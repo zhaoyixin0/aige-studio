@@ -15,6 +15,17 @@ export { Collision } from './mechanic/collision';
 export { DifficultyRamp } from './mechanic/difficulty-ramp';
 export { Randomizer } from './mechanic/randomizer';
 export { QuizEngine } from './mechanic/quiz-engine';
+export { ExpressionDetector } from './mechanic/expression-detector';
+export { ComboSystem } from './mechanic/combo-system';
+export { Jump } from './mechanic/jump';
+export { PowerUp } from './mechanic/power-up';
+export { BeatMap } from './mechanic/beat-map';
+export { GestureMatch } from './mechanic/gesture-match';
+export { MatchEngine } from './mechanic/match-engine';
+export { Runner } from './mechanic/runner';
+export { PlaneDetection } from './mechanic/plane-detection';
+export { BranchStateMachine } from './mechanic/branch-state-machine';
+export { DressUpEngine } from './mechanic/dress-up-engine';
 
 // Feedback
 export { GameFlow } from './feedback/game-flow';

@@ -16,6 +16,20 @@ import { Lives } from './modules/mechanic/lives.ts';
 import { DifficultyRamp } from './modules/mechanic/difficulty-ramp.ts';
 import { Randomizer } from './modules/mechanic/randomizer.ts';
 import { QuizEngine } from './modules/mechanic/quiz-engine.ts';
+// P1 extended mechanic modules
+import { ExpressionDetector } from './modules/mechanic/expression-detector.ts';
+import { ComboSystem } from './modules/mechanic/combo-system.ts';
+import { Jump } from './modules/mechanic/jump.ts';
+import { PowerUp } from './modules/mechanic/power-up.ts';
+// P2 extended mechanic modules
+import { BeatMap } from './modules/mechanic/beat-map.ts';
+import { GestureMatch } from './modules/mechanic/gesture-match.ts';
+import { MatchEngine } from './modules/mechanic/match-engine.ts';
+import { Runner } from './modules/mechanic/runner.ts';
+// P3 extended mechanic modules
+import { PlaneDetection } from './modules/mechanic/plane-detection.ts';
+import { BranchStateMachine } from './modules/mechanic/branch-state-machine.ts';
+import { DressUpEngine } from './modules/mechanic/dress-up-engine.ts';
 // Feedback modules
 import { GameFlow } from './modules/feedback/game-flow.ts';
 import { ParticleVFX } from './modules/feedback/particle-vfx.ts';
@@ -43,6 +57,20 @@ export function createModuleRegistry(): ModuleRegistry {
   registry.register('DifficultyRamp', DifficultyRamp as unknown as ModuleConstructor);
   registry.register('Randomizer', Randomizer as unknown as ModuleConstructor);
   registry.register('QuizEngine', QuizEngine as unknown as ModuleConstructor);
+  // P1 extended
+  registry.register('ExpressionDetector', ExpressionDetector as unknown as ModuleConstructor);
+  registry.register('ComboSystem', ComboSystem as unknown as ModuleConstructor);
+  registry.register('Jump', Jump as unknown as ModuleConstructor);
+  registry.register('PowerUp', PowerUp as unknown as ModuleConstructor);
+  // P2 extended
+  registry.register('BeatMap', BeatMap as unknown as ModuleConstructor);
+  registry.register('GestureMatch', GestureMatch as unknown as ModuleConstructor);
+  registry.register('MatchEngine', MatchEngine as unknown as ModuleConstructor);
+  registry.register('Runner', Runner as unknown as ModuleConstructor);
+  // P3 extended
+  registry.register('PlaneDetection', PlaneDetection as unknown as ModuleConstructor);
+  registry.register('BranchStateMachine', BranchStateMachine as unknown as ModuleConstructor);
+  registry.register('DressUpEngine', DressUpEngine as unknown as ModuleConstructor);
 
   // Feedback modules
   registry.register('GameFlow', GameFlow as unknown as ModuleConstructor);
