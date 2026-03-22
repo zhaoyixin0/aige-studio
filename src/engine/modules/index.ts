@@ -1,4 +1,10 @@
-// Input (to be added in Task 8)
+// Input
+export { FaceInput } from './input/face-input';
+export { HandInput } from './input/hand-input';
+export { BodyInput } from './input/body-input';
+export { TouchInput } from './input/touch-input';
+export { DeviceInput } from './input/device-input';
+export { AudioInput } from './input/audio-input';
 
 // Mechanic
 export { Scorer } from './mechanic/scorer';
