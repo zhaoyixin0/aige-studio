@@ -7,6 +7,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   suggestions?: Array<{ moduleType: string; reason: string }>;
+  wizardChoices?: Array<{ id: string; label: string; emoji?: string; description?: string }>;
   timestamp: number;
 }
 
