@@ -2,11 +2,27 @@ import { useState, useRef, useEffect } from 'react';
 import { SendHorizontal, Loader2, MessageSquare } from 'lucide-react';
 import { useEditorStore } from '@/store/editor-store.ts';
 import type { ChatMessage } from '@/store/editor-store.ts';
+import { useGameStore } from '@/store/game-store.ts';
+import { Agent } from '@/agent/index.ts';
+
+const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY as string | undefined;
+
+let agentInstance: Agent | null = null;
+function getAgent(): Agent | null {
+  if (agentInstance) return agentInstance;
+  if (apiKey) {
+    agentInstance = new Agent(apiKey);
+  }
+  return agentInstance;
+}
 
 export function ChatPanel() {
   const chatMessages = useEditorStore((s) => s.chatMessages);
   const isChatLoading = useEditorStore((s) => s.isChatLoading);
   const addChatMessage = useEditorStore((s) => s.addChatMessage);
+  const setChatLoading = useEditorStore((s) => s.setChatLoading);
+  const config = useGameStore((s) => s.config);
+  const setConfig = useGameStore((s) => s.setConfig);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -14,26 +30,67 @@ export function ChatPanel() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const text = input.trim();
     if (!text) return;
 
-    const message: ChatMessage = {
+    const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: 'user',
       content: text,
       timestamp: Date.now(),
     };
 
-    addChatMessage(message);
+    addChatMessage(userMessage);
     setInput('');
-    // Agent integration will be added in Task 13
+
+    const agent = getAgent();
+    if (!agent) {
+      addChatMessage({
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: 'API key not configured. Set VITE_ANTHROPIC_API_KEY in your .env file.',
+        timestamp: Date.now(),
+      });
+      return;
+    }
+
+    setChatLoading(true);
+    try {
+      const response = await agent.process(text, config);
+
+      if (response.config) {
+        setConfig(response.config);
+      }
+
+      const assistantMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: response.message,
+        suggestions:
+          response.suggestions.length > 0 ? response.suggestions : undefined,
+        timestamp: Date.now(),
+      };
+
+      addChatMessage(assistantMessage);
+    } catch (err) {
+      const errorText =
+        err instanceof Error ? err.message : 'Unknown error occurred';
+      addChatMessage({
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: `Error: ${errorText}`,
+        timestamp: Date.now(),
+      });
+    } finally {
+      setChatLoading(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      void handleSend();
     }
   };
 
@@ -82,7 +139,7 @@ export function ChatPanel() {
             rows={1}
           />
           <button
-            onClick={handleSend}
+            onClick={() => void handleSend()}
             disabled={!input.trim() || isChatLoading}
             className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors p-1"
           >
