@@ -1,6 +1,8 @@
-import { Pencil, Play, Maximize } from 'lucide-react';
+import { useState } from 'react';
+import { Pencil, Play, Maximize, Download } from 'lucide-react';
 import { useEditorStore } from '@/store/editor-store.ts';
 import type { PreviewMode } from '@/store/editor-store.ts';
+import { ExportDialog } from '@/ui/export/export-dialog.tsx';
 
 const modes: Array<{ mode: PreviewMode; icon: typeof Pencil; label: string }> = [
   { mode: 'edit', icon: Pencil, label: 'Edit' },
@@ -11,6 +13,7 @@ const modes: Array<{ mode: PreviewMode; icon: typeof Pencil; label: string }> = 
 export function PreviewToolbar() {
   const previewMode = useEditorStore((s) => s.previewMode);
   const setPreviewMode = useEditorStore((s) => s.setPreviewMode);
+  const [exportOpen, setExportOpen] = useState(false);
 
   return (
     <div className="flex items-center gap-1 px-3 py-2 border-b border-white/5 bg-gray-900">
@@ -34,6 +37,19 @@ export function PreviewToolbar() {
           </button>
         ))}
       </div>
+
+      <div className="ml-auto">
+        <button
+          onClick={() => setExportOpen(true)}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+          title="Export & Share"
+        >
+          <Download size={14} />
+          Export
+        </button>
+      </div>
+
+      <ExportDialog open={exportOpen} onOpenChange={setExportOpen} />
     </div>
   );
 }

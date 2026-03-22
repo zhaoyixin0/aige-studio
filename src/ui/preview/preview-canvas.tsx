@@ -4,10 +4,13 @@ import { useEngineContext } from '@/app/hooks/use-engine.ts';
 import { useCamera } from '@/app/hooks/use-camera.ts';
 import { useGameLoop } from '@/app/hooks/use-game-loop.ts';
 import { useGameStore } from '@/store/game-store.ts';
+import { useEditorStore } from '@/store/editor-store.ts';
 import { CameraLayer } from '@/engine/renderer/camera-layer.ts';
 
 export function PreviewCanvas() {
   const { engineRef, rendererRef, setMountEl, loadConfig, ready: engineReady } = useEngineContext();
+  const previewMode = useEditorStore((s) => s.previewMode);
+  const setPreviewMode = useEditorStore((s) => s.setPreviewMode);
 
   // Acquire camera + face tracker
   const { videoRef, trackerRef, ready: cameraReady } = useCamera();
@@ -57,9 +60,13 @@ export function PreviewCanvas() {
     loadConfig(cfg);
   }, [engineReady, configStructureKey, loadConfig]);
 
+  const isPlayOrFullscreen = previewMode === 'play' || previewMode === 'fullscreen';
+
   return (
-    <div className="flex flex-col h-full">
-      <PreviewToolbar />
+    <div className="flex flex-col h-full relative">
+      {/* Hide toolbar in play/fullscreen for immersive experience */}
+      {!isPlayOrFullscreen && <PreviewToolbar />}
+
       <div className="flex-1 flex items-center justify-center bg-black overflow-hidden">
         <div
           ref={setMountEl}
@@ -67,6 +74,16 @@ export function PreviewCanvas() {
           data-canvas-mount="true"
         />
       </div>
+
+      {/* Exit button overlay in play mode */}
+      {previewMode === 'play' && (
+        <button
+          onClick={() => setPreviewMode('edit')}
+          className="absolute top-3 right-3 z-10 px-3 py-1.5 rounded bg-black/60 hover:bg-black/80 text-white text-xs font-medium backdrop-blur-sm border border-white/10 transition-colors"
+        >
+          Exit Play Mode
+        </button>
+      )}
     </div>
   );
 }
