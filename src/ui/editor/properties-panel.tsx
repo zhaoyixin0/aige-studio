@@ -1,13 +1,34 @@
+import { useCallback } from 'react';
 import { Settings } from 'lucide-react';
 import { useEditorStore } from '@/store/editor-store.ts';
 import { useGameStore } from '@/store/game-store.ts';
 import { SchemaRenderer } from './schema-renderer.tsx';
-import type { ModuleSchema } from '@/engine/core/types.ts';
+import { useEngineContext } from '@/app/hooks/use-engine.ts';
 
 export function PropertiesPanel() {
   const selectedModuleId = useEditorStore((s) => s.selectedModuleId);
   const config = useGameStore((s) => s.config);
   const updateModuleParam = useGameStore((s) => s.updateModuleParam);
+  const { engineRef, getModuleSchema, ready } = useEngineContext();
+
+  // Get live schema from the running engine module
+  const schema = ready && selectedModuleId ? getModuleSchema(selectedModuleId) : null;
+
+  const handleChange = useCallback(
+    (param: string, value: unknown) => {
+      if (!selectedModuleId) return;
+
+      // Update the store (persisted config)
+      updateModuleParam(selectedModuleId, param, value);
+
+      // Also configure the live engine module for immediate preview update
+      const mod = engineRef.current?.getModule(selectedModuleId);
+      if (mod) {
+        mod.configure({ [param]: value });
+      }
+    },
+    [selectedModuleId, updateModuleParam, engineRef],
+  );
 
   if (!selectedModuleId || !config) {
     return (
@@ -27,10 +48,6 @@ export function PropertiesPanel() {
     );
   }
 
-  // Schema will be provided by the engine integration (Task 12).
-  // For now, render a JSON fallback for params.
-  const schema: ModuleSchema | null = null;
-
   return (
     <div className="flex flex-col gap-3 px-3 py-2">
       <div className="flex items-center gap-2 pb-2 border-b border-white/5">
@@ -42,7 +59,7 @@ export function PropertiesPanel() {
         <SchemaRenderer
           schema={schema}
           values={moduleConfig.params}
-          onChange={(param, value) => updateModuleParam(selectedModuleId, param, value)}
+          onChange={handleChange}
         />
       ) : (
         <div className="flex flex-col gap-2">
