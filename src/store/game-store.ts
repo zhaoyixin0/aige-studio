@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { GameConfig, ModuleConfig } from '@/engine/core';
+import type { AssetEntry, GameConfig, ModuleConfig } from '@/engine/core';
 
 interface GameStore {
   config: GameConfig | null;
@@ -15,6 +15,8 @@ interface GameStore {
   toggleModule: (moduleId: string) => void;
 
   updateAsset: (assetId: string, src: string) => void;
+
+  addAsset: (assetId: string, entry: AssetEntry) => void;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
@@ -85,6 +87,20 @@ export const useGameStore = create<GameStore>((set) => ({
           assets: {
             ...state.config.assets,
             [assetId]: { ...existing, src },
+          },
+        },
+      };
+    }),
+
+  addAsset: (assetId, entry) =>
+    set((state) => {
+      if (!state.config) return state;
+      return {
+        config: {
+          ...state.config,
+          assets: {
+            ...state.config.assets,
+            [assetId]: entry,
           },
         },
       };
