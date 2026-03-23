@@ -8,6 +8,7 @@ export interface ChatMessage {
   content: string;
   suggestions?: Array<{ moduleType: string; reason: string }>;
   wizardChoices?: Array<{ id: string; label: string; emoji?: string; description?: string }>;
+  enhancementSuggestions?: Array<{ id: string; label: string; emoji: string; moduleType?: string; action?: string }>;
   timestamp: number;
 }
 

@@ -4,6 +4,7 @@ import { useEditorStore } from '@/store/editor-store.ts';
 import type { ChatMessage } from '@/store/editor-store.ts';
 import { useGameStore } from '@/store/game-store.ts';
 import { Agent } from '@/agent/index.ts';
+import type { EnhancementSuggestion } from '@/agent/agent.ts';
 import type { GameConfig } from '@/engine/core';
 
 const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY as string | undefined;
@@ -59,6 +60,37 @@ export function ChatPanel() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
+  /** Handle an enhancement suggestion click. */
+  const handleEnhancement = useCallback((enhancementId: string) => {
+    const agent = getAgent();
+    if (!config) return;
+
+    addChatMessage({
+      id: crypto.randomUUID(),
+      role: 'user',
+      content: `\u{1F527} ${enhancementId}`,
+      timestamp: Date.now(),
+    });
+
+    const response = agent.handleEnhancement(enhancementId, config);
+    if (!response) return;
+
+    if (response.config) {
+      setConfig(response.config);
+    }
+
+    const assistantMsg: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: 'assistant',
+      content: response.message,
+      suggestions: response.suggestions.length > 0 ? response.suggestions : undefined,
+      wizardChoices: response.wizardChoices,
+      enhancementSuggestions: response.enhancementSuggestions,
+      timestamp: Date.now(),
+    };
+    addChatMessage(assistantMsg);
+  }, [config, addChatMessage, setConfig]);
+
   /** Handle a wizard button click. */
   const handleWizardChoice = useCallback((choiceId: string) => {
     const agent = getAgent();
@@ -70,7 +102,7 @@ export function ChatPanel() {
       addChatMessage({
         id: crypto.randomUUID(),
         role: 'user',
-        content: '\u{1F680} 开始创建游戏',
+        content: '\u{1F680} \u5F00\u59CB\u521B\u5EFA\u6E38\u620F',
         timestamp: Date.now(),
       });
 
@@ -110,12 +142,21 @@ export function ChatPanel() {
         setConfig(response.config);
       }
 
+      // Progressive preview: load partial config after each step
+      if (!response.config) {
+        const partialConfig = agent.getWizardPartialConfig();
+        if (partialConfig) {
+          setConfig(partialConfig);
+        }
+      }
+
       const assistantMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
         content: response.message,
         suggestions: response.suggestions.length > 0 ? response.suggestions : undefined,
         wizardChoices: response.wizardChoices,
+        enhancementSuggestions: response.enhancementSuggestions,
         timestamp: Date.now(),
       };
       addChatMessage(assistantMsg);
@@ -146,12 +187,21 @@ export function ChatPanel() {
         setConfig(response.config);
       }
 
+      // Progressive preview: load partial config after each step
+      if (!response.config) {
+        const partialConfig = agent.getWizardPartialConfig();
+        if (partialConfig) {
+          setConfig(partialConfig);
+        }
+      }
+
       const assistantMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
         content: response.message,
         suggestions: response.suggestions.length > 0 ? response.suggestions : undefined,
         wizardChoices: response.wizardChoices,
+        enhancementSuggestions: response.enhancementSuggestions,
         timestamp: Date.now(),
       };
       addChatMessage(assistantMsg);
@@ -175,6 +225,25 @@ export function ChatPanel() {
         role: 'assistant',
         content: response.message,
         wizardChoices: response.wizardChoices,
+        timestamp: Date.now(),
+      };
+      addChatMessage(assistantMsg);
+      return;
+    }
+
+    // Mode B: detect game type from free-text description
+    const modeBResult = agent.tryModeBAutoBuild(text);
+    if (modeBResult) {
+      if (modeBResult.config) {
+        setConfig(modeBResult.config);
+      }
+      const assistantMsg: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: modeBResult.message,
+        suggestions: modeBResult.suggestions.length > 0 ? modeBResult.suggestions : undefined,
+        wizardChoices: modeBResult.wizardChoices,
+        enhancementSuggestions: modeBResult.enhancementSuggestions,
         timestamp: Date.now(),
       };
       addChatMessage(assistantMsg);
@@ -252,6 +321,7 @@ export function ChatPanel() {
             key={msg.id}
             message={msg}
             onWizardChoice={handleWizardChoice}
+            onEnhancement={handleEnhancement}
           />
         ))}
 
@@ -292,9 +362,11 @@ export function ChatPanel() {
 function MessageBubble({
   message,
   onWizardChoice,
+  onEnhancement,
 }: {
   message: ChatMessage;
   onWizardChoice: (choiceId: string) => void;
+  onEnhancement: (enhancementId: string) => void;
 }) {
   const isUser = message.role === 'user';
 
@@ -326,6 +398,22 @@ function MessageBubble({
           </div>
         )}
 
+        {/* Enhancement suggestion buttons */}
+        {message.enhancementSuggestions && message.enhancementSuggestions.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-3 border-t border-white/10 pt-3">
+            {message.enhancementSuggestions.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => onEnhancement(s.id)}
+                className="px-3 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500/30 text-sm text-emerald-300 transition-colors cursor-pointer"
+              >
+                <span className="mr-1">{s.emoji}</span>
+                {s.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Suggestion chips */}
         {message.suggestions && message.suggestions.length > 0 && (
           <div className="mt-2 flex flex-col gap-1 border-t border-white/10 pt-2">
@@ -335,7 +423,7 @@ function MessageBubble({
                   <Sparkles size={10} className="inline mr-1" />
                   {s.moduleType}
                 </span>
-                {' — '}
+                {' \u2014 '}
                 {s.reason}
               </div>
             ))}

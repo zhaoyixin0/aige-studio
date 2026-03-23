@@ -11,6 +11,7 @@ export type WizardStep =
   | 'input_method'
   | 'duration'
   | 'theme'
+  | 'character'
   | 'optional_modules'
   | 'generating'
   | 'done';
@@ -35,6 +36,7 @@ export interface WizardState {
   inputMethod: string | null;
   duration: number | null;
   theme: string | null;
+  character: string | null;
   optionalModules: Record<string, boolean>;
   currentOptionalIndex: number;
 }
@@ -301,7 +303,8 @@ const GAME_TYPES: GameTypeDef[] = [
   },
 ];
 
-const GAME_TYPE_MAP = new Map<string, GameTypeDef>(GAME_TYPES.map((gt) => [gt.id, gt]));
+export { GAME_TYPES };
+export const GAME_TYPE_MAP = new Map<string, GameTypeDef>(GAME_TYPES.map((gt) => [gt.id, gt]));
 
 /* ------------------------------------------------------------------ */
 /*  Input method metadata                                              */
@@ -354,8 +357,31 @@ const THEME_CHOICES: WizardChoice[] = [
   { id: 'candy', label: '糖果世界', emoji: '\u{1F36C}' },
 ];
 
+/* ------------------------------------------------------------------ */
+/*  Character choices                                                   */
+/* ------------------------------------------------------------------ */
+
+const CHARACTER_CHOICES: WizardChoice[] = [
+  { id: 'basket', label: '\u{1F9FA} \u7BEE\u5B50', emoji: '\u{1F9FA}' },
+  { id: 'cat', label: '\u{1F431} \u732B\u54AA', emoji: '\u{1F431}' },
+  { id: 'rocket', label: '\u{1F680} \u98DE\u8239', emoji: '\u{1F680}' },
+  { id: 'warrior', label: '\u{1F93A} \u6218\u58EB', emoji: '\u{1F93A}' },
+  { id: 'fish', label: '\u{1F420} \u5C0F\u9C7C', emoji: '\u{1F420}' },
+  { id: 'pumpkin', label: '\u{1F383} \u5357\u74DC', emoji: '\u{1F383}' },
+];
+
+/** Emoji lookup for character IDs */
+const CHARACTER_EMOJI_MAP: Record<string, string> = {
+  basket: '\u{1F9FA}',
+  cat: '\u{1F431}',
+  rocket: '\u{1F680}',
+  warrior: '\u{1F93A}',
+  fish: '\u{1F420}',
+  pumpkin: '\u{1F383}',
+};
+
 /** Default theme per game type */
-const DEFAULT_THEME_FOR_GAME: Record<string, string> = {
+export const DEFAULT_THEME_FOR_GAME: Record<string, string> = {
   catch: 'fruit',
   dodge: 'space',
   shooting: 'space',
@@ -391,6 +417,7 @@ export class GameWizard {
     inputMethod: null,
     duration: null,
     theme: null,
+    character: null,
     optionalModules: {},
     currentOptionalIndex: 0,
   };
@@ -403,6 +430,7 @@ export class GameWizard {
       inputMethod: null,
       duration: null,
       theme: null,
+      character: null,
       optionalModules: {},
       currentOptionalIndex: 0,
     };
@@ -417,6 +445,85 @@ export class GameWizard {
   /** Get current step (useful for external inspection). */
   getStep(): WizardStep {
     return this.state.step;
+  }
+
+  /**
+   * Return a partial GameConfig based on choices made so far.
+   * This enables progressive preview — the canvas updates after each wizard step.
+   */
+  getPartialConfig(): GameConfig | null {
+    if (this.state.step === 'idle') return null;
+
+    const gameType = this.state.gameType;
+    if (!gameType) return null;
+
+    const gameDef = GAME_TYPE_MAP.get(gameType);
+    if (!gameDef) return null;
+
+    const modules: ModuleConfig[] = [];
+    const typeCounts = new Map<string, number>();
+
+    const addModule = (type: string, extraParams?: Record<string, unknown>) => {
+      const count = (typeCounts.get(type) ?? 0) + 1;
+      typeCounts.set(type, count);
+      const id = `${type.toLowerCase()}_${count}`;
+      const baseParams = defaultParamsForModule(type, gameType);
+      modules.push({
+        id,
+        type,
+        enabled: true,
+        params: extraParams ? { ...baseParams, ...extraParams } : baseParams,
+      });
+    };
+
+    // Always add required modules once game type is chosen
+    for (const modType of gameDef.requiredModules) {
+      addModule(modType);
+    }
+
+    // Add input module if selected
+    if (this.state.inputMethod) {
+      addModule(this.state.inputMethod);
+    }
+
+    // Add timer if duration selected and > 0
+    if (this.state.duration && this.state.duration > 0) {
+      addModule('Timer', { duration: this.state.duration });
+    }
+
+    // Add accepted optional modules
+    for (const [type, accepted] of Object.entries(this.state.optionalModules)) {
+      if (accepted) {
+        // Skip Timer if already added above
+        if (type === 'Timer') continue;
+        addModule(type);
+      }
+    }
+
+    // Resolve theme
+    const themeId = this.state.theme
+      ?? DEFAULT_THEME_FOR_GAME[gameType]
+      ?? 'fruit';
+
+    // Resolve player emoji from character selection
+    const playerEmoji = this.state.character
+      ? CHARACTER_EMOJI_MAP[this.state.character] ?? undefined
+      : undefined;
+
+    return {
+      version: '1.0.0',
+      meta: {
+        name: gameDef.metaName ?? '\u6E38\u620F',
+        description: gameDef.metaDescription ?? '',
+        thumbnail: null,
+        createdAt: new Date().toISOString(),
+        theme: themeId,
+        ...(playerEmoji ? { playerEmoji } : {}),
+      },
+      canvas: { width: 1080, height: 1920 },
+      modules,
+      assets: {},
+    };
   }
 
   /** Process a user answer for the current step. */
@@ -448,11 +555,18 @@ export class GameWizard {
 
       case 'theme': {
         this.state.theme = choiceId;
+        // After theme, go to character selection
+        this.state.step = 'character';
+        return { question: this.getCharacterQuestion(), config: null, summary: '' };
+      }
+
+      case 'character': {
+        this.state.character = choiceId;
         this.state.step = 'optional_modules';
         this.state.currentOptionalIndex = 0;
-        const nextOptional = this.getNextOptionalQuestion();
-        if (nextOptional) {
-          return { question: nextOptional, config: null, summary: '' };
+        const nextOptionalAfterChar = this.getNextOptionalQuestion();
+        if (nextOptionalAfterChar) {
+          return { question: nextOptionalAfterChar, config: null, summary: '' };
         }
         // No optional modules — done
         this.state.step = 'done';
@@ -557,6 +671,14 @@ export class GameWizard {
     };
   }
 
+  private getCharacterQuestion(): WizardQuestion {
+    return {
+      step: 'character',
+      question: '\u9009\u62E9\u4F60\u7684\u6E38\u620F\u89D2\u8272\uFF1A',
+      choices: CHARACTER_CHOICES,
+    };
+  }
+
   private getOptionalModules(): Array<{ type: string; label: string; description: string }> {
     const gameDef = GAME_TYPE_MAP.get(this.state.gameType ?? '');
     return gameDef?.optionalModules ?? [];
@@ -651,14 +773,20 @@ export class GameWizard {
     const inputDef = INPUT_METHOD_MAP.get(inputType);
     const inputLabel = inputDef ? inputDef.description : '';
 
+    // Resolve player emoji from character selection
+    const playerEmoji = this.state.character
+      ? CHARACTER_EMOJI_MAP[this.state.character] ?? undefined
+      : undefined;
+
     return {
       version: '1.0.0',
       meta: {
         name: gameDef.metaName,
-        description: inputLabel ? `${inputLabel}，${gameDef.metaDescription}` : gameDef.metaDescription,
+        description: inputLabel ? `${inputLabel}\uFF0C${gameDef.metaDescription}` : gameDef.metaDescription,
         thumbnail: null,
         createdAt: new Date().toISOString(),
         theme: themeId,
+        ...(playerEmoji ? { playerEmoji } : {}),
       },
       canvas: { width: 1080, height: 1920 },
       modules,
@@ -687,7 +815,13 @@ export class GameWizard {
     // Theme
     const themeChoice = THEME_CHOICES.find((t) => t.id === this.state.theme);
     if (themeChoice) {
-      lines.push(`${themeChoice.emoji} 游戏主题：${themeChoice.label}`);
+      lines.push(`${themeChoice.emoji} \u6E38\u620F\u4E3B\u9898\uFF1A${themeChoice.label}`);
+    }
+
+    // Character
+    const charChoice = CHARACTER_CHOICES.find((c) => c.id === this.state.character);
+    if (charChoice) {
+      lines.push(`${charChoice.emoji} \u6E38\u620F\u89D2\u8272\uFF1A${charChoice.label}`);
     }
 
     const enabledOptionals: string[] = [];

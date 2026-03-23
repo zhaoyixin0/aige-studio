@@ -3,15 +3,25 @@ import { IntentParser } from './intent-parser.ts';
 import { RecipeGenerator } from './recipe-generator.ts';
 import { Recommender } from './recommender.ts';
 import { tryLocalMatch } from './local-patterns.ts';
-import { GameWizard } from './wizard.ts';
+import { GameWizard, GAME_TYPE_MAP, DEFAULT_THEME_FOR_GAME } from './wizard.ts';
 import type { WizardChoice, WizardQuestion } from './wizard.ts';
-import type { GameConfig } from '@/engine/core/index.ts';
+import type { GameConfig, ModuleConfig } from '@/engine/core/index.ts';
+import { getModuleParams } from './game-presets.ts';
+
+export interface EnhancementSuggestion {
+  id: string;
+  label: string;
+  emoji: string;
+  moduleType?: string;
+  action?: string;
+}
 
 export interface AgentResponse {
   message: string;
   config: GameConfig | null;
   suggestions: Array<{ moduleType: string; reason: string }>;
   wizardChoices?: WizardChoice[];
+  enhancementSuggestions?: EnhancementSuggestion[];
 }
 
 /** Keywords that suggest the user wants to create a new game. */
@@ -28,6 +38,116 @@ const CREATE_GAME_PATTERNS = [
 
 function looksLikeCreateGame(input: string): boolean {
   return CREATE_GAME_PATTERNS.some((re) => re.test(input));
+}
+
+/* ------------------------------------------------------------------ */
+/*  Mode B: game type detection from free-text description              */
+/* ------------------------------------------------------------------ */
+
+const GAME_KEYWORDS: Record<string, string> = {
+  '\u63A5\u6C34\u679C': 'catch', '\u63A5\u4F4F': 'catch', '\u6293': 'catch',
+  '\u8E72\u907F': 'dodge', '\u8E72': 'dodge', '\u95EA\u907F': 'dodge',
+  '\u70B9\u51FB': 'tap', '\u70B9': 'tap', '\u6233': 'tap',
+  '\u5C04\u51FB': 'shooting', '\u6253\u9776': 'shooting', '\u5C04': 'shooting',
+  '\u7B54\u9898': 'quiz', '\u95EE\u7B54': 'quiz', '\u77E5\u8BC6': 'quiz',
+  '\u8F6C\u76D8': 'random-wheel', '\u62BD\u5956': 'random-wheel',
+  '\u8868\u60C5': 'expression', '\u9762\u90E8': 'expression',
+  '\u8DD1\u9177': 'runner', '\u5954\u8DD1': 'runner', '\u8DD1': 'runner',
+  '\u624B\u52BF': 'gesture', '\u914D\u5BF9': 'puzzle', '\u7FFB\u724C': 'puzzle',
+  '\u6362\u88C5': 'dress-up', '\u6545\u4E8B': 'narrative',
+};
+
+function detectGameType(message: string): string | null {
+  for (const [keyword, type] of Object.entries(GAME_KEYWORDS)) {
+    if (message.includes(keyword)) return type;
+  }
+  return null;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Enhancement suggestions                                             */
+/* ------------------------------------------------------------------ */
+
+const ALL_ENHANCEMENT_SUGGESTIONS: EnhancementSuggestion[] = [
+  { id: 'add_combo', label: '\u52A0\u8FDE\u51FB\u7CFB\u7EDF', emoji: '\u{1F31F}', moduleType: 'ComboSystem' },
+  { id: 'add_difficulty', label: '\u52A0\u96BE\u5EA6\u9012\u589E', emoji: '\u{1F4C8}', moduleType: 'DifficultyRamp' },
+  { id: 'change_theme', label: '\u6362\u4E3B\u9898', emoji: '\u{1F3A8}', action: 'change_theme' },
+  { id: 'adjust_speed', label: '\u8C03\u901F\u5EA6', emoji: '\u26A1', action: 'adjust_speed' },
+  { id: 'adjust_duration', label: '\u8C03\u65F6\u957F', emoji: '\u23F1', action: 'adjust_duration' },
+];
+
+function getEnhancementSuggestions(config: GameConfig): EnhancementSuggestion[] {
+  const existingTypes = new Set(config.modules.map((m) => m.type));
+  return ALL_ENHANCEMENT_SUGGESTIONS.filter((s) => {
+    // For module-type suggestions, only show if that module isn't already present
+    if (s.moduleType) return !existingTypes.has(s.moduleType);
+    // For action suggestions, always show
+    return true;
+  });
+}
+
+/**
+ * Auto-build a game config from a detected game type (Mode B).
+ * Includes all required modules + recommended optional modules with sensible defaults.
+ */
+function autoBuildConfig(gameType: string): GameConfig | null {
+  const gameDef = GAME_TYPE_MAP.get(gameType);
+  if (!gameDef) return null;
+
+  const modules: ModuleConfig[] = [];
+  const typeCounts = new Map<string, number>();
+
+  const addModule = (type: string, extraParams?: Record<string, unknown>) => {
+    const count = (typeCounts.get(type) ?? 0) + 1;
+    typeCounts.set(type, count);
+    const id = `${type.toLowerCase()}_${count}`;
+    const baseParams = getModuleParams(gameType, type);
+    modules.push({
+      id,
+      type,
+      enabled: true,
+      params: extraParams ? { ...baseParams, ...extraParams } : baseParams,
+    });
+  };
+
+  // Required modules
+  for (const modType of gameDef.requiredModules) {
+    addModule(modType);
+  }
+
+  // Default input
+  const inputType = gameDef.fixedInput ?? (gameDef.inputOptions?.[0] ?? 'TouchInput');
+  addModule(inputType);
+
+  // Add Timer with a sensible default (30s) for applicable game types
+  const NO_DURATION_TYPES = new Set(['random-wheel', 'dress-up', 'narrative']);
+  if (!NO_DURATION_TYPES.has(gameType)) {
+    addModule('Timer', { duration: 30 });
+  }
+
+  // Add recommended optionals (first 2 optional modules as sensible defaults)
+  const recommendedOptionals = gameDef.optionalModules.filter(
+    (opt) => opt.type !== 'Timer' // Timer already handled
+  ).slice(0, 2);
+  for (const opt of recommendedOptionals) {
+    addModule(opt.type);
+  }
+
+  const themeId = DEFAULT_THEME_FOR_GAME[gameType] ?? 'fruit';
+
+  return {
+    version: '1.0.0',
+    meta: {
+      name: gameDef.metaName,
+      description: gameDef.metaDescription,
+      thumbnail: null,
+      createdAt: new Date().toISOString(),
+      theme: themeId,
+    },
+    canvas: { width: 1080, height: 1920 },
+    modules,
+    assets: {},
+  };
 }
 
 export class Agent {
@@ -54,6 +174,11 @@ export class Agent {
     return this.wizard.isActive();
   }
 
+  /** Get partial config from wizard for progressive preview. */
+  getWizardPartialConfig(): GameConfig | null {
+    return this.wizard.getPartialConfig();
+  }
+
   /** Feed a wizard choice and return the next question or final config. */
   answerWizard(choiceId: string): AgentResponse {
     const result = this.wizard.answer(choiceId);
@@ -62,12 +187,128 @@ export class Agent {
       return this.wizardQuestionToResponse(result.question);
     }
 
-    // Wizard complete — return generated config with summary
+    // Wizard complete — return generated config with summary + enhancement suggestions
+    const enhancementSuggestions = result.config
+      ? getEnhancementSuggestions(result.config)
+      : [];
+
     return {
       message: result.summary,
       config: result.config,
       suggestions: [],
+      enhancementSuggestions,
     };
+  }
+
+  /**
+   * Mode B: Detect game type from free-text and auto-build.
+   * Returns null if no game type keyword is found.
+   */
+  tryModeBAutoBuild(message: string): AgentResponse | null {
+    const gameType = detectGameType(message);
+    if (!gameType) return null;
+
+    const config = autoBuildConfig(gameType);
+    if (!config) return null;
+
+    const gameDef = GAME_TYPE_MAP.get(gameType);
+    const enhancementSuggestions = getEnhancementSuggestions(config);
+
+    return {
+      message: `\u2705 \u5DF2\u4E3A\u4F60\u521B\u5EFA${gameDef?.metaName ?? '\u6E38\u620F'}\uFF01`,
+      config,
+      suggestions: [],
+      enhancementSuggestions,
+    };
+  }
+
+  /**
+   * Handle an enhancement suggestion click.
+   * For module-type enhancements, add the module to the current config.
+   */
+  handleEnhancement(enhancementId: string, currentConfig: GameConfig): AgentResponse | null {
+    const suggestion = ALL_ENHANCEMENT_SUGGESTIONS.find((s) => s.id === enhancementId);
+    if (!suggestion) return null;
+
+    if (suggestion.moduleType) {
+      // Add the module to the config
+      const gameType = this.detectGameTypeFromConfig(currentConfig);
+      const newConfig = JSON.parse(JSON.stringify(currentConfig)) as GameConfig;
+      const moduleType = suggestion.moduleType;
+      const existingCount = newConfig.modules.filter((m) => m.type === moduleType).length;
+      const id = `${moduleType.toLowerCase()}_${existingCount + 1}`;
+      newConfig.modules.push({
+        id,
+        type: moduleType,
+        enabled: true,
+        params: getModuleParams(gameType, moduleType),
+      });
+
+      return {
+        message: `${suggestion.emoji} \u5DF2\u6DFB\u52A0\u300C${suggestion.label}\u300D\uFF01`,
+        config: newConfig,
+        suggestions: [],
+        enhancementSuggestions: getEnhancementSuggestions(newConfig),
+      };
+    }
+
+    // For action-based suggestions, return a prompt message
+    if (suggestion.action === 'change_theme') {
+      return {
+        message: '\u{1F3A8} \u8BF7\u9009\u62E9\u65B0\u4E3B\u9898\uFF1A',
+        config: null,
+        suggestions: [],
+        wizardChoices: [
+          { id: 'theme_fruit', label: '\u6C34\u679C\u6D3E\u5BF9', emoji: '\u{1F34E}' },
+          { id: 'theme_space', label: '\u592A\u7A7A\u5192\u9669', emoji: '\u{1F680}' },
+          { id: 'theme_ocean', label: '\u6D77\u6D0B\u63A2\u7D22', emoji: '\u{1F30A}' },
+          { id: 'theme_halloween', label: '\u4E07\u5723\u8282', emoji: '\u{1F383}' },
+          { id: 'theme_candy', label: '\u7CD6\u679C\u4E16\u754C', emoji: '\u{1F36C}' },
+        ],
+      };
+    }
+
+    if (suggestion.action === 'adjust_speed') {
+      return {
+        message: '\u26A1 \u8BF7\u544A\u8BC9\u6211\u4F60\u60F3\u8C03\u6574\u7684\u901F\u5EA6\uFF0C\u4F8B\u5982\uFF1A\u201C\u52A0\u5FEB\u901F\u5EA6\u201D \u6216 \u201C\u964D\u4F4E\u901F\u5EA6\u201D',
+        config: null,
+        suggestions: [],
+      };
+    }
+
+    if (suggestion.action === 'adjust_duration') {
+      return {
+        message: '\u23F1 \u8BF7\u9009\u62E9\u6E38\u620F\u65F6\u957F\uFF1A',
+        config: null,
+        suggestions: [],
+        wizardChoices: [
+          { id: 'duration_15', label: '15\u79D2', emoji: '\u23F1' },
+          { id: 'duration_30', label: '30\u79D2', emoji: '\u23F1' },
+          { id: 'duration_60', label: '60\u79D2', emoji: '\u23F1' },
+          { id: 'duration_0', label: '\u65E0\u9650\u5236', emoji: '\u267E' },
+        ],
+      };
+    }
+
+    return null;
+  }
+
+  private detectGameTypeFromConfig(config: GameConfig): string {
+    // Heuristic: look at module types to guess game type
+    const moduleTypes = new Set(config.modules.map((m) => m.type));
+    if (moduleTypes.has('QuizEngine')) return 'quiz';
+    if (moduleTypes.has('Runner')) return 'runner';
+    if (moduleTypes.has('Randomizer')) return 'random-wheel';
+    if (moduleTypes.has('ExpressionDetector')) return 'expression';
+    if (moduleTypes.has('GestureMatch')) return 'gesture';
+    if (moduleTypes.has('BeatMap')) return 'rhythm';
+    if (moduleTypes.has('MatchEngine')) return 'puzzle';
+    if (moduleTypes.has('DressUpEngine')) return 'dress-up';
+    if (moduleTypes.has('PlaneDetection')) return 'world-ar';
+    if (moduleTypes.has('BranchStateMachine')) return 'narrative';
+    if (moduleTypes.has('Lives') && moduleTypes.has('Spawner')) return 'dodge';
+    if (moduleTypes.has('Spawner') && moduleTypes.has('Collision')) return 'catch';
+    return 'catch';
   }
 
   async process(
@@ -82,6 +323,12 @@ export class Agent {
     // Check if user wants to create a game — start wizard
     if (looksLikeCreateGame(userMessage)) {
       return this.startWizard();
+    }
+
+    // Mode B: detect game type from free-text description and auto-build
+    const modeBResult = this.tryModeBAutoBuild(userMessage);
+    if (modeBResult) {
+      return modeBResult;
     }
 
     // Step 0: Local pattern match (no API call)
