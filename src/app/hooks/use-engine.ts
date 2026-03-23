@@ -125,6 +125,12 @@ export function useEngine() {
     engine.restart();
     loader.load(engine, config);
     engine.start();
+
+    // Wire sub-renderers (particles, float text, sound) to engine events
+    const renderer = rendererRef.current;
+    if (renderer) {
+      renderer.connectToEngine(engine);
+    }
   }, []);
 
   // getModuleSchema: retrieve schema from a running engine module

@@ -1,15 +1,16 @@
-import { Container, Graphics } from 'pixi.js';
+import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import type { Engine } from '@/engine/core/engine';
 import type { Spawner } from '@/engine/modules/mechanic/spawner';
 import type { FaceInput } from '@/engine/modules/input/face-input';
 import type { HandInput } from '@/engine/modules/input/hand-input';
 import type { TouchInput } from '@/engine/modules/input/touch-input';
 import type { Collision } from '@/engine/modules/mechanic/collision';
+import { assetToEmoji, getTheme } from './theme-registry';
 
 export class GameObjectRenderer {
   private container: Container;
-  private sprites = new Map<string, Graphics>();
-  private playerSprite: Graphics | null = null;
+  private sprites = new Map<string, Text>();
+  private playerSprite: Container | null = null;
 
   constructor(container: Container) {
     this.container = container;
@@ -25,14 +26,21 @@ export class GameObjectRenderer {
     const collision = engine.getModulesByType('Collision')[0] as Collision | undefined;
     const activeIds = new Set<string>();
 
+    const themeName = engine.getConfig().meta.theme ?? 'fruit';
+    const theme = getTheme(themeName);
+
     for (const spawner of spawners) {
       const objects = (spawner as Spawner).getObjects();
       for (const obj of objects) {
         activeIds.add(obj.id);
         let sprite = this.sprites.get(obj.id);
         if (!sprite) {
-          sprite = new Graphics();
-          sprite.circle(0, 0, 20).fill({ color: this.getColorForAsset(obj.asset) });
+          const emoji = assetToEmoji(obj.asset, theme);
+          sprite = new Text({
+            text: emoji,
+            style: new TextStyle({ fontSize: 28 }),
+          });
+          sprite.anchor.set(0.5);
           this.container.addChild(sprite);
           this.sprites.set(obj.id, sprite);
         }
@@ -95,14 +103,33 @@ export class GameObjectRenderer {
       const playerRadius = isTapStyle ? 30 : 40;
 
       if (!this.playerSprite) {
-        this.playerSprite = new Graphics();
         if (isTapStyle) {
-          // Crosshair style for tap games
-          this.playerSprite.circle(0, 0, 25).stroke({ color: 0x00ff88, width: 3 });
-          this.playerSprite.moveTo(-15, 0).lineTo(15, 0).stroke({ color: 0x00ff88, width: 2 });
-          this.playerSprite.moveTo(0, -15).lineTo(0, 15).stroke({ color: 0x00ff88, width: 2 });
+          // Crosshair style for tap games — keep as Graphics
+          const crosshair = new Graphics();
+          crosshair.circle(0, 0, 25).stroke({ color: 0x00ff88, width: 3 });
+          crosshair.moveTo(-15, 0).lineTo(15, 0).stroke({ color: 0x00ff88, width: 2 });
+          crosshair.moveTo(0, -15).lineTo(0, 15).stroke({ color: 0x00ff88, width: 2 });
+          this.playerSprite = crosshair;
         } else {
-          this.playerSprite.circle(0, 0, 40).fill({ color: 0x00ff88 });
+          // Emoji player with shadow
+          const playerContainer = new Container();
+
+          // Shadow: small gray ellipse under the player
+          const shadow = new Graphics();
+          shadow.ellipse(0, 18, 22, 8).fill({ color: 0x000000, alpha: 0.3 });
+          playerContainer.addChild(shadow);
+
+          // Emoji text
+          const themeName = engine.getConfig().meta.theme ?? 'fruit';
+          const theme = getTheme(themeName);
+          const emojiText = new Text({
+            text: theme.playerEmoji,
+            style: new TextStyle({ fontSize: 44 }),
+          });
+          emojiText.anchor.set(0.5);
+          playerContainer.addChild(emojiText);
+
+          this.playerSprite = playerContainer;
         }
         this.container.addChild(this.playerSprite);
 
@@ -121,15 +148,6 @@ export class GameObjectRenderer {
         collision.updateObject('player_1', pos);
       }
     }
-  }
-
-  private getColorForAsset(asset: string): number {
-    // Simple hash-based color for different assets
-    let hash = 0;
-    for (const char of asset) {
-      hash = ((hash << 5) - hash + char.charCodeAt(0)) | 0;
-    }
-    return (hash & 0x00ffffff) | 0x404040; // ensure not too dark
   }
 
   reset(): void {

@@ -102,36 +102,30 @@ export class HudRenderer {
     this.width = width;
     this.height = height;
 
-    const style = new TextStyle({
-      fill: '#ffffff',
-      fontSize: 36,
-      fontFamily: 'Arial',
-      fontWeight: 'bold',
+    // V1-style HUD with emoji icons and colored backgrounds
+    this.scoreText = new Text({
+      text: '\u2b50 0',
+      style: new TextStyle({ fill: '#FFD700', fontSize: 36, fontFamily: 'Arial', fontWeight: 'bold' }),
     });
-    const smallStyle = new TextStyle({
-      fill: '#ffffff',
-      fontSize: 24,
-      fontFamily: 'Arial',
-    });
-
-    this.scoreText = new Text({ text: '0', style });
     this.scoreText.anchor.set(1, 0);
-    this.scoreText.position.set(width - 20, 20);
+    this.scoreText.position.set(width - 20, 16);
 
-    this.timerText = new Text({ text: '30', style });
+    this.timerText = new Text({
+      text: '\u23f1 30',
+      style: new TextStyle({ fill: '#00d4ff', fontSize: 36, fontFamily: 'Arial', fontWeight: 'bold' }),
+    });
     this.timerText.anchor.set(0.5, 0);
-    this.timerText.position.set(width / 2, 20);
+    this.timerText.position.set(width / 2, 16);
 
-    this.livesText = new Text({ text: '\u2764\u2764\u2764', style: smallStyle });
+    this.livesText = new Text({
+      text: '\u2764\ufe0f\u2764\ufe0f\u2764\ufe0f',
+      style: new TextStyle({ fill: '#ffffff', fontSize: 28, fontFamily: 'Arial' }),
+    });
     this.livesText.position.set(20, 20);
 
     this.comboText = new Text({
       text: '',
-      style: new TextStyle({
-        fill: '#ffdd00',
-        fontSize: 48,
-        fontWeight: 'bold',
-      }),
+      style: new TextStyle({ fill: '#ff6b9d', fontSize: 52, fontWeight: 'bold', fontFamily: 'Arial' }),
     });
     this.comboText.anchor.set(0.5);
     this.comboText.position.set(width / 2, height / 2 - 200);
@@ -523,17 +517,36 @@ export class HudRenderer {
     const overlay = engine.getModulesByType('UIOverlay')[0] as UIOverlay | undefined;
     if (overlay) {
       const hud = overlay.getHudState();
-      this.scoreText.text = String(hud.score ?? 0);
 
+      // V1-style score with star emoji
+      this.scoreText.text = `\u2b50 ${hud.score ?? 0}`;
+
+      // V1-style timer with color coding
       const remaining = hud.timer?.remaining ?? 0;
-      this.timerText.text = String(Math.ceil(remaining));
+      const duration = hud.timer?.elapsed != null ? remaining + hud.timer.elapsed : 30;
+      const ratio = duration > 0 ? remaining / duration : 1;
+      const ceil = Math.ceil(remaining);
+      this.timerText.text = `\u23f1 ${ceil}`;
+      if (ratio < 0.2) {
+        (this.timerText.style as TextStyle).fill = '#ff4757'; // red
+      } else if (ratio < 0.4) {
+        (this.timerText.style as TextStyle).fill = '#ffa500'; // orange
+      } else {
+        (this.timerText.style as TextStyle).fill = '#00d4ff'; // cyan
+      }
 
-      this.livesText.text = '\u2764'.repeat(hud.lives ?? 0);
+      // V1-style lives: ❤️ filled + 🖤 empty
+      const currentLives = hud.lives ?? 0;
+      const maxLives = 3; // default max
+      const filled = '\u2764\ufe0f'.repeat(currentLives);
+      const empty = '\uD83D\uDDA4'.repeat(Math.max(0, maxLives - currentLives));
+      this.livesText.text = filled + empty;
 
+      // V1-style combo with fire emoji
       const comboCount = hud.combo?.count ?? 0;
       const comboFade = hud.combo?.fadeTimer ?? 0;
       if (comboCount > 1 && comboFade > 0) {
-        this.comboText.text = `${comboCount}x COMBO!`;
+        this.comboText.text = `\uD83D\uDD25 x${comboCount} COMBO!`;
         this.comboText.alpha = Math.min(1, comboFade / 500);
       } else {
         this.comboText.alpha = 0;

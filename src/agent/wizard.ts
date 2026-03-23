@@ -10,6 +10,7 @@ export type WizardStep =
   | 'game_type'
   | 'input_method'
   | 'duration'
+  | 'theme'
   | 'optional_modules'
   | 'generating'
   | 'done';
@@ -33,6 +34,7 @@ export interface WizardState {
   gameType: string | null;
   inputMethod: string | null;
   duration: number | null;
+  theme: string | null;
   optionalModules: Record<string, boolean>;
   currentOptionalIndex: number;
 }
@@ -341,6 +343,36 @@ const DURATION_OPTIONS: DurationDef[] = [
 ];
 
 /* ------------------------------------------------------------------ */
+/*  Theme choices                                                      */
+/* ------------------------------------------------------------------ */
+
+const THEME_CHOICES: WizardChoice[] = [
+  { id: 'fruit', label: '水果派对', emoji: '\u{1F34E}' },
+  { id: 'space', label: '太空冒险', emoji: '\u{1F680}' },
+  { id: 'ocean', label: '海洋探索', emoji: '\u{1F30A}' },
+  { id: 'halloween', label: '万圣节', emoji: '\u{1F383}' },
+  { id: 'candy', label: '糖果世界', emoji: '\u{1F36C}' },
+];
+
+/** Default theme per game type */
+const DEFAULT_THEME_FOR_GAME: Record<string, string> = {
+  catch: 'fruit',
+  dodge: 'space',
+  shooting: 'space',
+  tap: 'candy',
+  runner: 'ocean',
+  quiz: 'fruit',
+  expression: 'halloween',
+  'random-wheel': 'candy',
+  gesture: 'ocean',
+  rhythm: 'halloween',
+  puzzle: 'candy',
+  'dress-up': 'fruit',
+  'world-ar': 'space',
+  narrative: 'halloween',
+};
+
+/* ------------------------------------------------------------------ */
 /*  Default params per module type                                     */
 /* ------------------------------------------------------------------ */
 
@@ -358,6 +390,7 @@ export class GameWizard {
     gameType: null,
     inputMethod: null,
     duration: null,
+    theme: null,
     optionalModules: {},
     currentOptionalIndex: 0,
   };
@@ -369,6 +402,7 @@ export class GameWizard {
       gameType: null,
       inputMethod: null,
       duration: null,
+      theme: null,
       optionalModules: {},
       currentOptionalIndex: 0,
     };
@@ -407,6 +441,13 @@ export class GameWizard {
 
       case 'duration': {
         this.state.duration = parseInt(choiceId, 10);
+        // After duration, go to theme selection
+        this.state.step = 'theme';
+        return { question: this.getThemeQuestion(), config: null, summary: '' };
+      }
+
+      case 'theme': {
+        this.state.theme = choiceId;
         this.state.step = 'optional_modules';
         this.state.currentOptionalIndex = 0;
         const nextOptional = this.getNextOptionalQuestion();
@@ -455,15 +496,9 @@ export class GameWizard {
   private skipDurationOrAsk(gameType: string): WizardAnswerResult {
     if (GameWizard.NO_DURATION_TYPES.has(gameType)) {
       this.state.duration = 0;
-      this.state.step = 'optional_modules';
-      this.state.currentOptionalIndex = 0;
-      const nextOptional = this.getNextOptionalQuestion();
-      if (nextOptional) {
-        return { question: nextOptional, config: null, summary: '' };
-      }
-      // No optional modules either — generate directly
-      this.state.step = 'done';
-      return { question: null, config: this.buildConfig(), summary: this.buildSummary() };
+      // Skip to theme step
+      this.state.step = 'theme';
+      return { question: this.getThemeQuestion(), config: null, summary: '' };
     }
     this.state.step = 'duration';
     return { question: this.getDurationQuestion(), config: null, summary: '' };
@@ -511,6 +546,14 @@ export class GameWizard {
         label: d.label,
         emoji: d.emoji,
       })),
+    };
+  }
+
+  private getThemeQuestion(): WizardQuestion {
+    return {
+      step: 'theme',
+      question: '选择游戏主题：',
+      choices: THEME_CHOICES,
     };
   }
 
@@ -599,6 +642,11 @@ export class GameWizard {
       }
     }
 
+    // Resolve theme: user selection, or default for game type, or 'fruit'
+    const themeId = this.state.theme
+      ?? DEFAULT_THEME_FOR_GAME[this.state.gameType ?? '']
+      ?? 'fruit';
+
     // Build input description
     const inputDef = INPUT_METHOD_MAP.get(inputType);
     const inputLabel = inputDef ? inputDef.description : '';
@@ -610,6 +658,7 @@ export class GameWizard {
         description: inputLabel ? `${inputLabel}，${gameDef.metaDescription}` : gameDef.metaDescription,
         thumbnail: null,
         createdAt: new Date().toISOString(),
+        theme: themeId,
       },
       canvas: { width: 1080, height: 1920 },
       modules,
@@ -633,6 +682,12 @@ export class GameWizard {
       lines.push(`\u23F1 游戏时长：${this.state.duration}秒`);
     } else {
       lines.push('\u267E 游戏时长：无限制（生命模式）');
+    }
+
+    // Theme
+    const themeChoice = THEME_CHOICES.find((t) => t.id === this.state.theme);
+    if (themeChoice) {
+      lines.push(`${themeChoice.emoji} 游戏主题：${themeChoice.label}`);
     }
 
     const enabledOptionals: string[] = [];

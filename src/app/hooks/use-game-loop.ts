@@ -25,10 +25,15 @@ export interface UseGameLoopOptions {
 export function useGameLoop({ engineRef, rendererRef, trackerRef, videoRef }: UseGameLoopOptions) {
   const rafRef = useRef<number | null>(null);
   const runningRef = useRef(false);
+  const lastTimeRef = useRef(0);
 
   const loop = useCallback(
     (timestamp: number) => {
       if (!runningRef.current) return;
+
+      // Calculate dt in milliseconds
+      const dt = lastTimeRef.current > 0 ? timestamp - lastTimeRef.current : 16;
+      lastTimeRef.current = timestamp;
 
       const engine = engineRef.current;
       const renderer = rendererRef.current;
@@ -45,9 +50,9 @@ export function useGameLoop({ engineRef, rendererRef, trackerRef, videoRef }: Us
         }
       }
 
-      // Render current engine state via PixiJS
+      // Render current engine state via PixiJS, passing dt for particle/float-text updates
       if (renderer && engine) {
-        renderer.render(engine);
+        renderer.render(engine, dt);
       }
 
       rafRef.current = requestAnimationFrame(loop);
@@ -58,6 +63,7 @@ export function useGameLoop({ engineRef, rendererRef, trackerRef, videoRef }: Us
   const start = useCallback(() => {
     if (runningRef.current) return;
     runningRef.current = true;
+    lastTimeRef.current = 0;
     rafRef.current = requestAnimationFrame(loop);
   }, [loop]);
 

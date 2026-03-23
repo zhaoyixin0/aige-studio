@@ -54,9 +54,24 @@ export class MatchEngine extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
+    // Auto-start grid generation
+    this.start();
+
+    this.on('gameflow:state', (data?: any) => {
+      if (data?.state === 'playing' && !this.started) {
+        this.start();
+      }
+    });
+
     this.on('input:touch:tap', (data?: any) => {
       if (data?.cellIndex !== undefined) {
         this.selectCell(data.cellIndex);
+      } else if (data?.x !== undefined && data?.y !== undefined) {
+        // Convert screen coordinates to cell index
+        const index = this.hitTestCell(data.x, data.y);
+        if (index >= 0) {
+          this.selectCell(index);
+        }
       }
     });
   }
@@ -203,6 +218,35 @@ export class MatchEngine extends BaseModule {
 
   getTotalPairs(): number {
     return this.totalPairs;
+  }
+
+  private hitTestCell(x: number, y: number): number {
+    const cols = this.getGridCols();
+    const rows = this.getGridRows();
+    const canvas = this.engine?.getCanvas() ?? { width: 1080, height: 1920 };
+
+    const padding = 40;
+    const gap = 10;
+    const availW = canvas.width - padding * 2;
+    const availH = canvas.height * 0.72;
+    const cardW = Math.min(120, (availW - gap * (cols - 1)) / cols);
+    const cardH = Math.min(120, (availH - gap * (rows - 1)) / rows);
+    const totalW = cols * cardW + (cols - 1) * gap;
+    const totalH = rows * cardH + (rows - 1) * gap;
+    const startX = (canvas.width - totalW) / 2;
+    const startY = canvas.height * 0.18 + (availH - totalH) / 2;
+
+    const col = Math.floor((x - startX) / (cardW + gap));
+    const row = Math.floor((y - startY) / (cardH + gap));
+
+    if (col < 0 || col >= cols || row < 0 || row >= rows) return -1;
+
+    // Check if click is actually within the card (not in the gap)
+    const cellX = startX + col * (cardW + gap);
+    const cellY = startY + row * (cardH + gap);
+    if (x < cellX || x > cellX + cardW || y < cellY || y > cellY + cardH) return -1;
+
+    return row * cols + col;
   }
 
   update(_dt: number): void {
