@@ -1,4 +1,4 @@
-import { Container, Graphics, Text, TextStyle } from 'pixi.js';
+import { Container, Graphics, Text, TextStyle, Sprite, Texture, Assets } from 'pixi.js';
 import type { Engine } from '@/engine/core/engine';
 import type { Spawner } from '@/engine/modules/mechanic/spawner';
 import type { FaceInput } from '@/engine/modules/input/face-input';
@@ -9,7 +9,8 @@ import { assetToEmoji, getTheme } from './theme-registry';
 
 export class GameObjectRenderer {
   private container: Container;
-  private sprites = new Map<string, Text>();
+  private sprites = new Map<string, Container>();
+  private textureCache = new Map<string, Texture>();
   private playerSprite: Container | null = null;
 
   constructor(container: Container) {
@@ -29,24 +30,38 @@ export class GameObjectRenderer {
     const themeName = engine.getConfig().meta.theme ?? 'fruit';
     const theme = getTheme(themeName);
 
+    const configAssets = engine.getConfig().assets ?? {};
+
     for (const spawner of spawners) {
       const objects = (spawner as Spawner).getObjects();
       for (const obj of objects) {
         activeIds.add(obj.id);
-        let sprite = this.sprites.get(obj.id);
-        if (!sprite) {
-          const emoji = assetToEmoji(obj.asset, theme);
-          sprite = new Text({
-            text: emoji,
-            style: new TextStyle({ fontSize: 28 }),
-          });
-          sprite.anchor.set(0.5);
-          this.container.addChild(sprite);
-          this.sprites.set(obj.id, sprite);
+        let wrapper = this.sprites.get(obj.id);
+        if (!wrapper) {
+          wrapper = new Container();
+          const assetEntry = configAssets[obj.asset];
+          const hasRealImage = assetEntry?.src?.startsWith('data:');
+
+          if (hasRealImage) {
+            // Use real image sprite
+            const sprite = this.createSpriteFromDataUrl(assetEntry.src, 48);
+            wrapper.addChild(sprite);
+          } else {
+            // Fallback to emoji
+            const emoji = assetToEmoji(obj.asset, theme);
+            const text = new Text({
+              text: emoji,
+              style: new TextStyle({ fontSize: 28 }),
+            });
+            text.anchor.set(0.5);
+            wrapper.addChild(text);
+          }
+          this.container.addChild(wrapper);
+          this.sprites.set(obj.id, wrapper);
         }
-        sprite.x = obj.x;
-        sprite.y = obj.y;
-        sprite.rotation = obj.rotation ?? 0;
+        wrapper.x = obj.x;
+        wrapper.y = obj.y;
+        wrapper.rotation = obj.rotation ?? 0;
 
         // Sync collision position for spawned objects
         if (collision) {
@@ -148,6 +163,19 @@ export class GameObjectRenderer {
         collision.updateObject('player_1', pos);
       }
     }
+  }
+
+  private createSpriteFromDataUrl(dataUrl: string, size: number): Sprite {
+    let texture = this.textureCache.get(dataUrl);
+    if (!texture) {
+      texture = Texture.from(dataUrl);
+      this.textureCache.set(dataUrl, texture);
+    }
+    const sprite = new Sprite(texture);
+    sprite.anchor.set(0.5);
+    sprite.width = size;
+    sprite.height = size;
+    return sprite;
   }
 
   reset(): void {
