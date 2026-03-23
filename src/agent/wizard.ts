@@ -1,4 +1,5 @@
 import type { GameConfig, ModuleConfig } from '@/engine/core/index.ts';
+import { getModuleParams } from './game-presets';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -89,6 +90,7 @@ const GAME_TYPES: GameTypeDef[] = [
       { type: 'Timer', label: '倒计时', description: '限定游戏时长' },
       { type: 'Scorer', label: '得分系统', description: '存活时间计分' },
       { type: 'DifficultyRamp', label: '难度递增', description: '随时间增加障碍物速度和频率' },
+      { type: 'ComboSystem', label: '连击系统', description: '连续躲避获得分数加成' },
       { type: 'ParticleVFX', label: '粒子特效', description: '碰撞时的视觉效果' },
       { type: 'SoundFX', label: '音效', description: '游戏音效和背景音乐' },
     ],
@@ -173,6 +175,7 @@ const GAME_TYPES: GameTypeDef[] = [
     fixedInput: 'FaceInput',
     optionalModules: [
       { type: 'Timer', label: '倒计时', description: '限定游戏时长' },
+      { type: 'ComboSystem', label: '连击系统', description: '连续匹配获得分数加成' },
       { type: 'ParticleVFX', label: '粒子特效', description: '表情匹配时的视觉效果' },
       { type: 'SoundFX', label: '音效', description: '匹配成功/失败音效' },
     ],
@@ -246,68 +249,7 @@ const DURATION_OPTIONS: DurationDef[] = [
 /* ------------------------------------------------------------------ */
 
 function defaultParamsForModule(moduleType: string, gameType: string): Record<string, unknown> {
-  switch (moduleType) {
-    case 'GameFlow':
-      return {};
-    case 'FaceInput':
-      return { smoothing: 0.3 };
-    case 'HandInput':
-      return { smoothing: 0.3 };
-    case 'TouchInput':
-      return {};
-    case 'AudioInput':
-      return { threshold: 0.5 };
-    case 'DeviceInput':
-      return { sensitivity: 1.0 };
-    case 'Spawner':
-      if (gameType === 'runner') {
-        return { frequency: 2000, maxCount: 5, speed: 300, direction: 'left' };
-      }
-      if (gameType === 'shooting') {
-        return { frequency: 1200, maxCount: 6, speed: 150, direction: 'down' };
-      }
-      if (gameType === 'dodge') {
-        return { frequency: 1000, maxCount: 10, speed: 250, direction: 'down' };
-      }
-      if (gameType === 'tap') {
-        return { frequency: 800, maxCount: 5, speed: 0, direction: 'none' };
-      }
-      return { frequency: 1500, maxCount: 8, speed: 200, direction: 'down' };
-    case 'Collision':
-      return {};
-    case 'Scorer':
-      return { pointsPerHit: 10 };
-    case 'Timer':
-      return { duration: 30, mode: 'countdown' };
-    case 'Lives':
-      return { count: 3 };
-    case 'UIOverlay':
-      return {};
-    case 'ResultScreen':
-      return {};
-    case 'DifficultyRamp':
-      return { interval: 10, speedMultiplier: 1.15, frequencyMultiplier: 0.9 };
-    case 'ComboSystem':
-      return { multiplierStep: 0.5, maxMultiplier: 5, resetOnMiss: true };
-    case 'ParticleVFX':
-      return {};
-    case 'SoundFX':
-      return {};
-    case 'QuizEngine':
-      return { questionCount: 10 };
-    case 'Randomizer':
-      return { segments: 6 };
-    case 'ExpressionDetector':
-      return { expressions: ['smile', 'surprise', 'wink'] };
-    case 'Runner':
-      return { speed: 300, lanes: 3 };
-    case 'Jump':
-      return { force: 500, maxJumps: 2 };
-    case 'PowerUp':
-      return { duration: 5, types: ['shield', 'magnet', 'doublePoints'] };
-    default:
-      return {};
-  }
+  return getModuleParams(gameType, moduleType);
 }
 
 /* ------------------------------------------------------------------ */
@@ -489,10 +431,12 @@ export class GameWizard {
   private buildConfig(): GameConfig {
     const gameDef = GAME_TYPE_MAP.get(this.state.gameType ?? '')!;
     const modules: ModuleConfig[] = [];
-    let counter = 1;
+    const typeCounts = new Map<string, number>();
 
     const addModule = (type: string) => {
-      const id = `${type.toLowerCase()}_${counter++}`;
+      const count = (typeCounts.get(type) ?? 0) + 1;
+      typeCounts.set(type, count);
+      const id = `${type.toLowerCase()}_${count}`;
       modules.push({
         id,
         type,
@@ -512,12 +456,15 @@ export class GameWizard {
 
     // Timer (if duration > 0)
     if (this.state.duration && this.state.duration > 0) {
-      const id = `timer_${counter++}`;
+      const timerCount = (typeCounts.get('Timer') ?? 0) + 1;
+      typeCounts.set('Timer', timerCount);
+      const id = `timer_${timerCount}`;
+      const timerPreset = getModuleParams(this.state.gameType ?? 'catch', 'Timer');
       modules.push({
         id,
         type: 'Timer',
         enabled: true,
-        params: { duration: this.state.duration, mode: 'countdown' },
+        params: { ...timerPreset, duration: this.state.duration },
       });
     }
 
