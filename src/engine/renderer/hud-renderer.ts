@@ -97,6 +97,13 @@ export class HudRenderer {
   private narrativeChoiceBgs: Graphics[] = [];
   private narrativeEndText!: Text;
 
+  // Start screen overlay
+  private startContainer: Container;
+  private startBg!: Graphics;
+  private startTitleText!: Text;
+  private startHintText!: Text;
+  private startGameNameText!: Text;
+
   // Result screen overlay
   private resultContainer: Container;
   private resultBg!: Graphics;
@@ -246,6 +253,9 @@ export class HudRenderer {
     // Narrative container
     this.narrativeContainer = this.buildNarrativeContainer();
 
+    // Start screen overlay
+    this.startContainer = this.buildStartContainer();
+
     // Result screen overlay
     this.resultContainer = this.buildResultContainer();
 
@@ -261,6 +271,7 @@ export class HudRenderer {
       this.puzzleContainer,
       this.dressUpContainer,
       this.narrativeContainer,
+      this.startContainer,
       this.resultContainer,
     );
   }
@@ -647,6 +658,9 @@ export class HudRenderer {
     // Narrative rendering
     this.syncNarrative(engine);
 
+    // Start screen overlay
+    this.syncStart(engine);
+
     // Result screen overlay (must be last — renders on top)
     this.syncResult(engine);
   }
@@ -916,6 +930,78 @@ export class HudRenderer {
     }
   }
 
+  // ── Start screen ───────────────────────────────────────────
+
+  private buildStartContainer(): Container {
+    const c = new Container();
+    c.visible = true;
+
+    this.startBg = new Graphics();
+    this.startBg.rect(0, 0, this.width, this.height);
+    this.startBg.fill({ color: 0x000000, alpha: 0.7 });
+
+    this.startTitleText = new Text({
+      text: '\u{1F3AE}',
+      style: new TextStyle({
+        fontSize: 120, fontFamily: 'Arial', align: 'center',
+      }),
+    });
+    this.startTitleText.anchor.set(0.5);
+    this.startTitleText.position.set(this.width / 2, this.height * 0.3);
+
+    this.startGameNameText = new Text({
+      text: '',
+      style: new TextStyle({
+        fill: '#ffffff', fontSize: 48, fontFamily: 'Arial', fontWeight: 'bold',
+        align: 'center', wordWrap: true, wordWrapWidth: this.width - 100,
+      }),
+    });
+    this.startGameNameText.anchor.set(0.5);
+    this.startGameNameText.position.set(this.width / 2, this.height * 0.45);
+
+    this.startHintText = new Text({
+      text: '\u{1F449} \u70B9\u51FB\u5C4F\u5E55\u5F00\u59CB\u6E38\u620F',
+      style: new TextStyle({
+        fill: '#aaaaaa', fontSize: 32, fontFamily: 'Arial', align: 'center',
+      }),
+    });
+    this.startHintText.anchor.set(0.5);
+    this.startHintText.position.set(this.width / 2, this.height * 0.6);
+
+    // Make the whole container clickable
+    this.startBg.eventMode = 'static';
+    this.startBg.cursor = 'pointer';
+
+    c.addChild(this.startBg, this.startTitleText, this.startGameNameText, this.startHintText);
+    return c;
+  }
+
+  private syncStart(engine: Engine): void {
+    const gameFlow = engine.getModulesByType('GameFlow')[0] as GameFlow | undefined;
+    if (!gameFlow) {
+      this.startContainer.visible = false;
+      return;
+    }
+
+    const state = gameFlow.getState();
+    if (state === 'ready') {
+      this.startContainer.visible = true;
+
+      // Show game name from config
+      const config = engine.getConfig();
+      this.startGameNameText.text = config.meta?.name || '\u65B0\u6E38\u620F';
+
+      // Wire click handler (only once)
+      if (!this.startBg.listenerCount('pointertap')) {
+        this.startBg.on('pointertap', () => {
+          gameFlow.transition('countdown');
+        });
+      }
+    } else {
+      this.startContainer.visible = false;
+    }
+  }
+
   // ── Result screen ──────────────────────────────────────────
 
   private buildResultContainer(): Container {
@@ -971,6 +1057,10 @@ export class HudRenderer {
     this.resultHintText.anchor.set(0.5);
     this.resultHintText.position.set(this.width / 2, this.height * 0.72);
 
+    // Make result screen clickable for restart
+    this.resultBg.eventMode = 'static';
+    this.resultBg.cursor = 'pointer';
+
     c.addChild(this.resultBg, this.resultTitleText, this.resultStarsText, this.resultScoreText, this.resultTimeText, this.resultHintText);
     return c;
   }
@@ -983,6 +1073,17 @@ export class HudRenderer {
     }
 
     this.resultContainer.visible = true;
+
+    // Wire restart click (only once)
+    if (!this.resultBg.listenerCount('pointertap')) {
+      this.resultBg.on('pointertap', () => {
+        // Reset all modules and restart
+        for (const mod of engine.getAllModules()) {
+          (mod as any).reset?.();
+        }
+        gameFlow.transition('countdown');
+      });
+    }
 
     const resultScreen = engine.getModulesByType('ResultScreen')[0] as ResultScreen | undefined;
     if (resultScreen) {

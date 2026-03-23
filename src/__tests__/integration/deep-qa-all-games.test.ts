@@ -987,11 +987,9 @@ describe('Deep QA: GameFlow state machine', () => {
     const engine = createEngine(config);
 
     const gf = engine.getModulesByType('GameFlow')[0] as GameFlow;
-    // ConfigLoader auto-starts GameFlow to 'countdown'
-    const state = gf.getState();
-    expect(state === 'countdown' || state === 'playing').toBe(true);
+    expect(gf.getState()).toBe('ready');
 
-    if (state !== 'countdown') gf.transition('countdown');
+    gf.transition('countdown');
     const countdownSec = gf.getParams().countdown ?? 3;
 
     // Tick through the countdown
