@@ -38,6 +38,15 @@ export class FaceInput extends BaseModule {
         label: 'Output To',
         default: 'player',
       },
+      playerSize: {
+        type: 'range',
+        label: '角色大小',
+        default: 64,
+        min: 24,
+        max: 128,
+        step: 4,
+        unit: 'px',
+      },
     };
   }
 

@@ -103,9 +103,10 @@ export class PixiRenderer {
   }
 
   connectToEngine(engine: Engine): void {
-    // Avoid double-connecting
-    if (this.connectedEngine === engine) return;
     this.connectedEngine = engine;
+
+    // Reset game object renderer so player gets re-registered with collision
+    this.gameObjectRenderer?.reset();
 
     // Create sound synth
     if (!this.soundSynth) {

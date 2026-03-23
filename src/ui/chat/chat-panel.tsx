@@ -62,18 +62,34 @@ export function ChatPanel() {
       timestamp: Date.now(),
     });
 
-    assetAgent.fulfillAssets(newConfig).then((assets) => {
-      if (Object.keys(assets).length > 0) {
+    assetAgent.fulfillAssets(newConfig, (progress) => {
+      console.log(`[AssetAgent] ${progress.key}: ${progress.status} (${progress.current}/${progress.total})`);
+    }).then((assets) => {
+      const count = Object.keys(assets).length;
+      if (count > 0) {
         batchUpdateAssets(assets);
         addChatMessage({
           id: crypto.randomUUID(),
           role: 'assistant',
-          content: `\u2705 \u5DF2\u81EA\u52A8\u751F\u6210 ${Object.keys(assets).length} \u4E2A\u6E38\u620F\u7D20\u6750\uFF01\u7D20\u6750\u5DF2\u4FDD\u5B58\u5230\u7D20\u6750\u5E93\u3002`,
+          content: `\u2705 \u5DF2\u81EA\u52A8\u751F\u6210 ${count} \u4E2A\u6E38\u620F\u7D20\u6750\uFF01\u7D20\u6750\u5DF2\u4FDD\u5B58\u5230\u7D20\u6750\u5E93\u3002`,
+          timestamp: Date.now(),
+        });
+      } else {
+        addChatMessage({
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: '\u26A0\uFE0F \u7D20\u6750\u751F\u6210\u8DF3\u8FC7\uFF08\u53EF\u80FD\u672A\u914D\u7F6E Gemini API Key \u6216\u65E0\u9700\u751F\u6210\u7684\u7D20\u6750\uFF09',
           timestamp: Date.now(),
         });
       }
     }).catch((err) => {
-      console.warn('Asset fulfillment failed:', err);
+      console.error('Asset fulfillment failed:', err);
+      addChatMessage({
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: `\u274C \u7D20\u6750\u751F\u6210\u5931\u8D25: ${err instanceof Error ? err.message : String(err)}`,
+        timestamp: Date.now(),
+      });
     });
   }, [addChatMessage, batchUpdateAssets]);
 

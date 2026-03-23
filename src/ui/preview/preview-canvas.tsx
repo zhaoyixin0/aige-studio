@@ -12,8 +12,12 @@ import type { GameConfig } from '@/engine/core';
 /** Stable selectors — extracted to module scope so function references never change. */
 const selectPreviewMode = (s: { previewMode: PreviewMode }) => s.previewMode;
 const selectSetPreviewMode = (s: { setPreviewMode: (mode: PreviewMode) => void }) => s.setPreviewMode;
-const selectConfigStructureKey = (s: { config: GameConfig | null }) =>
-  s.config?.modules.map((m) => `${m.id}:${m.type}:${m.enabled}`).join('|') ?? '';
+const selectConfigStructureKey = (s: { config: GameConfig | null }) => {
+  if (!s.config) return '';
+  const modKey = s.config.modules.map((m) => `${m.id}:${m.type}:${m.enabled}`).join('|');
+  const assetCount = Object.keys(s.config.assets).length;
+  return `${modKey}#assets:${assetCount}`;
+};
 
 export function PreviewCanvas() {
   const { engineRef, rendererRef, setMountEl, loadConfig, ready: engineReady } = useEngineContext();

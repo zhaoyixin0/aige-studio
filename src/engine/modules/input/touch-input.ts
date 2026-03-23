@@ -39,6 +39,15 @@ export class TouchInput extends BaseModule {
         type: 'rect',
         label: 'Active Area',
       },
+      playerSize: {
+        type: 'range',
+        label: '角色大小',
+        default: 64,
+        min: 24,
+        max: 128,
+        step: 4,
+        unit: 'px',
+      },
     };
   }
 

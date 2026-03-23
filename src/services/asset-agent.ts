@@ -47,6 +47,12 @@ export function extractAssetKeys(config: GameConfig): string[] {
     }
   }
 
+  // 3. Always include player character if game has a Spawner (needs a player)
+  const hasSpawner = config.modules.some(m => m.type === 'Spawner');
+  if (hasSpawner) {
+    keys.add('player');
+  }
+
   return [...keys];
 }
 
@@ -75,6 +81,8 @@ export class AssetAgent {
     const keys = extractAssetKeys(config);
     const result: Record<string, AssetEntry> = {};
 
+    console.log('[AssetAgent] Extracted asset keys:', keys);
+
     // Determine which keys actually need generation
     const keysToProcess = keys.filter((key) => {
       const existing = config.assets[key];
@@ -87,14 +95,16 @@ export class AssetAgent {
     });
 
     const total = keysToProcess.length;
+    console.log('[AssetAgent] Keys to process:', keysToProcess, `(${total} total)`);
     if (total === 0) return result;
 
     // Try to obtain Gemini service — may throw if no API key
     let gemini: GeminiImageService | null = null;
     try {
       gemini = getGeminiImageService();
-    } catch {
-      // No API key configured — skip generation entirely
+      console.log('[AssetAgent] Gemini service obtained successfully');
+    } catch (err) {
+      console.warn('[AssetAgent] No Gemini API key:', err);
     }
     if (!gemini) return result;
 
@@ -111,7 +121,12 @@ export class AssetAgent {
       // Check library for a cached version first
       const cached = this.library.findByKeyAndTheme(key, theme || undefined);
       if (cached) {
-        result[key] = { type: cached.type, src: cached.src };
+        // Resize cached asset if it's too large (legacy large images)
+        let src = cached.src;
+        if (cached.type !== 'background') {
+          try { src = await this.resizeImage(src, 128, 128); } catch { /* keep original */ }
+        }
+        result[key] = { type: cached.type, src };
         onProgress?.({ current: i + 1, total, key, status: 'done' });
         continue;
       }
@@ -143,6 +158,10 @@ export class AssetAgent {
 
         if (signal.aborted) return result;
 
+        // Resize sprite images to 128x128 (backgrounds to 540x960)
+        const targetSize = assetType === 'background' ? { w: 540, h: 960 } : { w: 128, h: 128 };
+        dataUrl = await this.resizeImage(dataUrl, targetSize.w, targetSize.h);
+
         // Save to library
         const name = this.library.generateName(key, theme || undefined);
         await this.library.save({
@@ -163,6 +182,26 @@ export class AssetAgent {
     }
 
     return result;
+  }
+
+  /** Resize an image data URL to target dimensions */
+  private resizeImage(dataUrl: string, maxW: number, maxH: number): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        // Maintain aspect ratio, fit within maxW x maxH
+        const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve(dataUrl); return; }
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = () => reject(new Error('Failed to load image for resize'));
+      img.src = dataUrl;
+    });
   }
 
   /** Cancel any in-progress fulfillment run. */

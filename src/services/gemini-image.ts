@@ -1,5 +1,5 @@
-const GEMINI_ENDPOINT =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+const IMAGEN_ENDPOINT =
+  'https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict';
 
 export type ImageStyle = 'cartoon' | 'pixel' | 'flat' | 'realistic';
 
@@ -23,58 +23,44 @@ export class GeminiImageService {
    */
   async generateImage(prompt: string, style: ImageStyle = 'cartoon'): Promise<string> {
     const styleHint = STYLE_PROMPTS[style];
-    const fullPrompt = `Generate a game sprite asset: ${prompt}. Make it a simple, clean icon suitable for a mobile game. Transparent or solid color background. ${styleHint}`;
-    return this.callGeminiAPI(fullPrompt);
+    const fullPrompt = `Game sprite asset: ${prompt}. Simple, clean icon for a mobile game. White background. ${styleHint}`;
+    return this.callImagenAPI(fullPrompt);
   }
 
   /**
    * Send a prompt as-is without adding style hints.
-   * Used by AssetAgent with PromptBuilder's complete prompt to avoid double styling.
+   * Used by AssetAgent with PromptBuilder's complete prompt.
    */
   async generateImageRaw(prompt: string): Promise<string> {
-    return this.callGeminiAPI(prompt);
+    return this.callImagenAPI(prompt);
   }
 
-  /** Shared API call logic */
-  private async callGeminiAPI(promptText: string): Promise<string> {
-    const response = await fetch(`${GEMINI_ENDPOINT}?key=${this.apiKey}`, {
+  /** Call Imagen 4 API */
+  private async callImagenAPI(promptText: string): Promise<string> {
+    const response = await fetch(`${IMAGEN_ENDPOINT}?key=${this.apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: promptText,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          responseModalities: ['TEXT', 'IMAGE'],
-        },
+        instances: [{ prompt: promptText }],
+        parameters: { sampleCount: 1 },
       }),
     });
 
     if (!response.ok) {
       const errorBody = await response.text().catch(() => '');
       throw new Error(
-        `Gemini API error: ${response.status}${errorBody ? ` — ${errorBody.slice(0, 200)}` : ''}`,
+        `Imagen API error: ${response.status}${errorBody ? ` — ${errorBody.slice(0, 200)}` : ''}`,
       );
     }
 
     const data = await response.json();
+    const predictions = data.predictions as Array<{ bytesBase64Encoded: string }> | undefined;
 
-    const parts: { inlineData?: { mimeType: string; data: string } }[] =
-      data.candidates?.[0]?.content?.parts ?? [];
-
-    for (const part of parts) {
-      if (part.inlineData) {
-        return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-      }
+    if (predictions && predictions.length > 0 && predictions[0].bytesBase64Encoded) {
+      return `data:image/png;base64,${predictions[0].bytesBase64Encoded}`;
     }
 
-    throw new Error('No image was returned by the model. Try a different description.');
+    throw new Error('No image was returned by Imagen. Try a different description.');
   }
 }
 

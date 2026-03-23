@@ -33,6 +33,7 @@ export class GameObjectRenderer {
     const configAssets = engine.getConfig().assets ?? {};
 
     for (const spawner of spawners) {
+      const spriteSize = (spawner as Spawner).getParams().spriteSize as number ?? 48;
       const objects = (spawner as Spawner).getObjects();
       for (const obj of objects) {
         activeIds.add(obj.id);
@@ -44,14 +45,14 @@ export class GameObjectRenderer {
 
           if (hasRealImage) {
             // Use real image sprite
-            const sprite = this.createSpriteFromDataUrl(assetEntry.src, 48);
+            const sprite = this.createSpriteFromDataUrl(assetEntry.src, spriteSize);
             wrapper.addChild(sprite);
           } else {
-            // Fallback to emoji
+            // Fallback to emoji, scale font size proportionally
             const emoji = assetToEmoji(obj.asset, theme);
             const text = new Text({
               text: emoji,
-              style: new TextStyle({ fontSize: 28 }),
+              style: new TextStyle({ fontSize: Math.round(spriteSize * 0.6) }),
             });
             text.anchor.set(0.5);
             wrapper.addChild(text);
@@ -115,35 +116,47 @@ export class GameObjectRenderer {
       // Determine if tap game for different visual/collision
       const spawner = engine.getModulesByType('Spawner')[0] as Spawner | undefined;
       const isTapStyle = spawner && spawner.getParams().speed?.max === 0;
-      const playerRadius = isTapStyle ? 30 : 40;
+
+      // Read playerSize from input module params
+      const inputMod = (faceInput ?? handInput ?? touchInput) as { getParams: () => Record<string, unknown> } | undefined;
+      const playerSize = (inputMod?.getParams()?.playerSize as number) ?? 64;
+      const playerRadius = isTapStyle ? 30 : playerSize / 2;
 
       if (!this.playerSprite) {
+        const configAssets = engine.getConfig().assets ?? {};
+        const playerAsset = configAssets['player'];
+        const hasPlayerImage = playerAsset?.src?.startsWith('data:');
+
         if (isTapStyle) {
-          // Crosshair style for tap games — keep as Graphics
+          // Crosshair style for tap games
           const crosshair = new Graphics();
           crosshair.circle(0, 0, 25).stroke({ color: 0x00ff88, width: 3 });
           crosshair.moveTo(-15, 0).lineTo(15, 0).stroke({ color: 0x00ff88, width: 2 });
           crosshair.moveTo(0, -15).lineTo(0, 15).stroke({ color: 0x00ff88, width: 2 });
           this.playerSprite = crosshair;
+        } else if (hasPlayerImage) {
+          // AI-generated player image
+          const playerContainer = new Container();
+          const shadow = new Graphics();
+          shadow.ellipse(0, playerSize * 0.3, playerSize * 0.4, 8).fill({ color: 0x000000, alpha: 0.3 });
+          playerContainer.addChild(shadow);
+          const imgSprite = this.createSpriteFromDataUrl(playerAsset.src, playerSize);
+          playerContainer.addChild(imgSprite);
+          this.playerSprite = playerContainer;
         } else {
           // Emoji player with shadow
           const playerContainer = new Container();
-
-          // Shadow: small gray ellipse under the player
           const shadow = new Graphics();
-          shadow.ellipse(0, 18, 22, 8).fill({ color: 0x000000, alpha: 0.3 });
+          shadow.ellipse(0, playerSize * 0.3, playerSize * 0.4, 8).fill({ color: 0x000000, alpha: 0.3 });
           playerContainer.addChild(shadow);
-
-          // Emoji text
           const themeName = engine.getConfig().meta.theme ?? 'fruit';
           const theme = getTheme(themeName);
           const emojiText = new Text({
             text: theme.playerEmoji,
-            style: new TextStyle({ fontSize: 44 }),
+            style: new TextStyle({ fontSize: playerSize }),
           });
           emojiText.anchor.set(0.5);
           playerContainer.addChild(emojiText);
-
           this.playerSprite = playerContainer;
         }
         this.container.addChild(this.playerSprite);
@@ -157,7 +170,12 @@ export class GameObjectRenderer {
       this.playerSprite.x = pos.x;
       this.playerSprite.y = pos.y;
 
-      // Sync collision position
+      // Dynamic scale based on current playerSize (allows real-time slider adjustment)
+      const baseSize = 64; // default creation size
+      const scale = playerSize / baseSize;
+      this.playerSprite.scale.set(scale);
+
+      // Sync collision position + radius
       const collision = engine.getModulesByType('Collision')[0] as Collision | undefined;
       if (collision) {
         collision.updateObject('player_1', pos);
@@ -165,17 +183,40 @@ export class GameObjectRenderer {
     }
   }
 
-  private createSpriteFromDataUrl(dataUrl: string, size: number): Sprite {
-    let texture = this.textureCache.get(dataUrl);
-    if (!texture) {
-      texture = Texture.from(dataUrl);
-      this.textureCache.set(dataUrl, texture);
+  private createSpriteFromDataUrl(dataUrl: string, size: number): Container {
+    // Use a placeholder container; load image async and replace when ready
+    const wrapper = new Container();
+
+    const cached = this.textureCache.get(dataUrl);
+    if (cached) {
+      const sprite = new Sprite(cached);
+      sprite.anchor.set(0.5);
+      sprite.width = size;
+      sprite.height = size;
+      wrapper.addChild(sprite);
+      return wrapper;
     }
-    const sprite = new Sprite(texture);
-    sprite.anchor.set(0.5);
-    sprite.width = size;
-    sprite.height = size;
-    return sprite;
+
+    // Draw data URL onto a small canvas to avoid WebGL OOM
+    const img = new window.Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.drawImage(img, 0, 0, size, size);
+      const texture = Texture.from(canvas);
+      this.textureCache.set(dataUrl, texture);
+      const sprite = new Sprite(texture);
+      sprite.anchor.set(0.5);
+      sprite.width = size;
+      sprite.height = size;
+      wrapper.addChild(sprite);
+    };
+    img.src = dataUrl;
+
+    return wrapper;
   }
 
   reset(): void {

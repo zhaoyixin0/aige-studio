@@ -77,6 +77,15 @@ export class Spawner extends BaseModule {
         max: 10,
         step: 0.1,
       },
+      spriteSize: {
+        type: 'range',
+        label: '素材大小',
+        default: 48,
+        min: 16,
+        max: 128,
+        step: 4,
+        unit: 'px',
+      },
     };
   }
 
