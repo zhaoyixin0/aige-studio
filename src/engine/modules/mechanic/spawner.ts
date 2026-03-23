@@ -193,6 +193,7 @@ export class Spawner extends BaseModule {
     };
 
     this.objects.push(obj);
+    this.emit('spawner:created', { id: obj.id, asset: obj.asset, x: obj.x, y: obj.y });
     return obj;
   }
 
@@ -201,7 +202,11 @@ export class Spawner extends BaseModule {
   }
 
   removeObject(id: string): void {
+    const existed = this.objects.some((o) => o.id === id);
     this.removeObjectInternal(id);
+    if (existed) {
+      this.emit('spawner:destroyed', { id });
+    }
   }
 
   private removeObjectInternal(id: string): void {

@@ -41,8 +41,8 @@ export class BeatMap extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    this.on('touch:tap', () => this.onPlayerInput());
-    this.on('face:*', () => this.onPlayerInput());
+    this.on('input:touch:tap', () => this.onPlayerInput());
+    this.on('input:face:*', () => this.onPlayerInput());
   }
 
   start(): void {

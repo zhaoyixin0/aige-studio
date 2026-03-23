@@ -1,9 +1,15 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Download, Share2, X, Check, Globe, FileCode } from 'lucide-react';
 import { WebExporter } from '@/exporters/web-exporter.ts';
 import { ApjsExporter } from '@/exporters/apjs-exporter.ts';
 import { useGameStore } from '@/store/game-store.ts';
+import type { GameConfig } from '@/engine/core';
+
+const EMPTY_CAPABILITIES: string[] = [];
+
+/** Stable selector — extracted to module scope so function reference never changes. */
+const selectConfig = (s: { config: GameConfig | null }) => s.config;
 
 interface ExportDialogProps {
   open: boolean;
@@ -11,7 +17,7 @@ interface ExportDialogProps {
 }
 
 export function ExportDialog({ open, onOpenChange }: ExportDialogProps) {
-  const config = useGameStore((s) => s.config);
+  const config = useGameStore(selectConfig);
   const [copied, setCopied] = useState(false);
 
   const handleWebExport = async () => {
@@ -37,9 +43,10 @@ export function ExportDialog({ open, onOpenChange }: ExportDialogProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const capabilities = config
-    ? new ApjsExporter().export(config).requiredCapabilities
-    : [];
+  const capabilities = useMemo(
+    () => (config ? new ApjsExporter().export(config).requiredCapabilities : EMPTY_CAPABILITIES),
+    [config],
+  );
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>

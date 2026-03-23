@@ -14,7 +14,7 @@
 |------|------|---------|
 | TouchInput | input | gesture: `'tap'` |
 | Randomizer | mechanic | animation: `'wheel'`, spinDuration: `3`, trigger: `'tap'` |
-| GameFlow | feedback | countdown: `0`, onFinish: `'none'` |
+| GameFlow | feedback | countdown: `0`, onFinish: `'show_result'` |
 
 ## 推荐增强模块
 
@@ -65,10 +65,12 @@ UIOverlay ← 显示结果
       "type": "Randomizer",
       "params": {
         "items": [
-          { "asset": "prize_a", "label": "奖品A", "weight": 1 },
-          { "asset": "prize_b", "label": "奖品B", "weight": 2 },
-          { "asset": "prize_c", "label": "奖品C", "weight": 1 },
-          { "asset": "prize_d", "label": "再来一次", "weight": 3 }
+          { "asset": "option1", "label": "奖品A", "weight": 1 },
+          { "asset": "option2", "label": "奖品B", "weight": 1 },
+          { "asset": "option3", "label": "奖品C", "weight": 1 },
+          { "asset": "option4", "label": "奖品D", "weight": 1 },
+          { "asset": "option5", "label": "奖品E", "weight": 1 },
+          { "asset": "option6", "label": "奖品F", "weight": 1 }
         ],
         "animation": "wheel",
         "spinDuration": 3,
@@ -78,7 +80,7 @@ UIOverlay ← 显示结果
     {
       "id": "gameFlow1",
       "type": "GameFlow",
-      "params": { "countdown": 0, "onFinish": "none" }
+      "params": { "countdown": 0, "onFinish": "show_result" }
     },
     {
       "id": "soundFx1",
@@ -95,7 +97,7 @@ UIOverlay ← 显示结果
       "type": "ParticleVFX",
       "params": {
         "events": {
-          "randomizer:result": { "effect": "confetti", "at": "center", "duration": 1000, "color": "#FFD700" }
+          "randomizer:result": { "effect": "burst", "at": "center", "duration": 600, "color": "#ffdd00" }
         }
       }
     }

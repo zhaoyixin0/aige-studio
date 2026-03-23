@@ -46,7 +46,7 @@ export class UIOverlay extends BaseModule {
     });
 
     this.on('lives:change', (data: any) => {
-      this.hudState.lives = data.lives ?? 0;
+      this.hudState.lives = data.current ?? 0;
     });
 
     this.on('scorer:combo:*', (data: any) => {

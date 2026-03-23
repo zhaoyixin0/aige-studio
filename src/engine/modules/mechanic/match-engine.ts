@@ -54,7 +54,7 @@ export class MatchEngine extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    this.on('touch:tap', (data?: any) => {
+    this.on('input:touch:tap', (data?: any) => {
       if (data?.cellIndex !== undefined) {
         this.selectCell(data.cellIndex);
       }

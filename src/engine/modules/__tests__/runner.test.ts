@@ -23,7 +23,7 @@ describe('Runner', () => {
 
     runner.start();
 
-    engine.eventBus.emit('touch:swipe', { direction: 'left' });
+    engine.eventBus.emit('input:touch:swipe', { direction: 'left' });
 
     expect(runner.getCurrentLane()).toBe(0);
     expect(laneHandler).toHaveBeenCalledWith(
@@ -37,8 +37,8 @@ describe('Runner', () => {
     runner.start();
 
     // Swipe left twice from middle (lane 1) — should stop at 0
-    engine.eventBus.emit('touch:swipe', { direction: 'left' });
-    engine.eventBus.emit('touch:swipe', { direction: 'left' });
+    engine.eventBus.emit('input:touch:swipe', { direction: 'left' });
+    engine.eventBus.emit('input:touch:swipe', { direction: 'left' });
 
     expect(runner.getCurrentLane()).toBe(0);
   });

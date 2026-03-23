@@ -33,7 +33,7 @@ describe('GestureMatch', () => {
 
     gm.start();
 
-    engine.eventBus.emit('hand:gesture', {
+    engine.eventBus.emit('input:hand:gesture', {
       gesture: 'thumbs_up',
       confidence: 0.9,
     });
@@ -53,7 +53,7 @@ describe('GestureMatch', () => {
 
     gm.start();
 
-    engine.eventBus.emit('hand:gesture', {
+    engine.eventBus.emit('input:hand:gesture', {
       gesture: 'fist',
       confidence: 0.9,
     });

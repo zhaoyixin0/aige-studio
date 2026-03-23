@@ -35,7 +35,7 @@ export class BranchStateMachine extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    this.on('touch:tap', (data?: any) => {
+    this.on('input:touch:tap', (data?: any) => {
       if (data?.choiceIndex !== undefined) {
         this.choose(data.choiceIndex);
       }

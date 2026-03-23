@@ -4,10 +4,14 @@ import { EditorPanel } from '@/ui/editor/editor-panel.tsx';
 import { useEngine, EngineContext } from '@/app/hooks/use-engine.ts';
 import { useEditorStore } from '@/store/editor-store.ts';
 import { FullscreenMode } from '@/ui/preview/fullscreen-mode.tsx';
+import type { PreviewMode } from '@/store/editor-store.ts';
+
+/** Stable selector — extracted to module scope so function reference never changes. */
+const selectPreviewMode = (s: { previewMode: PreviewMode }) => s.previewMode;
 
 export function MainLayout() {
   const engine = useEngine();
-  const previewMode = useEditorStore((s) => s.previewMode);
+  const previewMode = useEditorStore(selectPreviewMode);
   const showPanels = previewMode === 'edit';
 
   return (

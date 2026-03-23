@@ -15,6 +15,7 @@ export class TouchInput extends BaseModule {
   private pointerState: PointerState | null = null;
   private lastTapTime = 0;
   private longPressTimer: ReturnType<typeof setTimeout> | null = null;
+  private currentPosition: { x: number; y: number } | null = null;
 
   // Bound handlers for cleanup
   private handlePointerDown: ((e: PointerEvent) => void) | null = null;
@@ -63,6 +64,8 @@ export class TouchInput extends BaseModule {
     this.canvas.addEventListener('pointerdown', this.handlePointerDown);
     this.canvas.addEventListener('pointermove', this.handlePointerMove);
     this.canvas.addEventListener('pointerup', this.handlePointerUp);
+    // Enable move tracking even without pointer down
+    this.canvas.style.touchAction = 'none';
   }
 
   private unbindEvents(): void {
@@ -79,9 +82,15 @@ export class TouchInput extends BaseModule {
   private getRelativePos(e: PointerEvent): { x: number; y: number } {
     if (!this.canvas) return { x: e.clientX, y: e.clientY };
     const rect = this.canvas.getBoundingClientRect();
+    const cssX = e.clientX - rect.left;
+    const cssY = e.clientY - rect.top;
+    // Scale CSS coordinates to canvas internal resolution
+    const canvas = this.canvas as HTMLCanvasElement;
+    const scaleX = (canvas.width || rect.width) / rect.width;
+    const scaleY = (canvas.height || rect.height) / rect.height;
     return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: cssX * scaleX,
+      y: cssY * scaleY,
     };
   }
 
@@ -104,8 +113,10 @@ export class TouchInput extends BaseModule {
   }
 
   private onPointerMove(e: PointerEvent): void {
-    if (!this.pointerState) return;
     const pos = this.getRelativePos(e);
+    this.currentPosition = pos;
+
+    if (!this.pointerState) return;
     const dx = pos.x - this.pointerState.startX;
     const dy = pos.y - this.pointerState.startY;
     const distance = Math.sqrt(dx * dx + dy * dy);
@@ -114,6 +125,10 @@ export class TouchInput extends BaseModule {
       this.pointerState.moved = true;
       this.clearLongPressTimer();
     }
+  }
+
+  getPosition(): { x: number; y: number } | null {
+    return this.currentPosition;
   }
 
   private onPointerUp(e: PointerEvent): void {

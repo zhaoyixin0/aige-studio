@@ -38,8 +38,8 @@ export class Jump extends BaseModule {
       triggerEvent: {
         type: 'select',
         label: 'Trigger Event',
-        default: 'touch:tap',
-        options: ['touch:tap', 'face:mouthOpen'],
+        default: 'input:touch:tap',
+        options: ['input:touch:tap', 'input:face:mouthOpen'],
       },
     };
   }

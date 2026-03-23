@@ -13,9 +13,9 @@
 | 模块 | 类型 | 推荐参数 |
 |------|------|---------|
 | FaceInput 或 HandInput | input | tracking: `'headXY'`, smoothing: `0.3`, sensitivity: `1` |
-| Spawner | mechanic | direction: `'down'`, frequency: `1.5`, speed: `{ min: 100, max: 200 }`, maxCount: `10` |
+| Spawner | mechanic | direction: `'down'`, frequency: `1.5`, speed: `{ min: 120, max: 220 }`, maxCount: `8`, spawnArea: `{ x: 80, y: 0, width: 920, height: 0 }` |
 | Collision | mechanic | rules: `[{ a: 'player', b: 'items', event: 'hit', destroy: ['b'] }]` |
-| Scorer | mechanic | perHit: `10`, combo: `{ enabled: true, window: 1000, multiplier: [1, 1.5, 2] }` |
+| Scorer | mechanic | perHit: `10`, combo: `{ enabled: true, window: 1500, multiplier: [1, 1.5, 2, 3] }`, deductOnMiss: `false` |
 | Timer | mechanic | mode: `'countdown'`, duration: `30` |
 | GameFlow | feedback | countdown: `3`, onFinish: `'show_result'` |
 
@@ -73,15 +73,15 @@ GameFlow ──→ gameflow:state(finished) ──→ ResultScreen
       "type": "Spawner",
       "params": {
         "items": [
-          { "asset": "fruit_apple", "weight": 1 },
-          { "asset": "fruit_banana", "weight": 1 },
-          { "asset": "fruit_orange", "weight": 1 }
+          { "asset": "star", "weight": 3 },
+          { "asset": "apple", "weight": 2 },
+          { "asset": "coin", "weight": 1 }
         ],
         "speed": { "min": 120, "max": 220 },
         "frequency": 1.5,
         "direction": "down",
         "maxCount": 8,
-        "spawnArea": { "x": 50, "y": 0, "width": 700, "height": 0 }
+        "spawnArea": { "x": 80, "y": 0, "width": 920, "height": 0 }
       }
     },
     {
@@ -96,9 +96,8 @@ GameFlow ──→ gameflow:state(finished) ──→ ResultScreen
       "type": "Scorer",
       "params": {
         "perHit": 10,
-        "combo": { "enabled": true, "window": 1000, "multiplier": [1, 1.5, 2, 3] },
-        "deductOnMiss": true,
-        "deductAmount": 5
+        "combo": { "enabled": true, "window": 1500, "multiplier": [1, 1.5, 2, 3] },
+        "deductOnMiss": false
       }
     },
     {
@@ -118,7 +117,8 @@ GameFlow ──→ gameflow:state(finished) ──→ ResultScreen
         "target": "spawner1",
         "mode": "time",
         "rules": [
-          { "every": 10, "field": "frequency", "decrease": 0.2, "min": 0.5 }
+          { "every": 10, "field": "frequency", "decrease": 0.2, "min": 0.5 },
+          { "every": 15, "field": "maxCount", "increase": 2, "max": 15 }
         ]
       }
     }

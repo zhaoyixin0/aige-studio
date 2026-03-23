@@ -2,12 +2,22 @@ import * as Switch from '@radix-ui/react-switch';
 import { Box } from 'lucide-react';
 import { useGameStore } from '@/store/game-store.ts';
 import { useEditorStore } from '@/store/editor-store.ts';
+import type { ModuleConfig } from '@/engine/core';
+
+const EMPTY_MODULES: ModuleConfig[] = [];
+
+/** Stable selectors — extracted to module scope so function references never change. */
+const selectModules = (s: { config: { modules: ModuleConfig[] } | null }) =>
+  s.config?.modules ?? EMPTY_MODULES;
+const selectToggleModule = (s: { toggleModule: (id: string) => void }) => s.toggleModule;
+const selectSelectedModuleId = (s: { selectedModuleId: string | null }) => s.selectedModuleId;
+const selectSelectModule = (s: { selectModule: (id: string | null) => void }) => s.selectModule;
 
 export function ModuleList() {
-  const modules = useGameStore((s) => s.config?.modules ?? []);
-  const toggleModule = useGameStore((s) => s.toggleModule);
-  const selectedModuleId = useEditorStore((s) => s.selectedModuleId);
-  const selectModule = useEditorStore((s) => s.selectModule);
+  const modules = useGameStore(selectModules);
+  const toggleModule = useGameStore(selectToggleModule);
+  const selectedModuleId = useEditorStore(selectSelectedModuleId);
+  const selectModule = useEditorStore(selectSelectModule);
 
   if (modules.length === 0) {
     return (

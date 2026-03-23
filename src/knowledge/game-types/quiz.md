@@ -15,7 +15,7 @@
 | TouchInput | input | gesture: `'tap'` |
 | QuizEngine | mechanic | timePerQuestion: `15`, scoring: `{ correct: 10, wrong: 0, timeBonus: true }` |
 | Scorer | mechanic | perHit: `10`（用于统一计分显示） |
-| Timer | mechanic | mode: `'countdown'`, duration: `120`（总时限，可选） |
+| Timer | mechanic | mode: `'countdown'`, duration: `60`（总时限，可选） |
 | GameFlow | feedback | countdown: `3`, onFinish: `'show_result'` |
 
 ## 推荐增强模块
@@ -72,14 +72,19 @@ quiz:finished ──→ GameFlow → finished
       "params": {
         "questions": [
           {
-            "text": "中国的首都是哪个城市？",
-            "options": ["上海", "北京", "广州", "深圳"],
-            "correctIndex": 1
+            "question": "1 + 1 = ?",
+            "options": ["2", "3", "4", "1"],
+            "correct": 0
           },
           {
-            "text": "1+1等于几？",
-            "options": ["1", "2", "3", "4"],
-            "correctIndex": 1
+            "question": "太阳从哪边升起？",
+            "options": ["东", "西", "南", "北"],
+            "correct": 0
+          },
+          {
+            "question": "地球上最大的海洋是？",
+            "options": ["太平洋", "大西洋", "印度洋", "北冰洋"],
+            "correct": 0
           }
         ],
         "timePerQuestion": 15,
@@ -92,6 +97,11 @@ quiz:finished ──→ GameFlow → finished
       "params": { "perHit": 10 }
     },
     {
+      "id": "timer1",
+      "type": "Timer",
+      "params": { "mode": "countdown", "duration": 60 }
+    },
+    {
       "id": "gameFlow1",
       "type": "GameFlow",
       "params": { "countdown": 3, "onFinish": "show_result" }
@@ -101,8 +111,7 @@ quiz:finished ──→ GameFlow → finished
       "type": "ResultScreen",
       "params": {
         "show": ["score", "accuracy"],
-        "rating": { "3star": 80, "2star": 50, "1star": 20 },
-        "actions": ["retry", "share"]
+        "rating": { "3star": 80, "2star": 50, "1star": 20 }
       }
     }
   ]

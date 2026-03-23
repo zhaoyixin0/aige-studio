@@ -13,7 +13,8 @@
 | 模块 | 类型 | 推荐参数 |
 |------|------|---------|
 | FaceInput | input | tracking: `'mouthOpen'`（或按需切换），smoothing: `0.2`, sensitivity: `1` |
-| Scorer | mechanic | perHit: `10` |
+| ExpressionDetector | mechanic | expressionType: `'smile'`, threshold: `0.6`, cooldown: `800` |
+| Scorer | mechanic | perHit: `10`, combo: `{ enabled: true, window: 2000, multiplier: [1, 1.5, 2] }` |
 | Timer | mechanic | mode: `'countdown'`, duration: `30` |
 | GameFlow | feedback | countdown: `3`, onFinish: `'show_result'` |
 
@@ -67,6 +68,11 @@ Timer → timer:end → GameFlow → finished → ResultScreen
       "params": { "tracking": "mouthOpen", "smoothing": 0.2, "sensitivity": 1 }
     },
     {
+      "id": "expressionDetector1",
+      "type": "ExpressionDetector",
+      "params": { "expressionType": "smile", "threshold": 0.6, "cooldown": 800 }
+    },
+    {
       "id": "scorer1",
       "type": "Scorer",
       "params": { "perHit": 10, "combo": { "enabled": true, "window": 2000, "multiplier": [1, 1.5, 2] } }
@@ -95,9 +101,8 @@ Timer → timer:end → GameFlow → finished → ResultScreen
       "id": "resultScreen1",
       "type": "ResultScreen",
       "params": {
-        "show": ["score"],
-        "rating": { "3star": 200, "2star": 100, "1star": 50 },
-        "actions": ["retry", "share"]
+        "show": ["score", "combo_max"],
+        "rating": { "3star": 200, "2star": 100, "1star": 30 }
       }
     }
   ]

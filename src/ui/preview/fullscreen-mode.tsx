@@ -1,5 +1,9 @@
 import { useEffect } from 'react';
 import { useEditorStore } from '@/store/editor-store.ts';
+import type { PreviewMode } from '@/store/editor-store.ts';
+
+/** Stable selector — extracted to module scope so function reference never changes. */
+const selectSetPreviewMode = (s: { setPreviewMode: (mode: PreviewMode) => void }) => s.setPreviewMode;
 
 /**
  * Manages browser Fullscreen API lifecycle.
@@ -10,7 +14,7 @@ import { useEditorStore } from '@/store/editor-store.ts';
  * (which the browser handles natively) correctly resets previewMode to 'edit'.
  */
 export function FullscreenMode() {
-  const setPreviewMode = useEditorStore((s) => s.setPreviewMode);
+  const setPreviewMode = useEditorStore(selectSetPreviewMode);
 
   useEffect(() => {
     const enter = async () => {

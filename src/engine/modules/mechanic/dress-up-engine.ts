@@ -38,7 +38,7 @@ export class DressUpEngine extends BaseModule {
       this.equipped.set(layer, []);
     }
 
-    this.on('touch:tap', (data?: any) => {
+    this.on('input:touch:tap', (data?: any) => {
       if (data?.layer && data?.itemId) {
         this.equip(data.layer, data.itemId);
       }

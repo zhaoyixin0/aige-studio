@@ -10,9 +10,13 @@ const modes: Array<{ mode: PreviewMode; icon: typeof Pencil; label: string }> = 
   { mode: 'fullscreen', icon: Maximize, label: 'Fullscreen' },
 ];
 
+/** Stable selectors — extracted to module scope so function references never change. */
+const selectPreviewMode = (s: { previewMode: PreviewMode }) => s.previewMode;
+const selectSetPreviewMode = (s: { setPreviewMode: (mode: PreviewMode) => void }) => s.setPreviewMode;
+
 export function PreviewToolbar() {
-  const previewMode = useEditorStore((s) => s.previewMode);
-  const setPreviewMode = useEditorStore((s) => s.setPreviewMode);
+  const previewMode = useEditorStore(selectPreviewMode);
+  const setPreviewMode = useEditorStore(selectSetPreviewMode);
   const [exportOpen, setExportOpen] = useState(false);
 
   return (

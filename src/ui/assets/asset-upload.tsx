@@ -23,10 +23,13 @@ interface UploadedFile {
   mimeType: string;
 }
 
+/** Stable selector — extracted to module scope so function reference never changes. */
+const selectAddAsset = (s: { addAsset: (assetId: string, entry: AssetEntry) => void }) => s.addAsset;
+
 export function AssetUpload() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploads, setUploads] = useState<UploadedFile[]>([]);
-  const addAsset = useGameStore((s) => s.addAsset);
+  const addAsset = useGameStore(selectAddAsset);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;

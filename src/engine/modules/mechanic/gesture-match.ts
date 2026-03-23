@@ -38,7 +38,7 @@ export class GestureMatch extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    this.on('hand:gesture', (data?: any) => {
+    this.on('input:hand:gesture', (data?: any) => {
       this.handleGesture(data);
     });
   }

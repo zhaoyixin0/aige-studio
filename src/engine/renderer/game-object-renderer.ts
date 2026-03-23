@@ -3,6 +3,7 @@ import type { Engine } from '@/engine/core/engine';
 import type { Spawner } from '@/engine/modules/mechanic/spawner';
 import type { FaceInput } from '@/engine/modules/input/face-input';
 import type { HandInput } from '@/engine/modules/input/hand-input';
+import type { TouchInput } from '@/engine/modules/input/touch-input';
 import type { Collision } from '@/engine/modules/mechanic/collision';
 
 export class GameObjectRenderer {
@@ -21,6 +22,7 @@ export class GameObjectRenderer {
 
   private syncSpawnedObjects(engine: Engine): void {
     const spawners = engine.getModulesByType('Spawner');
+    const collision = engine.getModulesByType('Collision')[0] as Collision | undefined;
     const activeIds = new Set<string>();
 
     for (const spawner of spawners) {
@@ -37,6 +39,11 @@ export class GameObjectRenderer {
         sprite.x = obj.x;
         sprite.y = obj.y;
         sprite.rotation = obj.rotation ?? 0;
+
+        // Sync collision position for spawned objects
+        if (collision) {
+          collision.updateObject(obj.id, { x: obj.x, y: obj.y });
+        }
       }
     }
 
@@ -51,27 +58,63 @@ export class GameObjectRenderer {
   }
 
   private syncPlayer(engine: Engine): void {
-    // Try FaceInput first, then HandInput
+    // Try FaceInput, HandInput, then TouchInput
     const faceInput = engine.getModulesByType('FaceInput')[0] as FaceInput | undefined;
     const handInput = engine.getModulesByType('HandInput')[0] as HandInput | undefined;
-    const input = faceInput ?? handInput;
+    const touchInput = engine.getModulesByType('TouchInput')[0] as TouchInput | undefined;
 
-    if (input) {
-      const pos = input.getPosition();
+    let pos: { x: number; y: number } | null = null;
+
+    if (faceInput) {
+      pos = faceInput.getPosition();
+    } else if (handInput) {
+      pos = handInput.getPosition();
+    } else if (touchInput) {
+      pos = touchInput.getPosition();
       if (pos) {
-        if (!this.playerSprite) {
-          this.playerSprite = new Graphics();
-          this.playerSprite.circle(0, 0, 40).fill({ color: 0x00ff88 });
-          this.container.addChild(this.playerSprite);
+        // Check if this is a catch game (has spawner with moving objects) or tap game (stationary objects)
+        const spawner = engine.getModulesByType('Spawner')[0] as Spawner | undefined;
+        const isTapGame = spawner && (spawner.getParams().speed?.max === 0 || spawner.getParams().speed?.min === 0 && spawner.getParams().speed?.max === 0);
+        if (!isTapGame) {
+          // Catch/dodge: lock player to bottom of screen
+          const canvas = engine.getCanvas();
+          pos = { x: pos.x, y: canvas.height * 0.85 };
         }
-        this.playerSprite.x = pos.x;
-        this.playerSprite.y = pos.y;
+        // Tap game: player follows pointer exactly (acts as cursor)
+      }
+    }
 
-        // Sync collision
+    if (pos) {
+      // Determine if tap game for different visual/collision
+      const spawner = engine.getModulesByType('Spawner')[0] as Spawner | undefined;
+      const isTapStyle = spawner && spawner.getParams().speed?.max === 0;
+      const playerRadius = isTapStyle ? 30 : 40;
+
+      if (!this.playerSprite) {
+        this.playerSprite = new Graphics();
+        if (isTapStyle) {
+          // Crosshair style for tap games
+          this.playerSprite.circle(0, 0, 25).stroke({ color: 0x00ff88, width: 3 });
+          this.playerSprite.moveTo(-15, 0).lineTo(15, 0).stroke({ color: 0x00ff88, width: 2 });
+          this.playerSprite.moveTo(0, -15).lineTo(0, 15).stroke({ color: 0x00ff88, width: 2 });
+        } else {
+          this.playerSprite.circle(0, 0, 40).fill({ color: 0x00ff88 });
+        }
+        this.container.addChild(this.playerSprite);
+
+        // Register player in collision system
         const collision = engine.getModulesByType('Collision')[0] as Collision | undefined;
         if (collision) {
-          collision.updateObject('player_1', pos);
+          collision.registerObject('player_1', 'player', { x: pos.x, y: pos.y, radius: playerRadius });
         }
+      }
+      this.playerSprite.x = pos.x;
+      this.playerSprite.y = pos.y;
+
+      // Sync collision position
+      const collision = engine.getModulesByType('Collision')[0] as Collision | undefined;
+      if (collision) {
+        collision.updateObject('player_1', pos);
       }
     }
   }

@@ -8,6 +8,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@mediapipe/tasks-vision': path.resolve(
+        __dirname,
+        'node_modules/@mediapipe/tasks-vision/vision_bundle.mjs',
+      ),
     },
   },
 });

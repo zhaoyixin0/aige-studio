@@ -13,7 +13,7 @@
 | 模块 | 类型 | 推荐参数 |
 |------|------|---------|
 | TouchInput | input | gesture: `'tap'` |
-| Spawner | mechanic | direction: `'down'`, frequency: `1.0`, speed: `{ min: 50, max: 100 }`, maxCount: `8` |
+| Spawner | mechanic | direction: `'down'`, frequency: `1.0`, speed: `{ min: 0, max: 0 }`, maxCount: `8`, spawnArea: `{ x: 80, y: 150, width: 920, height: 1500 }` |
 | Scorer | mechanic | perHit: `10`, combo: `{ enabled: true, window: 800, multiplier: [1, 1.5, 2, 3] }` |
 | Timer | mechanic | mode: `'countdown'`, duration: `30` |
 | GameFlow | feedback | countdown: `3`, onFinish: `'show_result'` |
@@ -69,22 +69,22 @@ Timer ──→ timer:end ──→ GameFlow → finished → ResultScreen
       "type": "Spawner",
       "params": {
         "items": [
-          { "asset": "bubble_red", "weight": 1 },
-          { "asset": "bubble_blue", "weight": 1 },
-          { "asset": "bubble_gold", "weight": 0.5 }
+          { "asset": "bubble_red", "weight": 2 },
+          { "asset": "bubble_blue", "weight": 2 },
+          { "asset": "bubble_gold", "weight": 1 }
         ],
-        "speed": { "min": 50, "max": 100 },
+        "speed": { "min": 0, "max": 0 },
         "frequency": 1.0,
         "direction": "down",
         "maxCount": 8,
-        "spawnArea": { "x": 50, "y": 0, "width": 700, "height": 0 }
+        "spawnArea": { "x": 80, "y": 150, "width": 920, "height": 1500 }
       }
     },
     {
       "id": "collision1",
       "type": "Collision",
       "params": {
-        "rules": [{ "a": "tap", "b": "targets", "event": "hit", "destroy": ["b"] }]
+        "rules": [{ "a": "player", "b": "items", "event": "hit", "destroy": ["b"] }]
       }
     },
     {

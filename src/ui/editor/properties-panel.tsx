@@ -4,11 +4,17 @@ import { useEditorStore } from '@/store/editor-store.ts';
 import { useGameStore } from '@/store/game-store.ts';
 import { SchemaRenderer } from './schema-renderer.tsx';
 import { useEngineContext } from '@/app/hooks/use-engine.ts';
+import type { GameConfig } from '@/engine/core';
+
+/** Stable selectors — extracted to module scope so function references never change. */
+const selectSelectedModuleId = (s: { selectedModuleId: string | null }) => s.selectedModuleId;
+const selectConfig = (s: { config: GameConfig | null }) => s.config;
+const selectUpdateModuleParam = (s: { updateModuleParam: (moduleId: string, param: string, value: unknown) => void }) => s.updateModuleParam;
 
 export function PropertiesPanel() {
-  const selectedModuleId = useEditorStore((s) => s.selectedModuleId);
-  const config = useGameStore((s) => s.config);
-  const updateModuleParam = useGameStore((s) => s.updateModuleParam);
+  const selectedModuleId = useEditorStore(selectSelectedModuleId);
+  const config = useGameStore(selectConfig);
+  const updateModuleParam = useGameStore(selectUpdateModuleParam);
   const { engineRef, getModuleSchema, ready } = useEngineContext();
 
   // Get live schema from the running engine module

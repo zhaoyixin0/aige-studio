@@ -13,7 +13,7 @@
 | 模块 | 类型 | 推荐参数 |
 |------|------|---------|
 | TouchInput | input | gesture: `'swipe'`（或 tap 用于跳跃） |
-| Spawner | mechanic | direction: `'left'`（从右向左滚动），frequency: `1.0`, speed: `{ min: 200, max: 300 }` |
+| Spawner | mechanic | direction: `'left'`（从右向左滚动），frequency: `1.0`, speed: `{ min: 200, max: 300 }`, maxCount: `10`, spawnArea: `{ x: 1080, y: 200, width: 0, height: 1400 }` |
 | Collision | mechanic | rules: 见下方双规则 |
 | Scorer | mechanic | perHit: `5`（收集金币得分） |
 | DifficultyRamp | mechanic | 随时间增加 speed 和降低 frequency |
@@ -83,14 +83,14 @@ ResultScreen
       "type": "Spawner",
       "params": {
         "items": [
-          { "asset": "obstacle_box", "weight": 2 },
-          { "asset": "obstacle_spike", "weight": 1 },
-          { "asset": "coin_gold", "weight": 3 }
+          { "asset": "obstacle", "weight": 2 },
+          { "asset": "coin", "weight": 3 }
         ],
         "speed": { "min": 200, "max": 300 },
         "frequency": 1.0,
         "direction": "left",
-        "maxCount": 10
+        "maxCount": 10,
+        "spawnArea": { "x": 1080, "y": 200, "width": 0, "height": 1400 }
       }
     },
     {
@@ -98,8 +98,7 @@ ResultScreen
       "type": "Collision",
       "params": {
         "rules": [
-          { "a": "player", "b": "obstacles", "event": "damage" },
-          { "a": "player", "b": "coins", "event": "hit", "destroy": ["b"] }
+          { "a": "player", "b": "items", "event": "hit", "destroy": ["b"] }
         ]
       }
     },
@@ -121,7 +120,7 @@ ResultScreen
         "mode": "time",
         "rules": [
           { "every": 8, "field": "frequency", "decrease": 0.1, "min": 0.4 },
-          { "every": 10, "field": "speed", "increase": 25, "max": 500 }
+          { "every": 10, "field": "maxCount", "increase": 2, "max": 15 }
         ]
       }
     },

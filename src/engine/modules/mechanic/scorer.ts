@@ -92,7 +92,7 @@ export class Scorer extends BaseModule {
     });
 
     if (this.comboCount >= 3) {
-      this.emit(`scorer:combo:${this.comboCount}`);
+      this.emit(`scorer:combo:${this.comboCount}`, { combo: this.comboCount });
     }
   }
 

@@ -41,7 +41,7 @@ export class Runner extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    this.on('touch:swipe', (data?: any) => {
+    this.on('input:touch:swipe', (data?: any) => {
       this.handleSwipe(data);
     });
   }

@@ -46,6 +46,12 @@ const FILTER_TABS: { value: FilterType; label: string; icon: typeof Grid3X3 }[] 
   { value: 'background', label: 'Backgrounds', icon: Palette },
 ];
 
+const EMPTY_ASSETS: Record<string, AssetEntry> = {};
+
+/** Stable selector — extracted to module scope so the function reference never changes. */
+const selectAssets = (s: { config: { assets: Record<string, AssetEntry> } | null }) =>
+  s.config?.assets ?? EMPTY_ASSETS;
+
 interface AssetBrowserProps {
   onSelect?: (assetId: string, src: string) => void;
 }
@@ -54,7 +60,7 @@ export function AssetBrowser({ onSelect }: AssetBrowserProps) {
   const [filter, setFilter] = useState<FilterType>('all');
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const storeAssets = useGameStore((s) => s.config?.assets ?? {});
+  const storeAssets = useGameStore(selectAssets);
 
   const allAssets = useMemo(() => {
     const prebuilt = PREBUILT_ASSETS.map(prebuiltToDisplay);

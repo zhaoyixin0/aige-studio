@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 import { Engine } from '@/engine/core/engine.ts';
 import { ConfigLoader } from '@/engine/core/config-loader.ts';
@@ -9,7 +9,7 @@ import type { GameConfig, ModuleSchema } from '@/engine/core/types.ts';
 // --- Engine Context ---
 
 export interface EngineContextValue {
-  engineRef: RefObject<Engine | null>;
+  engineRef: RefObject<Engine>;
   rendererRef: RefObject<PixiRenderer | null>;
   /** Callback ref — pass to the mount div in PreviewCanvas */
   setMountEl: (el: HTMLDivElement | null) => void;
@@ -39,10 +39,15 @@ const CANVAS_HEIGHT = 1920;
  * When the mount element appears, the PixiRenderer is initialised asynchronously.
  */
 export function useEngine() {
-  const engineRef = useRef<Engine>(new Engine());
+  const engineRef = useRef<Engine | null>(null);
   const rendererRef = useRef<PixiRenderer | null>(null);
-  const registryRef = useRef(createModuleRegistry());
-  const loaderRef = useRef(new ConfigLoader(registryRef.current));
+  const registryRef = useRef<ReturnType<typeof createModuleRegistry> | null>(null);
+  const loaderRef = useRef<ConfigLoader | null>(null);
+
+  // Lazy initialization to avoid creating throwaway objects on re-render
+  if (!engineRef.current) engineRef.current = new Engine();
+  if (!registryRef.current) registryRef.current = createModuleRegistry();
+  if (!loaderRef.current) loaderRef.current = new ConfigLoader(registryRef.current);
   const canvasElRef = useRef<HTMLCanvasElement | null>(null);
   const mountElRef = useRef<HTMLDivElement | null>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
@@ -63,10 +68,11 @@ export function useEngine() {
       return;
     }
 
-    // Create <canvas> and append to mount div
+    // Create <canvas> and append to mount div, scaled to fit container
     const canvas = document.createElement('canvas');
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
+    canvas.style.maxWidth = '100%';
+    canvas.style.maxHeight = '100%';
+    canvas.style.objectFit = 'contain';
     canvas.style.display = 'block';
     el.appendChild(canvas);
     canvasElRef.current = canvas;
@@ -77,7 +83,7 @@ export function useEngine() {
 
     let disposed = false;
 
-    renderer
+    const initPromise = renderer
       .init(canvas, CANVAS_WIDTH, CANVAS_HEIGHT)
       .then(() => {
         if (!disposed) setReady(true);
@@ -89,8 +95,15 @@ export function useEngine() {
     // Register cleanup for when mount element is removed or changed
     cleanupRef.current = () => {
       disposed = true;
-      engineRef.current.stop();
-      renderer.destroy();
+      engineRef.current?.stop();
+
+      // If init is still pending, wait for it to complete before destroying.
+      // This prevents leaking a WebGL context when destroy() is a no-op
+      // because `initialized` hasn't been set yet.
+      initPromise.then(() => {
+        renderer.destroy();
+      });
+
       if (el.contains(canvas)) {
         el.removeChild(canvas);
       }
@@ -122,12 +135,17 @@ export function useEngine() {
     return mod ? mod.getSchema() : null;
   }, []);
 
-  return {
-    engineRef,
-    rendererRef,
-    setMountEl,
-    loadConfig,
-    getModuleSchema,
-    ready,
-  };
+  return useMemo(
+    () => ({
+      engineRef,
+      rendererRef,
+      setMountEl,
+      loadConfig,
+      getModuleSchema,
+      ready,
+    }),
+    // engineRef, rendererRef are stable refs; setMountEl, loadConfig,
+    // getModuleSchema are stable useCallback values. Only `ready` changes.
+    [engineRef, rendererRef, setMountEl, loadConfig, getModuleSchema, ready],
+  );
 }

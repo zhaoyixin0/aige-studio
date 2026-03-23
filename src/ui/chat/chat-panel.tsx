@@ -45,15 +45,15 @@ export function ChatPanel() {
   const setConfig = useGameStore(selectSetConfig);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [welcomeShown, setWelcomeShown] = useState(false);
+  const welcomeShownRef = useRef(false);
 
   // Show welcome message on first render if chat is empty
   useEffect(() => {
-    if (!welcomeShown && chatMessages.length === 0) {
+    if (!welcomeShownRef.current && chatMessages.length === 0) {
+      welcomeShownRef.current = true;
       addChatMessage(WELCOME_MESSAGE);
-      setWelcomeShown(true);
     }
-  }, [welcomeShown, chatMessages.length, addChatMessage]);
+  }, [chatMessages.length, addChatMessage]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

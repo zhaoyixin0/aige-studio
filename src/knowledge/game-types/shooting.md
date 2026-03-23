@@ -13,7 +13,7 @@
 | 模块 | 类型 | 推荐参数 |
 |------|------|---------|
 | FaceInput 或 TouchInput | input | FaceInput: tracking: `'headXY'`, smoothing: `0.2`; TouchInput: gesture: `'tap'` |
-| Spawner | mechanic | direction: `'random'`, frequency: `1.0`, speed: `{ min: 80, max: 180 }` |
+| Spawner | mechanic | direction: `'random'`, frequency: `1.0`, speed: `{ min: 80, max: 180 }`, maxCount: `6`, spawnArea: `{ x: 50, y: 50, width: 980, height: 1600 }` |
 | Collision | mechanic | rules: `[{ a: 'crosshair', b: 'targets', event: 'hit', destroy: ['b'] }]` |
 | Scorer | mechanic | perHit: `10`, combo: `{ enabled: true, window: 1200, multiplier: [1, 1.5, 2] }` |
 | GameFlow | feedback | countdown: `3`, onFinish: `'show_result'` |
@@ -67,7 +67,7 @@ Timer → timer:end → GameFlow → finished → ResultScreen
     {
       "id": "faceInput1",
       "type": "FaceInput",
-      "params": { "tracking": "headXY", "smoothing": 0.2, "sensitivity": 1.2 }
+      "params": { "tracking": "headXY", "smoothing": 0.2, "sensitivity": 1.0 }
     },
     {
       "id": "spawner1",
@@ -81,7 +81,8 @@ Timer → timer:end → GameFlow → finished → ResultScreen
         "speed": { "min": 80, "max": 180 },
         "frequency": 1.0,
         "direction": "random",
-        "maxCount": 6
+        "maxCount": 6,
+        "spawnArea": { "x": 50, "y": 50, "width": 980, "height": 1600 }
       }
     },
     {
@@ -103,6 +104,11 @@ Timer → timer:end → GameFlow → finished → ResultScreen
       "id": "timer1",
       "type": "Timer",
       "params": { "mode": "countdown", "duration": 30 }
+    },
+    {
+      "id": "lives1",
+      "type": "Lives",
+      "params": { "count": 5 }
     },
     {
       "id": "gameFlow1",

@@ -10,6 +10,7 @@ export class PixiRenderer {
   private hudLayer = new Container();
   private gameObjectRenderer: GameObjectRenderer | null = null;
   private hudRenderer: HudRenderer | null = null;
+  private initialized = false;
 
   constructor() {
     this.app = new Application();
@@ -23,12 +24,14 @@ export class PixiRenderer {
       backgroundColor: 0x111827,
       antialias: true,
     });
+    this.initialized = true;
     this.app.stage.addChild(this.cameraLayer, this.gameLayer, this.hudLayer);
     this.gameObjectRenderer = new GameObjectRenderer(this.gameLayer);
     this.hudRenderer = new HudRenderer(this.hudLayer, width, height);
   }
 
   render(engine: Engine): void {
+    if (!this.initialized) return;
     this.gameObjectRenderer?.sync(engine);
     this.hudRenderer?.sync(engine);
   }
@@ -46,10 +49,19 @@ export class PixiRenderer {
   }
 
   resize(width: number, height: number): void {
+    if (!this.initialized) return;
     this.app.renderer.resize(width, height);
   }
 
   destroy(): void {
-    this.app.destroy(true);
+    if (!this.initialized) return;
+    this.initialized = false;
+    this.gameObjectRenderer = null;
+    this.hudRenderer = null;
+    try {
+      this.app.destroy(true);
+    } catch {
+      // App may have been partially torn down already
+    }
   }
 }

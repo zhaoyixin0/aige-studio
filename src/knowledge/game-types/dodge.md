@@ -13,7 +13,7 @@
 | 模块 | 类型 | 推荐参数 |
 |------|------|---------|
 | FaceInput | input | tracking: `'headXY'`, smoothing: `0.25`, sensitivity: `1.2` |
-| Spawner | mechanic | direction: `'down'`（或 `'random'`）, frequency: `1.2`, speed: `{ min: 150, max: 280 }` |
+| Spawner | mechanic | direction: `'down'`（或 `'random'`）, frequency: `1.2`, speed: `{ min: 150, max: 280 }`, maxCount: `10` |
 | Collision | mechanic | rules: `[{ a: 'player', b: 'obstacles', event: 'damage' }]` |
 | Lives | mechanic | count: `3`, onZero: `'finish'` |
 | Timer | mechanic | mode: `'countdown'`, duration: `30` |
@@ -73,27 +73,32 @@ Timer ──→ timer:end ──→ GameFlow → finished
       "type": "Spawner",
       "params": {
         "items": [
-          { "asset": "obstacle_rock", "weight": 2 },
-          { "asset": "obstacle_bomb", "weight": 1 }
+          { "asset": "meteor", "weight": 2 },
+          { "asset": "bomb", "weight": 1 }
         ],
         "speed": { "min": 150, "max": 280 },
         "frequency": 1.2,
         "direction": "down",
-        "maxCount": 12,
-        "spawnArea": { "x": 0, "y": 0, "width": 800, "height": 0 }
+        "maxCount": 10,
+        "spawnArea": { "x": 50, "y": 0, "width": 980, "height": 0 }
       }
     },
     {
       "id": "collision1",
       "type": "Collision",
       "params": {
-        "rules": [{ "a": "player", "b": "obstacles", "event": "damage" }]
+        "rules": [{ "a": "player", "b": "items", "event": "damage", "destroy": ["b"] }]
       }
+    },
+    {
+      "id": "scorer1",
+      "type": "Scorer",
+      "params": { "perHit": 5 }
     },
     {
       "id": "lives1",
       "type": "Lives",
-      "params": { "count": 3, "events": { "damage": -1 }, "onZero": "finish" }
+      "params": { "count": 3, "onZero": "finish" }
     },
     {
       "id": "timer1",
@@ -113,7 +118,7 @@ Timer ──→ timer:end ──→ GameFlow → finished
         "mode": "time",
         "rules": [
           { "every": 8, "field": "frequency", "decrease": 0.15, "min": 0.4 },
-          { "every": 12, "field": "speed", "increase": 30, "max": 450 }
+          { "every": 12, "field": "maxCount", "increase": 2, "max": 18 }
         ]
       }
     }

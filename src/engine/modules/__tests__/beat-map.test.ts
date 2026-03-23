@@ -41,7 +41,7 @@ describe('BeatMap', () => {
 
     // Advance time to 450ms then tap
     beatMap.update(450);
-    engine.eventBus.emit('touch:tap');
+    engine.eventBus.emit('input:touch:tap');
     beatMap.update(16); // process the input
 
     expect(hitHandler).toHaveBeenCalledWith(
