@@ -8,6 +8,8 @@ import type { ExpressionDetector } from '@/engine/modules/mechanic/expression-de
 import type { MatchEngine } from '@/engine/modules/mechanic/match-engine';
 import type { DressUpEngine } from '@/engine/modules/mechanic/dress-up-engine';
 import type { BranchStateMachine } from '@/engine/modules/mechanic/branch-state-machine';
+import type { GameFlow } from '@/engine/modules/feedback/game-flow';
+import type { ResultScreen } from '@/engine/modules/feedback/result-screen';
 
 const GESTURE_EMOJI: Record<string, string> = {
   thumbs_up: '\uD83D\uDC4D',
@@ -94,6 +96,15 @@ export class HudRenderer {
   private narrativeChoiceTexts: Text[] = [];
   private narrativeChoiceBgs: Graphics[] = [];
   private narrativeEndText!: Text;
+
+  // Result screen overlay
+  private resultContainer: Container;
+  private resultBg!: Graphics;
+  private resultTitleText!: Text;
+  private resultScoreText!: Text;
+  private resultStarsText!: Text;
+  private resultTimeText!: Text;
+  private resultHintText!: Text;
 
   private width: number;
   private height: number;
@@ -235,6 +246,9 @@ export class HudRenderer {
     // Narrative container
     this.narrativeContainer = this.buildNarrativeContainer();
 
+    // Result screen overlay
+    this.resultContainer = this.buildResultContainer();
+
     container.addChild(
       this.scoreText,
       this.timerText,
@@ -247,6 +261,7 @@ export class HudRenderer {
       this.puzzleContainer,
       this.dressUpContainer,
       this.narrativeContainer,
+      this.resultContainer,
     );
   }
 
@@ -631,6 +646,9 @@ export class HudRenderer {
 
     // Narrative rendering
     this.syncNarrative(engine);
+
+    // Result screen overlay (must be last — renders on top)
+    this.syncResult(engine);
   }
 
   // ── Expression sync ─────────────────────────────────────────
@@ -895,6 +913,97 @@ export class HudRenderer {
       }
     } else {
       this.narrativeContainer.visible = false;
+    }
+  }
+
+  // ── Result screen ──────────────────────────────────────────
+
+  private buildResultContainer(): Container {
+    const c = new Container();
+    c.visible = false;
+
+    this.resultBg = new Graphics();
+    this.resultBg.rect(0, 0, this.width, this.height);
+    this.resultBg.fill({ color: 0x000000, alpha: 0.75 });
+
+    this.resultTitleText = new Text({
+      text: '\u{1F3AE} \u6E38\u620F\u7ED3\u675F',
+      style: new TextStyle({
+        fill: '#ffffff', fontSize: 52, fontFamily: 'Arial', fontWeight: 'bold', align: 'center',
+      }),
+    });
+    this.resultTitleText.anchor.set(0.5);
+    this.resultTitleText.position.set(this.width / 2, this.height * 0.25);
+
+    this.resultStarsText = new Text({
+      text: '',
+      style: new TextStyle({
+        fill: '#FFD700', fontSize: 64, fontFamily: 'Arial', align: 'center',
+      }),
+    });
+    this.resultStarsText.anchor.set(0.5);
+    this.resultStarsText.position.set(this.width / 2, this.height * 0.35);
+
+    this.resultScoreText = new Text({
+      text: '',
+      style: new TextStyle({
+        fill: '#ffffff', fontSize: 44, fontFamily: 'Arial', fontWeight: 'bold', align: 'center',
+      }),
+    });
+    this.resultScoreText.anchor.set(0.5);
+    this.resultScoreText.position.set(this.width / 2, this.height * 0.48);
+
+    this.resultTimeText = new Text({
+      text: '',
+      style: new TextStyle({
+        fill: '#00d4ff', fontSize: 32, fontFamily: 'Arial', align: 'center',
+      }),
+    });
+    this.resultTimeText.anchor.set(0.5);
+    this.resultTimeText.position.set(this.width / 2, this.height * 0.57);
+
+    this.resultHintText = new Text({
+      text: '\u70B9\u51FB\u5C4F\u5E55\u91CD\u65B0\u5F00\u59CB',
+      style: new TextStyle({
+        fill: '#aaaaaa', fontSize: 24, fontFamily: 'Arial', align: 'center',
+      }),
+    });
+    this.resultHintText.anchor.set(0.5);
+    this.resultHintText.position.set(this.width / 2, this.height * 0.72);
+
+    c.addChild(this.resultBg, this.resultTitleText, this.resultStarsText, this.resultScoreText, this.resultTimeText, this.resultHintText);
+    return c;
+  }
+
+  private syncResult(engine: Engine): void {
+    const gameFlow = engine.getModulesByType('GameFlow')[0] as GameFlow | undefined;
+    if (!gameFlow || gameFlow.getState() !== 'finished') {
+      this.resultContainer.visible = false;
+      return;
+    }
+
+    this.resultContainer.visible = true;
+
+    const resultScreen = engine.getModulesByType('ResultScreen')[0] as ResultScreen | undefined;
+    if (resultScreen) {
+      const results = resultScreen.getResults();
+      const score = results.stats.score ?? 0;
+      const time = results.stats.time;
+      const stars = results.starRating;
+
+      this.resultScoreText.text = `\u2b50 \u5F97\u5206: ${score}`;
+      this.resultStarsText.text = '\u2B50'.repeat(stars) + '\u2606'.repeat(Math.max(0, 3 - stars));
+      this.resultTimeText.text = time != null ? `\u23f1 \u7528\u65f6: ${Math.ceil(time)}s` : '';
+    } else {
+      // Fallback: read score directly from Scorer module
+      const scorers = engine.getModulesByType('Scorer');
+      if (scorers.length > 0) {
+        const scorer = scorers[0] as any;
+        const score = scorer.getScore?.() ?? 0;
+        this.resultScoreText.text = `\u2b50 \u5F97\u5206: ${score}`;
+      }
+      this.resultStarsText.text = '';
+      this.resultTimeText.text = '';
     }
   }
 

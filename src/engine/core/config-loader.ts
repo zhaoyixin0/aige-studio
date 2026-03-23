@@ -46,6 +46,12 @@ export class ConfigLoader {
     }
 
     AutoWirer.wire(engine);
+
+    // Auto-start GameFlow if present
+    const gameFlows = engine.getModulesByType('GameFlow');
+    if (gameFlows.length > 0) {
+      (gameFlows[0] as any).transition('countdown');
+    }
   }
 
   /**
