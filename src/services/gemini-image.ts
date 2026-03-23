@@ -17,9 +17,26 @@ export class GeminiImageService {
     this.apiKey = apiKey;
   }
 
+  /**
+   * Generate an image with style hints injected into the prompt.
+   * Used by the manual AI generate dialog.
+   */
   async generateImage(prompt: string, style: ImageStyle = 'cartoon'): Promise<string> {
     const styleHint = STYLE_PROMPTS[style];
+    const fullPrompt = `Generate a game sprite asset: ${prompt}. Make it a simple, clean icon suitable for a mobile game. Transparent or solid color background. ${styleHint}`;
+    return this.callGeminiAPI(fullPrompt);
+  }
 
+  /**
+   * Send a prompt as-is without adding style hints.
+   * Used by AssetAgent with PromptBuilder's complete prompt to avoid double styling.
+   */
+  async generateImageRaw(prompt: string): Promise<string> {
+    return this.callGeminiAPI(prompt);
+  }
+
+  /** Shared API call logic */
+  private async callGeminiAPI(promptText: string): Promise<string> {
     const response = await fetch(`${GEMINI_ENDPOINT}?key=${this.apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -28,7 +45,7 @@ export class GeminiImageService {
           {
             parts: [
               {
-                text: `Generate a game sprite asset: ${prompt}. Make it a simple, clean icon suitable for a mobile game. Transparent or solid color background. ${styleHint}`,
+                text: promptText,
               },
             ],
           },
