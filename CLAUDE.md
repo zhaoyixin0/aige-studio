@@ -38,7 +38,7 @@ Export (Web HTML / .apjs)
 
 ### Engine Core
 - `src/engine/core/` — Engine, EventBus, ConfigLoader, AutoWirer, types
-- `src/engine/modules/` — 30 game modules (6 input, 13 mechanic, 5 feedback, 11 extended)
+- `src/engine/modules/` — 46 game modules (6 input, 13 mechanic, 5 feedback, 11 extended, 16 platformer batch 1)
 - `src/engine/renderer/` — PixiJS rendering (emoji themes, particles, float text, sound synth, HUD)
 - `src/engine/tracking/` — MediaPipe wrappers (face, hand, body)
 
@@ -79,8 +79,8 @@ Export (Web HTML / .apjs)
 - `src/exporters/web-exporter.ts` — Standalone HTML game export
 - `src/exporters/apjs-exporter.ts` — Effect House .apjs export
 
-## 14 Game Types
-catch, dodge, tap, shooting, quiz, random-wheel, expression, runner, gesture, rhythm, puzzle, dress-up, world-ar, narrative
+## 15 Game Types
+catch, dodge, tap, shooting, quiz, random-wheel, expression, runner, gesture, rhythm, puzzle, dress-up, world-ar, narrative, platformer
 
 ## 5 Emoji Themes
 fruit (🧺🍎💣), space (🚀⭐☄️), ocean (🐠🐚🦈), halloween (🎃🍬👻), candy (🤖🍩🌶️)
@@ -102,7 +102,7 @@ Wizard and Mode B work WITHOUT any API keys.
 npm run dev          # Dev server
 npm run dev -- --host  # Dev server + LAN access
 npm run build        # Production build
-npx vitest run       # Run all tests (390+)
+npx vitest run       # Run all tests (535+)
 npx tsc --noEmit     # Type check
 ```
 
@@ -112,11 +112,13 @@ npx tsc --noEmit     # Type check
 - `docs/plans/2026-03-22-game-params-calibration.md` — Market calibration plan
 - `docs/plans/2026-03-22-v1-v2-merge.md` — V1 visual merge plan
 - `docs/plans/2026-03-22-asset-agent.md` — Asset Agent plan
+- `docs/plans/2026-03-23-module-expansion-design.md` — Platformer module expansion design
+- `docs/plans/2026-03-23-module-expansion-implementation.md` — 19-task implementation plan
 
 ## V1 Reference
 Previous prototype at `C:\Users\yixin\Downloads\secret demo\index.html` — single-file Canvas 2D engine with 22 modules, 5 emoji themes, particle effects, Web Audio sound synthesis. V1's visual expressiveness was merged into V2.
 
-## Development History (2026-03-22)
+## Development History
 1. Project scaffolding (Vite + React + TS + Tailwind)
 2. Engine core (EventBus, Engine, ModuleRegistry, AutoWirer, ConfigLoader)
 3. 19 base modules (input, mechanic, feedback)
@@ -135,6 +137,11 @@ Previous prototype at `C:\Users\yixin\Downloads\secret demo\index.html` — sing
 16. Asset Agent (auto search → Imagen 4 generate → bg removal → resize → save to IndexedDB)
 17. Live sprite/player size adjustment sliders
 18. Vercel deployment + GitHub CI
+
+### 2026-03-23
+19. 16 platformer modules (Gravity, Knockback, IFrames, PlayerMovement, Dash, CoyoteTime, StaticPlatform, MovingPlatform, OneWayPlatform, CrumblingPlatform, Hazard, Collectible, Inventory, Checkpoint, WallDetect, CameraFollow)
+20. Platformer game type preset + integration tests
+21. Auto-wirer expansion (Collectible+Collision wiring)
 
 ## Known Issues / Next Steps
 - Background removal is slow (~10-30s/image, single-threaded WASM)
