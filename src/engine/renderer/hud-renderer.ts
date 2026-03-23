@@ -968,10 +968,6 @@ export class HudRenderer {
     this.startHintText.anchor.set(0.5);
     this.startHintText.position.set(this.width / 2, this.height * 0.6);
 
-    // Make the whole container clickable
-    this.startBg.eventMode = 'static';
-    this.startBg.cursor = 'pointer';
-
     c.addChild(this.startBg, this.startTitleText, this.startGameNameText, this.startHintText);
     return c;
   }
@@ -990,13 +986,6 @@ export class HudRenderer {
       // Show game name from config
       const config = engine.getConfig();
       this.startGameNameText.text = config.meta?.name || '\u65B0\u6E38\u620F';
-
-      // Wire click handler (only once)
-      if (!this.startBg.listenerCount('pointertap')) {
-        this.startBg.on('pointertap', () => {
-          gameFlow.transition('countdown');
-        });
-      }
     } else {
       this.startContainer.visible = false;
     }
@@ -1057,10 +1046,6 @@ export class HudRenderer {
     this.resultHintText.anchor.set(0.5);
     this.resultHintText.position.set(this.width / 2, this.height * 0.72);
 
-    // Make result screen clickable for restart
-    this.resultBg.eventMode = 'static';
-    this.resultBg.cursor = 'pointer';
-
     c.addChild(this.resultBg, this.resultTitleText, this.resultStarsText, this.resultScoreText, this.resultTimeText, this.resultHintText);
     return c;
   }
@@ -1073,17 +1058,6 @@ export class HudRenderer {
     }
 
     this.resultContainer.visible = true;
-
-    // Wire restart click (only once)
-    if (!this.resultBg.listenerCount('pointertap')) {
-      this.resultBg.on('pointertap', () => {
-        // Reset all modules and restart
-        for (const mod of engine.getAllModules()) {
-          (mod as any).reset?.();
-        }
-        gameFlow.transition('countdown');
-      });
-    }
 
     const resultScreen = engine.getModulesByType('ResultScreen')[0] as ResultScreen | undefined;
     if (resultScreen) {
