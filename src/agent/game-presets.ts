@@ -197,11 +197,11 @@ const PRESETS: Record<GameType, GamePreset> = {
     GameFlow:     { countdown: 3, onFinish: 'show_result' },
     QuizEngine:   {
       questions: [
-        { question: '世界上最大的海洋是？', options: ['太平洋', '大西洋', '印度洋', '北冰洋'], correct: 0 },
-        { question: '一年有多少天？', options: ['365', '360', '366', '350'], correct: 0 },
-        { question: '熊猫最爱吃什么？', options: ['竹子', '苹果', '胡萝卜', '鱼'], correct: 0 },
-        { question: '彩虹有几种颜色？', options: ['7', '5', '6', '8'], correct: 0 },
-        { question: '地球是什么形状的？', options: ['球形', '方形', '三角形', '平面'], correct: 0 },
+        { text: '世界上最大的海洋是？', options: ['太平洋', '大西洋', '印度洋', '北冰洋'], correctIndex: 0 },
+        { text: '一年有多少天？', options: ['365', '360', '366', '350'], correctIndex: 0 },
+        { text: '熊猫最爱吃什么？', options: ['竹子', '苹果', '胡萝卜', '鱼'], correctIndex: 0 },
+        { text: '彩虹有几种颜色？', options: ['7', '5', '6', '8'], correctIndex: 0 },
+        { text: '地球是什么形状的？', options: ['球形', '方形', '三角形', '平面'], correctIndex: 0 },
       ],
       timePerQuestion: 10,
       scoring: { correct: 20, wrong: 0, timeBonus: true },
