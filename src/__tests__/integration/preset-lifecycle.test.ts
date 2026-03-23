@@ -5,7 +5,7 @@ import { createModuleRegistry } from '@/engine/module-setup';
 import { GameWizard } from '@/agent/wizard';
 
 describe('Preset Lifecycle', () => {
-  const GAME_TYPES = ['catch', 'dodge', 'tap', 'shooting', 'quiz', 'runner', 'expression', 'random-wheel'];
+  const GAME_TYPES = ['catch', 'dodge', 'tap', 'shooting', 'quiz', 'runner', 'expression', 'random-wheel', 'gesture', 'rhythm', 'puzzle', 'dress-up', 'world-ar', 'narrative'];
 
   for (const gameType of GAME_TYPES) {
     it(`should load ${gameType} preset into engine without errors`, () => {

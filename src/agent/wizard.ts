@@ -201,6 +201,102 @@ const GAME_TYPES: GameTypeDef[] = [
     metaName: '跑酷游戏',
     metaDescription: '自动奔跑，躲避障碍物，收集道具',
   },
+  {
+    id: 'gesture',
+    label: '手势互动',
+    emoji: '\u{1F91A}',
+    description: '像 Snapchat "手势挑战" — 用手势匹配目标动作',
+    requiredModules: ['GameFlow', 'GestureMatch', 'Scorer', 'UIOverlay', 'ResultScreen'],
+    inputOptions: null,
+    fixedInput: 'HandInput',
+    optionalModules: [
+      { type: 'Timer', label: '倒计时', description: '限定游戏时长' },
+      { type: 'ComboSystem', label: '连击系统', description: '连续匹配获得分数加成' },
+      { type: 'ParticleVFX', label: '粒子特效', description: '匹配成功时的视觉效果' },
+      { type: 'SoundFX', label: '音效', description: '匹配成功/失败音效' },
+    ],
+    metaName: '手势互动游戏',
+    metaDescription: '用手势匹配目标动作来得分',
+  },
+  {
+    id: 'rhythm',
+    label: '节奏类',
+    emoji: '\u{1F3B5}',
+    description: '像 TikTok "音乐节拍" — 跟随节奏点击屏幕',
+    requiredModules: ['GameFlow', 'BeatMap', 'Spawner', 'Collision', 'Scorer', 'UIOverlay', 'ResultScreen'],
+    inputOptions: ['TouchInput', 'FaceInput'],
+    optionalModules: [
+      { type: 'Timer', label: '倒计时', description: '限定游戏时长' },
+      { type: 'ComboSystem', label: '连击系统', description: '连续命中获得分数加成' },
+      { type: 'DifficultyRamp', label: '难度递增', description: '随时间增加节拍速度' },
+      { type: 'ParticleVFX', label: '粒子特效', description: '命中节拍时的视觉效果' },
+      { type: 'SoundFX', label: '音效', description: '节拍命中/失败音效' },
+    ],
+    metaName: '节奏游戏',
+    metaDescription: '跟随节奏点击屏幕，挑战你的节拍感',
+  },
+  {
+    id: 'puzzle',
+    label: '拼图/配对',
+    emoji: '\u{1F9E9}',
+    description: '像 TikTok "记忆翻牌" — 翻开卡片找到配对',
+    requiredModules: ['GameFlow', 'MatchEngine', 'Scorer', 'UIOverlay', 'ResultScreen'],
+    inputOptions: null,
+    fixedInput: 'TouchInput',
+    optionalModules: [
+      { type: 'Timer', label: '倒计时', description: '限定游戏时长' },
+      { type: 'SoundFX', label: '音效', description: '翻牌和配对音效' },
+      { type: 'ParticleVFX', label: '粒子特效', description: '配对成功时的视觉效果' },
+    ],
+    metaName: '记忆配对游戏',
+    metaDescription: '翻开卡片找到配对，挑战你的记忆力',
+  },
+  {
+    id: 'dress-up',
+    label: '换装/贴纸',
+    emoji: '\u{1F457}',
+    description: '像 TikTok "虚拟换装" — 给角色搭配服装和配饰',
+    requiredModules: ['GameFlow', 'DressUpEngine', 'UIOverlay', 'ResultScreen'],
+    inputOptions: ['FaceInput', 'TouchInput'],
+    optionalModules: [
+      { type: 'SoundFX', label: '音效', description: '换装音效' },
+      { type: 'ParticleVFX', label: '粒子特效', description: '换装时的视觉效果' },
+    ],
+    metaName: '换装游戏',
+    metaDescription: '给角色搭配服装和配饰',
+  },
+  {
+    id: 'world-ar',
+    label: '世界AR',
+    emoji: '\u{1F30D}',
+    description: '像 Snapchat "世界镜头" — 在真实环境中放置虚拟物品',
+    requiredModules: ['GameFlow', 'PlaneDetection', 'Spawner', 'Collision', 'Scorer', 'UIOverlay', 'ResultScreen'],
+    inputOptions: null,
+    fixedInput: 'TouchInput',
+    optionalModules: [
+      { type: 'Timer', label: '倒计时', description: '限定游戏时长' },
+      { type: 'Lives', label: '生命系统', description: '错过物品扣除生命' },
+      { type: 'ParticleVFX', label: '粒子特效', description: '放置物品时的视觉效果' },
+      { type: 'SoundFX', label: '音效', description: '放置和碰撞音效' },
+    ],
+    metaName: '世界AR游戏',
+    metaDescription: '在真实环境中放置虚拟物品来得分',
+  },
+  {
+    id: 'narrative',
+    label: '分支叙事',
+    emoji: '\u{1F4D6}',
+    description: '像 TikTok "命运选择" — 做出选择影响故事走向',
+    requiredModules: ['GameFlow', 'BranchStateMachine', 'UIOverlay', 'ResultScreen'],
+    inputOptions: null,
+    fixedInput: 'TouchInput',
+    optionalModules: [
+      { type: 'SoundFX', label: '音效', description: '故事推进音效' },
+      { type: 'ParticleVFX', label: '粒子特效', description: '选择和结局的视觉效果' },
+    ],
+    metaName: '分支叙事游戏',
+    metaDescription: '做出选择影响故事走向',
+  },
 ];
 
 const GAME_TYPE_MAP = new Map<string, GameTypeDef>(GAME_TYPES.map((gt) => [gt.id, gt]));
@@ -298,21 +394,7 @@ export class GameWizard {
         // If input is fixed for this game type, skip the input step
         if (gameDef && !gameDef.inputOptions) {
           this.state.inputMethod = gameDef.fixedInput ?? 'TouchInput';
-          this.state.step = 'duration';
-          // If random-wheel, skip duration too (no timer concept)
-          if (choiceId === 'random-wheel') {
-            this.state.duration = 0;
-            this.state.step = 'optional_modules';
-            this.state.currentOptionalIndex = 0;
-            const nextOptional = this.getNextOptionalQuestion();
-            if (nextOptional) {
-              return { question: nextOptional, config: null, summary: '' };
-            }
-            // No optional modules either — generate directly
-            this.state.step = 'done';
-            return { question: null, config: this.buildConfig(), summary: this.buildSummary() };
-          }
-          return { question: this.getDurationQuestion(), config: null, summary: '' };
+          return this.skipDurationOrAsk(choiceId);
         }
         this.state.step = 'input_method';
         return { question: this.getInputMethodQuestion(), config: null, summary: '' };
@@ -320,8 +402,7 @@ export class GameWizard {
 
       case 'input_method': {
         this.state.inputMethod = choiceId;
-        this.state.step = 'duration';
-        return { question: this.getDurationQuestion(), config: null, summary: '' };
+        return this.skipDurationOrAsk(this.state.gameType ?? '');
       }
 
       case 'duration': {
@@ -356,6 +437,36 @@ export class GameWizard {
       default:
         return { question: null, config: null, summary: '' };
     }
+  }
+
+  /* ---------------------------------------------------------------- */
+  /*  Duration-skip helper                                             */
+  /* ---------------------------------------------------------------- */
+
+  /** Game types that have no timer/duration concept and should skip the duration step. */
+  private static readonly NO_DURATION_TYPES = new Set([
+    'random-wheel', 'dress-up', 'narrative',
+  ]);
+
+  /**
+   * After input is resolved, either skip the duration step (for game types
+   * that have no timer concept) or ask the user to pick a duration.
+   */
+  private skipDurationOrAsk(gameType: string): WizardAnswerResult {
+    if (GameWizard.NO_DURATION_TYPES.has(gameType)) {
+      this.state.duration = 0;
+      this.state.step = 'optional_modules';
+      this.state.currentOptionalIndex = 0;
+      const nextOptional = this.getNextOptionalQuestion();
+      if (nextOptional) {
+        return { question: nextOptional, config: null, summary: '' };
+      }
+      // No optional modules either — generate directly
+      this.state.step = 'done';
+      return { question: null, config: this.buildConfig(), summary: this.buildSummary() };
+    }
+    this.state.step = 'duration';
+    return { question: this.getDurationQuestion(), config: null, summary: '' };
   }
 
   /* ---------------------------------------------------------------- */

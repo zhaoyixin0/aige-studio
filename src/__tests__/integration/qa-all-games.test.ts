@@ -31,7 +31,7 @@ function loadAndTick(config: GameConfig, frames: number = 100): Engine {
 
 describe('QA: All Game Types', () => {
   // Test each game type
-  const types = ['catch', 'dodge', 'tap', 'shooting', 'quiz', 'runner', 'expression', 'random-wheel'];
+  const types = ['catch', 'dodge', 'tap', 'shooting', 'quiz', 'runner', 'expression', 'random-wheel', 'gesture', 'rhythm', 'puzzle', 'dress-up', 'world-ar', 'narrative'];
 
   for (const gameType of types) {
     describe(gameType, () => {
@@ -224,6 +224,83 @@ describe('QA: All Game Types', () => {
       const config = createGame('runner');
       const spawner = config.modules.find(m => m.type === 'Spawner');
       expect(spawner!.params.direction).toBe('left');
+    });
+  });
+
+  describe('gesture specific', () => {
+    it('should have GestureMatch with target gestures', () => {
+      const config = createGame('gesture');
+      const gm = config.modules.find(m => m.type === 'GestureMatch');
+      expect(gm).toBeDefined();
+      const gestures = gm!.params.targetGestures as string[];
+      expect(gestures.length).toBeGreaterThanOrEqual(4);
+      expect(gm!.params.matchThreshold).toBeDefined();
+    });
+
+    it('should have HandInput (fixed)', () => {
+      const config = createGame('gesture');
+      expect(config.modules.find(m => m.type === 'HandInput')).toBeDefined();
+    });
+  });
+
+  describe('rhythm specific', () => {
+    it('should have BeatMap with bpm', () => {
+      const config = createGame('rhythm');
+      const bm = config.modules.find(m => m.type === 'BeatMap');
+      expect(bm).toBeDefined();
+      expect(bm!.params.bpm).toBeDefined();
+      expect(bm!.params.tolerance).toBeDefined();
+    });
+  });
+
+  describe('puzzle specific', () => {
+    it('should have MatchEngine with grid config', () => {
+      const config = createGame('puzzle');
+      const me = config.modules.find(m => m.type === 'MatchEngine');
+      expect(me).toBeDefined();
+      expect(me!.params.gridCols).toBeDefined();
+      expect(me!.params.gridRows).toBeDefined();
+      expect(me!.params.matchCount).toBeDefined();
+    });
+  });
+
+  describe('dress-up specific', () => {
+    it('should have DressUpEngine with layers', () => {
+      const config = createGame('dress-up');
+      const de = config.modules.find(m => m.type === 'DressUpEngine');
+      expect(de).toBeDefined();
+      const layers = de!.params.layers as string[];
+      expect(layers.length).toBeGreaterThanOrEqual(3);
+      expect(de!.params.maxPerLayer).toBeDefined();
+    });
+  });
+
+  describe('world-ar specific', () => {
+    it('should have PlaneDetection', () => {
+      const config = createGame('world-ar');
+      const pd = config.modules.find(m => m.type === 'PlaneDetection');
+      expect(pd).toBeDefined();
+      expect(pd!.params.enabled).toBe(true);
+      expect(pd!.params.sensitivity).toBeDefined();
+    });
+  });
+
+  describe('narrative specific', () => {
+    it('should have BranchStateMachine with states', () => {
+      const config = createGame('narrative');
+      const bsm = config.modules.find(m => m.type === 'BranchStateMachine');
+      expect(bsm).toBeDefined();
+      expect(bsm!.params.startState).toBe('start');
+      expect(bsm!.params.states).toBeDefined();
+      const states = bsm!.params.states as Record<string, any>;
+      expect(states['start']).toBeDefined();
+      expect(states['start'].choices.length).toBeGreaterThan(0);
+    });
+
+    it('should NOT have Spawner or Collision', () => {
+      const config = createGame('narrative');
+      expect(config.modules.find(m => m.type === 'Spawner')).toBeUndefined();
+      expect(config.modules.find(m => m.type === 'Collision')).toBeUndefined();
     });
   });
 });

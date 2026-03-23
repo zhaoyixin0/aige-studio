@@ -10,6 +10,7 @@
 export const ALL_GAME_TYPES = [
   'catch', 'dodge', 'quiz', 'random-wheel',
   'tap', 'shooting', 'expression', 'runner',
+  'gesture', 'rhythm', 'puzzle', 'dress-up', 'world-ar', 'narrative',
 ] as const;
 
 export type GameType = (typeof ALL_GAME_TYPES)[number];
@@ -318,6 +319,211 @@ const PRESETS: Record<GameType, GamePreset> = {
       },
     },
     SoundFX:      { events: { 'collision:hit': 'pop', 'collision:damage': 'buzz', 'scorer:update': 'ding' } },
+  },
+
+  // ──────────────────────────────────────────
+  // GESTURE (手势互动)
+  // Benchmark: Snapchat "Hand Gesture Challenge"
+  // ──────────────────────────────────────────
+  gesture: {
+    GameFlow:     { countdown: 3, onFinish: 'show_result' },
+    GestureMatch: {
+      targetGestures: ['thumbs_up', 'peace', 'fist', 'open_palm'],
+      displayTime: 3,
+      matchThreshold: 0.8,
+    },
+    Scorer:       { perHit: 10, combo: { enabled: true, window: 2000, multiplier: [1, 1.5, 2] } },
+    Timer:        { duration: 30, mode: 'countdown' },
+    UIOverlay:    {},
+    ResultScreen: { show: ['score', 'accuracy'], rating: { '3star': 200, '2star': 100, '1star': 30 } },
+    HandInput:    { smoothing: 0.25 },
+    // Optional modules
+    ComboSystem:  { comboWindow: 2000, multiplierStep: 0.5, maxMultiplier: 3 },
+    ParticleVFX:  {
+      events: {
+        'gesture:match': { effect: 'sparkle', at: 'player', duration: 400, color: '#00ff88' },
+      },
+    },
+    SoundFX:      { events: { 'gesture:match': 'ding', 'gesture:fail': 'buzz' } },
+  },
+
+  // ──────────────────────────────────────────
+  // RHYTHM (节奏类)
+  // Benchmark: TikTok "音乐节拍" / "Beat Drop"
+  // ──────────────────────────────────────────
+  rhythm: {
+    GameFlow:     { countdown: 3, onFinish: 'show_result' },
+    BeatMap:      {
+      bpm: 120,
+      tolerance: 200,
+      beats: [],
+    },
+    Spawner:      {
+      frequency: 0.5, maxCount: 10,
+      speed: { min: 300, max: 300 },
+      direction: 'down',
+      items: [
+        { asset: 'beat_note', weight: 1 },
+      ],
+      spawnArea: { x: 200, y: 0, width: 680, height: 0 },
+    },
+    Collision:    { rules: [{ a: 'player', b: 'items', event: 'hit', destroy: ['b'] }] },
+    Scorer:       { perHit: 10, combo: { enabled: true, window: 1000, multiplier: [1, 1.5, 2, 3] } },
+    Timer:        { duration: 60, mode: 'countdown' },
+    UIOverlay:    {},
+    ResultScreen: { show: ['score', 'accuracy', 'combo_max'], rating: { '3star': 300, '2star': 150, '1star': 50 } },
+    // Input-specific presets (touch or face)
+    TouchInput:   {},
+    FaceInput:    { smoothing: 0.2, sensitivity: 1.0 },
+    // Optional modules
+    DifficultyRamp: {
+      target: 'spawner_1', mode: 'time',
+      rules: [
+        { field: 'frequency', decrease: 0.05, min: 0.2, every: 15 },
+      ],
+    },
+    ComboSystem:  { comboWindow: 1000, multiplierStep: 0.5, maxMultiplier: 4 },
+    ParticleVFX:  {
+      events: {
+        'beat:hit': { effect: 'sparkle', at: 'target', duration: 300, color: '#00ddff' },
+      },
+    },
+    SoundFX:      { events: { 'beat:hit': 'ding', 'beat:miss': 'buzz' } },
+  },
+
+  // ──────────────────────────────────────────
+  // PUZZLE (拼图/配对)
+  // Benchmark: TikTok "记忆翻牌" / Instagram "Memory Match"
+  // ──────────────────────────────────────────
+  puzzle: {
+    GameFlow:     { countdown: 3, onFinish: 'show_result' },
+    MatchEngine:  {
+      gridCols: 4,
+      gridRows: 4,
+      matchCount: 2,
+      shuffleOnFail: false,
+    },
+    Scorer:       { perHit: 20 },
+    Timer:        { duration: 60, mode: 'countdown' },
+    UIOverlay:    {},
+    ResultScreen: { show: ['score', 'time'], rating: { '3star': 200, '2star': 100, '1star': 40 } },
+    TouchInput:   {},
+    // Optional modules
+    SoundFX:      { events: { 'match:found': 'ding', 'match:fail': 'buzz', 'match:complete': 'cheer' } },
+    ParticleVFX:  {
+      events: {
+        'match:found': { effect: 'sparkle', at: 'target', duration: 400, color: '#ffdd00' },
+        'match:complete': { effect: 'burst', at: 'center', duration: 600, color: '#00ff88' },
+      },
+    },
+  },
+
+  // ──────────────────────────────────────────
+  // DRESS-UP (换装/贴纸)
+  // Benchmark: TikTok "虚拟换装" / Snapchat "Bitmoji Fashion"
+  // ──────────────────────────────────────────
+  'dress-up': {
+    GameFlow:     { countdown: 0, onFinish: 'show_result' },
+    DressUpEngine: {
+      layers: ['hat', 'glasses', 'shirt', 'pants', 'shoes'],
+      maxPerLayer: 1,
+    },
+    UIOverlay:    {},
+    ResultScreen: { show: ['score'], rating: {} },
+    // Input-specific presets (face for AR overlay, touch for selection)
+    FaceInput:    { smoothing: 0.2, sensitivity: 1.0 },
+    TouchInput:   {},
+    // Optional modules
+    SoundFX:      { events: { 'dressup:equip': 'pop', 'dressup:snapshot': 'cheer' } },
+    ParticleVFX:  {
+      events: {
+        'dressup:equip': { effect: 'sparkle', at: 'target', duration: 300, color: '#ff88ff' },
+      },
+    },
+  },
+
+  // ──────────────────────────────────────────
+  // WORLD-AR (世界AR)
+  // Benchmark: Snapchat "World Lens Games"
+  // ──────────────────────────────────────────
+  'world-ar': {
+    GameFlow:     { countdown: 3, onFinish: 'show_result' },
+    PlaneDetection: {
+      enabled: true,
+      sensitivity: 0.5,
+    },
+    Spawner:      {
+      frequency: 2.0, maxCount: 5,
+      speed: { min: 0, max: 0 },
+      direction: 'down',
+      items: [
+        { asset: 'ar_object', weight: 1 },
+      ],
+      spawnArea: { x: 100, y: 200, width: 880, height: 1400 },
+    },
+    Collision:    { rules: [{ a: 'player', b: 'items', event: 'hit', destroy: ['b'] }] },
+    Scorer:       { perHit: 15 },
+    Timer:        { duration: 30, mode: 'countdown' },
+    Lives:        { count: 3 },
+    UIOverlay:    {},
+    ResultScreen: { show: ['score', 'time'], rating: { '3star': 200, '2star': 100, '1star': 30 } },
+    TouchInput:   {},
+    // Optional modules
+    ParticleVFX:  {
+      events: {
+        'collision:hit': { effect: 'sparkle', at: 'target', duration: 400, color: '#00ff88' },
+        'plane:detected': { effect: 'burst', at: 'target', duration: 300, color: '#88ddff' },
+      },
+    },
+    SoundFX:      { events: { 'collision:hit': 'pop', 'plane:detected': 'ding' } },
+  },
+
+  // ──────────────────────────────────────────
+  // NARRATIVE (分支叙事)
+  // Benchmark: TikTok "命运选择" / Instagram "Choose Your Story"
+  // ──────────────────────────────────────────
+  narrative: {
+    GameFlow:     { countdown: 0, onFinish: 'show_result' },
+    BranchStateMachine: {
+      startState: 'start',
+      states: {
+        start: {
+          text: '你走在一条分岔路口...',
+          choices: [
+            { label: '走左边的小路', target: 'forest' },
+            { label: '走右边的大路', target: 'village' },
+          ],
+        },
+        forest: {
+          text: '你来到一片神秘的森林，发现一个宝箱...',
+          choices: [
+            { label: '打开宝箱', target: 'treasure' },
+            { label: '继续前进', target: 'monster' },
+          ],
+        },
+        village: {
+          text: '你到达一个热闹的村庄...',
+          choices: [
+            { label: '去市场', target: 'market' },
+            { label: '去酒馆', target: 'tavern' },
+          ],
+        },
+        treasure: { text: '恭喜！你找到了传说中的宝藏！', choices: [] },
+        monster: { text: '一只巨龙出现了...你勇敢地战斗并获胜！', choices: [] },
+        market: { text: '你在市场找到了稀有物品！', choices: [] },
+        tavern: { text: '你在酒馆听到了宝藏的线索...', choices: [] },
+      },
+    },
+    UIOverlay:    {},
+    ResultScreen: { show: ['score'], rating: {} },
+    TouchInput:   {},
+    // Optional modules
+    SoundFX:      { events: { 'branch:stateChange': 'pop', 'branch:end': 'cheer' } },
+    ParticleVFX:  {
+      events: {
+        'branch:end': { effect: 'burst', at: 'center', duration: 600, color: '#ffdd00' },
+      },
+    },
   },
 };
 
