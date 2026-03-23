@@ -11,6 +11,7 @@ export const ALL_GAME_TYPES = [
   'catch', 'dodge', 'quiz', 'random-wheel',
   'tap', 'shooting', 'expression', 'runner',
   'gesture', 'rhythm', 'puzzle', 'dress-up', 'world-ar', 'narrative',
+  'platformer',
 ] as const;
 
 export type GameType = (typeof ALL_GAME_TYPES)[number];
@@ -524,6 +525,51 @@ const PRESETS: Record<GameType, GamePreset> = {
         'branch:end': { effect: 'burst', at: 'center', duration: 600, color: '#ffdd00' },
       },
     },
+  },
+
+  // ──────────────────────────────────────────
+  // PLATFORMER (平台跳跃类)
+  // Benchmark: Mario-style side-scrolling platformers
+  // ──────────────────────────────────────────
+  platformer: {
+    GameFlow:        { countdown: 3, onFinish: 'show_result' },
+    PlayerMovement:  { speed: 300, acceleration: 1000, deceleration: 800, moveLeftEvent: 'input:touch:swipe:left', moveRightEvent: 'input:touch:swipe:right' },
+    Jump:            { jumpForce: 600, gravity: 980, groundY: 0.8, triggerEvent: 'input:touch:tap' },
+    Gravity:         { strength: 980, terminalVelocity: 800, applyTo: 'player' },
+    CoyoteTime:      { coyoteFrames: 6, bufferFrames: 6, jumpEvent: 'input:touch:tap' },
+    StaticPlatform:  {
+      platforms: [
+        { x: 0, y: 550, width: 800, height: 50, material: 'normal' },
+        { x: 200, y: 400, width: 150, height: 20, material: 'normal' },
+        { x: 450, y: 300, width: 150, height: 20, material: 'normal' },
+      ],
+      layer: 'platforms',
+    },
+    Collectible:     {
+      items: [
+        { x: 250, y: 370, value: 10, type: 'coin' },
+        { x: 500, y: 270, value: 10, type: 'coin' },
+      ],
+      layer: 'collectibles',
+    },
+    Hazard:          { hazards: [{ x: 350, y: 540, width: 50, height: 10, pattern: 'static' }], damage: 1, layer: 'hazards' },
+    Scorer:          { perHit: 10 },
+    Timer:           { duration: 60, mode: 'countdown' },
+    Lives:           { count: 3 },
+    Checkpoint:      { checkpoints: [{ x: 400, y: 280, width: 30, height: 50 }] },
+    IFrames:         { duration: 1000 },
+    Knockback:       { force: 300, duration: 200 },
+    CameraFollow:    { mode: 'center', smoothing: 0.1 },
+    TouchInput:      {},
+    ParticleVFX:     {
+      events: {
+        'collectible:pickup': { effect: 'sparkle', at: 'target', duration: 400, color: '#ffdd00' },
+        'collision:damage': { effect: 'burst', at: 'player', duration: 300, color: '#ff0000' },
+      },
+    },
+    SoundFX:         { events: { 'collectible:pickup': 'ding', 'jump:start': 'pop', 'collision:damage': 'hurt' } },
+    UIOverlay:       { elements: ['score', 'timer', 'lives'] },
+    ResultScreen:    { show: ['score', 'time'], rating: { excellent: 200, good: 100, ok: 50 } },
   },
 };
 
