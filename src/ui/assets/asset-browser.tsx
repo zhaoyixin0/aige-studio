@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Search, Image, Volume2, Palette, Grid3X3 } from 'lucide-react';
 import { PREBUILT_ASSETS, type PrebuiltAsset } from '@/assets/prebuilt.ts';
 import { useGameStore } from '@/store/game-store.ts';
 import type { AssetEntry } from '@/engine/core';
+import { AssetLibrary, type LibraryAsset } from '@/services/asset-library.ts';
 
 type FilterType = 'all' | 'sprite' | 'sound' | 'background';
 
@@ -12,7 +13,7 @@ interface DisplayAsset {
   type: 'sprite' | 'sound' | 'background' | 'particle';
   src: string;
   thumbnail?: string;
-  source: 'prebuilt' | 'user' | 'ai-generated';
+  source: 'prebuilt' | 'user' | 'ai-generated' | 'library';
 }
 
 function storeAssetsToDisplayAssets(
@@ -39,6 +40,20 @@ function prebuiltToDisplay(asset: PrebuiltAsset): DisplayAsset {
   };
 }
 
+function libraryToDisplay(asset: LibraryAsset): DisplayAsset {
+  return {
+    id: asset.id,
+    name: `\uD83D\uDCDA ${asset.name}`,
+    type: asset.type,
+    src: asset.src,
+    thumbnail: asset.src.startsWith('data:') ? asset.src : undefined,
+    source: 'library',
+  };
+}
+
+/** Singleton library instance shared across renders. */
+const sharedLibrary = new AssetLibrary();
+
 const FILTER_TABS: { value: FilterType; label: string; icon: typeof Grid3X3 }[] = [
   { value: 'all', label: 'All', icon: Grid3X3 },
   { value: 'sprite', label: 'Sprites', icon: Image },
@@ -60,13 +75,29 @@ export function AssetBrowser({ onSelect }: AssetBrowserProps) {
   const [filter, setFilter] = useState<FilterType>('all');
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [libraryAssets, setLibraryAssets] = useState<LibraryAsset[]>([]);
   const storeAssets = useGameStore(selectAssets);
+
+  // Load library assets on mount
+  useEffect(() => {
+    let cancelled = false;
+    sharedLibrary.ready().then(() => {
+      if (!cancelled) {
+        setLibraryAssets(sharedLibrary.getAll());
+      }
+    });
+    return () => { cancelled = true; };
+  }, [storeAssets]); // re-load when store assets change (new assets may have been saved)
 
   const allAssets = useMemo(() => {
     const prebuilt = PREBUILT_ASSETS.map(prebuiltToDisplay);
     const userAssets = storeAssetsToDisplayAssets(storeAssets);
-    return [...prebuilt, ...userAssets];
-  }, [storeAssets]);
+    const libAssets = libraryAssets.map(libraryToDisplay);
+    // Deduplicate: library assets that share an id with a store asset are skipped
+    const storeIds = new Set(Object.keys(storeAssets));
+    const dedupedLib = libAssets.filter((a) => !storeIds.has(a.id));
+    return [...prebuilt, ...userAssets, ...dedupedLib];
+  }, [storeAssets, libraryAssets]);
 
   const filtered = useMemo(() => {
     let result = allAssets;

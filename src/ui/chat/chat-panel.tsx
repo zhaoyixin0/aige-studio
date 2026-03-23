@@ -4,8 +4,9 @@ import { useEditorStore } from '@/store/editor-store.ts';
 import type { ChatMessage } from '@/store/editor-store.ts';
 import { useGameStore } from '@/store/game-store.ts';
 import { Agent } from '@/agent/index.ts';
+import { AssetAgent } from '@/services/asset-agent.ts';
 
-import type { GameConfig } from '@/engine/core';
+import type { GameConfig, AssetEntry } from '@/engine/core';
 
 const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY as string | undefined;
 
@@ -25,6 +26,7 @@ const selectAddChatMessage = (s: { addChatMessage: (message: ChatMessage) => voi
 const selectSetChatLoading = (s: { setChatLoading: (loading: boolean) => void }) => s.setChatLoading;
 const selectConfig = (s: { config: GameConfig | null }) => s.config;
 const selectSetConfig = (s: { setConfig: (config: GameConfig) => void }) => s.setConfig;
+const selectBatchUpdateAssets = (s: { batchUpdateAssets: (assets: Record<string, AssetEntry>) => void }) => s.batchUpdateAssets;
 
 /** Welcome message shown on first load. */
 const WELCOME_MESSAGE: ChatMessage = {
@@ -44,9 +46,36 @@ export function ChatPanel() {
   const setChatLoading = useEditorStore(selectSetChatLoading);
   const config = useGameStore(selectConfig);
   const setConfig = useGameStore(selectSetConfig);
+  const batchUpdateAssets = useGameStore(selectBatchUpdateAssets);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const welcomeShownRef = useRef(false);
+
+  /** Fire-and-forget: generate assets for a newly created config. */
+  const triggerAssetFulfillment = useCallback((newConfig: GameConfig) => {
+    const assetAgent = new AssetAgent();
+
+    addChatMessage({
+      id: crypto.randomUUID(),
+      role: 'assistant',
+      content: '\uD83C\uDFA8 \u6B63\u5728\u81EA\u52A8\u751F\u6210\u6E38\u620F\u7D20\u6750...',
+      timestamp: Date.now(),
+    });
+
+    assetAgent.fulfillAssets(newConfig).then((assets) => {
+      if (Object.keys(assets).length > 0) {
+        batchUpdateAssets(assets);
+        addChatMessage({
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: `\u2705 \u5DF2\u81EA\u52A8\u751F\u6210 ${Object.keys(assets).length} \u4E2A\u6E38\u620F\u7D20\u6750\uFF01\u7D20\u6750\u5DF2\u4FDD\u5B58\u5230\u7D20\u6750\u5E93\u3002`,
+          timestamp: Date.now(),
+        });
+      }
+    }).catch((err) => {
+      console.warn('Asset fulfillment failed:', err);
+    });
+  }, [addChatMessage, batchUpdateAssets]);
 
   // Show welcome message on first render if chat is empty
   useEffect(() => {
@@ -160,8 +189,13 @@ export function ChatPanel() {
         timestamp: Date.now(),
       };
       addChatMessage(assistantMsg);
+
+      // Auto-generate assets when wizard produces a final config
+      if (response.config) {
+        triggerAssetFulfillment(response.config);
+      }
     }
-  }, [chatMessages, addChatMessage, setConfig]);
+  }, [chatMessages, addChatMessage, setConfig, triggerAssetFulfillment]);
 
   const handleSend = async () => {
     const text = input.trim();
@@ -205,6 +239,11 @@ export function ChatPanel() {
         timestamp: Date.now(),
       };
       addChatMessage(assistantMsg);
+
+      // Auto-generate assets when wizard produces a final config
+      if (response.config) {
+        triggerAssetFulfillment(response.config);
+      }
       return;
     }
 
@@ -247,6 +286,11 @@ export function ChatPanel() {
         timestamp: Date.now(),
       };
       addChatMessage(assistantMsg);
+
+      // Auto-generate assets for Mode B config
+      if (modeBResult.config) {
+        triggerAssetFulfillment(modeBResult.config);
+      }
       return;
     }
 

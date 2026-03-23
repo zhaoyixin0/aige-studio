@@ -17,6 +17,8 @@ interface GameStore {
   updateAsset: (assetId: string, src: string) => void;
 
   addAsset: (assetId: string, entry: AssetEntry) => void;
+
+  batchUpdateAssets: (assets: Record<string, AssetEntry>) => void;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
@@ -101,6 +103,20 @@ export const useGameStore = create<GameStore>((set) => ({
           assets: {
             ...state.config.assets,
             [assetId]: entry,
+          },
+        },
+      };
+    }),
+
+  batchUpdateAssets: (assets) =>
+    set((state) => {
+      if (!state.config) return state;
+      return {
+        config: {
+          ...state.config,
+          assets: {
+            ...state.config.assets,
+            ...assets,
           },
         },
       };
