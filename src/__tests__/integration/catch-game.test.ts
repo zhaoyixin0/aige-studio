@@ -151,7 +151,7 @@ describe('Catch Game Integration', () => {
     expect(timer.getRemaining()).toBe(0);
   });
 
-  it('should emit timer:tick events every second', () => {
+  it('should emit timer:tick every frame with decreasing remaining', () => {
     const engine = createCatchEngine();
     const tickEvents: any[] = [];
 
@@ -159,17 +159,16 @@ describe('Catch Game Integration', () => {
       tickEvents.push(data);
     });
 
-    // Tick 3 seconds
+    // Tick 3 seconds (30 frames at 100ms each)
     for (let i = 0; i < 30; i++) {
       engine.tick(100);
     }
 
-    // Should have 3 tick events (at 1s, 2s, 3s)
-    expect(tickEvents.length).toBe(3);
+    // Should have 30 tick events (one per frame)
+    expect(tickEvents.length).toBe(30);
     // In countdown mode, remaining should decrease
-    expect(tickEvents[0].remaining).toBe(29);
-    expect(tickEvents[1].remaining).toBe(28);
-    expect(tickEvents[2].remaining).toBe(27);
+    expect(tickEvents[0].remaining).toBeCloseTo(29.9, 0);
+    expect(tickEvents[29].remaining).toBeCloseTo(27, 0);
   });
 
   it('should lose lives on collision:damage and detect lives:zero', () => {

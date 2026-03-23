@@ -4,7 +4,7 @@ import { useEditorStore } from '@/store/editor-store.ts';
 import type { ChatMessage } from '@/store/editor-store.ts';
 import { useGameStore } from '@/store/game-store.ts';
 import { Agent } from '@/agent/index.ts';
-import type { EnhancementSuggestion } from '@/agent/agent.ts';
+
 import type { GameConfig } from '@/engine/core';
 
 const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY as string | undefined;

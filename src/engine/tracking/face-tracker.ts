@@ -69,7 +69,7 @@ export class FaceTracker {
     // Extract blendshapes
     const blendshapes = raw.faceBlendshapes?.[0]?.categories ?? [];
     const blend = (name: string): number => {
-      const entry = blendshapes.find((b) => b.categoryName === name);
+      const entry = blendshapes.find((b: { categoryName: string; score: number }) => b.categoryName === name);
       return entry?.score ?? 0;
     };
 

@@ -5,7 +5,7 @@
  * tests actual game logic including event chains, scoring,
  * state transitions, game-over conditions, and module interactions.
  */
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { Engine } from '@/engine/core/engine';
 import { ConfigLoader } from '@/engine/core/config-loader';
 import { createModuleRegistry } from '@/engine/module-setup';

@@ -9,7 +9,7 @@ import type { GameConfig, ModuleSchema } from '@/engine/core/types.ts';
 // --- Engine Context ---
 
 export interface EngineContextValue {
-  engineRef: RefObject<Engine>;
+  engineRef: RefObject<Engine | null>;
   rendererRef: RefObject<PixiRenderer | null>;
   /** Callback ref — pass to the mount div in PreviewCanvas */
   setMountEl: (el: HTMLDivElement | null) => void;

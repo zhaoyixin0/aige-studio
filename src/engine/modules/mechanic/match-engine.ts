@@ -139,7 +139,6 @@ export class MatchEngine extends BaseModule {
   }
 
   private checkMatch(): void {
-    const matchCount = this.params.matchCount ?? 2;
     const selectedCells = this.selected.map((i) => this.grid[i]);
 
     // Check if all selected have the same value

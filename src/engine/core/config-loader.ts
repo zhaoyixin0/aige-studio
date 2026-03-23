@@ -1,4 +1,4 @@
-import type { GameConfig, GameModule } from './types';
+import type { GameConfig } from './types';
 import type { Engine } from './engine';
 import type { ModuleRegistry } from './module-registry';
 import { AutoWirer } from './auto-wirer';

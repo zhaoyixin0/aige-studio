@@ -113,11 +113,10 @@ describe('QA: All Game Types', () => {
       const engine = loadAndTick(config, 10);
       const lives = engine.getModulesByType('Lives')[0] as any;
       expect(lives).toBeDefined();
-      const initialCount = lives.getParams().count;
+      lives.getParams(); // verify params accessible
       engine.eventBus.emit('collision:damage', {});
       // Lives should decrease (check via lives:change event)
-      let newCount = initialCount;
-      engine.eventBus.on('lives:change', (data: any) => { newCount = data?.current; });
+      engine.eventBus.on('lives:change', (_data: any) => { /* newCount = data?.current; */ });
       engine.eventBus.emit('collision:damage', {});
       // Note: lives may have already decreased from first emit
       engine.restart();

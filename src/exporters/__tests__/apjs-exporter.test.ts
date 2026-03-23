@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ApjsExporter } from '../apjs-exporter';
-import type { ApjsExportResult } from '../apjs-exporter';
+
 import {
   getTranslator,
   SpawnerTranslator,

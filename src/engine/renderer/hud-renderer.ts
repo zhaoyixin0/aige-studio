@@ -64,36 +64,36 @@ export class HudRenderer {
 
   // Expression UI elements
   private expressionContainer: Container;
-  private expressionEmojiText: Text;
-  private expressionHintText: Text;
-  private expressionCheckText: Text;
+  private expressionEmojiText!: Text;
+  private expressionHintText!: Text;
+  private expressionCheckText!: Text;
 
   // Gesture UI elements
   private gestureContainer: Container;
-  private gestureEmojiText: Text;
-  private gestureLabelText: Text;
-  private gestureHintText: Text;
-  private gestureProgressText: Text;
+  private gestureEmojiText!: Text;
+  private gestureLabelText!: Text;
+  private gestureHintText!: Text;
+  private gestureProgressText!: Text;
 
   // Puzzle UI elements
   private puzzleContainer: Container;
-  private puzzleGraphics: Graphics;
+  private puzzleGraphics!: Graphics;
   private puzzleCardTexts: Text[] = [];
-  private puzzleProgressText: Text;
+  private puzzleProgressText!: Text;
 
   // Dress-Up UI elements
   private dressUpContainer: Container;
-  private dressUpSilhouette: Graphics;
+  private dressUpSilhouette!: Graphics;
   private dressUpLayerTexts: Text[] = [];
   private dressUpEquipTexts: Text[] = [];
-  private dressUpHintText: Text;
+  private dressUpHintText!: Text;
 
   // Narrative UI elements
   private narrativeContainer: Container;
-  private narrativeStoryText: Text;
+  private narrativeStoryText!: Text;
   private narrativeChoiceTexts: Text[] = [];
   private narrativeChoiceBgs: Graphics[] = [];
-  private narrativeEndText: Text;
+  private narrativeEndText!: Text;
 
   private width: number;
   private height: number;

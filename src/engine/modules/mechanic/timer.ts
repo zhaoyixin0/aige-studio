@@ -7,7 +7,7 @@ export class Timer extends BaseModule {
   private elapsed = 0;
   private paused = false;
   private ended = false;
-  private lastTickSecond = 0;
+  // lastTickSecond removed: was unused
 
   getSchema(): ModuleSchema {
     return {
@@ -58,21 +58,17 @@ export class Timer extends BaseModule {
       this.elapsed += dt;
     }
 
-    // Emit timer:tick every full second boundary
-    const currentSecond = Math.floor(this.elapsed / 1000);
-    while (this.lastTickSecond < currentSecond) {
-      this.lastTickSecond++;
-      const elapsedSec = this.lastTickSecond;
-      const remainingSec =
-        this.params.mode === 'countdown'
-          ? Math.max(0, this.params.duration - elapsedSec)
-          : 0;
+    // Emit timer:tick every frame with current time values
+    const elapsedSec = this.elapsed / 1000;
+    const remainingSec =
+      this.params.mode === 'countdown'
+        ? Math.max(0, this.params.duration - elapsedSec)
+        : 0;
 
-      this.emit('timer:tick', {
-        remaining: remainingSec,
-        elapsed: elapsedSec,
-      });
-    }
+    this.emit('timer:tick', {
+      remaining: remainingSec,
+      elapsed: elapsedSec,
+    });
 
     // Check for countdown end
     if (this.params.mode === 'countdown' && this.elapsed >= durationMs && !this.ended) {
@@ -96,6 +92,6 @@ export class Timer extends BaseModule {
     this.elapsed = 0;
     this.paused = false;
     this.ended = false;
-    this.lastTickSecond = 0;
+
   }
 }

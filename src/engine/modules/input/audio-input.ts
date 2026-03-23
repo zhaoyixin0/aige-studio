@@ -6,7 +6,7 @@ export class AudioInput extends BaseModule {
 
   private audioContext: AudioContext | null = null;
   private analyser: AnalyserNode | null = null;
-  private dataArray: Uint8Array | null = null;
+  private dataArray: Uint8Array<ArrayBuffer> | null = null;
   private stream: MediaStream | null = null;
   private isActive = false;
 

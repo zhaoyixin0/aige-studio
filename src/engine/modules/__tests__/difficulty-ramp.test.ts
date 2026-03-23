@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { Engine } from '@/engine/core';
 import { DifficultyRamp } from '../mechanic/difficulty-ramp';
 import { Spawner } from '../mechanic/spawner';

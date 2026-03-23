@@ -59,7 +59,7 @@ export class BodyTracker {
     }
 
     const poseLandmarks = raw.landmarks[0];
-    const landmarks: BodyLandmark[] = poseLandmarks.map((lm) => ({
+    const landmarks: BodyLandmark[] = poseLandmarks.map((lm: { x: number; y: number; z: number; visibility?: number }) => ({
       x: lm.x,
       y: lm.y,
       z: lm.z,

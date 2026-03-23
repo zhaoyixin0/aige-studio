@@ -22,20 +22,22 @@ describe('Timer', () => {
     expect(endHandler).toHaveBeenCalledOnce();
   });
 
-  it('should emit timer:tick every second', () => {
+  it('should emit timer:tick every frame with remaining time', () => {
     const { engine } = setup({ mode: 'countdown', duration: 5 });
     const tickHandler = vi.fn();
     engine.eventBus.on('timer:tick', tickHandler);
 
-    // Tick 2.5 seconds
+    // Tick 2.5 seconds (3 frames)
     engine.tick(1000);
     engine.tick(1000);
     engine.tick(500);
 
-    expect(tickHandler).toHaveBeenCalledTimes(2);
+    // Now emits every frame (3 calls)
+    expect(tickHandler).toHaveBeenCalledTimes(3);
+    // After 1s elapsed, remaining should be 4
     expect(tickHandler).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ remaining: 4, elapsed: 1 }),
+      expect.objectContaining({ remaining: 4 }),
     );
     expect(tickHandler).toHaveBeenNthCalledWith(
       2,

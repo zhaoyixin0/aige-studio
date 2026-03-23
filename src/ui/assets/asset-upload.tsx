@@ -43,7 +43,7 @@ export function AssetUpload() {
         const assetType = isAudio ? 'sound' : 'sprite';
         const baseName = file.name.replace(/\.[^.]+$/, '');
         const id = `user-${baseName}-${Date.now()}`;
-        const src = `user://uploads/${file.name}`;
+        // const src = `user://uploads/${file.name}`;
 
         // Add to store
         const entry: AssetEntry = {

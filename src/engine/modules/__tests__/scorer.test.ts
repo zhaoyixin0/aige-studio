@@ -41,7 +41,7 @@ describe('Scorer', () => {
   });
 
   it('should emit scorer:update on score change', () => {
-    const { engine, scorer } = setup({ perHit: 10 });
+    const { engine } = setup({ perHit: 10 });
     const handler = vi.fn();
     engine.eventBus.on('scorer:update', handler);
 

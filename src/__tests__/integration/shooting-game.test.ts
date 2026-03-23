@@ -7,7 +7,7 @@ import type { Spawner } from '@/engine/modules/mechanic/spawner';
 import type { Scorer } from '@/engine/modules/mechanic/scorer';
 import type { Timer } from '@/engine/modules/mechanic/timer';
 import type { GameFlow } from '@/engine/modules/feedback/game-flow';
-import type { DifficultyRamp } from '@/engine/modules/mechanic/difficulty-ramp';
+
 
 /**
  * Shooting game config: targets appear, player shoots them.

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { Engine } from '../engine';
-import type { GameModule, GameEngine, ModuleSchema } from '../types';
+import type { GameModule, ModuleSchema } from '../types';
 
 function createTestModule(id: string, type: string): GameModule {
   return {

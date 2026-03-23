@@ -82,7 +82,7 @@ export class HandTracker {
       }
     }
 
-    const landmarks = handLandmarks.map((lm) => ({
+    const landmarks = handLandmarks.map((lm: { x: number; y: number; z: number }) => ({
       x: lm.x,
       y: lm.y,
       z: lm.z,

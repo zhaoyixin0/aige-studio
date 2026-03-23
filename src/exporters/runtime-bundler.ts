@@ -249,7 +249,7 @@ export class RuntimeBundler {
   }
 
   /** Generate per-frame update code. */
-  private generateUpdateCode(moduleTypes: string[], enabledModules: ModuleConfig[]): string {
+  private generateUpdateCode(moduleTypes: string[], _enabledModules: ModuleConfig[]): string {
     const parts: string[] = [];
 
     if (moduleTypes.includes('Timer')) {
