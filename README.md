@@ -1,73 +1,46 @@
-# React + TypeScript + Vite
+# AIGE Studio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+模块化社交平台游戏创建工具 — 像搭积木一样，用 AI 引导创建 AR 小游戏。
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **14 种游戏类型** — 接住、躲避、点击、射击、答题、转盘、表情、跑酷、手势、节奏、拼图、换装、世界AR、叙事
+- **30 个预建模块** — 即插即用，无需编程
+- **5 套 Emoji 主题** — 水果、太空、海洋、万圣节、糖果
+- **AI 素材生成** — Imagen 4 自动生成 + 背景移除
+- **3 种交互模式** — 向导引导 / 快速描述 / 自由对话
+- **实时预览** — PixiJS 渲染 + 粒子特效 + 音效合成
+- **双格式导出** — Web HTML + Effect House .apjs
 
-## React Compiler
+## Quick Start
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Open http://localhost:5173
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Environment Variables (Optional)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+# .env
+VITE_ANTHROPIC_API_KEY=sk-ant-...   # For free-chat mode
+VITE_GEMINI_API_KEY=AIza...          # For AI asset generation
 ```
+
+The wizard works without any API keys.
+
+## Tech Stack
+
+React 19 · TypeScript · Vite · PixiJS 8 · Zustand · Tailwind CSS · Radix UI · Vitest
+
+## Tests
+
+```bash
+npx vitest run   # 390+ tests
+```
+
+## License
+
+Internal use — TikTok AIGE Team
