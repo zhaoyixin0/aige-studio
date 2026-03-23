@@ -26,8 +26,8 @@ const PRESETS: Record<GameType, GamePreset> = {
   catch: {
     GameFlow:     { countdown: 3, onFinish: 'show_result' },
     Spawner:      {
-      frequency: 1.5, maxCount: 8,
-      speed: { min: 120, max: 220 },
+      frequency: 1.5, maxCount: 5,
+      speed: { min: 200, max: 300 },
       direction: 'down',
       items: [
         { asset: 'star', weight: 3 },
@@ -73,7 +73,7 @@ const PRESETS: Record<GameType, GamePreset> = {
   dodge: {
     GameFlow:     { countdown: 3, onFinish: 'show_result' },
     Spawner:      {
-      frequency: 1.2, maxCount: 10,
+      frequency: 1.2, maxCount: 6,
       speed: { min: 150, max: 280 },
       direction: 'down',
       items: [
@@ -155,7 +155,7 @@ const PRESETS: Record<GameType, GamePreset> = {
     GameFlow:     { countdown: 3, onFinish: 'show_result' },
     Spawner:      {
       frequency: 1.0, maxCount: 6,
-      speed: { min: 80, max: 180 },
+      speed: { min: 100, max: 250 },
       direction: 'random',   // CRITICAL: was 'down', real games use random
       items: [
         { asset: 'target_normal', weight: 3 },
@@ -196,14 +196,16 @@ const PRESETS: Record<GameType, GamePreset> = {
     GameFlow:     { countdown: 3, onFinish: 'show_result' },
     QuizEngine:   {
       questions: [
-        { question: '1 + 1 = ?', options: ['2', '3', '4', '1'], correct: 0 },
-        { question: '太阳从哪边升起？', options: ['东', '西', '南', '北'], correct: 0 },
-        { question: '地球上最大的海洋是？', options: ['太平洋', '大西洋', '印度洋', '北冰洋'], correct: 0 },
+        { question: '世界上最大的海洋是？', options: ['太平洋', '大西洋', '印度洋', '北冰洋'], correct: 0 },
+        { question: '一年有多少天？', options: ['365', '360', '366', '350'], correct: 0 },
+        { question: '熊猫最爱吃什么？', options: ['竹子', '苹果', '胡萝卜', '鱼'], correct: 0 },
+        { question: '彩虹有几种颜色？', options: ['7', '5', '6', '8'], correct: 0 },
+        { question: '地球是什么形状的？', options: ['球形', '方形', '三角形', '平面'], correct: 0 },
       ],
-      timePerQuestion: 15,
-      scoring: { correct: 10, wrong: 0, timeBonus: true },
+      timePerQuestion: 10,
+      scoring: { correct: 20, wrong: 0, timeBonus: true },
     },
-    Scorer:       { perHit: 10 },
+    Scorer:       { perHit: 20 },
     Timer:        { duration: 60, mode: 'countdown' },
     UIOverlay:    {},
     ResultScreen: { show: ['score', 'accuracy'], rating: { '3star': 80, '2star': 50, '1star': 20 } },
@@ -220,12 +222,12 @@ const PRESETS: Record<GameType, GamePreset> = {
     GameFlow:     { countdown: 0, onFinish: 'show_result' },
     Randomizer:   {
       items: [
-        { asset: 'option1', label: '奖品A', weight: 1 },
-        { asset: 'option2', label: '奖品B', weight: 1 },
-        { asset: 'option3', label: '奖品C', weight: 1 },
-        { asset: 'option4', label: '奖品D', weight: 1 },
-        { asset: 'option5', label: '奖品E', weight: 1 },
-        { asset: 'option6', label: '奖品F', weight: 1 },
+        { asset: 'option1', label: '🍔 火锅', weight: 1 },
+        { asset: 'option2', label: '🍜 烧烤', weight: 1 },
+        { asset: 'option3', label: '🍕 披萨', weight: 1 },
+        { asset: 'option4', label: '🍣 寿司', weight: 1 },
+        { asset: 'option5', label: '🍰 甜点', weight: 1 },
+        { asset: 'option6', label: '🥗 沙拉', weight: 1 },
       ],
       animation: 'wheel',
       spinDuration: 3,
@@ -270,7 +272,7 @@ const PRESETS: Record<GameType, GamePreset> = {
   // ──────────────────────────────────────────
   runner: {
     GameFlow:     { countdown: 3, onFinish: 'show_result' },
-    Runner:       { speed: 300, laneCount: 3, acceleration: 10 },
+    Runner:       { speed: 250, laneCount: 3, acceleration: 10 },
     Spawner:      {
       frequency: 1.0, maxCount: 10,
       speed: { min: 200, max: 300 },
@@ -302,7 +304,7 @@ const PRESETS: Record<GameType, GamePreset> = {
         { field: 'maxCount', increase: 2, max: 15, every: 10 },
       ],
     },
-    Jump:         { jumpForce: 500, gravity: 980, groundY: 0.8, triggerEvent: 'input:touch:tap' },
+    Jump:         { jumpForce: 500, gravity: 800, groundY: 0.8, triggerEvent: 'input:touch:tap' },
     PowerUp:      {
       powerUpTypes: [
         { type: 'shield', duration: 5000 },

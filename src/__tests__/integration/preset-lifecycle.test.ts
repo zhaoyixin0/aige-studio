@@ -51,8 +51,8 @@ describe('Preset Lifecycle', () => {
     const config = result.config!;
     const spawner = config.modules.find(m => m.type === 'Spawner');
     expect(spawner).toBeDefined();
-    expect((spawner!.params as any).speed?.min).toBe(120);
-    expect((spawner!.params as any).speed?.max).toBe(220);
+    expect((spawner!.params as any).speed?.min).toBe(200);
+    expect((spawner!.params as any).speed?.max).toBe(300);
   });
 
   it('shooting preset should use random spawn direction', () => {
