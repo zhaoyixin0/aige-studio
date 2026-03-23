@@ -51,6 +51,7 @@ export interface GameMeta {
   description: string;
   thumbnail: string | null;
   createdAt: string;
+  theme?: string;
 }
 
 export interface GameConfig {
