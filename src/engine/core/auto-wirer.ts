@@ -30,8 +30,24 @@ const WIRING_RULES: WiringRule[] = [
       });
     },
   },
+  {
+    // Collectible + Collision: auto-register collectible items for collision detection
+    requires: ['Collectible', 'Collision'],
+    setup: (engine, modules) => {
+      const collision = modules.get('Collision') as Collision;
+      const collectible = modules.get('Collectible') as any;
+      const items = collectible.getActiveItems?.() ?? [];
+      for (let i = 0; i < items.length; i++) {
+        collision.registerObject(`collectible-${i}`, 'collectibles', {
+          x: items[i].x, y: items[i].y, radius: 16,
+        });
+      }
+    },
+  },
   // Timer + GameFlow: handled internally (GameFlow listens to timer:end)
   // Lives + GameFlow: handled internally (GameFlow listens to lives:zero)
+  // Checkpoint + Lives: handled internally (Checkpoint listens to lives:zero)
+  // IFrames + Collision: checked via iframes.isActive() at runtime
 ];
 
 export class AutoWirer {

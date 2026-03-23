@@ -27,12 +27,30 @@ export { PlaneDetection } from './mechanic/plane-detection';
 export { BranchStateMachine } from './mechanic/branch-state-machine';
 export { DressUpEngine } from './mechanic/dress-up-engine';
 
+// Mechanic — Platformer (Batch 1)
+export { Gravity } from './mechanic/gravity';
+export { Knockback } from './mechanic/knockback';
+export { IFrames } from './mechanic/i-frames';
+export { PlayerMovement } from './mechanic/player-movement';
+export { Dash } from './mechanic/dash';
+export { CoyoteTime } from './mechanic/coyote-time';
+export { StaticPlatform } from './mechanic/static-platform';
+export { MovingPlatform } from './mechanic/moving-platform';
+export { OneWayPlatform } from './mechanic/one-way-platform';
+export { CrumblingPlatform } from './mechanic/crumbling-platform';
+export { Hazard } from './mechanic/hazard';
+export { Collectible } from './mechanic/collectible';
+export { Inventory } from './mechanic/inventory';
+export { Checkpoint } from './mechanic/checkpoint';
+export { WallDetect } from './mechanic/wall-detect';
+
 // Feedback
 export { GameFlow } from './feedback/game-flow';
 export { ParticleVFX } from './feedback/particle-vfx';
 export { SoundFX } from './feedback/sound-fx';
 export { UIOverlay } from './feedback/ui-overlay';
 export { ResultScreen } from './feedback/result-screen';
+export { CameraFollow } from './feedback/camera-follow';
 
 // Base
 export { BaseModule } from './base-module';
