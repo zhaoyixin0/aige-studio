@@ -161,6 +161,8 @@ export class PixiRenderer {
           for (const mod of engine.getAllModules()) {
             (mod as any).reset?.();
           }
+          // Reset renderer so player gets re-registered with collision
+          this.gameObjectRenderer?.reset();
           gf.transition('countdown');
         }
       };
