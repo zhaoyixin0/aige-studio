@@ -185,6 +185,18 @@ export class MatchEngine extends BaseModule {
     return this.grid.map((c) => ({ ...c }));
   }
 
+  getGridCols(): number {
+    return (this.params.gridCols as number) ?? 4;
+  }
+
+  getGridRows(): number {
+    return (this.params.gridRows as number) ?? 4;
+  }
+
+  getSelectedCells(): number[] {
+    return [...this.selected];
+  }
+
   getMatchesFound(): number {
     return this.matchesFound;
   }

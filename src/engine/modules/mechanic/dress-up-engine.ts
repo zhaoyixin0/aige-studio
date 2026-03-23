@@ -80,6 +80,10 @@ export class DressUpEngine extends BaseModule {
     return true;
   }
 
+  getLayers(): string[] {
+    return (this.params.layers as string[]) ?? [];
+  }
+
   getEquipped(layer?: string): EquippedItem[] {
     const result: EquippedItem[] = [];
 

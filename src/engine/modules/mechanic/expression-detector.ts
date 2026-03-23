@@ -5,6 +5,8 @@ export class ExpressionDetector extends BaseModule {
   readonly type = 'ExpressionDetector';
 
   private lastDetectTime = -Infinity;
+  private matched = false;
+  private matchFadeTimer = 0;
 
   getSchema(): ModuleSchema {
     return {
@@ -57,6 +59,8 @@ export class ExpressionDetector extends BaseModule {
 
     if (confidence >= threshold) {
       this.lastDetectTime = now;
+      this.matched = true;
+      this.matchFadeTimer = 1500; // ms to show checkmark
       this.emit('expression:detected', {
         expression: expressionType,
         confidence,
@@ -79,11 +83,31 @@ export class ExpressionDetector extends BaseModule {
     }
   }
 
-  update(_dt: number): void {
-    // Event-driven — no-op
+  update(dt: number): void {
+    if (this.matchFadeTimer > 0) {
+      this.matchFadeTimer -= dt;
+      if (this.matchFadeTimer <= 0) {
+        this.matched = false;
+        this.matchFadeTimer = 0;
+      }
+    }
+  }
+
+  getExpressionType(): string {
+    return (this.params.expressionType as string) ?? 'smile';
+  }
+
+  isMatched(): boolean {
+    return this.matched;
+  }
+
+  getMatchFadeTimer(): number {
+    return this.matchFadeTimer;
   }
 
   reset(): void {
     this.lastDetectTime = -Infinity;
+    this.matched = false;
+    this.matchFadeTimer = 0;
   }
 }

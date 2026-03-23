@@ -7,6 +7,8 @@ export class GestureMatch extends BaseModule {
   private currentTarget: string | null = null;
   private displayTimer = 0;
   private active = false;
+  private matchCount = 0;
+  private totalTargets = 0;
 
   getSchema(): ModuleSchema {
     return {
@@ -45,6 +47,9 @@ export class GestureMatch extends BaseModule {
 
   start(): void {
     this.active = true;
+    this.matchCount = 0;
+    const gestures: string[] = this.params.targetGestures ?? [];
+    this.totalTargets = gestures.length;
     this.nextTarget();
   }
 
@@ -69,6 +74,7 @@ export class GestureMatch extends BaseModule {
     const confidence = (data.confidence as number | undefined) ?? 1;
 
     if (gesture === this.currentTarget && confidence >= threshold) {
+      this.matchCount++;
       this.emit('gesture:match', {
         target: this.currentTarget,
         gesture,
@@ -108,9 +114,19 @@ export class GestureMatch extends BaseModule {
     return this.active;
   }
 
+  getProgress(): { matched: number; total: number } {
+    return { matched: this.matchCount, total: this.totalTargets };
+  }
+
+  getTargetGestures(): string[] {
+    return (this.params.targetGestures as string[]) ?? [];
+  }
+
   reset(): void {
     this.currentTarget = null;
     this.displayTimer = 0;
     this.active = false;
+    this.matchCount = 0;
+    this.totalTargets = 0;
   }
 }
