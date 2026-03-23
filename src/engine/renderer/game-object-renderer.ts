@@ -58,6 +58,10 @@ export class GameObjectRenderer {
   }
 
   private syncPlayer(engine: Engine): void {
+    // Only show player character if there are spawned objects to interact with
+    const hasSpawner = engine.getModulesByType('Spawner').length > 0;
+    if (!hasSpawner) return;
+
     // Try FaceInput, HandInput, then TouchInput
     const faceInput = engine.getModulesByType('FaceInput')[0] as FaceInput | undefined;
     const handInput = engine.getModulesByType('HandInput')[0] as HandInput | undefined;

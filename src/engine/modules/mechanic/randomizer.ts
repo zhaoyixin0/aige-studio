@@ -118,6 +118,16 @@ export class Randomizer extends BaseModule {
     return this.spinning;
   }
 
+  getSpinProgress(): number {
+    if (!this.spinning) return 0;
+    const duration = this.params.spinDuration ?? 3;
+    return Math.min(1, this.spinTimer / duration);
+  }
+
+  getItems(): Array<{ asset: string; label?: string; weight: number }> {
+    return this.params.items ?? [];
+  }
+
   reset(): void {
     this.spinning = false;
     this.spinTimer = 0;
