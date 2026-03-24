@@ -63,6 +63,11 @@ export interface GameConfig {
   assets: Record<string, AssetEntry>;
 }
 
+export interface ModuleDependencies {
+  requires: string[];
+  optional: string[];
+}
+
 export interface GameModule {
   id: string;
   type: string;
@@ -70,6 +75,7 @@ export interface GameModule {
   update(dt: number): void;
   destroy(): void;
   getSchema(): ModuleSchema;
+  getDependencies(): ModuleDependencies;
   configure(params: Record<string, any>): void;
   getParams(): Record<string, any>;
   onAttach(engine: GameEngine): void;

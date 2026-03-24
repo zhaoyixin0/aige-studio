@@ -46,6 +46,25 @@ export class ConfigLoader {
     }
 
     AutoWirer.wire(engine);
+
+    // Validate module dependencies
+    this.validateDependencies(engine);
+  }
+
+  private validateDependencies(engine: Engine): void {
+    const moduleTypes = new Set(engine.getAllModules().map((m) => m.type));
+
+    for (const mod of engine.getAllModules()) {
+      const deps = mod.getDependencies();
+      for (const req of deps.requires) {
+        if (!moduleTypes.has(req)) {
+          console.warn(
+            `[ConfigLoader] Module "${mod.type}" (${mod.id}) requires "${req}" but it is not loaded. ` +
+            `This module may not function correctly.`
+          );
+        }
+      }
+    }
   }
 
   /**

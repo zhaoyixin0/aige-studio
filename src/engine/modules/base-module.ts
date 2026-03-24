@@ -2,6 +2,7 @@ import type {
   GameModule,
   GameEngine,
   ModuleSchema,
+  ModuleDependencies,
   EventHandler,
 } from '@/engine/core';
 
@@ -21,6 +22,8 @@ export abstract class BaseModule implements GameModule {
 
   private readonly _onResume = () => { this.gameflowPaused = false; };
   private readonly _onPause = () => { this.gameflowPaused = true; };
+
+  private _trackedListeners: Array<{ event: string; handler: EventHandler }> = [];
 
   constructor(id: string, params: Record<string, any> = {}) {
     this.id = id;
@@ -52,6 +55,11 @@ export abstract class BaseModule implements GameModule {
   }
 
   destroy(): void {
+    for (const { event, handler } of this._trackedListeners) {
+      this.engine?.eventBus.off(event, handler);
+    }
+    this._trackedListeners = [];
+
     this.engine?.eventBus.off('gameflow:resume', this._onResume);
     this.engine?.eventBus.off('gameflow:pause', this._onPause);
     this.engine = null;
@@ -68,6 +76,10 @@ export abstract class BaseModule implements GameModule {
   abstract update(dt: number): void;
   abstract getSchema(): ModuleSchema;
 
+  getDependencies(): ModuleDependencies {
+    return { requires: [], optional: [] };
+  }
+
   // --- Helpers ---
 
   protected emit(event: string, data?: unknown): void {
@@ -76,5 +88,6 @@ export abstract class BaseModule implements GameModule {
 
   protected on(event: string, handler: EventHandler): void {
     this.engine?.eventBus.on(event, handler);
+    this._trackedListeners.push({ event, handler });
   }
 }
