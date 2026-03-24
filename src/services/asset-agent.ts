@@ -122,7 +122,7 @@ export class AssetAgent {
     if (!gemini) return result;
 
     const theme = config.meta?.theme ?? '';
-    const style: PromptContext['style'] = 'cartoon';
+    const style = (config.meta?.artStyle as PromptContext['style']) || 'cartoon';
 
     for (let i = 0; i < keysToProcess.length; i++) {
       if (signal.aborted) return result;

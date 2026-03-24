@@ -11,6 +11,7 @@ export type WizardStep =
   | 'input_method'
   | 'duration'
   | 'theme'
+  | 'art_style'
   | 'character'
   | 'optional_modules'
   | 'background'
@@ -37,6 +38,7 @@ export interface WizardState {
   inputMethod: string | null;
   duration: number | null;
   theme: string | null;
+  artStyle: string | null;
   character: string | null;
   optionalModules: Record<string, boolean>;
   currentOptionalIndex: number;
@@ -446,6 +448,7 @@ export class GameWizard {
     inputMethod: null,
     duration: null,
     theme: null,
+    artStyle: null,
     character: null,
     optionalModules: {},
     currentOptionalIndex: 0,
@@ -454,7 +457,7 @@ export class GameWizard {
 
   /** Start the wizard from scratch. Returns the first question. */
   private static readonly STEP_ORDER: WizardStep[] = [
-    'game_type', 'input_method', 'duration', 'theme',
+    'game_type', 'input_method', 'duration', 'theme', 'art_style',
     'character', 'optional_modules', 'background',
   ];
 
@@ -465,9 +468,10 @@ export class GameWizard {
     if (idx <= 1) { this.state.inputMethod = null; }
     if (idx <= 2) { this.state.duration = null; }
     if (idx <= 3) { this.state.theme = null; }
-    if (idx <= 4) { this.state.character = null; }
-    if (idx <= 5) { this.state.optionalModules = {}; this.state.currentOptionalIndex = 0; }
-    if (idx <= 6) { this.state.wantBackground = false; }
+    if (idx <= 4) { this.state.artStyle = null; }
+    if (idx <= 5) { this.state.character = null; }
+    if (idx <= 6) { this.state.optionalModules = {}; this.state.currentOptionalIndex = 0; }
+    if (idx <= 7) { this.state.wantBackground = false; }
     this.state.step = step;
   }
 
@@ -478,6 +482,7 @@ export class GameWizard {
       case 'input_method': return this.getInputMethodQuestion();
       case 'duration': return this.getDurationQuestion();
       case 'theme': return this.getThemeQuestion();
+      case 'art_style': return this.getArtStyleQuestion();
       case 'character': return this.getCharacterQuestion();
       case 'optional_modules': return this.getNextOptionalQuestion();
       case 'background': return this.getBackgroundQuestion();
@@ -577,6 +582,7 @@ export class GameWizard {
         thumbnail: null,
         createdAt: new Date().toISOString(),
         theme: themeId,
+        ...(this.state.artStyle ? { artStyle: this.state.artStyle } : {}),
         ...(playerEmoji ? { playerEmoji } : {}),
       },
       canvas: { width: 1080, height: 1920 },
@@ -611,7 +617,12 @@ export class GameWizard {
 
       case 'theme': {
         this.state.theme = choiceId;
-        // After theme, go to character selection
+        this.state.step = 'art_style';
+        return { question: this.getArtStyleQuestion(), config: null, summary: '' };
+      }
+
+      case 'art_style': {
+        this.state.artStyle = choiceId;
         this.state.step = 'character';
         return { question: this.getCharacterQuestion(), config: null, summary: '' };
       }
@@ -728,6 +739,21 @@ export class GameWizard {
       step: 'theme',
       question: '选择游戏主题：',
       choices: THEME_CHOICES,
+    };
+  }
+
+  private getArtStyleQuestion(): WizardQuestion {
+    return {
+      step: 'art_style',
+      question: '选择素材画风：',
+      choices: [
+        { id: 'cartoon', label: '卡通风', emoji: '\u{1F3A8}' },
+        { id: 'pixel', label: '像素风', emoji: '\u{1F579}' },
+        { id: 'flat', label: '扁平风', emoji: '\u{1F4D0}' },
+        { id: 'realistic', label: '写实风', emoji: '\u{1F4F7}' },
+        { id: 'watercolor', label: '水彩风', emoji: '\u{1F58C}' },
+        { id: 'chibi', label: 'Q版可爱', emoji: '\u{1F431}' },
+      ],
     };
   }
 
@@ -860,6 +886,7 @@ export class GameWizard {
         thumbnail: null,
         createdAt: new Date().toISOString(),
         theme: themeId,
+        ...(this.state.artStyle ? { artStyle: this.state.artStyle } : {}),
         ...(playerEmoji ? { playerEmoji } : {}),
       },
       canvas: { width: 1080, height: 1920 },

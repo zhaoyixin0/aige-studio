@@ -4,7 +4,7 @@ export interface PromptContext {
   gameType: string;
   theme: string;
   role: 'good' | 'bad' | 'player' | 'bullet' | 'background';
-  style: 'cartoon' | 'pixel' | 'flat' | 'realistic';
+  style: string;
 }
 
 const THEME_AESTHETICS: Record<string, string> = {
@@ -87,9 +87,11 @@ const THEMED_ITEM_DESCRIPTIONS: Record<string, Record<string, string>> = {
 
 const STYLE_INSTRUCTIONS: Record<string, string> = {
   cartoon: 'cartoon style, bold outlines, vibrant colors, 2D flat shading',
-  pixel: 'pixel art style, 32x32 grid, retro 8-bit aesthetic',
+  pixel: 'pixel art style, 32x32 grid, retro 8-bit aesthetic, limited color palette',
   flat: 'flat design, minimal shadows, clean geometric shapes, material design',
   realistic: 'semi-realistic, soft lighting, detailed textures, 3D rendered look',
+  watercolor: 'watercolor painting style, soft edges, blended colors, paper texture, artistic brush strokes',
+  chibi: 'chibi / super-deformed style, oversized head, tiny body, cute round eyes, kawaii aesthetic',
 };
 
 export class PromptBuilder {
