@@ -281,6 +281,15 @@ export class PixiRenderer {
   destroy(): void {
     if (!this.initialized) return;
     this.initialized = false;
+
+    // Clean up engine event listeners to prevent leaks
+    if (this.connectedEngine) {
+      for (const { event, handler } of this.engineEventHandlers) {
+        this.connectedEngine.eventBus.off(event, handler);
+      }
+    }
+    this.engineEventHandlers = [];
+
     if (this.canvasClickHandler) {
       this.app.canvas?.removeEventListener('click', this.canvasClickHandler);
       this.canvasClickHandler = null;
