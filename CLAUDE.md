@@ -16,7 +16,7 @@ AIGE Studio is a modular social platform game creation tool. Users create games 
 - **AI:** Claude API (free-form chat), Gemini Imagen 4 (asset generation)
 - **Image Processing:** @imgly/background-removal (ONNX WASM, browser-side)
 - **Storage:** IndexedDB (asset library via idb-keyval)
-- **Testing:** Vitest (390+ tests)
+- **Testing:** Vitest (543+ tests)
 - **Tracking:** MediaPipe (face/hand/body, optional)
 
 ## Architecture
@@ -43,7 +43,7 @@ Export (Web HTML / .apjs)
 - `src/engine/tracking/` — MediaPipe wrappers (face, hand, body)
 
 ### Agent & Wizard
-- `src/agent/wizard.ts` — GameWizard: step-by-step guided game creation (14 game types)
+- `src/agent/wizard.ts` — GameWizard: step-by-step guided game creation (15 game types)
 - `src/agent/agent.ts` — Agent orchestrator: wizard routing, Mode B auto-build, enhancement suggestions
 - `src/agent/game-presets.ts` — Market-calibrated default params per game type
 - `src/agent/skill-loader.ts` — Knowledge base loader
@@ -55,7 +55,7 @@ Export (Web HTML / .apjs)
 - `src/services/asset-agent.ts` — Auto search/generate/remove-bg/save pipeline
 - `src/services/asset-library.ts` — IndexedDB persistent asset storage
 - `src/services/bg-remover.ts` — @imgly/background-removal wrapper
-- `src/services/prompt-builder.ts` — Context-aware Gemini prompt generation
+- `src/services/prompt-builder.ts` — Context-aware Gemini prompt generation (theme-specific item descriptions)
 - `src/services/gemini-image.ts` — Imagen 4 API client
 
 ### UI
@@ -67,7 +67,7 @@ Export (Web HTML / .apjs)
 - `src/ui/export/export-dialog.tsx` — Web + .apjs export
 
 ### Knowledge Base
-- `src/knowledge/game-types/` — 14 game type skill files (Chinese)
+- `src/knowledge/game-types/` — 15 game type skill files (Chinese)
 - `src/knowledge/modules/` — 19 module skill files
 - `src/knowledge/relations/` — Module wiring, synergies, conflicts
 
@@ -102,7 +102,7 @@ Wizard and Mode B work WITHOUT any API keys.
 npm run dev          # Dev server
 npm run dev -- --host  # Dev server + LAN access
 npm run build        # Production build
-npx vitest run       # Run all tests (535+)
+npx vitest run       # Run all tests (543+)
 npx tsc --noEmit     # Type check
 ```
 
@@ -142,6 +142,31 @@ Previous prototype at `C:\Users\yixin\Downloads\secret demo\index.html` — sing
 19. 16 platformer modules (Gravity, Knockback, IFrames, PlayerMovement, Dash, CoyoteTime, StaticPlatform, MovingPlatform, OneWayPlatform, CrumblingPlatform, Hazard, Collectible, Inventory, Checkpoint, WallDetect, CameraFollow)
 20. Platformer game type preset + integration tests
 21. Auto-wirer expansion (Collectible+Collision wiring)
+22. Game flow UI: start screen (click to play), countdown overlay (3,2,1,GO!), result screen (score + stars + restart)
+23. Canvas click handler for game start/restart (replaces PixiJS events for reliability)
+24. Asset library strict theme matching — no cross-theme fallback, forces regeneration
+25. Theme-specific asset generation prompts (space→crystal, fruit→strawberry, etc.)
+26. Collision re-registration fix on game restart
+27. HTML nesting fix (button-in-button → div with role=button)
+
+## Game Flow
+```
+Start Screen ("click to start")
+    ↓ click
+Countdown (3, 2, 1, GO!)
+    ↓
+Playing (timer, score, lives HUD)
+    ↓ timer:end / lives:zero
+Result Screen (score + stars + time + "click to restart")
+    ↓ click
+Restart → Countdown...
+```
+
+## Module Expansion Plan (3 batches)
+- **Batch 1 (done):** 16 platformer modules — physics, movement, platforms, collectibles, camera
+- **Batch 2 (planned):** ~7 shooter/bullet modules — Projectile, AimControl, EnemyAI, Health, WaveManager, BulletPattern, Shield
+- **Batch 3 (planned):** ~6 action-RPG modules — MeleeAttack, Patrol, ResourcePool, LootDrop, StatusEffect, DialogTrigger
+- Design docs: `docs/plans/2026-03-23-module-expansion-design.md`
 
 ## Known Issues / Next Steps
 - Background removal is slow (~10-30s/image, single-threaded WASM)
@@ -149,3 +174,5 @@ Previous prototype at `C:\Users\yixin\Downloads\secret demo\index.html` — sing
 - Gemini API key exposed in frontend (fine for internal use, need proxy for public)
 - V1's Python backend Agent (WebSocket + tool_use) could be ported for better AI interaction
 - Comprehensive mobile touch testing needed
+- Platformer modules need renderer integration (platforms/hazards not yet rendered visually)
+- Batch 2 & 3 module expansion pending
