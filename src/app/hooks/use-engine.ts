@@ -45,7 +45,10 @@ export function useEngine() {
   const loaderRef = useRef<ConfigLoader | null>(null);
 
   // Lazy initialization to avoid creating throwaway objects on re-render
-  if (!engineRef.current) engineRef.current = new Engine();
+  if (!engineRef.current) {
+    engineRef.current = new Engine();
+    (window as any).__engine = engineRef.current;
+  }
   if (!registryRef.current) registryRef.current = createModuleRegistry();
   if (!loaderRef.current) loaderRef.current = new ConfigLoader(registryRef.current);
   const canvasElRef = useRef<HTMLCanvasElement | null>(null);
@@ -113,6 +116,7 @@ export function useEngine() {
 
       // Recreate engine for potential re-mount
       engineRef.current = new Engine();
+      (window as any).__engine = engineRef.current;
     };
   }, []);
 

@@ -2,6 +2,19 @@ import type { EventHandler } from './types';
 
 export class EventBus {
   private listeners = new Map<string, Set<EventHandler>>();
+  private debug = false;
+
+  setDebug(enabled: boolean): void {
+    this.debug = enabled;
+  }
+
+  getListenerCount(event: string): number {
+    return this.listeners.get(event)?.size ?? 0;
+  }
+
+  getRegisteredEvents(): string[] {
+    return Array.from(this.listeners.keys());
+  }
 
   on(event: string, handler: EventHandler): void {
     if (!this.listeners.has(event)) {
@@ -39,6 +52,14 @@ export class EventBus {
             handler(data);
           }
         }
+      }
+    }
+
+    if (this.debug) {
+      const count = exact?.size ?? 0;
+      console.log(`[EventBus] ${event} → ${count} listeners`, data);
+      if (count === 0) {
+        console.warn(`[EventBus] ⚠ No listeners for: ${event}`);
       }
     }
   }
