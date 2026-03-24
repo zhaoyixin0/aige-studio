@@ -20,7 +20,6 @@ export class Collision extends BaseModule {
   readonly type = 'Collision';
 
   private objects = new Map<string, CollisionObject>();
-  private paused = false;
 
   getSchema(): ModuleSchema {
     return {
@@ -34,14 +33,6 @@ export class Collision extends BaseModule {
 
   init(engine: GameEngine): void {
     super.init(engine);
-
-    this.on('gameflow:pause', () => {
-      this.paused = true;
-    });
-
-    this.on('gameflow:resume', () => {
-      this.paused = false;
-    });
   }
 
   registerObject(
@@ -58,11 +49,13 @@ export class Collision extends BaseModule {
     });
   }
 
-  updateObject(id: string, position: { x: number; y: number }): void {
+  updateObject(id: string, position: { x: number; y: number; radius?: number }): void {
     const obj = this.objects.get(id);
-    if (obj) {
-      obj.x = position.x;
-      obj.y = position.y;
+    if (!obj) return;
+    obj.x = position.x;
+    obj.y = position.y;
+    if (position.radius !== undefined) {
+      obj.radius = position.radius;
     }
   }
 
@@ -71,7 +64,7 @@ export class Collision extends BaseModule {
   }
 
   update(_dt: number): void {
-    if (this.paused) return;
+    if (this.gameflowPaused) return;
 
     const rules: CollisionRule[] = this.params.rules ?? [];
     const toDestroy = new Set<string>();
@@ -131,6 +124,5 @@ export class Collision extends BaseModule {
 
   reset(): void {
     this.objects.clear();
-    this.paused = false;
   }
 }

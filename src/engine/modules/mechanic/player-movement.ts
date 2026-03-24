@@ -56,31 +56,72 @@ export class PlayerMovement extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    const moveLeftEvent = this.params.moveLeftEvent ?? 'input:touch:swipe:left';
-    const moveRightEvent = this.params.moveRightEvent ?? 'input:touch:swipe:right';
-
-    this.on(moveLeftEvent, () => {
-      this.direction = -1;
-      this.inputActive = true;
+    // Touch hold: left half → move left, right half → move right
+    this.on('input:touch:hold', (data?: any) => {
+      if (data?.side === 'left') {
+        this.direction = -1;
+        this.inputActive = true;
+      } else if (data?.side === 'right') {
+        this.direction = 1;
+        this.inputActive = true;
+      }
     });
 
-    this.on(moveRightEvent, () => {
-      this.direction = 1;
-      this.inputActive = true;
+    // Touch release: stop input
+    this.on('input:touch:release', () => {
+      this.inputActive = false;
     });
+
+    // Swipe also works for quick direction changes
+    this.on('input:touch:swipe', (data?: any) => {
+      if (data?.direction === 'left') {
+        this.direction = -1;
+        this.inputActive = true;
+      } else if (data?.direction === 'right') {
+        this.direction = 1;
+        this.inputActive = true;
+      }
+    });
+
+    // Support custom discrete events (for non-touch inputs like hand gesture)
+    const moveLeftEvent = this.params.moveLeftEvent;
+    const moveRightEvent = this.params.moveRightEvent;
+    if (moveLeftEvent && !moveLeftEvent.startsWith('input:touch:')) {
+      this.on(moveLeftEvent, () => {
+        this.direction = -1;
+        this.inputActive = true;
+      });
+    }
+    if (moveRightEvent && !moveRightEvent.startsWith('input:touch:')) {
+      this.on(moveRightEvent, () => {
+        this.direction = 1;
+        this.inputActive = true;
+      });
+    }
 
     const continuousEvent = this.params.continuousEvent;
     if (continuousEvent) {
       this.on(continuousEvent, (data?: any) => {
-        if (data && typeof data.x === 'number') {
-          const canvasWidth = this.engine?.getCanvas().width ?? 800;
+        if (!data) return;
+        const canvasWidth = this.engine?.getCanvas().width ?? 800;
+        if (typeof data.x === 'number') {
+          // Position-based input (face/hand: normalized 0-1)
           this.x = data.x * canvasWidth;
+        } else if (typeof data.frequency === 'number') {
+          // Frequency-based input (audio: pitch maps to x position)
+          // Map 200-800 Hz range to canvas width
+          const normalized = Math.max(0, Math.min(1, (data.frequency - 200) / 600));
+          this.x = normalized * canvasWidth;
+        } else if (typeof data.tiltX === 'number') {
+          // Tilt-based input (device: -1 to 1)
+          this.x = (data.tiltX + 1) / 2 * canvasWidth;
         }
       });
     }
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     const speed = this.params.speed ?? 300;
     const acceleration = this.params.acceleration ?? 1000;
     const deceleration = this.params.deceleration ?? 800;

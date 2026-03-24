@@ -36,6 +36,7 @@ export class BodyInput extends BaseModule {
   }
 
   update(_dt: number): void {
+    if (this.gameflowPaused) return;
     if (!this.tracker) return;
 
     const result = this.tracker.getLastResult();

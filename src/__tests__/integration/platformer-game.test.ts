@@ -32,6 +32,7 @@ describe('Platformer Game Integration', () => {
     engine.addModule(new IFrames('if-1', { duration: 1000 }));
     engine.addModule(new Knockback('kb-1', { force: 300, duration: 200 }));
     engine.addModule(new CameraFollow('cam-1', { mode: 'center', smoothing: 0.1 }));
+    engine.eventBus.emit('gameflow:resume');
     return engine;
   }
 

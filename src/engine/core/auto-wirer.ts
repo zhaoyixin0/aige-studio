@@ -1,5 +1,6 @@
 import type { GameEngine, GameModule } from './types';
 import type { Collision } from '@/engine/modules/mechanic/collision';
+import type { Spawner } from '@/engine/modules/mechanic/spawner';
 
 interface WiringRule {
   requires: string[];
@@ -12,13 +13,16 @@ const WIRING_RULES: WiringRule[] = [
     requires: ['Spawner', 'Collision'],
     setup: (engine, modules) => {
       const collision = modules.get('Collision') as Collision;
+      const spawner = modules.get('Spawner') as Spawner;
 
       engine.eventBus.on('spawner:created', (data?: any) => {
         if (data?.id != null) {
+          const spriteSize = (spawner as any).getParams().spriteSize ?? 48;
+          const radius = spriteSize / 2;
           collision.registerObject(data.id, 'items', {
             x: data.x ?? 0,
             y: data.y ?? 0,
-            radius: 20,
+            radius,
           });
         }
       });
@@ -36,10 +40,12 @@ const WIRING_RULES: WiringRule[] = [
     setup: (engine, modules) => {
       const collision = modules.get('Collision') as Collision;
       const collectible = modules.get('Collectible') as any;
+      const collectibleSize = collectible.getParams?.().spriteSize ?? 32;
+      const collectibleRadius = collectibleSize / 2;
       const items = collectible.getActiveItems?.() ?? [];
       for (let i = 0; i < items.length; i++) {
         collision.registerObject(`collectible-${i}`, 'collectibles', {
-          x: items[i].x, y: items[i].y, radius: 16,
+          x: items[i].x, y: items[i].y, radius: collectibleRadius,
         });
       }
     },

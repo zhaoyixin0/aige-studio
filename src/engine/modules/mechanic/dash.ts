@@ -93,6 +93,7 @@ export class Dash extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     // Decrement cooldown
     if (this.cooldownRemaining > 0) {
       this.cooldownRemaining = Math.max(0, this.cooldownRemaining - dt);

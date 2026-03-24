@@ -7,6 +7,7 @@ describe('MovingPlatform', () => {
     const engine = new Engine();
     const platform = new MovingPlatform('platform-1', params);
     engine.addModule(platform);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, platform };
   }
 

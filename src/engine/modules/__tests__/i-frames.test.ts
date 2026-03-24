@@ -7,6 +7,7 @@ describe('IFrames', () => {
     const engine = new Engine();
     const iframes = new IFrames('iframes-1', params);
     engine.addModule(iframes);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, iframes };
   }
 

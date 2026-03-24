@@ -68,6 +68,7 @@ export class MovingPlatform extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     const dtSec = dt / 1000;
 
     for (let i = 0; i < this.states.length; i++) {

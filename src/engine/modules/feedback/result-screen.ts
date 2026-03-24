@@ -37,6 +37,7 @@ export class ResultScreen extends BaseModule {
 
   init(engine: GameEngine): void {
     super.init(engine);
+    this.gameflowPaused = false;
 
     this.on('gameflow:state', (data: any) => {
       if (data?.state === 'finished') {

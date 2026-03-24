@@ -7,6 +7,7 @@ describe('CameraFollow', () => {
     const engine = new Engine();
     const cam = new CameraFollow('cam-1', params);
     engine.addModule(cam);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, cam };
   }
 

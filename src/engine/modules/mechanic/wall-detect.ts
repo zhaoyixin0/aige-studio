@@ -96,6 +96,7 @@ export class WallDetect extends BaseModule {
   }
 
   update(_dt: number): void {
+    if (this.gameflowPaused) return;
     if (this.touching && this.params.wallSlide) {
       this.emit('wall:slide', {
         side: this.side,

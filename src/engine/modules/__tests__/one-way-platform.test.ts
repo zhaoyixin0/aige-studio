@@ -13,6 +13,7 @@ describe('OneWayPlatform', () => {
     const engine = new Engine();
     const platform = new OneWayPlatform('owp-1', params);
     engine.addModule(platform);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, platform };
   }
 

@@ -90,6 +90,8 @@ describe('Catch Game Integration', () => {
   it('should spawn objects over time', () => {
     const engine = createCatchEngine();
     const spawner = engine.getModule('spawner_1') as unknown as Spawner;
+    const gameflow = engine.getModule('gameflow_1') as unknown as GameFlow;
+    gameflow.transition('countdown');
 
     // Initially no objects
     expect(spawner.getObjects().length).toBe(0);
@@ -136,6 +138,8 @@ describe('Catch Game Integration', () => {
   it('should count down timer and emit timer:end', () => {
     const engine = createCatchEngine();
     const timer = engine.getModule('timer_1') as unknown as Timer;
+    const gameflow = engine.getModule('gameflow_1') as unknown as GameFlow;
+    gameflow.transition('countdown');
 
     let timerEnded = false;
     engine.eventBus.on('timer:end', () => {
@@ -153,6 +157,8 @@ describe('Catch Game Integration', () => {
 
   it('should emit timer:tick every frame with decreasing remaining', () => {
     const engine = createCatchEngine();
+    const gameflow = engine.getModule('gameflow_1') as unknown as GameFlow;
+    gameflow.transition('countdown');
     const tickEvents: any[] = [];
 
     engine.eventBus.on('timer:tick', (data) => {
@@ -289,6 +295,8 @@ describe('Catch Game Integration', () => {
 
   it('should update UIOverlay HUD state on timer:tick', () => {
     const engine = createCatchEngine();
+    const gameflow = engine.getModule('gameflow_1') as unknown as GameFlow;
+    gameflow.transition('countdown');
     const overlay = engine.getModule('overlay_1') as unknown as UIOverlay;
 
     // Tick 1 second

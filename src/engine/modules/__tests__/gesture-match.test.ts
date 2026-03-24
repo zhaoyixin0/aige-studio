@@ -7,6 +7,7 @@ describe('GestureMatch', () => {
     const engine = new Engine();
     const gm = new GestureMatch('gm-1', params);
     engine.addModule(gm);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, gm };
   }
 

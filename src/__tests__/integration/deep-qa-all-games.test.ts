@@ -63,6 +63,7 @@ function startPlaying(engine: Engine): void {
   if (gf) {
     gf.transition('playing');
   }
+  engine.eventBus.emit('gameflow:resume');
 }
 
 /* ================================================================== */
@@ -387,7 +388,7 @@ describe('Deep QA: Quiz', () => {
     engine.eventBus.on('quiz:correct', () => {
       correctFired = true;
     });
-    engine.eventBus.on('quiz:score', (data) => {
+    engine.eventBus.on('scorer:update', (data) => {
       scoreFired = true;
       expect(data.delta).toBeGreaterThan(0);
     });
@@ -459,6 +460,7 @@ describe('Deep QA: Random Wheel', () => {
   it('after spin duration, result should be set', () => {
     const config = createGameAllYes('random-wheel');
     const engine = createEngine(config);
+    startPlaying(engine);
 
     const randomizer = engine.getModulesByType('Randomizer')[0] as Randomizer;
     const spinDuration = randomizer.getParams().spinDuration ?? 3;
@@ -483,6 +485,7 @@ describe('Deep QA: Random Wheel', () => {
   it('result should be one of the configured items', () => {
     const config = createGameAllYes('random-wheel');
     const engine = createEngine(config);
+    startPlaying(engine);
 
     const randomizer = engine.getModulesByType('Randomizer')[0] as Randomizer;
     const items = randomizer.getItems();
@@ -526,8 +529,8 @@ describe('Deep QA: Expression', () => {
       expect(data.confidence).toBeGreaterThan(0);
     });
 
-    // Emit face:smile with confidence exceeding threshold (0.6)
-    engine.eventBus.emit('face:smile', { smile: 0.95, confidence: 0.95 });
+    // Emit input:face:smile with value exceeding threshold (0.6)
+    engine.eventBus.emit('input:face:smile', { value: 0.95 });
 
     expect(detected).toBe(true);
     engine.restart();

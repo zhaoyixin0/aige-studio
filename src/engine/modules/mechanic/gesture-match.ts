@@ -91,6 +91,7 @@ export class GestureMatch extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     if (!this.active || !this.currentTarget) return;
 
     const displayTime = (this.params.displayTime ?? 3) * 1000; // s to ms

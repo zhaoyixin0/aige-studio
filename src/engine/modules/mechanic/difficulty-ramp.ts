@@ -13,10 +13,10 @@ export interface DifficultyRule {
 export class DifficultyRamp extends BaseModule {
   readonly type = 'DifficultyRamp';
 
-  private elapsed = 0;
   private ruleTimers: number[] = [];
   private currentScore = 0;
   private lastScoreMilestone = 0;
+  private warnedMissingTarget = false;
 
   getSchema(): ModuleSchema {
     return {
@@ -55,12 +55,11 @@ export class DifficultyRamp extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     const rules: DifficultyRule[] = this.params.rules ?? [];
     if (rules.length === 0) return;
 
     if (this.params.mode === 'time') {
-      this.elapsed += dt / 1000; // convert ms to seconds
-
       for (let i = 0; i < rules.length; i++) {
         const rule = rules[i];
         this.ruleTimers[i] += dt / 1000;
@@ -85,7 +84,13 @@ export class DifficultyRamp extends BaseModule {
 
   private applyRule(rule: DifficultyRule): void {
     const target = this.engine?.getModule(this.params.target);
-    if (!target) return;
+    if (!target) {
+      if (!this.warnedMissingTarget) {
+        console.warn(`[DifficultyRamp] Target module "${this.params.target}" not found`);
+        this.warnedMissingTarget = true;
+      }
+      return;
+    }
 
     const targetParams = target.getParams();
     let currentValue = targetParams[rule.field];
@@ -117,9 +122,9 @@ export class DifficultyRamp extends BaseModule {
   }
 
   reset(): void {
-    this.elapsed = 0;
     this.ruleTimers = (this.params.rules ?? []).map(() => 0);
     this.currentScore = 0;
     this.lastScoreMilestone = 0;
+    this.warnedMissingTarget = false;
   }
 }

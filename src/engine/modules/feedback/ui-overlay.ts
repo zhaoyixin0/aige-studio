@@ -33,6 +33,7 @@ export class UIOverlay extends BaseModule {
 
   init(engine: GameEngine): void {
     super.init(engine);
+    this.gameflowPaused = false;
 
     this.on('scorer:update', (data: any) => {
       this.hudState.score = data.score ?? 0;

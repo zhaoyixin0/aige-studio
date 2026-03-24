@@ -12,6 +12,16 @@ export abstract class BaseModule implements GameModule {
   protected engine: GameEngine | null = null;
   protected params: Record<string, any>;
 
+  /**
+   * Whether this module is paused by GameFlow.
+   * Starts as true — modules only run after gameflow:resume (entering 'playing').
+   * Modules whose update() should respect this must check: if (this.gameflowPaused) return;
+   */
+  protected gameflowPaused = true;
+
+  private readonly _onResume = () => { this.gameflowPaused = false; };
+  private readonly _onPause = () => { this.gameflowPaused = true; };
+
   constructor(id: string, params: Record<string, any> = {}) {
     this.id = id;
     // Merge defaults from schema with provided params
@@ -29,6 +39,8 @@ export abstract class BaseModule implements GameModule {
 
   init(engine: GameEngine): void {
     this.engine = engine;
+    this.engine.eventBus.on('gameflow:resume', this._onResume);
+    this.engine.eventBus.on('gameflow:pause', this._onPause);
   }
 
   onAttach(engine: GameEngine): void {
@@ -40,6 +52,8 @@ export abstract class BaseModule implements GameModule {
   }
 
   destroy(): void {
+    this.engine?.eventBus.off('gameflow:resume', this._onResume);
+    this.engine?.eventBus.off('gameflow:pause', this._onPause);
     this.engine = null;
   }
 

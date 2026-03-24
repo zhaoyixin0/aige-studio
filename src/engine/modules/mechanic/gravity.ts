@@ -96,6 +96,7 @@ export class Gravity extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     if (!this.enabled) return;
 
     const strength = this.params.strength ?? 980;

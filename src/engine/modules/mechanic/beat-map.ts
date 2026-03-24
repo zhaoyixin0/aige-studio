@@ -79,6 +79,7 @@ export class BeatMap extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     if (!this.started) return;
 
     this.elapsed += dt;

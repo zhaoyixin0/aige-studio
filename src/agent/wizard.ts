@@ -13,6 +13,7 @@ export type WizardStep =
   | 'theme'
   | 'character'
   | 'optional_modules'
+  | 'background'
   | 'generating'
   | 'done';
 
@@ -39,6 +40,7 @@ export interface WizardState {
   character: string | null;
   optionalModules: Record<string, boolean>;
   currentOptionalIndex: number;
+  wantBackground: boolean;
 }
 
 export interface WizardAnswerResult {
@@ -301,6 +303,32 @@ const GAME_TYPES: GameTypeDef[] = [
     metaName: '分支叙事游戏',
     metaDescription: '做出选择影响故事走向',
   },
+  {
+    id: 'platformer',
+    label: '平台跳跃',
+    emoji: '\u{1F3AE}',
+    description: '像 Mario — 跳跃、收集金币、躲避障碍的横版闯关',
+    requiredModules: ['GameFlow', 'PlayerMovement', 'Jump', 'Gravity', 'StaticPlatform', 'Scorer', 'UIOverlay', 'ResultScreen'],
+    inputOptions: ['TouchInput', 'DeviceInput'],
+    optionalModules: [
+      { type: 'Timer', label: '倒计时', description: '限定闯关时长' },
+      { type: 'Lives', label: '生命系统', description: '碰到危险物扣除生命' },
+      { type: 'CoyoteTime', label: '土狼时间', description: '离开平台后短暂仍可跳跃' },
+      { type: 'Dash', label: '冲刺', description: '双击快速冲刺' },
+      { type: 'Collectible', label: '收集物', description: '收集金币和道具' },
+      { type: 'Hazard', label: '危险物', description: '尖刺、火焰等障碍' },
+      { type: 'MovingPlatform', label: '移动平台', description: '来回移动的平台' },
+      { type: 'CrumblingPlatform', label: '碎裂平台', description: '踩上后会碎裂的平台' },
+      { type: 'Checkpoint', label: '检查点', description: '死亡后从检查点重生' },
+      { type: 'IFrames', label: '无敌帧', description: '受伤后短暂无敌' },
+      { type: 'Knockback', label: '击退', description: '受伤后被击退' },
+      { type: 'CameraFollow', label: '镜头跟随', description: '镜头跟随玩家移动' },
+      { type: 'ParticleVFX', label: '粒子特效', description: '跳跃和收集的视觉效果' },
+      { type: 'SoundFX', label: '音效', description: '跳跃和碰撞音效' },
+    ],
+    metaName: '平台跳跃游戏',
+    metaDescription: '跳跃闯关，收集金币，躲避障碍',
+  },
 ];
 
 export { GAME_TYPES };
@@ -396,6 +424,7 @@ export const DEFAULT_THEME_FOR_GAME: Record<string, string> = {
   'dress-up': 'fruit',
   'world-ar': 'space',
   narrative: 'halloween',
+  platformer: 'candy',
 };
 
 /* ------------------------------------------------------------------ */
@@ -420,21 +449,51 @@ export class GameWizard {
     character: null,
     optionalModules: {},
     currentOptionalIndex: 0,
+    wantBackground: false,
   };
 
   /** Start the wizard from scratch. Returns the first question. */
+  private static readonly STEP_ORDER: WizardStep[] = [
+    'game_type', 'input_method', 'duration', 'theme',
+    'character', 'optional_modules', 'background',
+  ];
+
+  /** Clear all wizard state from the given step onward (inclusive). */
+  private clearStateFrom(step: WizardStep): void {
+    const idx = GameWizard.STEP_ORDER.indexOf(step);
+    if (idx <= 0) { this.state.gameType = null; }
+    if (idx <= 1) { this.state.inputMethod = null; }
+    if (idx <= 2) { this.state.duration = null; }
+    if (idx <= 3) { this.state.theme = null; }
+    if (idx <= 4) { this.state.character = null; }
+    if (idx <= 5) { this.state.optionalModules = {}; this.state.currentOptionalIndex = 0; }
+    if (idx <= 6) { this.state.wantBackground = false; }
+    this.state.step = step;
+  }
+
+  /** Get the question for a given step. */
+  private getQuestionForStep(step: WizardStep): WizardQuestion | null {
+    switch (step) {
+      case 'game_type': return this.getGameTypeQuestion();
+      case 'input_method': return this.getInputMethodQuestion();
+      case 'duration': return this.getDurationQuestion();
+      case 'theme': return this.getThemeQuestion();
+      case 'character': return this.getCharacterQuestion();
+      case 'optional_modules': return this.getNextOptionalQuestion();
+      case 'background': return this.getBackgroundQuestion();
+      default: return null;
+    }
+  }
+
   start(): WizardQuestion {
-    this.state = {
-      step: 'game_type',
-      gameType: null,
-      inputMethod: null,
-      duration: null,
-      theme: null,
-      character: null,
-      optionalModules: {},
-      currentOptionalIndex: 0,
-    };
+    this.clearStateFrom('game_type');
     return this.getGameTypeQuestion();
+  }
+
+  /** Rewind the wizard to a previous step. Returns the question for that step. */
+  goToStep(step: WizardStep): WizardQuestion | null {
+    this.clearStateFrom(step);
+    return this.getQuestionForStep(step);
   }
 
   /** Whether the wizard is currently active (awaiting user input). */
@@ -522,7 +581,9 @@ export class GameWizard {
       },
       canvas: { width: 1080, height: 1920 },
       modules,
-      assets: {},
+      assets: this.state.wantBackground
+        ? { background: { type: 'background' as const, src: '' } }
+        : {},
     };
   }
 
@@ -531,12 +592,7 @@ export class GameWizard {
     switch (this.state.step) {
       case 'game_type': {
         this.state.gameType = choiceId;
-        const gameDef = GAME_TYPE_MAP.get(choiceId);
-        // If input is fixed for this game type, skip the input step
-        if (gameDef && !gameDef.inputOptions) {
-          this.state.inputMethod = gameDef.fixedInput ?? 'TouchInput';
-          return this.skipDurationOrAsk(choiceId);
-        }
+        // Always ask for input method — all inputs can be combined with all game types
         this.state.step = 'input_method';
         return { question: this.getInputMethodQuestion(), config: null, summary: '' };
       }
@@ -568,9 +624,9 @@ export class GameWizard {
         if (nextOptionalAfterChar) {
           return { question: nextOptionalAfterChar, config: null, summary: '' };
         }
-        // No optional modules — done
-        this.state.step = 'done';
-        return { question: null, config: this.buildConfig(), summary: this.buildSummary() };
+        // No optional modules — ask about background
+        this.state.step = 'background';
+        return { question: this.getBackgroundQuestion(), config: null, summary: '' };
       }
 
       case 'optional_modules': {
@@ -584,7 +640,13 @@ export class GameWizard {
         if (next) {
           return { question: next, config: null, summary: '' };
         }
-        // All optional modules asked — generate config
+        // All optional modules asked — ask about background
+        this.state.step = 'background';
+        return { question: this.getBackgroundQuestion(), config: null, summary: '' };
+      }
+
+      case 'background': {
+        this.state.wantBackground = choiceId === 'yes';
         this.state.step = 'done';
         return { question: null, config: this.buildConfig(), summary: this.buildSummary() };
       }
@@ -636,9 +698,7 @@ export class GameWizard {
   }
 
   private getInputMethodQuestion(): WizardQuestion {
-    const gameDef = GAME_TYPE_MAP.get(this.state.gameType ?? '');
-    const allowed = gameDef?.inputOptions ?? INPUT_METHODS.map((im) => im.id);
-    const choices = INPUT_METHODS.filter((im) => allowed.includes(im.id)).map((im) => ({
+    const choices = INPUT_METHODS.map((im) => ({
       id: im.id,
       label: im.label,
       emoji: im.emoji,
@@ -676,6 +736,17 @@ export class GameWizard {
       step: 'character',
       question: '\u9009\u62E9\u4F60\u7684\u6E38\u620F\u89D2\u8272\uFF1A',
       choices: CHARACTER_CHOICES,
+    };
+  }
+
+  private getBackgroundQuestion(): WizardQuestion {
+    return {
+      step: 'background',
+      question: '要生成 AI 游戏背景吗？\n根据主题和游戏风格自动生成匹配的背景图',
+      choices: [
+        { id: 'yes', label: '是，生成背景', emoji: '\u{1F5BC}' },
+        { id: 'no', label: '否，使用默认', emoji: '\u274C' },
+      ],
     };
   }
 
@@ -764,6 +835,9 @@ export class GameWizard {
       }
     }
 
+    // Remap module events based on chosen input method
+    this.remapEventsForInput(modules, inputType);
+
     // Resolve theme: user selection, or default for game type, or 'fruit'
     const themeId = this.state.theme
       ?? DEFAULT_THEME_FOR_GAME[this.state.gameType ?? '']
@@ -795,6 +869,56 @@ export class GameWizard {
   }
 
   /* ---------------------------------------------------------------- */
+  /* ---------------------------------------------------------------- */
+  /*  Event remapping for input method                                  */
+  /* ---------------------------------------------------------------- */
+
+  /**
+   * Remap trigger/movement events on modules based on the chosen input method.
+   * This allows any input to work with any game type by adjusting event names.
+   */
+  private remapEventsForInput(modules: ModuleConfig[], inputType: string): void {
+    const findMod = (type: string) => modules.find((m) => m.type === type);
+
+    // Helper to remap action triggers for a given input type
+    const remapAction = (event: string) => {
+      const jump = findMod('Jump');
+      if (jump) jump.params.triggerEvent = event;
+      const beatMap = findMod('BeatMap');
+      if (beatMap) beatMap.params.inputEvent = event;
+    };
+
+    const remapDash = (event: string) => {
+      const dash = findMod('Dash');
+      if (dash) dash.params.triggerEvent = event;
+    };
+
+    if (inputType === 'FaceInput') {
+      const playerMov = findMod('PlayerMovement');
+      if (playerMov) playerMov.params.continuousEvent = 'input:face:move';
+      remapAction('input:face:mouthOpen');
+      remapDash('input:face:blink');
+    } else if (inputType === 'HandInput') {
+      const playerMov = findMod('PlayerMovement');
+      if (playerMov) playerMov.params.continuousEvent = 'input:hand:move';
+      remapAction('input:hand:gesture');
+      remapDash('input:hand:gesture');
+    } else if (inputType === 'DeviceInput') {
+      const playerMov = findMod('PlayerMovement');
+      if (playerMov) playerMov.params.continuousEvent = 'input:device:tilt';
+      remapAction('input:device:shake');
+      remapDash('input:device:shake');
+    } else if (inputType === 'AudioInput') {
+      const audioMod = findMod('AudioInput');
+      if (audioMod) audioMod.params.mode = 'frequency';
+      const playerMov = findMod('PlayerMovement');
+      if (playerMov) playerMov.params.continuousEvent = 'input:audio:frequency';
+      remapAction('input:audio:volume');
+      remapDash('input:audio:blow');
+    }
+    // TouchInput: uses defaults (input:touch:tap, input:touch:swipe:left/right) — no remap needed
+  }
+
   /*  Summary builder                                                  */
   /* ---------------------------------------------------------------- */
 
@@ -833,10 +957,14 @@ export class GameWizard {
     }
 
     if (enabledOptionals.length > 0) {
-      lines.push(`\u2728 附加模块：${enabledOptionals.join('、')}`);
+      lines.push(`\u2728 \u9644\u52A0\u6A21\u5757\uFF1A${enabledOptionals.join('\u3001')}`);
     }
 
-    lines.push('\n\u2705 游戏配置已生成！你可以在右侧面板中查看和调整各模块参数。');
+    if (this.state.wantBackground) {
+      lines.push('\u{1F5BC} AI \u80CC\u666F\uFF1A\u662F');
+    }
+
+    lines.push('\n\u2705 \u6E38\u620F\u914D\u7F6E\u5DF2\u751F\u6210\uFF01\u4F60\u53EF\u4EE5\u5728\u53F3\u4FA7\u9762\u677F\u4E2D\u67E5\u770B\u548C\u8C03\u6574\u5404\u6A21\u5757\u53C2\u6570\u3002');
 
     return lines.join('\n');
   }

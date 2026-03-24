@@ -28,6 +28,7 @@ describe('DifficultyRamp', () => {
     });
     engine.addModule(ramp);
 
+    engine.eventBus.emit('gameflow:resume');
     return { engine, spawner, ramp };
   }
 

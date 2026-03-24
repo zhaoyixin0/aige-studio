@@ -7,6 +7,7 @@ describe('Hazard', () => {
     const engine = new Engine();
     const hazard = new Hazard('hazard-1', params);
     engine.addModule(hazard);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, hazard };
   }
 

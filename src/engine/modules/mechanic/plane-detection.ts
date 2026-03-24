@@ -108,6 +108,7 @@ export class PlaneDetection extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     if (!this.params.enabled) return;
 
     // Periodic simulation scan every 2 seconds

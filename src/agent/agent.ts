@@ -2,9 +2,10 @@ import { SkillLoader } from './skill-loader.ts';
 import { IntentParser } from './intent-parser.ts';
 import { RecipeGenerator } from './recipe-generator.ts';
 import { Recommender } from './recommender.ts';
+import { GuidedCreator } from './guided-creator.ts';
 import { tryLocalMatch } from './local-patterns.ts';
 import { GameWizard, GAME_TYPE_MAP, DEFAULT_THEME_FOR_GAME } from './wizard.ts';
-import type { WizardChoice, WizardQuestion } from './wizard.ts';
+import type { WizardChoice, WizardQuestion, WizardStep } from './wizard.ts';
 import type { GameConfig, ModuleConfig } from '@/engine/core/index.ts';
 import { getModuleParams } from './game-presets.ts';
 
@@ -21,6 +22,7 @@ export interface AgentResponse {
   config: GameConfig | null;
   suggestions: Array<{ moduleType: string; reason: string }>;
   wizardChoices?: WizardChoice[];
+  wizardStep?: string;
   enhancementSuggestions?: EnhancementSuggestion[];
 }
 
@@ -155,12 +157,18 @@ export class Agent {
   private intentParser: IntentParser;
   private recipeGenerator: RecipeGenerator;
   private recommender: Recommender;
+  private guidedCreator: GuidedCreator | null = null;
   private wizard = new GameWizard();
+  private apiKey: string;
 
   constructor(apiKey: string) {
+    this.apiKey = apiKey;
     this.intentParser = new IntentParser(apiKey);
     this.recipeGenerator = new RecipeGenerator(apiKey);
     this.recommender = new Recommender(apiKey);
+    if (apiKey) {
+      this.guidedCreator = new GuidedCreator(apiKey);
+    }
   }
 
   /** Start the wizard flow and return the first question. */
@@ -177,6 +185,13 @@ export class Agent {
   /** Get partial config from wizard for progressive preview. */
   getWizardPartialConfig(): GameConfig | null {
     return this.wizard.getPartialConfig();
+  }
+
+  /** Rewind the wizard to a previous step. Returns the question for that step. */
+  goToWizardStep(step: WizardStep): AgentResponse | null {
+    const question = this.wizard.goToStep(step);
+    if (!question) return null;
+    return this.wizardQuestionToResponse(question);
   }
 
   /** Feed a wizard choice and return the next question or final config. */
@@ -204,21 +219,37 @@ export class Agent {
    * Mode B: Detect game type from free-text and auto-build.
    * Returns null if no game type keyword is found.
    */
+  /**
+   * Mode B: Detect game type from free-text and start the wizard
+   * with the game type pre-selected, so the user can choose input method.
+   */
   tryModeBAutoBuild(message: string): AgentResponse | null {
     const gameType = detectGameType(message);
     if (!gameType) return null;
 
-    const config = autoBuildConfig(gameType);
-    if (!config) return null;
-
     const gameDef = GAME_TYPE_MAP.get(gameType);
-    const enhancementSuggestions = getEnhancementSuggestions(config);
+    if (!gameDef) return null;
 
+    // Start wizard and pre-fill game type, advance to input selection
+    this.wizard.start();
+    const result = this.wizard.answer(gameType);
+
+    if (result.question) {
+      return {
+        message: `\u{1F3AE} \u68C0\u6D4B\u5230\u4F60\u60F3\u505A${gameDef.metaName}\uFF01\n\n${result.question.question}`,
+        config: null,
+        suggestions: [],
+        wizardChoices: result.question.choices,
+        wizardStep: result.question.step,
+      };
+    }
+
+    // Unlikely: wizard completed in one step
     return {
-      message: `\u2705 \u5DF2\u4E3A\u4F60\u521B\u5EFA${gameDef?.metaName ?? '\u6E38\u620F'}\uFF01`,
-      config,
+      message: result.summary,
+      config: result.config,
       suggestions: [],
-      enhancementSuggestions,
+      enhancementSuggestions: result.config ? getEnhancementSuggestions(result.config) : [],
     };
   }
 
@@ -293,6 +324,36 @@ export class Agent {
     return null;
   }
 
+  /** Continue LLM-guided game creation conversation */
+  private async continueGuidedCreation(userMessage: string): Promise<AgentResponse> {
+    if (!this.guidedCreator) {
+      return this.startWizard();
+    }
+
+    const result = await this.guidedCreator.chat(userMessage);
+
+    const response: AgentResponse = {
+      message: result.message,
+      config: result.config,
+      suggestions: [],
+    };
+
+    // Convert quick replies to wizard-style choice buttons
+    if (result.quickReplies && result.quickReplies.length > 0) {
+      response.wizardChoices = result.quickReplies.map((r) => ({
+        id: r.id,
+        label: r.label,
+        emoji: r.emoji,
+      }));
+    }
+
+    if (result.config) {
+      response.enhancementSuggestions = getEnhancementSuggestions(result.config);
+    }
+
+    return response;
+  }
+
   private detectGameTypeFromConfig(config: GameConfig): string {
     // Heuristic: look at module types to guess game type
     const moduleTypes = new Set(config.modules.map((m) => m.type));
@@ -320,15 +381,31 @@ export class Agent {
       return this.answerWizard(userMessage.trim());
     }
 
-    // Check if user wants to create a game — start wizard
+    // If guided creator is in an active conversation, continue it
+    if (this.guidedCreator?.isActive()) {
+      return this.continueGuidedCreation(userMessage);
+    }
+
+    // Check if user wants to create a game
     if (looksLikeCreateGame(userMessage)) {
+      // If API key available, use LLM-guided creation
+      if (this.guidedCreator) {
+        return this.continueGuidedCreation(userMessage);
+      }
+      // No API key — fall back to wizard
       return this.startWizard();
     }
 
-    // Mode B: detect game type from free-text description and auto-build
-    const modeBResult = this.tryModeBAutoBuild(userMessage);
-    if (modeBResult) {
-      return modeBResult;
+    // Mode B: detect game type from free-text description
+    const gameType = detectGameType(userMessage);
+    if (gameType) {
+      if (this.guidedCreator) {
+        // LLM-guided: start conversation with the game description
+        return this.continueGuidedCreation(userMessage);
+      }
+      // No API key: redirect to wizard with game type pre-filled
+      const modeBResult = this.tryModeBAutoBuild(userMessage);
+      if (modeBResult) return modeBResult;
     }
 
     // Step 0: Local pattern match (no API call)
@@ -346,7 +423,9 @@ export class Agent {
     let skills = '';
     try {
       if (intent.intent === 'create_game' && intent.gameType) {
-        // For create_game intents, redirect to wizard instead of one-shot generation
+        // Pre-fill game type if detected, then continue wizard from input selection
+        const modeBResult = this.tryModeBAutoBuild(userMessage);
+        if (modeBResult) return modeBResult;
         return this.startWizard();
       } else if (intent.intent === 'add_module' && intent.targetModule) {
         skills = await this.skillLoader.loadForModuleAdd(intent.targetModule);
@@ -388,6 +467,7 @@ export class Agent {
       config: null,
       suggestions: [],
       wizardChoices: question.choices,
+      wizardStep: question.step,
     };
   }
 

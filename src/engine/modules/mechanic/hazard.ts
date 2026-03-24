@@ -87,6 +87,7 @@ export class Hazard extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     const dtSec = dt / 1000;
     const speed = this.params.oscillateSpeed ?? 100;
     const range = this.params.oscillateRange ?? 100;

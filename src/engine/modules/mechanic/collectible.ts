@@ -120,6 +120,7 @@ export class Collectible extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     this.elapsed += dt;
   }
 

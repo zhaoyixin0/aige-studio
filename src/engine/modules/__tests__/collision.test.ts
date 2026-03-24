@@ -12,6 +12,7 @@ describe('Collision', () => {
       ...params,
     });
     engine.addModule(collision);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, collision };
   }
 

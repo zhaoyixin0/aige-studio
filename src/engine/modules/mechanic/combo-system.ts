@@ -1,6 +1,15 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
 import { BaseModule } from '../base-module';
 
+/**
+ * ComboSystem provides combo event signaling for the engine.
+ *
+ * It listens to `scorer:update` events and tracks combos independently from Scorer's
+ * built-in combo logic. This is intentional — Scorer's combo affects score calculation
+ * (multiplier array applied to deltas), while ComboSystem emits `combo:hit` and
+ * `combo:break` events for other modules to consume (visual effects, HUD, sound, etc.).
+ * The two may have different combo windows and multiplier formulas by design.
+ */
 export class ComboSystem extends BaseModule {
   readonly type = 'ComboSystem';
 
@@ -70,6 +79,7 @@ export class ComboSystem extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     if (this.comboCount === 0) return;
 
     const window = this.params.comboWindow ?? 2000;

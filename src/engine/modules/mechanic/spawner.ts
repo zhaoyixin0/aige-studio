@@ -19,7 +19,6 @@ export class Spawner extends BaseModule {
 
   private objects: SpawnedObject[] = [];
   private spawnTimer = 0;
-  private paused = false;
 
   getSchema(): ModuleSchema {
     return {
@@ -92,14 +91,6 @@ export class Spawner extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    this.on('gameflow:pause', () => {
-      this.paused = true;
-    });
-
-    this.on('gameflow:resume', () => {
-      this.paused = false;
-    });
-
     this.on('collision:hit', (data?: any) => {
       if (data?.targetId) {
         this.removeObject(data.targetId);
@@ -108,7 +99,7 @@ export class Spawner extends BaseModule {
   }
 
   update(dt: number): void {
-    if (this.paused) return;
+    if (this.gameflowPaused) return;
 
     const frequency = (this.params.frequency ?? 1.5) * 1000; // convert to ms
 
@@ -228,6 +219,5 @@ export class Spawner extends BaseModule {
   reset(): void {
     this.objects = [];
     this.spawnTimer = 0;
-    this.paused = false;
   }
 }

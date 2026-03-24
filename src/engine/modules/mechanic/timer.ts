@@ -5,7 +5,6 @@ export class Timer extends BaseModule {
   readonly type = 'Timer';
 
   private elapsed = 0;
-  private paused = false;
   private ended = false;
   // lastTickSecond removed: was unused
 
@@ -37,17 +36,10 @@ export class Timer extends BaseModule {
 
   init(engine: GameEngine): void {
     super.init(engine);
-
-    this.on('gameflow:pause', () => {
-      this.paused = true;
-    });
-    this.on('gameflow:resume', () => {
-      this.paused = false;
-    });
   }
 
   update(dt: number): void {
-    if (this.paused || this.ended) return;
+    if (this.gameflowPaused || this.ended) return;
 
     const durationMs = this.params.duration * 1000;
 
@@ -90,7 +82,6 @@ export class Timer extends BaseModule {
 
   reset(): void {
     this.elapsed = 0;
-    this.paused = false;
     this.ended = false;
 
   }

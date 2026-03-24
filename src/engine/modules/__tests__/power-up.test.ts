@@ -7,6 +7,7 @@ describe('PowerUp', () => {
     const engine = new Engine();
     const powerUp = new PowerUp('pu-1', params);
     engine.addModule(powerUp);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, powerUp };
   }
 

@@ -56,6 +56,7 @@ export class AudioInput extends BaseModule {
   }
 
   update(_dt: number): void {
+    if (this.gameflowPaused) return;
     if (!this.isActive || !this.analyser || !this.dataArray) return;
 
     const mode: string = this.params.mode ?? 'volume';
@@ -121,6 +122,11 @@ export class AudioInput extends BaseModule {
         });
       }
     }
+  }
+
+  reset(): void {
+    // Audio resources are kept alive across resets — only game state resets
+    this.isActive = !!this.analyser;
   }
 
   destroy(): void {

@@ -1,6 +1,17 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
 import { BaseModule } from '../base-module';
 
+/**
+ * Scorer tracks score and has optional built-in combo tracking for score multipliers.
+ *
+ * Note on combo duplication with ComboSystem:
+ * Scorer's combo logic applies multipliers to score deltas internally (via the
+ * `combo.multiplier` array). ComboSystem is a separate module that listens to
+ * `scorer:update` and emits `combo:hit` / `combo:break` events for other modules
+ * (e.g., visual feedback, HUD). The two track combos independently with potentially
+ * different windows and multiplier formulas — this is intentional. They don't conflict:
+ * Scorer owns score calculation, ComboSystem owns combo signaling to the rest of the engine.
+ */
 export class Scorer extends BaseModule {
   readonly type = 'Scorer';
 
@@ -46,13 +57,18 @@ export class Scorer extends BaseModule {
         default: 5,
         min: 0,
       },
+      hitEvent: {
+        type: 'string',
+        label: 'Score Event',
+        default: 'collision:hit',
+      },
     };
   }
 
   init(engine: GameEngine): void {
     super.init(engine);
 
-    this.on('collision:hit', () => this.onHit());
+    this.on(this.params.hitEvent ?? 'collision:hit', () => this.onHit());
 
     if (this.params.deductOnMiss) {
       this.on('spawner:destroyed', () => this.onMiss());
@@ -109,6 +125,7 @@ export class Scorer extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     // Check combo timeout — reset combo if window has elapsed
     const combo = this.params.combo;
     if (combo?.enabled && this.comboCount > 0) {

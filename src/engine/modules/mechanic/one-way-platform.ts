@@ -102,6 +102,7 @@ export class OneWayPlatform extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     if (this.dropping) {
       this.dropTimer += dt;
       if (this.dropTimer >= 250) {

@@ -24,6 +24,7 @@ const selectChatMessages = (s: { chatMessages: ChatMessage[] }) => s.chatMessage
 const selectIsChatLoading = (s: { isChatLoading: boolean }) => s.isChatLoading;
 const selectAddChatMessage = (s: { addChatMessage: (message: ChatMessage) => void }) => s.addChatMessage;
 const selectSetChatLoading = (s: { setChatLoading: (loading: boolean) => void }) => s.setChatLoading;
+const selectTruncateChatAfter = (s: { truncateChatAfter: (messageId: string) => void }) => s.truncateChatAfter;
 const selectConfig = (s: { config: GameConfig | null }) => s.config;
 const selectSetConfig = (s: { setConfig: (config: GameConfig) => void }) => s.setConfig;
 const selectBatchUpdateAssets = (s: { batchUpdateAssets: (assets: Record<string, AssetEntry>) => void }) => s.batchUpdateAssets;
@@ -43,6 +44,7 @@ export function ChatPanel() {
   const chatMessages = useEditorStore(selectChatMessages);
   const isChatLoading = useEditorStore(selectIsChatLoading);
   const addChatMessage = useEditorStore(selectAddChatMessage);
+  const truncateChatAfter = useEditorStore(selectTruncateChatAfter);
   const setChatLoading = useEditorStore(selectSetChatLoading);
   const config = useGameStore(selectConfig);
   const setConfig = useGameStore(selectSetConfig);
@@ -130,18 +132,18 @@ export function ChatPanel() {
       content: response.message,
       suggestions: response.suggestions.length > 0 ? response.suggestions : undefined,
       wizardChoices: response.wizardChoices,
+      wizardStep: response.wizardStep,
       enhancementSuggestions: response.enhancementSuggestions,
       timestamp: Date.now(),
     };
     addChatMessage(assistantMsg);
   }, [config, addChatMessage, setConfig]);
 
-  /** Handle a wizard button click. */
-  const handleWizardChoice = useCallback((choiceId: string) => {
+  /** Handle a wizard button click. Supports re-selection from previous steps. */
+  const handleWizardChoice = useCallback((choiceId: string, sourceMessageId?: string) => {
     const agent = getAgent();
 
     if (choiceId === '__start_wizard__') {
-      // Start the wizard flow
       const response = agent.startWizard();
 
       addChatMessage({
@@ -156,20 +158,40 @@ export function ChatPanel() {
         role: 'assistant',
         content: response.message,
         wizardChoices: response.wizardChoices,
+        wizardStep: response.wizardStep,
         timestamp: Date.now(),
       };
       addChatMessage(assistantMsg);
       return;
     }
 
+    // If clicking on a PREVIOUS step's choices (not the latest), rewind the wizard
+    if (sourceMessageId) {
+      const lastWizardMsg = [...chatMessages].reverse().find(
+        (m) => m.role === 'assistant' && m.wizardStep,
+      );
+      const isCurrentStep = lastWizardMsg?.id === sourceMessageId;
+
+      if (!isCurrentStep) {
+        const sourceMsg = chatMessages.find((m) => m.id === sourceMessageId);
+        if (sourceMsg?.wizardStep) {
+          const srcIdx = chatMessages.findIndex((m) => m.id === sourceMessageId);
+          const nextMsg = srcIdx >= 0 && srcIdx + 1 < chatMessages.length ? chatMessages[srcIdx + 1] : null;
+          if (nextMsg) {
+            truncateChatAfter(nextMsg.id);
+          }
+          agent.goToWizardStep(sourceMsg.wizardStep as any);
+        }
+      }
+    }
+
     // Wizard is active — feed the choice
     if (agent.isWizardActive()) {
-      // Show the user's selection as a user message
-      // (find the label from the last assistant message's choices)
-      const lastAssistant = [...chatMessages].reverse().find(
-        (m) => m.role === 'assistant' && m.wizardChoices,
-      );
-      const choiceDef = lastAssistant?.wizardChoices?.find((c) => c.id === choiceId);
+      // Resolve label from source message (avoids stale closure after truncation)
+      const sourceMsg = sourceMessageId
+        ? chatMessages.find((m) => m.id === sourceMessageId)
+        : [...chatMessages].reverse().find((m) => m.role === 'assistant' && m.wizardChoices);
+      const choiceDef = sourceMsg?.wizardChoices?.find((c) => c.id === choiceId);
       const userLabel = choiceDef
         ? `${choiceDef.emoji ? choiceDef.emoji + ' ' : ''}${choiceDef.label}`
         : choiceId;
@@ -201,6 +223,7 @@ export function ChatPanel() {
         content: response.message,
         suggestions: response.suggestions.length > 0 ? response.suggestions : undefined,
         wizardChoices: response.wizardChoices,
+        wizardStep: response.wizardStep,
         enhancementSuggestions: response.enhancementSuggestions,
         timestamp: Date.now(),
       };
@@ -210,12 +233,22 @@ export function ChatPanel() {
       if (response.config) {
         triggerAssetFulfillment(response.config);
       }
+      return;
     }
-  }, [chatMessages, addChatMessage, setConfig, triggerAssetFulfillment]);
 
-  const handleSend = async () => {
-    const text = input.trim();
+    // Not wizard — treat as free-text input (for guided creator quick replies)
+    const sourceMsg = sourceMessageId
+      ? chatMessages.find((m) => m.id === sourceMessageId)
+      : null;
+    const choiceDef = sourceMsg?.wizardChoices?.find((c) => c.id === choiceId);
+    const label = choiceDef?.label ?? choiceId;
+    void handleSend(label);
+  }, [chatMessages, addChatMessage, truncateChatAfter, setConfig, triggerAssetFulfillment]);
+
+  const handleSend = async (overrideText?: string) => {
+    const text = (overrideText ?? input).trim();
     if (!text) return;
+    if (!overrideText) setInput('');
 
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
@@ -225,7 +258,6 @@ export function ChatPanel() {
     };
 
     addChatMessage(userMessage);
-    setInput('');
 
     const agent = getAgent();
 
@@ -251,6 +283,7 @@ export function ChatPanel() {
         content: response.message,
         suggestions: response.suggestions.length > 0 ? response.suggestions : undefined,
         wizardChoices: response.wizardChoices,
+        wizardStep: response.wizardStep,
         enhancementSuggestions: response.enhancementSuggestions,
         timestamp: Date.now(),
       };
@@ -280,6 +313,7 @@ export function ChatPanel() {
         role: 'assistant',
         content: response.message,
         wizardChoices: response.wizardChoices,
+        wizardStep: response.wizardStep,
         timestamp: Date.now(),
       };
       addChatMessage(assistantMsg);
@@ -339,10 +373,16 @@ export function ChatPanel() {
         suggestions:
           response.suggestions.length > 0 ? response.suggestions : undefined,
         wizardChoices: response.wizardChoices,
+        enhancementSuggestions: response.enhancementSuggestions,
         timestamp: Date.now(),
       };
 
       addChatMessage(assistantMessage);
+
+      // Auto-generate assets when a config is produced (guided creator or recipe)
+      if (response.config) {
+        triggerAssetFulfillment(response.config);
+      }
     } catch (err) {
       const errorText =
         err instanceof Error ? err.message : 'Unknown error occurred';
@@ -358,7 +398,7 @@ export function ChatPanel() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey && !isChatLoading) {
       e.preventDefault();
       void handleSend();
     }
@@ -425,7 +465,7 @@ function MessageBubble({
   onEnhancement,
 }: {
   message: ChatMessage;
-  onWizardChoice: (choiceId: string) => void;
+  onWizardChoice: (choiceId: string, sourceMessageId?: string) => void;
   onEnhancement: (enhancementId: string) => void;
 }) {
   const isUser = message.role === 'user';
@@ -447,7 +487,7 @@ function MessageBubble({
             {message.wizardChoices.map((choice) => (
               <button
                 key={choice.id}
-                onClick={() => onWizardChoice(choice.id)}
+                onClick={() => onWizardChoice(choice.id, message.id)}
                 className="px-3 py-2 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 text-sm text-blue-300 transition-colors cursor-pointer"
                 title={choice.description}
               >

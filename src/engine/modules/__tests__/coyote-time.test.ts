@@ -7,6 +7,7 @@ describe('CoyoteTime', () => {
     const engine = new Engine();
     const coyote = new CoyoteTime('coyote-1', params);
     engine.addModule(coyote);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, coyote };
   }
 

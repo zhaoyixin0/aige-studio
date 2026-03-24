@@ -67,6 +67,7 @@ export class PowerUp extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     const expired: ActivePowerUp[] = [];
 
     for (const pu of this.activePowerUps) {

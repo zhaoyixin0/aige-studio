@@ -7,6 +7,7 @@ describe('Knockback', () => {
     const engine = new Engine();
     const knockback = new Knockback('kb-1', params);
     engine.addModule(knockback);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, knockback };
   }
 

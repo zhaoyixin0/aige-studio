@@ -17,6 +17,7 @@ describe('Randomizer', () => {
       ...params,
     });
     engine.addModule(randomizer);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, randomizer };
   }
 

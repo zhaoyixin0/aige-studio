@@ -39,7 +39,7 @@ export class ExpressionDetector extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    this.on('face:*', (data?: any) => {
+    this.on('input:face:*', (data?: any) => {
       this.handleFaceEvent(data);
     });
   }
@@ -71,19 +71,21 @@ export class ExpressionDetector extends BaseModule {
   private getConfidence(expressionType: string, data: any): number {
     switch (expressionType) {
       case 'smile':
-        return data.smile ?? data.confidence ?? 0;
+        return data.value ?? data.confidence ?? 0;
       case 'surprise':
-        return data.eyebrowRaise ?? data.confidence ?? 0;
+        return data.value ?? data.confidence ?? 0;
       case 'wink':
-        return data.blink ?? data.confidence ?? 0;
+        // blink events have { left, right } instead of { value }
+        return Math.max(data.left ?? 0, data.right ?? 0) || data.confidence || 0;
       case 'open-mouth':
-        return data.mouthOpen ?? data.confidence ?? 0;
+        return data.value ?? data.confidence ?? 0;
       default:
-        return data.confidence ?? 0;
+        return data.value ?? data.confidence ?? 0;
     }
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     if (this.matchFadeTimer > 0) {
       this.matchFadeTimer -= dt;
       if (this.matchFadeTimer <= 0) {

@@ -101,6 +101,7 @@ export class DeviceInput extends BaseModule {
   }
 
   update(_dt: number): void {
+    if (this.gameflowPaused) return;
     // Emit tilt every frame when device orientation is available
     if (this.tiltX !== 0 || this.tiltY !== 0) {
       this.emit('input:device:tilt', { x: this.tiltX, y: this.tiltY });

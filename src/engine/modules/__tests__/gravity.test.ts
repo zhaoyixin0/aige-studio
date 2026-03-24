@@ -7,6 +7,7 @@ describe('Gravity', () => {
     const engine = new Engine();
     const gravity = new Gravity('gravity-1', params);
     engine.addModule(gravity);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, gravity };
   }
 

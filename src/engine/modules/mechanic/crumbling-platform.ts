@@ -87,6 +87,7 @@ export class CrumblingPlatform extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     const delay = this.params.delay ?? 500;
     const respawnTime = this.params.respawnTime ?? 3;
 

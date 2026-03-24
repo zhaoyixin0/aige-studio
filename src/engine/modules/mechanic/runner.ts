@@ -80,6 +80,7 @@ export class Runner extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     if (!this.started) return;
 
     const acceleration = this.params.acceleration ?? 10;

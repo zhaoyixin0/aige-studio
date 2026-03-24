@@ -7,6 +7,7 @@ describe('WallDetect', () => {
     const engine = new Engine();
     const wallDetect = new WallDetect('wd-1', params);
     engine.addModule(wallDetect);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, wallDetect };
   }
 

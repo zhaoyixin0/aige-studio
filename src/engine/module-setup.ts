@@ -30,12 +30,29 @@ import { Runner } from './modules/mechanic/runner.ts';
 import { PlaneDetection } from './modules/mechanic/plane-detection.ts';
 import { BranchStateMachine } from './modules/mechanic/branch-state-machine.ts';
 import { DressUpEngine } from './modules/mechanic/dress-up-engine.ts';
+// Platformer mechanic modules
+import { Gravity } from './modules/mechanic/gravity.ts';
+import { PlayerMovement } from './modules/mechanic/player-movement.ts';
+import { StaticPlatform } from './modules/mechanic/static-platform.ts';
+import { MovingPlatform } from './modules/mechanic/moving-platform.ts';
+import { CrumblingPlatform } from './modules/mechanic/crumbling-platform.ts';
+import { OneWayPlatform } from './modules/mechanic/one-way-platform.ts';
+import { CoyoteTime } from './modules/mechanic/coyote-time.ts';
+import { Dash } from './modules/mechanic/dash.ts';
+import { WallDetect } from './modules/mechanic/wall-detect.ts';
+import { Knockback } from './modules/mechanic/knockback.ts';
+import { IFrames } from './modules/mechanic/i-frames.ts';
+import { Collectible } from './modules/mechanic/collectible.ts';
+import { Hazard } from './modules/mechanic/hazard.ts';
+import { Checkpoint } from './modules/mechanic/checkpoint.ts';
+import { Inventory } from './modules/mechanic/inventory.ts';
 // Feedback modules
 import { GameFlow } from './modules/feedback/game-flow.ts';
 import { ParticleVFX } from './modules/feedback/particle-vfx.ts';
 import { SoundFX } from './modules/feedback/sound-fx.ts';
 import { UIOverlay } from './modules/feedback/ui-overlay.ts';
 import { ResultScreen } from './modules/feedback/result-screen.ts';
+import { CameraFollow } from './modules/feedback/camera-follow.ts';
 
 export function createModuleRegistry(): ModuleRegistry {
   const registry = new ModuleRegistry();
@@ -71,6 +88,22 @@ export function createModuleRegistry(): ModuleRegistry {
   registry.register('PlaneDetection', PlaneDetection as unknown as ModuleConstructor);
   registry.register('BranchStateMachine', BranchStateMachine as unknown as ModuleConstructor);
   registry.register('DressUpEngine', DressUpEngine as unknown as ModuleConstructor);
+  // Platformer
+  registry.register('Gravity', Gravity as unknown as ModuleConstructor);
+  registry.register('PlayerMovement', PlayerMovement as unknown as ModuleConstructor);
+  registry.register('StaticPlatform', StaticPlatform as unknown as ModuleConstructor);
+  registry.register('MovingPlatform', MovingPlatform as unknown as ModuleConstructor);
+  registry.register('CrumblingPlatform', CrumblingPlatform as unknown as ModuleConstructor);
+  registry.register('OneWayPlatform', OneWayPlatform as unknown as ModuleConstructor);
+  registry.register('CoyoteTime', CoyoteTime as unknown as ModuleConstructor);
+  registry.register('Dash', Dash as unknown as ModuleConstructor);
+  registry.register('WallDetect', WallDetect as unknown as ModuleConstructor);
+  registry.register('Knockback', Knockback as unknown as ModuleConstructor);
+  registry.register('IFrames', IFrames as unknown as ModuleConstructor);
+  registry.register('Collectible', Collectible as unknown as ModuleConstructor);
+  registry.register('Hazard', Hazard as unknown as ModuleConstructor);
+  registry.register('Checkpoint', Checkpoint as unknown as ModuleConstructor);
+  registry.register('Inventory', Inventory as unknown as ModuleConstructor);
 
   // Feedback modules
   registry.register('GameFlow', GameFlow as unknown as ModuleConstructor);
@@ -78,6 +111,7 @@ export function createModuleRegistry(): ModuleRegistry {
   registry.register('SoundFX', SoundFX as unknown as ModuleConstructor);
   registry.register('UIOverlay', UIOverlay as unknown as ModuleConstructor);
   registry.register('ResultScreen', ResultScreen as unknown as ModuleConstructor);
+  registry.register('CameraFollow', CameraFollow as unknown as ModuleConstructor);
 
   return registry;
 }

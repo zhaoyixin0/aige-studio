@@ -44,6 +44,7 @@ export class IFrames extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     if (!this.active) return;
 
     this.elapsed += dt;

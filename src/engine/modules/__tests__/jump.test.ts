@@ -7,6 +7,7 @@ describe('Jump', () => {
     const engine = new Engine();
     const jump = new Jump('jump-1', params);
     engine.addModule(jump);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, jump };
   }
 

@@ -7,6 +7,7 @@ describe('Timer', () => {
     const engine = new Engine();
     const timer = new Timer('timer-1', params);
     engine.addModule(timer);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, timer };
   }
 

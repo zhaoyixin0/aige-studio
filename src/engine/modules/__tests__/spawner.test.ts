@@ -15,6 +15,7 @@ describe('Spawner', () => {
       ...params,
     });
     engine.addModule(spawner);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, spawner };
   }
 

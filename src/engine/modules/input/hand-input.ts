@@ -37,6 +37,7 @@ export class HandInput extends BaseModule {
   }
 
   update(_dt: number): void {
+    if (this.gameflowPaused) return;
     if (!this.tracker) return;
 
     const result = this.tracker.getLastResult();
@@ -65,6 +66,10 @@ export class HandInput extends BaseModule {
     } else {
       this.currentGesture = null;
     }
+  }
+
+  reset(): void {
+    this.currentGesture = null;
   }
 
   getPosition(): { x: number; y: number } | null {

@@ -88,6 +88,13 @@ export class TouchInput extends BaseModule {
       this.canvas.removeEventListener('pointerup', this.handlePointerUp);
   }
 
+  /**
+   * Convert pointer event to canvas-space coordinates.
+   * Unlike FaceInput/HandInput, touch coordinates are NOT mirrored (no `1 - x`).
+   * This is intentional: camera-based inputs mirror X to compensate for the camera's
+   * natural mirror effect, so moving right physically maps to moving right on screen.
+   * Touch is a direct interaction — the user taps where they mean — so no mirroring is needed.
+   */
   private getRelativePos(e: PointerEvent): { x: number; y: number } {
     if (!this.canvas) return { x: e.clientX, y: e.clientY };
     const rect = this.canvas.getBoundingClientRect();
@@ -111,6 +118,11 @@ export class TouchInput extends BaseModule {
       startTime: performance.now(),
       moved: false,
     };
+
+    // Emit directional hold event based on touch position (left/right half of screen)
+    const canvasWidth = (this.canvas as HTMLCanvasElement)?.width ?? 800;
+    const side = pos.x < canvasWidth / 2 ? 'left' : 'right';
+    this.emit('input:touch:hold', { x: pos.x, y: pos.y, side });
 
     // Start long press timer
     this.clearLongPressTimer();
@@ -142,6 +154,7 @@ export class TouchInput extends BaseModule {
 
   private onPointerUp(e: PointerEvent): void {
     this.clearLongPressTimer();
+    this.emit('input:touch:release', {});
 
     if (!this.pointerState) return;
     const pos = this.getRelativePos(e);
@@ -191,8 +204,20 @@ export class TouchInput extends BaseModule {
     }
   }
 
+  reset(): void {
+    this.clearLongPressTimer();
+    this.pointerState = null;
+    this.lastTapTime = 0;
+    this.currentPosition = null;
+  }
+
   update(_dt: number): void {
-    // Touch events are driven by DOM events, no per-frame work needed
+    // Re-emit hold event every frame while pointer is down (for continuous movement)
+    if (this.pointerState && this.currentPosition) {
+      const canvasWidth = (this.canvas as HTMLCanvasElement)?.width ?? 800;
+      const side = this.currentPosition.x < canvasWidth / 2 ? 'left' : 'right';
+      this.emit('input:touch:hold', { x: this.currentPosition.x, y: this.currentPosition.y, side });
+    }
   }
 
   destroy(): void {

@@ -29,6 +29,7 @@ export class GameFlow extends BaseModule {
 
   init(engine: GameEngine): void {
     super.init(engine);
+    this.gameflowPaused = false;
 
     this.on('timer:end', () => {
       if (this.state === 'playing') {

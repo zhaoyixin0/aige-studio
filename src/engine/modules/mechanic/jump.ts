@@ -69,6 +69,7 @@ export class Jump extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     if (this.grounded) return;
 
     const gravity = (this.params.gravity ?? 980) / 1000; // per-ms units

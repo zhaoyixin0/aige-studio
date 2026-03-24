@@ -7,6 +7,7 @@ describe('Runner', () => {
     const engine = new Engine();
     const runner = new Runner('runner-1', params);
     engine.addModule(runner);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, runner };
   }
 

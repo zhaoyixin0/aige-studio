@@ -49,6 +49,7 @@ export class ParticleVFX extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     // Advance lifetimes and remove expired particles
     for (const particle of this.particles) {
       particle.lifetime += dt;

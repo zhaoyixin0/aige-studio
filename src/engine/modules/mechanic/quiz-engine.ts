@@ -79,7 +79,7 @@ export class QuizEngine extends BaseModule {
       });
 
       if (score > 0) {
-        this.emit('quiz:score', { delta: score, total: this.totalScore });
+        this.emit('scorer:update', { score: this.totalScore, delta: score, combo: 0 });
       }
     } else {
       this.emit('quiz:wrong', {
@@ -97,6 +97,7 @@ export class QuizEngine extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     if (!this.started || this.finished) return;
 
     const timePerQuestion = (this.params.timePerQuestion ?? 15) * 1000; // ms

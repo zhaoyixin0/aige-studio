@@ -7,6 +7,7 @@ describe('Dash', () => {
     const engine = new Engine();
     const dash = new Dash('dash-1', params);
     engine.addModule(dash);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, dash };
   }
 

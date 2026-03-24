@@ -94,6 +94,8 @@ describe('Shooting Game Integration', () => {
   it('should spawn targets over time', () => {
     const engine = createShootingEngine();
     const spawner = engine.getModule('spawner_1') as unknown as Spawner;
+    const gameflow = engine.getModule('gameflow_1') as unknown as GameFlow;
+    gameflow.transition('countdown');
 
     // Initially no objects
     expect(spawner.getObjects().length).toBe(0);
@@ -125,6 +127,8 @@ describe('Shooting Game Integration', () => {
   it('should increase difficulty over time by decreasing spawner frequency', () => {
     const engine = createShootingEngine();
     const spawner = engine.getModule('spawner_1') as unknown as Spawner;
+    const gameflow = engine.getModule('gameflow_1') as any;
+    gameflow.transition('countdown');
 
     // Initial frequency is 2.0s
     const initialFrequency = spawner.getParams().frequency;
@@ -166,6 +170,8 @@ describe('Shooting Game Integration', () => {
 
   it('should emit difficulty:update events on ramp', () => {
     const engine = createShootingEngine();
+    const gameflow = engine.getModule('gameflow_1') as any;
+    gameflow.transition('countdown');
     const difficultyEvents: any[] = [];
 
     engine.eventBus.on('difficulty:update', (data) => {

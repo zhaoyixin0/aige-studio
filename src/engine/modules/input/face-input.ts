@@ -55,6 +55,7 @@ export class FaceInput extends BaseModule {
   }
 
   update(_dt: number): void {
+    if (this.gameflowPaused) return;
     if (!this.tracker) return;
 
     const result = this.tracker.getLastResult();
@@ -97,6 +98,11 @@ export class FaceInput extends BaseModule {
     if (result.smile > 0.5) {
       this.emit('input:face:smile', { value: result.smile });
     }
+  }
+
+  reset(): void {
+    this.smoothX = 0.5;
+    this.smoothY = 0.5;
   }
 
   getPosition(): { x: number; y: number } {

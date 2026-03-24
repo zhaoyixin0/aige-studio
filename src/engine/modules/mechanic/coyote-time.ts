@@ -68,6 +68,7 @@ export class CoyoteTime extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     if (this.coyoteTimer > 0) {
       this.coyoteTimer -= dt;
       if (this.coyoteTimer < 0) {

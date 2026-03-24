@@ -74,6 +74,7 @@ export class Knockback extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     if (!this.active) return;
 
     const duration = this.params.duration ?? 200;

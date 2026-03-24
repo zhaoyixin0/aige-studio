@@ -1,4 +1,4 @@
-import { Application, Container, Graphics } from 'pixi.js';
+import { Application, Container, Graphics, Sprite, Texture } from 'pixi.js';
 import type { Engine } from '@/engine/core/engine';
 import { GameObjectRenderer } from './game-object-renderer';
 import { HudRenderer } from './hud-renderer';
@@ -22,6 +22,9 @@ export class PixiRenderer {
   private currentThemeId: string | null = null;
   private connectedEngine: Engine | null = null;
   private canvasClickHandler: (() => void) | null = null;
+  private bgSprite: Sprite | null = null;
+  private bgSrc: string | null = null;
+  private engineEventHandlers: Array<{ event: string; handler: (data?: any) => void }> = [];
 
   constructor() {
     this.app = new Application();
@@ -82,6 +85,62 @@ export class PixiRenderer {
     }
   }
 
+  private syncBackgroundImage(engine: Engine): void {
+    const bgAsset = engine.getConfig().assets?.background;
+    const src = bgAsset?.src;
+
+    if (!src || !src.startsWith('data:')) {
+      // No AI background — use theme grid background
+      if (this.bgSprite) {
+        this.bgSprite.visible = false;
+      }
+      if (this.backgroundGraphics) {
+        this.backgroundGraphics.visible = true;
+      }
+      return;
+    }
+
+    // Already rendered this src
+    if (src === this.bgSrc && this.bgSprite) return;
+
+    // Load new background image
+    this.bgSrc = src;
+    const capturedSrc = src;
+    const img = new window.Image();
+    img.onload = () => {
+      // Guard against stale load if src changed while loading
+      if (this.bgSrc !== capturedSrc) return;
+      const canvas = document.createElement('canvas');
+      const w = this.app.renderer.width;
+      const h = this.app.renderer.height;
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.drawImage(img, 0, 0, w, h);
+      const texture = Texture.from(canvas);
+
+      if (this.bgSprite) {
+        const oldTexture = this.bgSprite.texture;
+        this.bgSprite.texture = texture;
+        oldTexture.destroy();
+      } else {
+        this.bgSprite = new Sprite(texture);
+        this.bgSprite.width = w;
+        this.bgSprite.height = h;
+        // Insert behind game layer but after background graphics
+        this.app.stage.addChildAt(this.bgSprite, 1);
+      }
+      this.bgSprite.visible = true;
+
+      // Hide the grid background when AI background is shown
+      if (this.backgroundGraphics) {
+        this.backgroundGraphics.visible = false;
+      }
+    };
+    img.src = src;
+  }
+
   render(engine: Engine, dt?: number): void {
     if (!this.initialized) return;
 
@@ -92,8 +151,11 @@ export class PixiRenderer {
       this.drawBackground(getTheme(themeId));
     }
 
+    // Render AI background image if available
+    this.syncBackgroundImage(engine);
+
     this.gameObjectRenderer?.sync(engine);
-    this.hudRenderer?.sync(engine);
+    this.hudRenderer?.sync(engine, dt ?? 16);
 
     // Update particle and float text systems
     if (dt != null) {
@@ -104,6 +166,15 @@ export class PixiRenderer {
   }
 
   connectToEngine(engine: Engine): void {
+    if (!this.initialized) return;
+
+    // Remove previous engine event listeners to prevent accumulation on restart
+    if (this.connectedEngine) {
+      for (const { event, handler } of this.engineEventHandlers) {
+        this.connectedEngine.eventBus.off(event, handler);
+      }
+    }
+    this.engineEventHandlers = [];
     this.connectedEngine = engine;
 
     // Reset game object renderer so player gets re-registered with collision
@@ -114,7 +185,13 @@ export class PixiRenderer {
       this.soundSynth = new SoundSynth();
     }
 
-    engine.eventBus.on('collision:hit', (data?: any) => {
+    // Helper to register and track event listeners
+    const listen = (event: string, handler: (data?: any) => void) => {
+      engine.eventBus.on(event, handler);
+      this.engineEventHandlers.push({ event, handler });
+    };
+
+    listen('collision:hit', (data?: any) => {
       const x = data?.x ?? 540;
       const y = data?.y ?? 960;
       this.particleRenderer?.burst(x, y, 0xFFD700, 8);
@@ -122,14 +199,14 @@ export class PixiRenderer {
       this.soundSynth?.playScore();
     });
 
-    engine.eventBus.on('collision:damage', (data?: any) => {
+    listen('collision:damage', (data?: any) => {
       const x = data?.x ?? 540;
       const y = data?.y ?? 960;
       this.particleRenderer?.burst(x, y, 0xFF4757, 10);
       this.soundSynth?.playHit();
     });
 
-    engine.eventBus.on('scorer:update', (data?: any) => {
+    listen('scorer:update', (data?: any) => {
       const combo = data?.combo ?? 0;
       if (combo > 1) {
         this.floatTextRenderer?.spawn(540, 700, `\u{1F525} x${combo} COMBO!`, 0xff6b9d);
@@ -137,10 +214,18 @@ export class PixiRenderer {
       }
     });
 
-    engine.eventBus.on('gameflow:state', (data?: any) => {
+    listen('gameflow:state', (data?: any) => {
       if (data?.state === 'finished') {
         this.soundSynth?.playGameOver();
       }
+    });
+
+    listen('beat:hit', (data?: any) => {
+      this.hudRenderer?.showRhythmFeedback(data?.accuracy ?? 0.5);
+    });
+
+    listen('beat:miss', () => {
+      this.hudRenderer?.showRhythmFeedback(0);
     });
 
     // Canvas click handler for start/restart game flow
@@ -159,6 +244,8 @@ export class PixiRenderer {
           gf.transition('countdown');
         } else if (state === 'finished') {
           for (const mod of engine.getAllModules()) {
+            // Reset gameflowPaused to true before module-specific reset
+            (mod as any).gameflowPaused = true;
             (mod as any).reset?.();
           }
           // Reset renderer so player gets re-registered with collision

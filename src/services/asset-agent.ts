@@ -33,8 +33,9 @@ export function extractAssetKeys(config: GameConfig): string[] {
     keys.add(key);
   }
 
-  // 2. Walk modules — any module with an items array
+  // 2. Walk modules for asset references
   for (const mod of config.modules) {
+    // Spawner/Randomizer items: { asset: string }
     const items = mod.params?.items;
     if (Array.isArray(items)) {
       for (const item of items) {
@@ -42,14 +43,24 @@ export function extractAssetKeys(config: GameConfig): string[] {
           keys.add(item);
         } else if (item && typeof item.asset === 'string') {
           keys.add(item.asset);
+        } else if (item && typeof item.type === 'string') {
+          keys.add(item.type);
         }
       }
     }
+
+    // Hazard hazards array
+    const hazards = mod.params?.hazards;
+    if (mod.type === 'Hazard' && Array.isArray(hazards)) {
+      keys.add('hazard');
+    }
   }
 
-  // 3. Always include player character if game has a Spawner (needs a player)
-  const hasSpawner = config.modules.some(m => m.type === 'Spawner');
-  if (hasSpawner) {
+  // 3. Include player character if game has a visual player
+  const needsPlayer = config.modules.some(m =>
+    m.type === 'Spawner' || m.type === 'PlayerMovement'
+  );
+  if (needsPlayer) {
     keys.add('player');
   }
 

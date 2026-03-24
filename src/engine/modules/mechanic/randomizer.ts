@@ -75,6 +75,7 @@ export class Randomizer extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     if (!this.spinning) return;
 
     this.spinTimer += dt / 1000; // convert ms to seconds

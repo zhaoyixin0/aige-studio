@@ -7,6 +7,7 @@ describe('CrumblingPlatform', () => {
     const engine = new Engine();
     const platform = new CrumblingPlatform('crumble-1', params);
     engine.addModule(platform);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, platform };
   }
 

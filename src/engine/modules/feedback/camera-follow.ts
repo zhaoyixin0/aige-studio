@@ -94,6 +94,7 @@ export class CameraFollow extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     const mode: CameraMode = this.params.mode;
     const smoothing: number = this.params.smoothing;
     const t = 1 - smoothing;

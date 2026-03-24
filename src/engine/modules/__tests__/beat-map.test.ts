@@ -7,6 +7,7 @@ describe('BeatMap', () => {
     const engine = new Engine();
     const beatMap = new BeatMap('beat-1', params);
     engine.addModule(beatMap);
+    engine.eventBus.emit('gameflow:resume');
     return { engine, beatMap };
   }
 

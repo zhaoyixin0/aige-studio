@@ -34,7 +34,7 @@ describe('AutoWirer', () => {
     expect(registerSpy).toHaveBeenCalledWith('spawn-99', 'items', {
       x: 100,
       y: 50,
-      radius: 20,
+      radius: 24,
     });
 
     // Simulate spawner:destroyed — should unregister
