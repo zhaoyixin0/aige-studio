@@ -71,6 +71,12 @@ export function ChatPanel() {
       const count = Object.keys(assets).length;
       if (count > 0) {
         batchUpdateAssets(assets);
+        // Update engine config directly so renderer picks up new sprites
+        const engine = (window as any).__engine;
+        if (engine) {
+          const engineConfig = engine.getConfig();
+          engineConfig.assets = { ...engineConfig.assets, ...assets };
+        }
         addChatMessage({
           id: crypto.randomUUID(),
           role: 'assistant',

@@ -22,6 +22,7 @@ export class GameObjectRenderer {
   private sprites = new Map<string, Container>();
   private textureCache = new Map<string, Texture>();
   private playerSprite: Container | null = null;
+  private lastAssetKeys = '';
   private platformGraphics: Graphics | null = null;
 
   constructor(container: Container) {
@@ -29,6 +30,27 @@ export class GameObjectRenderer {
   }
 
   sync(engine: Engine): void {
+    // Detect asset changes (e.g., AssetAgent finished generating) — clear sprite cache
+    const currentAssetKeys = Object.entries(engine.getConfig().assets ?? {})
+      .map(([k, v]) => `${k}:${v.src ? 'y' : 'n'}`)
+      .join(',');
+    if (currentAssetKeys !== this.lastAssetKeys) {
+      if (this.lastAssetKeys !== '') {
+        // Assets changed since last frame — clear cached sprites so they re-create with new assets
+        for (const sprite of this.sprites.values()) {
+          this.container.removeChild(sprite);
+          sprite.destroy();
+        }
+        this.sprites.clear();
+        if (this.playerSprite) {
+          this.container.removeChild(this.playerSprite);
+          this.playerSprite.destroy();
+          this.playerSprite = null;
+        }
+      }
+      this.lastAssetKeys = currentAssetKeys;
+    }
+
     const gameFlow = engine.getModulesByType('GameFlow')[0] as GameFlow | undefined;
     const state = gameFlow?.getState() ?? 'playing';
 
