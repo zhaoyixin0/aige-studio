@@ -5,6 +5,7 @@ import { ConfigLoader } from '@/engine/core/config-loader.ts';
 import { PixiRenderer } from '@/engine/renderer/pixi-renderer.ts';
 import { createModuleRegistry } from '@/engine/module-setup.ts';
 import type { GameConfig, ModuleSchema } from '@/engine/core/types.ts';
+import { EventRecorder, ModuleDiagnostics } from '@/engine/diagnostics';
 
 // --- Engine Context ---
 
@@ -28,6 +29,42 @@ export function useEngineContext(): EngineContextValue {
   return ctx;
 }
 
+// --- Browser console diagnostics ---
+
+/** Expose diagnostics tools on `window.__diagnostics` for browser console debugging. */
+function exposeDiagnostics(): void {
+  (window as any).__diagnostics = {
+    _recorder: null as EventRecorder | null,
+    start() {
+      const engine = (window as any).__engine;
+      if (!engine) { console.warn('No engine available'); return; }
+      if (this._recorder) this._recorder.detach();
+      this._recorder = new EventRecorder();
+      this._recorder.attach(engine.eventBus);
+      console.log('🔍 Diagnostics recording started. Play the game, then call __diagnostics.stop()');
+    },
+    stop() {
+      const engine = (window as any).__engine;
+      if (!engine || !this._recorder) { console.warn('No recording in progress'); return; }
+      const config = engine.getConfig();
+      const report = ModuleDiagnostics.diagnose(engine, this._recorder, config);
+      this._recorder.detach();
+      this._recorder = null;
+      console.log(ModuleDiagnostics.formatReport(report));
+      return report;
+    },
+    report() {
+      if (!this._recorder) { console.warn('Call __diagnostics.start() first'); return; }
+      const engine = (window as any).__engine;
+      if (!engine) return;
+      const config = engine.getConfig();
+      const report = ModuleDiagnostics.diagnose(engine, this._recorder, config);
+      console.log(ModuleDiagnostics.formatReport(report));
+      return report;
+    },
+  };
+}
+
 // --- Canvas dimensions (portrait mobile) ---
 const CANVAS_WIDTH = 1080;
 const CANVAS_HEIGHT = 1920;
@@ -48,6 +85,7 @@ export function useEngine() {
   if (!engineRef.current) {
     engineRef.current = new Engine();
     (window as any).__engine = engineRef.current;
+    exposeDiagnostics();
   }
   if (!registryRef.current) registryRef.current = createModuleRegistry();
   if (!loaderRef.current) loaderRef.current = new ConfigLoader(registryRef.current);
@@ -117,6 +155,7 @@ export function useEngine() {
       // Recreate engine for potential re-mount
       engineRef.current = new Engine();
       (window as any).__engine = engineRef.current;
+      exposeDiagnostics();
     };
   }, []);
 
