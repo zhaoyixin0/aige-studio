@@ -648,7 +648,9 @@ export class GameWizard {
       case 'background': {
         this.state.wantBackground = choiceId === 'yes';
         this.state.step = 'done';
-        return { question: null, config: this.buildConfig(), summary: this.buildSummary() };
+        const config = this.buildConfig();
+        console.log('[Wizard] background step: choiceId=', choiceId, 'wantBackground=', this.state.wantBackground, 'config.assets=', Object.keys(config.assets));
+        return { question: null, config, summary: this.buildSummary() };
       }
 
       default:
