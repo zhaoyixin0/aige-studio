@@ -1,6 +1,15 @@
 import type { Engine } from '@/engine/core/engine';
 import type { EventRecorder } from './event-recorder';
 import type { GameConfig } from '@/engine/core';
+import type { GameFlow } from '@/engine/modules/feedback/game-flow';
+import type { Scorer } from '@/engine/modules/mechanic/scorer';
+import type { Lives } from '@/engine/modules/mechanic/lives';
+import type { Timer } from '@/engine/modules/mechanic/timer';
+import {
+  GAMEFLOW_STATE, GAMEFLOW_RESUME, GAMEFLOW_PAUSE,
+  COLLISION_HIT, COLLISION_DAMAGE, SCORER_UPDATE,
+  TIMER_END, LIVES_CHANGE, LIVES_ZERO,
+} from '@/engine/core/events';
 
 export interface DiagnosticIssue {
   severity: 'error' | 'warning' | 'info';
@@ -28,7 +37,7 @@ const orphanEventRule: DiagnosticRule = (_engine, recorder) => {
   const orphans = recorder.getOrphaned();
 
   // Ignore gameflow events (always emitted even if no custom listeners)
-  const ignore = new Set(['gameflow:state', 'gameflow:resume', 'gameflow:pause']);
+  const ignore = new Set([GAMEFLOW_STATE, GAMEFLOW_RESUME, GAMEFLOW_PAUSE]);
 
   for (const [event, count] of orphans) {
     if (ignore.has(event)) continue;
@@ -48,10 +57,10 @@ const chainBreakRule: DiagnosticRule = (engine, recorder, config) => {
 
   // Expected chains: if A module exists and emits event X, B module should respond with Y
   const chains: Array<{ needs: string[]; from: string; to: string; label: string }> = [
-    { needs: ['Collision', 'Scorer'], from: 'collision:hit', to: 'scorer:update', label: 'Collision → Scorer' },
-    { needs: ['Collision', 'Lives'], from: 'collision:damage', to: 'lives:change', label: 'Collision → Lives' },
-    { needs: ['Timer', 'GameFlow'], from: 'timer:end', to: 'gameflow:state', label: 'Timer → GameFlow' },
-    { needs: ['Lives', 'GameFlow'], from: 'lives:zero', to: 'gameflow:state', label: 'Lives → GameFlow' },
+    { needs: ['Collision', 'Scorer'], from: COLLISION_HIT, to: SCORER_UPDATE, label: 'Collision → Scorer' },
+    { needs: ['Collision', 'Lives'], from: COLLISION_DAMAGE, to: LIVES_CHANGE, label: 'Collision → Lives' },
+    { needs: ['Timer', 'GameFlow'], from: TIMER_END, to: GAMEFLOW_STATE, label: 'Timer → GameFlow' },
+    { needs: ['Lives', 'GameFlow'], from: LIVES_ZERO, to: GAMEFLOW_STATE, label: 'Lives → GameFlow' },
   ];
 
   for (const chain of chains) {
@@ -74,10 +83,10 @@ const chainBreakRule: DiagnosticRule = (engine, recorder, config) => {
 // ── Rule 3: GameFlow Stuck Detector ────────────────────────
 const gameFlowStuckRule: DiagnosticRule = (engine, recorder) => {
   const issues: DiagnosticIssue[] = [];
-  const gf = engine.getModulesByType('GameFlow')[0] as any;
+  const gf = engine.getModulesByType('GameFlow')[0] as GameFlow | undefined;
   if (!gf) return issues;
 
-  const state = gf.getState?.();
+  const state = gf.getState();
   const duration = recorder.getDurationMs();
 
   if (state === 'countdown' && duration > 10000) {
@@ -105,9 +114,9 @@ const gameFlowStuckRule: DiagnosticRule = (engine, recorder) => {
 const scoreAnomalyRule: DiagnosticRule = (engine) => {
   const issues: DiagnosticIssue[] = [];
 
-  const scorers = engine.getModulesByType('Scorer');
+  const scorers = engine.getModulesByType('Scorer') as Scorer[];
   for (const scorer of scorers) {
-    const score = (scorer as any).getScore?.();
+    const score = (scorer as any).getScore?.(); // getScore not on interface
     if (typeof score === 'number' && score < 0) {
       issues.push({
         severity: 'error',
@@ -118,9 +127,9 @@ const scoreAnomalyRule: DiagnosticRule = (engine) => {
     }
   }
 
-  const lives = engine.getModulesByType('Lives');
+  const lives = engine.getModulesByType('Lives') as Lives[];
   for (const life of lives) {
-    const current = (life as any).getCurrent?.();
+    const current = (life as any).getCurrent?.(); // getCurrent not on interface
     if (typeof current === 'number' && current < 0) {
       issues.push({
         severity: 'error',

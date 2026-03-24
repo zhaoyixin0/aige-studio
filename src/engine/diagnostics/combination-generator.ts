@@ -45,7 +45,7 @@ function buildConfig(gameType: string, modules: ModuleConfig[]): GameConfig {
 }
 
 function presetToModules(gameType: string): ModuleConfig[] {
-  const preset = getGamePreset(gameType as any);
+  const preset = getGamePreset(gameType);
   if (!preset) return [];
   return Object.entries(preset).map(([type, params], i) => ({
     id: `${type.toLowerCase()}_${i}`,

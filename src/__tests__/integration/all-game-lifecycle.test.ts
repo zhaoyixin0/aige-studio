@@ -7,7 +7,7 @@ import type { GameConfig, ModuleConfig } from '@/engine/core';
 
 // Helper: build a GameConfig from a preset
 function buildConfig(gameType: string): GameConfig {
-  const preset = getGamePreset(gameType as any);
+  const preset = getGamePreset(gameType);
   if (!preset) throw new Error(`No preset found for game type: ${gameType}`);
   const modules: ModuleConfig[] = Object.entries(preset).map(([type, params], i) => ({
     id: `${type.toLowerCase()}_${i}`,
