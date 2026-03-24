@@ -15,8 +15,11 @@ const selectSetPreviewMode = (s: { setPreviewMode: (mode: PreviewMode) => void }
 const selectConfigStructureKey = (s: { config: GameConfig | null }) => {
   if (!s.config) return '';
   const modKey = s.config.modules.map((m) => `${m.id}:${m.type}:${m.enabled}`).join('|');
-  const assetCount = Object.keys(s.config.assets).length;
-  return `${modKey}#assets:${assetCount}`;
+  // Track asset count AND content changes (e.g., background src updated by AssetAgent)
+  const assetKey = Object.entries(s.config.assets)
+    .map(([k, v]) => `${k}:${v.src ? v.src.slice(0, 20) : 'empty'}`)
+    .join(',');
+  return `${modKey}#${assetKey}`;
 };
 
 export function PreviewCanvas() {
