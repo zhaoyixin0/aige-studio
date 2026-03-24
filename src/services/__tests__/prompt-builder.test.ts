@@ -3,32 +3,32 @@ import { describe, it, expect } from 'vitest';
 import { PromptBuilder } from '../prompt-builder.ts';
 
 describe('PromptBuilder', () => {
-  it('should build prompt for a good item in fruit theme', () => {
+  it('should build sprite prompt with green background requirement', () => {
     const prompt = PromptBuilder.build('star', {
       gameType: 'catch',
       theme: 'fruit',
       role: 'good',
       style: 'cartoon',
     });
-    // With fruit theme, 'star' maps to 'strawberry' (themed description)
     expect(prompt).toContain('strawberry');
     expect(prompt).toContain('cartoon');
-    expect(prompt).toContain('collectible');
+    expect(prompt).toContain('#00FF00');
+    expect(prompt).toContain('sharp edges');
   });
 
-  it('should build prompt for a bad item', () => {
+  it('should build prompt for a bad item with danger hint', () => {
     const prompt = PromptBuilder.build('bomb', {
       gameType: 'dodge',
       theme: 'space',
       role: 'bad',
       style: 'cartoon',
     });
-    // With space theme, 'bomb' maps to 'asteroid' (themed description)
     expect(prompt).toContain('asteroid');
-    expect(prompt).toContain('dangerous');
+    expect(prompt).toContain('DANGEROUS');
+    expect(prompt).toContain('#00FF00');
   });
 
-  it('should build prompt for player character', () => {
+  it('should build player prompt with character template', () => {
     const prompt = PromptBuilder.build('player', {
       gameType: 'catch',
       theme: 'ocean',
@@ -36,17 +36,20 @@ describe('PromptBuilder', () => {
       style: 'cartoon',
     });
     expect(prompt).toContain('character');
+    expect(prompt).toContain('cartoon fish');
+    expect(prompt).toContain('#00FF00');
   });
 
-  it('should build prompt for background', () => {
-    const prompt = PromptBuilder.build('sky', {
+  it('should build background prompt without green screen', () => {
+    const prompt = PromptBuilder.build('background', {
       gameType: 'catch',
       theme: 'space',
       role: 'background',
       style: 'cartoon',
     });
     expect(prompt).toContain('background');
-    expect(prompt).toContain('1080x1920');
+    expect(prompt).toContain('9:16');
+    expect(prompt).not.toContain('#00FF00');
   });
 
   it('should infer role for known bad keys', () => {
@@ -96,7 +99,15 @@ describe('PromptBuilder', () => {
       style: 'cartoon',
     });
     expect(prompt).toContain('star');
-    // Should not crash even with unknown theme
     expect(prompt.length).toBeGreaterThan(0);
+  });
+
+  it('should support all art styles', () => {
+    for (const style of ['cartoon', 'pixel', 'flat', 'realistic', 'watercolor', 'chibi']) {
+      const prompt = PromptBuilder.build('star', {
+        gameType: 'catch', theme: 'fruit', role: 'good', style,
+      });
+      expect(prompt.length).toBeGreaterThan(50);
+    }
   });
 });

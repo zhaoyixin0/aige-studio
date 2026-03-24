@@ -158,13 +158,20 @@ export class AssetAgent {
         if (signal.aborted) return result;
 
         // Remove background for non-background sprites
+        // Use fast chroma-key removal (prompts request #00FF00 green background)
+        // Falls back to slow AI removal if green pixels < 5%
         const assetType: AssetEntry['type'] = role === 'background' ? 'background' : 'sprite';
         if (assetType !== 'background') {
           onProgress?.({ current: i + 1, total, key, status: 'removing-bg' });
           try {
-            dataUrl = await this.bgRemover.remove(dataUrl);
+            dataUrl = await this.bgRemover.chromaKeyRemove(dataUrl);
           } catch (err) {
-            console.warn(`BgRemoval failed for ${key}, using original:`, err);
+            console.warn(`[AssetAgent] Chroma key failed for ${key}, trying AI removal:`, err);
+            try {
+              dataUrl = await this.bgRemover.remove(dataUrl);
+            } catch (err2) {
+              console.warn(`[AssetAgent] AI removal also failed for ${key}, using original:`, err2);
+            }
           }
         }
 
