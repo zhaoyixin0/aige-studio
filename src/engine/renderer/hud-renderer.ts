@@ -97,6 +97,11 @@ export class HudRenderer {
   private narrativeChoiceBgs: Graphics[] = [];
   private narrativeEndText!: Text;
 
+  // Countdown overlay
+  private countdownContainer: Container;
+  private countdownBg!: Graphics;
+  private countdownText!: Text;
+
   // Start screen overlay
   private startContainer: Container;
   private startBg!: Graphics;
@@ -253,6 +258,9 @@ export class HudRenderer {
     // Narrative container
     this.narrativeContainer = this.buildNarrativeContainer();
 
+    // Countdown overlay
+    this.countdownContainer = this.buildCountdownContainer();
+
     // Start screen overlay
     this.startContainer = this.buildStartContainer();
 
@@ -271,6 +279,7 @@ export class HudRenderer {
       this.puzzleContainer,
       this.dressUpContainer,
       this.narrativeContainer,
+      this.countdownContainer,
       this.startContainer,
       this.resultContainer,
     );
@@ -658,6 +667,9 @@ export class HudRenderer {
     // Narrative rendering
     this.syncNarrative(engine);
 
+    // Countdown overlay
+    this.syncCountdown(engine);
+
     // Start screen overlay
     this.syncStart(engine);
 
@@ -928,6 +940,42 @@ export class HudRenderer {
     } else {
       this.narrativeContainer.visible = false;
     }
+  }
+
+  // ── Countdown overlay ──────────────────────────────────────
+
+  private buildCountdownContainer(): Container {
+    const c = new Container();
+    c.visible = false;
+
+    this.countdownBg = new Graphics();
+    this.countdownBg.rect(0, 0, this.width, this.height);
+    this.countdownBg.fill({ color: 0x000000, alpha: 0.6 });
+
+    this.countdownText = new Text({
+      text: '3',
+      style: new TextStyle({
+        fill: '#ffffff', fontSize: 160, fontFamily: 'Arial', fontWeight: 'bold', align: 'center',
+      }),
+    });
+    this.countdownText.anchor.set(0.5);
+    this.countdownText.position.set(this.width / 2, this.height * 0.4);
+
+    c.addChild(this.countdownBg, this.countdownText);
+    return c;
+  }
+
+  private syncCountdown(engine: Engine): void {
+    const gameFlow = engine.getModulesByType('GameFlow')[0] as GameFlow | undefined;
+    if (!gameFlow || gameFlow.getState() !== 'countdown') {
+      this.countdownContainer.visible = false;
+      return;
+    }
+
+    this.countdownContainer.visible = true;
+    const remaining = gameFlow.getCountdownRemaining();
+    const displayNum = Math.ceil(remaining);
+    this.countdownText.text = displayNum > 0 ? String(displayNum) : 'GO!';
   }
 
   // ── Start screen ───────────────────────────────────────────
