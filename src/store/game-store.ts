@@ -122,3 +122,8 @@ export const useGameStore = create<GameStore>((set) => ({
       };
     }),
 }));
+
+// Expose store for renderer access (background sync)
+if (typeof window !== 'undefined') {
+  (window as any).__gameStore = useGameStore;
+}

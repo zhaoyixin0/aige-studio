@@ -106,7 +106,9 @@ export class AssetAgent {
     });
 
     const total = keysToProcess.length;
-    console.log('[AssetAgent] Keys to process:', keysToProcess, `(${total} total)`);
+    console.log('[AssetAgent] All extracted keys:', keys);
+    console.log('[AssetAgent] Keys to process (after filter):', keysToProcess, `(${total} total)`);
+    console.log('[AssetAgent] Config assets:', Object.keys(config.assets), config.assets);
     if (total === 0) return result;
 
     // Try to obtain Gemini service — may throw if no API key
@@ -129,10 +131,9 @@ export class AssetAgent {
 
       onProgress?.({ current: i + 1, total, key, status: 'generating' });
 
-      // Check library for a cached version first
+      // Check library for a cached version first (must have valid data URL)
       const cached = this.library.findByKeyAndTheme(key, theme || undefined);
-      if (cached) {
-        // Resize cached asset if it's too large (legacy large images)
+      if (cached && cached.src && cached.src.startsWith('data:')) {
         let src = cached.src;
         if (cached.type !== 'background') {
           try { src = await this.resizeImage(src, 128, 128); } catch { /* keep original */ }

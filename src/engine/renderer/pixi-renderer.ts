@@ -86,7 +86,21 @@ export class PixiRenderer {
   }
 
   private syncBackgroundImage(engine: Engine): void {
-    const bgAsset = engine.getConfig().assets?.background;
+    // Read from engine config first, then try store as fallback
+    // (store may have assets updated by AssetAgent that haven't triggered engine reload yet)
+    let bgAsset = engine.getConfig().assets?.background;
+    if (!bgAsset?.src || !bgAsset.src.startsWith('data:')) {
+      try {
+        // Dynamic import from store to avoid circular dependency at module level
+        const storeConfig = (window as any).__gameStore?.getState?.()?.config;
+        if (storeConfig?.assets?.background?.src?.startsWith('data:')) {
+          bgAsset = storeConfig.assets.background;
+          // Also update engine config so it stays in sync
+          const engineConfig = engine.getConfig();
+          engineConfig.assets = { ...engineConfig.assets, background: bgAsset };
+        }
+      } catch { /* ignore */ }
+    }
     const src = bgAsset?.src;
 
     if (!src || !src.startsWith('data:')) {
