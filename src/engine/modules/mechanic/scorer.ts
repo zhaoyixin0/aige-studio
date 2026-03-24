@@ -62,6 +62,12 @@ export class Scorer extends BaseModule {
         label: 'Score Event',
         default: 'collision:hit',
       },
+      scorePerSecond: {
+        type: 'number',
+        label: 'Score Per Second (survival)',
+        default: 0,
+        min: 0,
+      },
     };
   }
 
@@ -136,8 +142,15 @@ export class Scorer extends BaseModule {
         this.comboCount = 0;
       }
     }
-    // dt is used implicitly via time-based combo tracking
-    void dt;
+    // Survival scoring: add points over time
+    const scorePerSecond = this.params.scorePerSecond ?? 0;
+    if (scorePerSecond > 0) {
+      const delta = Math.round(scorePerSecond * (dt / 1000));
+      if (delta > 0) {
+        this.score += delta;
+        this.emit('scorer:update', { score: this.score, delta, combo: 0 });
+      }
+    }
   }
 
   getScore(): number {
