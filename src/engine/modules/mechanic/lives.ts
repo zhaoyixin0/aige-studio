@@ -36,6 +36,8 @@ export class Lives extends BaseModule {
     };
   }
 
+  getDependencies() { return { requires: ['Collision'], optional: [] }; }
+
   init(engine: GameEngine): void {
     super.init(engine);
     this.current = this.params.count;

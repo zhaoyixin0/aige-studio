@@ -65,6 +65,8 @@ export class Scorer extends BaseModule {
     };
   }
 
+  getDependencies() { return { requires: ['Collision'], optional: ['ComboSystem'] }; }
+
   init(engine: GameEngine): void {
     super.init(engine);
 

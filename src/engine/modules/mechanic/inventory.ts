@@ -27,6 +27,8 @@ export class Inventory extends BaseModule {
     };
   }
 
+  getDependencies() { return { requires: [], optional: ['Collectible'] }; }
+
   init(engine: GameEngine): void {
     super.init(engine);
     this.initializeAmounts();

@@ -39,6 +39,8 @@ export class Checkpoint extends BaseModule {
     };
   }
 
+  getDependencies() { return { requires: [], optional: ['Lives'] }; }
+
   init(engine: GameEngine): void {
     super.init(engine);
 

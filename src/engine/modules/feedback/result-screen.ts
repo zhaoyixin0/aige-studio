@@ -35,6 +35,8 @@ export class ResultScreen extends BaseModule {
     };
   }
 
+  getDependencies() { return { requires: ['GameFlow'], optional: ['Scorer', 'Timer'] }; }
+
   init(engine: GameEngine): void {
     super.init(engine);
     this.gameflowPaused = false;

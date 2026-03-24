@@ -27,6 +27,8 @@ export class GameFlow extends BaseModule {
     };
   }
 
+  getDependencies() { return { requires: [], optional: ['Timer', 'Lives'] }; }
+
   init(engine: GameEngine): void {
     super.init(engine);
     this.gameflowPaused = false;

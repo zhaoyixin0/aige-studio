@@ -39,6 +39,8 @@ export class DifficultyRamp extends BaseModule {
     };
   }
 
+  getDependencies() { return { requires: [], optional: ['Scorer'] }; }
+
   init(engine: GameEngine): void {
     super.init(engine);
 

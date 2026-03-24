@@ -35,6 +35,8 @@ export class CoyoteTime extends BaseModule {
     };
   }
 
+  getDependencies() { return { requires: ['Jump', 'Gravity'], optional: [] }; }
+
   init(engine: GameEngine): void {
     super.init(engine);
 

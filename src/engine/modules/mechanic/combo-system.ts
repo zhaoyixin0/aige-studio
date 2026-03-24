@@ -46,6 +46,8 @@ export class ComboSystem extends BaseModule {
     };
   }
 
+  getDependencies() { return { requires: ['Scorer'], optional: [] }; }
+
   init(engine: GameEngine): void {
     super.init(engine);
 

@@ -31,6 +31,8 @@ export class IFrames extends BaseModule {
     };
   }
 
+  getDependencies() { return { requires: ['Collision'], optional: [] }; }
+
   init(engine: GameEngine): void {
     super.init(engine);
 
