@@ -16,7 +16,7 @@ AIGE Studio is a modular social platform game creation tool. Users create games 
 - **AI:** Claude API (free-form chat), Gemini Imagen 4 (asset generation)
 - **Image Processing:** @imgly/background-removal (ONNX WASM, browser-side)
 - **Storage:** IndexedDB (asset library via idb-keyval)
-- **Testing:** Vitest (543+ tests)
+- **Testing:** Vitest (544+ tests)
 - **Tracking:** MediaPipe (face/hand/body, optional)
 
 ## Architecture
@@ -43,9 +43,10 @@ Export (Web HTML / .apjs)
 - `src/engine/tracking/` — MediaPipe wrappers (face, hand, body)
 
 ### Agent & Wizard
-- `src/agent/wizard.ts` — GameWizard: step-by-step guided game creation (15 game types)
-- `src/agent/agent.ts` — Agent orchestrator: wizard routing, Mode B auto-build, enhancement suggestions
-- `src/agent/game-presets.ts` — Market-calibrated default params per game type
+- `src/agent/wizard.ts` — GameWizard: step-by-step guided game creation (15 game types), re-selectable choices, background question
+- `src/agent/agent.ts` — Agent orchestrator: wizard routing, Mode B, guided creator, enhancement suggestions
+- `src/agent/guided-creator.ts` — LLM-guided game creation through free conversation (Claude API tool_use)
+- `src/agent/game-presets.ts` — Market-calibrated default params per game type (incl. platformer 1080x1920)
 - `src/agent/skill-loader.ts` — Knowledge base loader
 - `src/agent/intent-parser.ts` — Claude API intent classification
 - `src/agent/recipe-generator.ts` — Claude API config generation
@@ -85,10 +86,11 @@ catch, dodge, tap, shooting, quiz, random-wheel, expression, runner, gesture, rh
 ## 5 Emoji Themes
 fruit (🧺🍎💣), space (🚀⭐☄️), ocean (🐠🐚🦈), halloween (🎃🍬👻), candy (🤖🍩🌶️)
 
-## 3 Interaction Modes
-1. **Wizard (Mode A):** Step-by-step guided creation with progressive preview
-2. **Mode B:** Type description → auto-detect game type → one-shot build → enhancement suggestions
+## 4 Interaction Modes
+1. **Wizard (Mode A):** Step-by-step guided creation with progressive preview, re-selectable choices
+2. **Mode B:** Type description → auto-detect game type → start wizard from input selection
 3. **Free Chat (Mode C):** Claude API natural language modification
+4. **Guided Creator (Mode D):** LLM-guided conversation — analyzes requirements, breaks into modules, asks step-by-step questions (requires Claude API key)
 
 ## Environment Variables
 ```
@@ -131,7 +133,7 @@ Previous prototype at `C:\Users\yixin\Downloads\secret demo\index.html` — sing
 10. Web + .apjs exporters
 11. Asset system (browser, upload, AI generate dialog)
 12. Preview modes (edit/play/fullscreen) + share/export
-13. Guided wizard with 14 game types + market-calibrated presets
+13. Guided wizard with 15 game types + market-calibrated presets
 14. V1×V2 merge (emoji themes, particles, float text, sound synthesis)
 15. V1 interaction modes (progressive preview, Mode B, character selection, enhancements)
 16. Asset Agent (auto search → Imagen 4 generate → bg removal → resize → save to IndexedDB)
@@ -148,6 +150,21 @@ Previous prototype at `C:\Users\yixin\Downloads\secret demo\index.html` — sing
 25. Theme-specific asset generation prompts (space→crystal, fruit→strawberry, etc.)
 26. Collision re-registration fix on game restart
 27. HTML nesting fix (button-in-button → div with role=button)
+
+### 2026-03-24
+28. BaseModule unified gameflowPaused mechanism — all 46 modules coordinate with GameFlow state
+29. Comprehensive module coordination fixes: event names, collision radii, scorer configurability, restart state
+30. Platformer rendering: platforms, collectibles, hazards, checkpoints, camera follow
+31. Runner/Rhythm/World-AR HUD rendering (15/15 game types fully rendered)
+32. 16 platformer modules registered in module-setup.ts + CameraFollow
+33. Platformer game type added to wizard (15th type) with 1080x1920 preset
+34. All game types open all 5 input methods — remapEventsForInput auto-maps events
+35. TouchInput hold/release for continuous platformer movement (left/right half screen)
+36. Wizard step re-selection: click previous choices to rewind and re-answer
+37. AI background generation question in wizard + PixiRenderer background image support
+38. GuidedCreator: LLM-guided game creation through free conversation (Claude API tool_use)
+39. PixiRenderer event listener cleanup prevents accumulation on restart
+40. Asset extraction expanded for Collectible/Hazard/PlayerMovement modules
 
 ## Game Flow
 ```
@@ -170,9 +187,8 @@ Restart → Countdown...
 
 ## Known Issues / Next Steps
 - Background removal is slow (~10-30s/image, single-threaded WASM)
-- Some game types need custom renderers for full visual experience
 - Gemini API key exposed in frontend (fine for internal use, need proxy for public)
-- V1's Python backend Agent (WebSocket + tool_use) could be ported for better AI interaction
 - Comprehensive mobile touch testing needed
-- Platformer modules need renderer integration (platforms/hazards not yet rendered visually)
 - Batch 2 & 3 module expansion pending
+- Platformer physics: platform collision with player needs full integration (currently visual-only)
+- GuidedCreator conversation could benefit from streaming responses
