@@ -49,9 +49,15 @@ describe('AssetLibrary', () => {
     expect(found!.theme).toBe('space');
   });
 
-  it('should fall back to key-only match when theme not found', async () => {
+  it('should NOT fall back to wrong theme — forces regeneration', async () => {
     await lib.save({ name: 'star', tags: ['star'], type: 'sprite', src: 'data:...' });
     const found = lib.findByKeyAndTheme('star', 'ocean');
+    expect(found).toBeUndefined();
+  });
+
+  it('should fall back to key-only when no theme specified', async () => {
+    await lib.save({ name: 'star', tags: ['star'], type: 'sprite', src: 'data:...' });
+    const found = lib.findByKeyAndTheme('star');
     expect(found).toBeDefined();
     expect(found!.name).toBe('star');
   });

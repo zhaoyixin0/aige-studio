@@ -10,7 +10,8 @@ describe('PromptBuilder', () => {
       role: 'good',
       style: 'cartoon',
     });
-    expect(prompt).toContain('star');
+    // With fruit theme, 'star' maps to 'strawberry' (themed description)
+    expect(prompt).toContain('strawberry');
     expect(prompt).toContain('cartoon');
     expect(prompt).toContain('collectible');
   });
@@ -22,7 +23,8 @@ describe('PromptBuilder', () => {
       role: 'bad',
       style: 'cartoon',
     });
-    expect(prompt).toContain('bomb');
+    // With space theme, 'bomb' maps to 'asteroid' (themed description)
+    expect(prompt).toContain('asteroid');
     expect(prompt).toContain('dangerous');
   });
 

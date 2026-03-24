@@ -83,6 +83,10 @@ export class GameFlow extends BaseModule {
     return this.state;
   }
 
+  getCountdownRemaining(): number {
+    return this.countdownTimer;
+  }
+
   reset(): void {
     this.state = 'ready';
     this.countdownTimer = 0;

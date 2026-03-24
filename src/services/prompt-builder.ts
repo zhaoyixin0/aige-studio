@@ -35,6 +35,46 @@ const ITEM_DESCRIPTIONS: Record<string, string> = {
   bubble_gold: 'a golden shiny bubble',
 };
 
+// Theme-specific overrides for generic item keys
+// When theme is set, use these descriptions instead of the generic ones
+const THEMED_ITEM_DESCRIPTIONS: Record<string, Record<string, string>> = {
+  fruit: {
+    star: 'a ripe strawberry',
+    apple: 'a juicy orange',
+    coin: 'a fresh banana',
+    bomb: 'a rotten tomato',
+    player: 'a woven fruit basket',
+  },
+  space: {
+    star: 'a glowing energy crystal',
+    apple: 'a small alien artifact',
+    coin: 'a spinning space token',
+    bomb: 'a spiky asteroid',
+    player: 'a sleek spaceship',
+  },
+  ocean: {
+    star: 'a beautiful seashell',
+    apple: 'a colorful tropical fish',
+    coin: 'a shiny pearl',
+    bomb: 'a spiky sea urchin',
+    player: 'a cute cartoon fish',
+  },
+  halloween: {
+    star: 'a glowing candy corn',
+    apple: 'a wrapped halloween candy',
+    coin: 'a golden pumpkin coin',
+    bomb: 'a spooky ghost',
+    player: 'a cute jack-o-lantern',
+  },
+  candy: {
+    star: 'a swirl lollipop',
+    apple: 'a frosted cupcake',
+    coin: 'a chocolate gold coin',
+    bomb: 'a hot chili pepper',
+    player: 'a candy robot character',
+  },
+};
+
 const STYLE_INSTRUCTIONS: Record<string, string> = {
   cartoon: 'cartoon style, bold outlines, vibrant colors, 2D flat shading',
   pixel: 'pixel art style, 32x32 grid, retro 8-bit aesthetic',
@@ -44,7 +84,8 @@ const STYLE_INSTRUCTIONS: Record<string, string> = {
 
 export class PromptBuilder {
   static build(assetKey: string, ctx: PromptContext): string {
-    const itemDesc = ITEM_DESCRIPTIONS[assetKey] ?? assetKey;
+    const themedDescs = THEMED_ITEM_DESCRIPTIONS[ctx.theme];
+    const itemDesc = themedDescs?.[assetKey] ?? ITEM_DESCRIPTIONS[assetKey] ?? assetKey;
     const aesthetic = THEME_AESTHETICS[ctx.theme] ?? '';
     const styleInst = STYLE_INSTRUCTIONS[ctx.style] ?? STYLE_INSTRUCTIONS.cartoon;
 

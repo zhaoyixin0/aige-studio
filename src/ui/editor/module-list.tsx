@@ -31,10 +31,13 @@ export function ModuleList() {
   return (
     <div className="flex flex-col gap-1">
       {modules.map((mod) => (
-        <button
+        <div
           key={mod.id}
+          role="button"
+          tabIndex={0}
           onClick={() => selectModule(mod.id === selectedModuleId ? null : mod.id)}
-          className={`flex items-center gap-2 px-3 py-2 rounded text-left transition-colors ${
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') selectModule(mod.id === selectedModuleId ? null : mod.id); }}
+          className={`flex items-center gap-2 px-3 py-2 rounded text-left transition-colors cursor-pointer ${
             selectedModuleId === mod.id
               ? 'bg-blue-600/20 border border-blue-500/30'
               : 'hover:bg-white/5 border border-transparent'
@@ -53,7 +56,7 @@ export function ModuleList() {
           >
             <Switch.Thumb className="block w-3 h-3 bg-white rounded-full transition-transform translate-x-0.5 data-[state=checked]:translate-x-[14px]" />
           </Switch.Root>
-        </button>
+        </div>
       ))}
     </div>
   );

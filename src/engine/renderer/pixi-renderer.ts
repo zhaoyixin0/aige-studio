@@ -21,6 +21,7 @@ export class PixiRenderer {
   private initialized = false;
   private currentThemeId: string | null = null;
   private connectedEngine: Engine | null = null;
+  private canvasClickHandler: (() => void) | null = null;
 
   constructor() {
     this.app = new Application();
@@ -141,6 +142,32 @@ export class PixiRenderer {
         this.soundSynth?.playGameOver();
       }
     });
+
+    // Canvas click handler for start/restart game flow
+    const canvas = this.app.canvas;
+    if (canvas) {
+      // Remove previous handler if any
+      if (this.canvasClickHandler) {
+        canvas.removeEventListener('click', this.canvasClickHandler);
+      }
+      this.canvasClickHandler = () => {
+        const gameFlows = engine.getModulesByType('GameFlow');
+        if (gameFlows.length === 0) return;
+        const gf = gameFlows[0] as any;
+        const state = gf.getState();
+        if (state === 'ready') {
+          gf.transition('countdown');
+        } else if (state === 'finished') {
+          for (const mod of engine.getAllModules()) {
+            (mod as any).reset?.();
+          }
+          // Reset renderer so player gets re-registered with collision
+          this.gameObjectRenderer?.reset();
+          gf.transition('countdown');
+        }
+      };
+      canvas.addEventListener('click', this.canvasClickHandler);
+    }
   }
 
   getApp(): Application {
@@ -167,6 +194,10 @@ export class PixiRenderer {
   destroy(): void {
     if (!this.initialized) return;
     this.initialized = false;
+    if (this.canvasClickHandler) {
+      this.app.canvas?.removeEventListener('click', this.canvasClickHandler);
+      this.canvasClickHandler = null;
+    }
     this.gameObjectRenderer = null;
     this.hudRenderer = null;
     this.particleRenderer?.destroy();

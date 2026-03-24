@@ -78,12 +78,12 @@ export class AssetLibrary {
 
   /** Find by key + theme for best match */
   findByKeyAndTheme(key: string, theme?: string): LibraryAsset | undefined {
-    // Prefer same-theme match
     if (theme) {
-      const themed = this.assets.find(a =>
+      // When a theme is specified, only return same-theme matches.
+      // Do NOT fallback to a different theme — force regeneration instead.
+      return this.assets.find(a =>
         (a.tags.includes(key) || a.name === key) && a.theme === theme
       );
-      if (themed) return themed;
     }
     return this.findByKey(key);
   }
