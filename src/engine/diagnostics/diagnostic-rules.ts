@@ -173,39 +173,12 @@ const eventStormRule: DiagnosticRule = (_engine, recorder) => {
   return issues;
 };
 
-// ── Rule 7: Update Performance Detector ────────────────────
-const updateSlowRule: DiagnosticRule = (engine) => {
+// ── Rule 7+8: Crash + Performance Detector (merged to avoid double update) ──
+const crashAndPerfRule: DiagnosticRule = (engine) => {
   const issues: DiagnosticIssue[] = [];
-  const modules = engine.getAllModules();
 
-  for (const mod of modules) {
+  for (const mod of engine.getAllModules()) {
     const start = performance.now();
-    try {
-      mod.update(16); // Simulate one frame
-    } catch {
-      // CrashDetector handles this
-    }
-    const elapsed = performance.now() - start;
-
-    if (elapsed > 5) {
-      issues.push({
-        severity: 'warning',
-        category: 'performance',
-        module: mod.type,
-        message: `${mod.type}.update() took ${elapsed.toFixed(1)}ms (threshold: 5ms)`,
-      });
-    }
-  }
-
-  return issues;
-};
-
-// ── Rule 8: Crash Detector ─────────────────────────────────
-const crashRule: DiagnosticRule = (engine) => {
-  const issues: DiagnosticIssue[] = [];
-  const modules = engine.getAllModules();
-
-  for (const mod of modules) {
     try {
       mod.update(16);
     } catch (err) {
@@ -214,6 +187,15 @@ const crashRule: DiagnosticRule = (engine) => {
         category: 'crash',
         module: mod.type,
         message: `${mod.type}.update() threw: ${err instanceof Error ? err.message : String(err)}`,
+      });
+    }
+    const elapsed = performance.now() - start;
+    if (elapsed > 5) {
+      issues.push({
+        severity: 'warning',
+        category: 'performance',
+        module: mod.type,
+        message: `${mod.type}.update() took ${elapsed.toFixed(1)}ms (threshold: 5ms)`,
       });
     }
   }
@@ -245,7 +227,7 @@ const dependencyRule: DiagnosticRule = (engine) => {
 
 // ── All rules ──────────────────────────────────────────────
 const ALL_RULES: DiagnosticRule[] = [
-  crashRule,
+  crashAndPerfRule,
   dependencyRule,
   orphanEventRule,
   chainBreakRule,
@@ -253,7 +235,6 @@ const ALL_RULES: DiagnosticRule[] = [
   scoreAnomalyRule,
   timerAnomalyRule,
   eventStormRule,
-  updateSlowRule,
 ];
 
 // ── Main diagnostics runner ────────────────────────────────

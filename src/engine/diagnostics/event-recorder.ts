@@ -8,34 +8,48 @@ export interface RecordedEvent {
   frame: number;
 }
 
+const DEFAULT_MAX_EVENTS = 100_000;
+
 /**
  * Records all events passing through an EventBus for later analysis.
  * Monkey-patches emit() — call detach() to restore.
  */
 export class EventRecorder {
   private events: RecordedEvent[] = [];
-  private originalEmit: EventBus['emit'] | null = null;
+  private originalEmit: ((event: string, data?: any) => void) | null = null;
   private bus: EventBus | null = null;
   private startTime = 0;
   private frameCount = 0;
+  private maxEvents: number;
+  private attached = false;
+
+  constructor(maxEvents = DEFAULT_MAX_EVENTS) {
+    this.maxEvents = maxEvents;
+  }
 
   attach(eventBus: EventBus): void {
+    if (this.attached) this.detach();
+
     this.bus = eventBus;
+    // Store reference to prototype method for clean restore
     this.originalEmit = eventBus.emit.bind(eventBus);
     this.startTime = Date.now();
     this.frameCount = 0;
     this.events = [];
+    this.attached = true;
 
     const self = this;
     eventBus.emit = function (event: string, data?: any) {
-      self.events.push({
-        event,
-        data: data !== undefined ? structuredClone(data) : undefined,
-        timestamp: Date.now() - self.startTime,
-        listenerCount: eventBus.getListenerCount(event),
-        frame: self.frameCount,
-      });
-      self.originalEmit!.call(eventBus, event, data);
+      if (self.events.length < self.maxEvents) {
+        self.events.push({
+          event,
+          data: data !== undefined ? { ...data } : undefined,
+          timestamp: Date.now() - self.startTime,
+          listenerCount: eventBus.getListenerCount(event),
+          frame: self.frameCount,
+        });
+      }
+      self.originalEmit!(event, data);
     };
   }
 
@@ -45,6 +59,7 @@ export class EventRecorder {
     }
     this.bus = null;
     this.originalEmit = null;
+    this.attached = false;
   }
 
   /** Call once per engine tick to track frame boundaries */
@@ -79,7 +94,11 @@ export class EventRecorder {
 
   /** Count occurrences of an event */
   countEvent(event: string): number {
-    return this.events.filter((e) => e.event === event).length;
+    let count = 0;
+    for (const e of this.events) {
+      if (e.event === event) count++;
+    }
+    return count;
   }
 
   /** Get events per frame (for storm detection) */
@@ -106,6 +125,10 @@ export class EventRecorder {
 
   getFrameCount(): number {
     return this.frameCount;
+  }
+
+  isAtCapacity(): boolean {
+    return this.events.length >= this.maxEvents;
   }
 
   clear(): void {
