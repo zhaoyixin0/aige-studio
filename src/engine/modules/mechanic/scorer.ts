@@ -18,6 +18,7 @@ export class Scorer extends BaseModule {
   private score = 0;
   private comboCount = 0;
   private lastHitTime = 0;
+  private scoreAccumulator = 0;
 
   getSchema(): ModuleSchema {
     return {
@@ -142,11 +143,13 @@ export class Scorer extends BaseModule {
         this.comboCount = 0;
       }
     }
-    // Survival scoring: add points over time
+    // Survival scoring: accumulate fractional points, emit when crossing whole number
     const scorePerSecond = this.params.scorePerSecond ?? 0;
     if (scorePerSecond > 0) {
-      const delta = Math.round(scorePerSecond * (dt / 1000));
-      if (delta > 0) {
+      this.scoreAccumulator += scorePerSecond * (dt / 1000);
+      const delta = Math.floor(this.scoreAccumulator);
+      if (delta >= 1) {
+        this.scoreAccumulator -= delta;
         this.score += delta;
         this.emit('scorer:update', { score: this.score, delta, combo: 0 });
       }
@@ -161,5 +164,6 @@ export class Scorer extends BaseModule {
     this.score = 0;
     this.comboCount = 0;
     this.lastHitTime = 0;
+    this.scoreAccumulator = 0;
   }
 }
