@@ -188,7 +188,7 @@ export class AssetAgent {
         result[key] = { type: assetType, src: dataUrl };
         onProgress?.({ current: i + 1, total, key, status: 'done' });
       } catch (err) {
-        console.warn(`Asset generation failed for ${key}:`, err);
+        console.error(`[AssetAgent] ❌ Generation FAILED for "${key}" (role: ${PromptBuilder.inferRole(key)}):`, err);
         onProgress?.({ current: i + 1, total, key, status: 'error' });
       }
     }

@@ -55,6 +55,7 @@ export function ChatPanel() {
 
   /** Fire-and-forget: generate assets for a newly created config. */
   const triggerAssetFulfillment = useCallback((newConfig: GameConfig) => {
+    console.log('[ChatPanel] triggerAssetFulfillment config.assets keys:', Object.keys(newConfig.assets));
     const assetAgent = new AssetAgent();
 
     addChatMessage({
