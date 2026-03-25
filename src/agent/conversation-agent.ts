@@ -301,7 +301,7 @@ export class ConversationAgent {
     if (currentConfig) {
       const moduleTypes = currentConfig.modules.map((m) => m.type);
       systemPrompt += `\n\n## 当前游戏配置
-- 类型: ${currentConfig.meta.theme ?? '未知'}
+- 名称: ${currentConfig.meta.name}
 - 主题: ${currentConfig.meta.theme ?? '未设置'}
 - 画风: ${currentConfig.meta.artStyle ?? '未设置'}
 - 模块: ${moduleTypes.join(', ')}
@@ -395,27 +395,11 @@ export class ConversationAgent {
         reply = '请描述你想要创建的游戏，我来帮你实现。';
       }
 
-      // Add the full assistant response to history (including tool_use blocks)
-      // This ensures Claude remembers what tools it called in the next turn
-      const assistantContent: any[] = [];
-      for (const block of response.content) {
-        if (block.type === 'text') {
-          assistantContent.push({ type: 'text', text: block.text });
-        } else if (block.type === 'tool_use') {
-          assistantContent.push({ type: 'tool_use', id: block.id, name: block.name, input: block.input });
-        }
-      }
-      this.history.push({ role: 'assistant', content: assistantContent.length === 1 && assistantContent[0].type === 'text' ? reply : assistantContent as any });
-
-      // If there were tool calls, add tool results so Claude can continue the conversation
-      const toolBlocks = response.content.filter((b: any) => b.type === 'tool_use');
-      if (toolBlocks.length > 0) {
-        const toolResults = toolBlocks.map((b: any) => ({
-          type: 'tool_result' as const,
-          tool_use_id: b.id,
-          content: config ? `游戏已创建: ${config.meta.name}` : '已执行',
-        }));
-        this.history.push({ role: 'user', content: toolResults as any });
+      // Store only text in history — system prompt provides current config context,
+      // so Claude always knows the current state without needing tool_use/tool_result blocks.
+      // This avoids incomplete tool loops and keeps the conversation type-safe.
+      if (reply) {
+        this.history.push({ role: 'assistant', content: reply });
       }
 
       // Determine if we still need more info
@@ -588,12 +572,8 @@ export class ConversationAgent {
           if (change.theme) {
             updated.meta.theme = change.theme;
             // Clear all sprite assets to force regeneration with new theme
-            for (const [key, entry] of Object.entries(updated.assets)) {
-              if (entry.type !== 'background') {
-                entry.src = '';
-              } else {
-                entry.src = ''; // background also needs regeneration
-              }
+            for (const entry of Object.values(updated.assets)) {
+              entry.src = '';
             }
           }
           break;
