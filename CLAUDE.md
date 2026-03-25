@@ -16,7 +16,7 @@ AIGE Studio is a modular social platform game creation tool. Users create games 
 - **AI:** Claude API (free-form chat), Gemini Imagen 4 (asset generation)
 - **Image Processing:** @imgly/background-removal (ONNX WASM, browser-side)
 - **Storage:** IndexedDB (asset library via idb-keyval)
-- **Testing:** Vitest (938+ tests)
+- **Testing:** Vitest (939+ tests)
 - **Tracking:** MediaPipe (face/hand/body, optional)
 
 ## Architecture
@@ -44,6 +44,7 @@ Export (Web HTML / .apjs)
 
 ### Agent & Wizard
 - `src/agent/conversation-agent.ts` — ConversationAgent: unified Claude tool_use agent (replaces wizard UI)
+- `src/agent/singleton.ts` — Shared ConversationAgent singleton (survives HMR)
 - `src/agent/wizard.ts` — GameWizard: step-by-step guided game creation (15 game types, internal utility), re-selectable choices, background question
 - `src/agent/agent.ts` — Agent orchestrator: wizard routing, Mode B, guided creator, enhancement suggestions
 - `src/agent/guided-creator.ts` — LLM-guided game creation through free conversation (Claude API tool_use)
@@ -189,6 +190,11 @@ Previous prototype at `C:\Users\yixin\Downloads\secret demo\index.html` — sing
 52. Dynamic suggestion chips: game types → module recommendations → enhancement suggestions
 53. Two-phase layout: centered landing → chat+preview studio, collapsible editor
 54. LandingPage + StudioChatPanel + SuggestionChips components
+55. ConversationAgent fixes: shared singleton, history preservation, input method confirmation
+56. Custom theme support — any theme string accepted, LLM generates matching asset descriptions
+57. Generic asset IDs (good_1/good_2/bad_1 instead of star/apple/bomb) — LLM controls content via asset_descriptions
+58. Style/theme change triggers asset regeneration (clears src to force re-generate)
+59. Collision module added to platformer preset, resolving dependency warnings
 
 ## Game Flow
 ```
