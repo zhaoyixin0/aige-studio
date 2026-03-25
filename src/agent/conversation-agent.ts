@@ -390,8 +390,28 @@ export class ConversationAgent {
         reply = '请描述你想要创建的游戏，我来帮你实现。';
       }
 
-      // Add assistant reply to history
-      this.history.push({ role: 'assistant', content: reply });
+      // Add the full assistant response to history (including tool_use blocks)
+      // This ensures Claude remembers what tools it called in the next turn
+      const assistantContent: any[] = [];
+      for (const block of response.content) {
+        if (block.type === 'text') {
+          assistantContent.push({ type: 'text', text: block.text });
+        } else if (block.type === 'tool_use') {
+          assistantContent.push({ type: 'tool_use', id: block.id, name: block.name, input: block.input });
+        }
+      }
+      this.history.push({ role: 'assistant', content: assistantContent.length === 1 && assistantContent[0].type === 'text' ? reply : assistantContent as any });
+
+      // If there were tool calls, add tool results so Claude can continue the conversation
+      const toolBlocks = response.content.filter((b: any) => b.type === 'tool_use');
+      if (toolBlocks.length > 0) {
+        const toolResults = toolBlocks.map((b: any) => ({
+          type: 'tool_result' as const,
+          tool_use_id: b.id,
+          content: config ? `游戏已创建: ${config.meta.name}` : '已执行',
+        }));
+        this.history.push({ role: 'user', content: toolResults as any });
+      }
 
       // Determine if we still need more info
       const needsMoreInfo = !config && !chips;
