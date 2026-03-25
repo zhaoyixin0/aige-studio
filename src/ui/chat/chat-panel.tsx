@@ -3,6 +3,7 @@ import { SendHorizontal, Loader2, MessageSquare, Sparkles } from 'lucide-react';
 import { useEditorStore } from '@/store/editor-store.ts';
 import type { ChatMessage } from '@/store/editor-store.ts';
 import { useGameStore } from '@/store/game-store.ts';
+import { useEngineContext } from '@/app/hooks/use-engine.ts';
 import { Agent } from '@/agent/index.ts';
 import { AssetAgent } from '@/services/asset-agent.ts';
 
@@ -41,6 +42,7 @@ const WELCOME_MESSAGE: ChatMessage = {
 };
 
 export function ChatPanel() {
+  const { engineRef } = useEngineContext();
   const chatMessages = useEditorStore(selectChatMessages);
   const isChatLoading = useEditorStore(selectIsChatLoading);
   const addChatMessage = useEditorStore(selectAddChatMessage);
@@ -71,8 +73,8 @@ export function ChatPanel() {
       const count = Object.keys(assets).length;
       if (count > 0) {
         batchUpdateAssets(assets);
-        // Update engine config directly so renderer picks up new sprites
-        const engine = (window as any).__engine;
+        // Update engine config so renderer picks up new sprites
+        const engine = engineRef.current;
         if (engine) {
           const engineConfig = engine.getConfig();
           engineConfig.assets = { ...engineConfig.assets, ...assets };
