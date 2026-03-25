@@ -15,13 +15,13 @@ import type { GameConfig, AssetEntry } from '@/engine/core';
 /*  Singleton ConversationAgent                                        */
 /* ------------------------------------------------------------------ */
 
-const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY as string | undefined;
-
-let conversationAgentInstance: ConversationAgent | null = null;
 function getConversationAgent(): ConversationAgent {
-  if (conversationAgentInstance) return conversationAgentInstance;
-  conversationAgentInstance = new ConversationAgent(apiKey);
-  return conversationAgentInstance;
+  const w = window as any;
+  if (!w.__conversationAgent) {
+    const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY as string | undefined;
+    w.__conversationAgent = new ConversationAgent(apiKey);
+  }
+  return w.__conversationAgent;
 }
 
 /* ------------------------------------------------------------------ */

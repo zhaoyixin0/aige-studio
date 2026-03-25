@@ -13,14 +13,13 @@ import { AssetAgent } from '@/services/asset-agent';
 /*  Singleton agent (persists across re-renders)                       */
 /* ------------------------------------------------------------------ */
 
-let agentInstance: ConversationAgent | null = null;
-
 function getAgent(): ConversationAgent {
-  if (!agentInstance) {
+  const w = window as any;
+  if (!w.__conversationAgent) {
     const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY as string | undefined;
-    agentInstance = new ConversationAgent(apiKey);
+    w.__conversationAgent = new ConversationAgent(apiKey);
   }
-  return agentInstance;
+  return w.__conversationAgent;
 }
 
 /* ------------------------------------------------------------------ */
