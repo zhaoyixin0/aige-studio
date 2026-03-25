@@ -150,7 +150,9 @@ export class PromptBuilder {
   static build(assetKey: string, ctx: PromptContext): string {
     const themedDescs = THEMED_ITEM_DESCRIPTIONS[ctx.theme];
     const itemDesc = themedDescs?.[assetKey] ?? ITEM_DESCRIPTIONS[assetKey] ?? assetKey;
-    const aesthetic = THEME_AESTHETICS[ctx.theme] ?? 'game-themed';
+    // For custom themes (not in preset), use the theme name as the aesthetic description
+    const aesthetic = THEME_AESTHETICS[ctx.theme]
+      ?? `${ctx.theme} themed, ${ctx.theme}-inspired visual elements, fun and playful`;
     const styleInst = STYLE_INSTRUCTIONS[ctx.style] ?? STYLE_INSTRUCTIONS.cartoon;
 
     if (ctx.role === 'background') {

@@ -128,8 +128,7 @@ const TOOLS: Anthropic.Messages.Tool[] = [
         },
         theme: {
           type: 'string',
-          enum: [...THEMES],
-          description: '主题（默认根据游戏类型自动选择）',
+          description: `主题。预设主题: ${THEMES.join(', ')}。也支持自定义主题如"animal"、"dinosaur"等，AI会生成匹配的素材。`,
         },
         art_style: {
           type: 'string',
@@ -510,10 +509,8 @@ export class ConversationAgent {
       }
     }
 
-    // Resolve theme
-    const themeId = params.theme && THEMES.includes(params.theme as any)
-      ? params.theme
-      : DEFAULT_THEME[gameType] ?? 'fruit';
+    // Resolve theme — allow custom themes (AI will generate matching assets)
+    const themeId = params.theme ?? DEFAULT_THEME[gameType] ?? 'fruit';
 
     // Resolve art style
     const artStyle = params.art_style && ART_STYLES.includes(params.art_style as any)
