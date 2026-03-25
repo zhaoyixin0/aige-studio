@@ -155,7 +155,7 @@ const TOOLS: Anthropic.Messages.Tool[] = [
         },
         asset_descriptions: {
           type: 'object',
-          description: '自定义素材描述，根据主题生成匹配的素材。key 是素材 ID（如 star, coin, bomb, player, background），value 是该素材在当前主题下应该是什么。例如动物主题：{"star":"a cute golden puppy","coin":"a shiny bone treat","bomb":"an angry hedgehog","player":"a happy corgi dog","background":"a sunny green meadow with trees and flowers"}',
+          description: '自定义素材描述，根据主题生成匹配的素材。key 是素材 ID（good_1, good_2, good_3, bad_1, bad_2, player, background），value 是该素材在当前主题下应该是什么的英文描述。例如动物主题：{"good_1":"a cute golden puppy","good_2":"a playful kitten","good_3":"a baby bunny","bad_1":"an angry porcupine","bad_2":"a sneaky snake","player":"a happy corgi with a basket","background":"a sunny green meadow with trees and flowers"}。必须提供，确保素材与主题匹配。',
           additionalProperties: { type: 'string' },
         },
       },
@@ -593,6 +593,14 @@ export class ConversationAgent {
         case 'set_theme': {
           if (change.theme) {
             updated.meta.theme = change.theme;
+            // Clear all sprite assets to force regeneration with new theme
+            for (const [key, entry] of Object.entries(updated.assets)) {
+              if (entry.type !== 'background') {
+                entry.src = '';
+              } else {
+                entry.src = ''; // background also needs regeneration
+              }
+            }
           }
           break;
         }
@@ -600,6 +608,10 @@ export class ConversationAgent {
         case 'set_art_style': {
           if (change.art_style) {
             updated.meta.artStyle = change.art_style;
+            // Clear all assets to force regeneration with new style
+            for (const entry of Object.values(updated.assets)) {
+              entry.src = '';
+            }
           }
           break;
         }

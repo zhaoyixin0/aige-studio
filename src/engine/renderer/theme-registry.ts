@@ -62,18 +62,26 @@ export function getAllThemes(): GameTheme[] {
 
 /** Map a spawned object's asset name to an emoji from the theme */
 export function assetToEmoji(asset: string, theme: GameTheme): string {
-  // Known good assets → pick from goodEmojis
+  // Role-based naming: good_N → goodEmojis, bad_N → badEmojis
+  if (asset.startsWith('good_')) {
+    const idx = parseInt(asset.split('_')[1] ?? '1', 10) - 1;
+    return theme.goodEmojis[idx % theme.goodEmojis.length];
+  }
+  if (asset.startsWith('bad_')) {
+    const idx = parseInt(asset.split('_')[1] ?? '1', 10) - 1;
+    return theme.badEmojis[idx % theme.badEmojis.length];
+  }
+  // Legacy specific names
   const goodAssets = ['star', 'apple', 'coin', 'heart', 'diamond', 'gift',
     'bubble_red', 'bubble_blue', 'bubble_gold', 'target_normal', 'target_gold', 'target_small'];
   const badAssets = ['bomb', 'meteor', 'ghost', 'obstacle'];
-
   if (goodAssets.includes(asset)) {
     return theme.goodEmojis[hashString(asset) % theme.goodEmojis.length];
   }
   if (badAssets.includes(asset)) {
     return theme.badEmojis[hashString(asset) % theme.badEmojis.length];
   }
-  // Fallback: pick from all emojis
+  // Fallback
   const all = [...theme.goodEmojis, ...theme.badEmojis];
   return all[hashString(asset) % all.length];
 }

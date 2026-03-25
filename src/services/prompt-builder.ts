@@ -23,6 +23,11 @@ const THEME_AESTHETICS: Record<string, string> = {
 };
 
 const ITEM_DESCRIPTIONS: Record<string, string> = {
+  good_1: 'a collectible game item',
+  good_2: 'a bonus collectible item',
+  good_3: 'a special reward item',
+  bad_1: 'a dangerous obstacle',
+  bad_2: 'a harmful hazard',
   star: 'a shining star',
   apple: 'a ripe apple',
   coin: 'a golden coin',
@@ -44,47 +49,47 @@ const ITEM_DESCRIPTIONS: Record<string, string> = {
 
 const THEMED_ITEM_DESCRIPTIONS: Record<string, Record<string, string>> = {
   fruit: {
-    star: 'a ripe strawberry',
-    apple: 'a juicy orange',
-    coin: 'a fresh banana',
-    bomb: 'a rotten tomato',
-    meteor: 'a moldy avocado',
+    good_1: 'a ripe strawberry',
+    good_2: 'a juicy orange',
+    good_3: 'a fresh banana',
+    bad_1: 'a rotten tomato',
+    bad_2: 'a moldy avocado',
     player: 'a woven fruit basket',
     background: 'a colorful fruit market stall with crates of fresh produce',
   },
   space: {
-    star: 'a glowing energy crystal',
-    apple: 'a small alien artifact',
-    coin: 'a spinning space token',
-    bomb: 'a spiky asteroid',
-    meteor: 'a fiery comet with glowing tail',
+    good_1: 'a glowing energy crystal',
+    good_2: 'a small alien artifact',
+    good_3: 'a spinning space token',
+    bad_1: 'a spiky asteroid',
+    bad_2: 'a fiery comet with glowing tail',
     player: 'a sleek spaceship',
     background: 'deep space with nebulae, distant galaxies and stars',
   },
   ocean: {
-    star: 'a beautiful seashell',
-    apple: 'a colorful tropical fish',
-    coin: 'a shiny pearl',
-    bomb: 'a spiky sea urchin',
-    meteor: 'a sinking anchor',
+    good_1: 'a beautiful seashell',
+    good_2: 'a colorful tropical fish',
+    good_3: 'a shiny pearl',
+    bad_1: 'a spiky sea urchin',
+    bad_2: 'a sinking anchor',
     player: 'a cute cartoon fish',
     background: 'an underwater coral reef with sunlight streaming through water',
   },
   halloween: {
-    star: 'a glowing candy corn',
-    apple: 'a wrapped halloween candy',
-    coin: 'a golden pumpkin coin',
-    bomb: 'a spooky ghost',
-    meteor: 'a flying witch on broomstick',
+    good_1: 'a glowing candy corn',
+    good_2: 'a wrapped halloween candy',
+    good_3: 'a golden pumpkin coin',
+    bad_1: 'a spooky ghost',
+    bad_2: 'a flying witch on broomstick',
     player: 'a cute jack-o-lantern',
     background: 'a spooky graveyard under a full moon with bats',
   },
   candy: {
-    star: 'a swirl lollipop',
-    apple: 'a frosted cupcake',
-    coin: 'a chocolate gold coin',
-    bomb: 'a sour gummy bear',
-    meteor: 'a jawbreaker candy ball',
+    good_1: 'a swirl lollipop',
+    good_2: 'a frosted cupcake',
+    good_3: 'a chocolate gold coin',
+    bad_1: 'a sour gummy bear',
+    bad_2: 'a jawbreaker candy ball',
     player: 'a candy robot character',
     background: 'a candy land with lollipop trees and chocolate rivers',
   },
@@ -187,7 +192,12 @@ export class PromptBuilder {
 
   /** Determine role of an asset key based on naming conventions */
   static inferRole(assetKey: string): PromptContext['role'] {
-    const badKeys = ['bomb', 'meteor', 'ghost', 'obstacle', 'enemy'];
+    // Role-based naming: good_N, bad_N
+    if (assetKey.startsWith('good_')) return 'good';
+    if (assetKey.startsWith('bad_')) return 'bad';
+
+    // Legacy specific names
+    const badKeys = ['bomb', 'meteor', 'ghost', 'obstacle', 'enemy', 'hazard'];
     const playerKeys = ['player', 'character', 'hero', 'avatar'];
     const bgKeys = ['sky', 'space_bg', 'ocean_bg', 'background'];
     const bulletKeys = ['bullet', 'projectile', 'shot'];

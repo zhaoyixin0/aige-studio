@@ -4,7 +4,7 @@ import { PromptBuilder } from '../prompt-builder.ts';
 
 describe('PromptBuilder', () => {
   it('should build sprite prompt with green background requirement', () => {
-    const prompt = PromptBuilder.build('star', {
+    const prompt = PromptBuilder.build('good_1', {
       gameType: 'catch',
       theme: 'fruit',
       role: 'good',
@@ -17,7 +17,7 @@ describe('PromptBuilder', () => {
   });
 
   it('should build prompt for a bad item with danger hint', () => {
-    const prompt = PromptBuilder.build('bomb', {
+    const prompt = PromptBuilder.build('bad_1', {
       gameType: 'dodge',
       theme: 'space',
       role: 'bad',
