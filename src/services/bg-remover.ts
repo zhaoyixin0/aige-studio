@@ -54,7 +54,10 @@ export class BgRemover {
         // a green background — fall back to AI removal
         if (removedCount / totalPixels < 0.05) {
           console.warn('[BgRemover] Low green pixel count — image may not have green background, falling back to AI removal');
-          this.remove(dataUrl).then(resolve).catch(() => resolve(dataUrl));
+          this.remove(dataUrl).then(resolve).catch((err) => {
+            console.warn('[BgRemover] AI fallback also failed:', err);
+            resolve(dataUrl);
+          });
           return;
         }
 

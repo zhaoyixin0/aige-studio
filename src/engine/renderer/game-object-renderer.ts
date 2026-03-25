@@ -22,7 +22,7 @@ export class GameObjectRenderer {
   private sprites = new Map<string, Container>();
   private textureCache = new Map<string, Texture>();
   private playerSprite: Container | null = null;
-  private lastAssetKeys = '';
+  private lastAssetKeys = 0;
   private platformGraphics: Graphics | null = null;
 
   constructor(container: Container) {
@@ -30,12 +30,13 @@ export class GameObjectRenderer {
   }
 
   sync(engine: Engine): void {
-    // Detect asset changes (e.g., AssetAgent finished generating) — clear sprite cache
-    const currentAssetKeys = Object.entries(engine.getConfig().assets ?? {})
-      .map(([k, v]) => `${k}:${v.src ? 'y' : 'n'}`)
-      .join(',');
-    if (currentAssetKeys !== this.lastAssetKeys) {
-      if (this.lastAssetKeys !== '') {
+    // Detect asset changes — use count + has-data check (cheap, no allocations)
+    const assets = engine.getConfig().assets ?? {};
+    const keys = Object.keys(assets);
+    let assetHash = keys.length;
+    for (const k of keys) { if ((assets as any)[k]?.src) assetHash += k.length; }
+    if (assetHash !== this.lastAssetKeys) {
+      if (this.lastAssetKeys !== 0) {
         // Assets changed since last frame — clear cached sprites so they re-create with new assets
         for (const sprite of this.sprites.values()) {
           this.container.removeChild(sprite);
@@ -48,7 +49,7 @@ export class GameObjectRenderer {
           this.playerSprite = null;
         }
       }
-      this.lastAssetKeys = currentAssetKeys;
+      this.lastAssetKeys = assetHash;
     }
 
     const gameFlow = engine.getModulesByType('GameFlow')[0] as GameFlow | undefined;

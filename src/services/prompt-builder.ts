@@ -3,7 +3,7 @@
 // Generates optimized prompts for Gemini Imagen / Nano Banana image generation.
 //
 // Sprite prompts use chroma-key green (#00FF00) backgrounds for clean removal.
-// Key technique: green background + white outline = sharp edges after bg removal.
+// Key technique: green background + clean sharp edges (no outline) for reliable chroma-key removal.
 // Reference: https://roboticape.com/2026/03/07/generating-game-sprites-with-gemini-image-generation-nano-banana-pro-lessons-learned/
 
 export interface PromptContext {
