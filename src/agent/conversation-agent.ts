@@ -286,6 +286,8 @@ export class ConversationAgent {
       this.history = this.history.slice(-MAX_HISTORY);
     }
 
+    console.log('[ConversationAgent] History length:', this.history.length, 'Messages:', this.history.map(m => ({ role: m.role, content: typeof m.content === 'string' ? m.content.slice(0, 50) : '[complex]' })));
+
     // Build messages array; inject current config context if available
     const messages = this.history.map((m) => ({
       role: m.role as 'user' | 'assistant',
