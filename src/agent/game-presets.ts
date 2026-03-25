@@ -533,6 +533,7 @@ const PRESETS: Record<GameType, GamePreset> = {
   // ──────────────────────────────────────────
   platformer: {
     GameFlow:        { countdown: 3, onFinish: 'show_result' },
+    Collision:       { rules: [{ a: 'player', b: 'collectibles', event: 'hit', destroy: ['b'] }, { a: 'player', b: 'hazards', event: 'damage', destroy: [] }] },
     PlayerMovement:  { speed: 300, acceleration: 1000, deceleration: 800, moveLeftEvent: 'input:touch:swipe:left', moveRightEvent: 'input:touch:swipe:right' },
     Jump:            { jumpForce: 600, gravity: 980, groundY: 0.78, triggerEvent: 'input:touch:tap' },
     Gravity:         { strength: 980, terminalVelocity: 800, applyTo: 'player' },
