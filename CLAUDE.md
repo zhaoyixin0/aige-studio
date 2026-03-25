@@ -43,7 +43,8 @@ Export (Web HTML / .apjs)
 - `src/engine/tracking/` — MediaPipe wrappers (face, hand, body)
 
 ### Agent & Wizard
-- `src/agent/wizard.ts` — GameWizard: step-by-step guided game creation (15 game types), re-selectable choices, background question
+- `src/agent/conversation-agent.ts` — ConversationAgent: unified Claude tool_use agent (replaces wizard UI)
+- `src/agent/wizard.ts` — GameWizard: step-by-step guided game creation (15 game types, internal utility), re-selectable choices, background question
 - `src/agent/agent.ts` — Agent orchestrator: wizard routing, Mode B, guided creator, enhancement suggestions
 - `src/agent/guided-creator.ts` — LLM-guided game creation through free conversation (Claude API tool_use)
 - `src/agent/game-presets.ts` — Market-calibrated default params per game type (incl. platformer 1080x1920)
@@ -60,10 +61,13 @@ Export (Web HTML / .apjs)
 - `src/services/gemini-image.ts` — Imagen 4 API client
 
 ### UI
-- `src/ui/layout/main-layout.tsx` — 3-panel layout (chat, preview, editor)
-- `src/ui/chat/chat-panel.tsx` — Chat with wizard, Mode B, enhancements
+- `src/ui/layout/main-layout.tsx` — Two-phase layout: landing → studio (chat+preview+editor)
+- `src/ui/landing/landing-page.tsx` — Centered input page with dynamic suggestion chips
+- `src/ui/chat/studio-chat-panel.tsx` — In-studio chat panel with ConversationAgent
+- `src/ui/chat/suggestion-chips.tsx` — Dynamic suggestion chips component
+- `src/ui/chat/chat-panel.tsx` — Legacy chat panel (kept for compatibility)
 - `src/ui/preview/preview-canvas.tsx` — PixiJS game preview
-- `src/ui/editor/` — Module list, properties panel, schema renderer
+- `src/ui/editor/` — Module list, properties panel, schema renderer (collapsible)
 - `src/ui/assets/` — Asset browser, upload, AI generate dialog
 - `src/ui/export/export-dialog.tsx` — Web + .apjs export
 
@@ -86,16 +90,20 @@ catch, dodge, tap, shooting, quiz, random-wheel, expression, runner, gesture, rh
 ## 5 Emoji Themes
 fruit (🧺🍎💣), space (🚀⭐☄️), ocean (🐠🐚🦈), halloween (🎃🍬👻), candy (🤖🍩🌶️)
 
-## 4 Interaction Modes
-1. **Wizard (Mode A):** Step-by-step guided creation with progressive preview, re-selectable choices
-2. **Mode B:** Type description → auto-detect game type → start wizard from input selection
-3. **Free Chat (Mode C):** Claude API natural language modification
-4. **Guided Creator (Mode D):** LLM-guided conversation — analyzes requirements, breaks into modules, asks step-by-step questions (requires Claude API key)
+## Interaction Mode
+**Conversational Creation** — Google AI Studio inspired UI:
+- Landing page: centered input + game type suggestion chips
+- User describes game → ConversationAgent (Claude tool_use) infers params, ≤3 follow-up rounds
+- Game created → two-panel studio (chat 40% + preview 60%), editor collapsible
+- Dynamic suggestion chips change by phase: game types → modules → enhancements
+- Works without API key (regex fallback for game type detection)
+
+Old modes (Wizard, Mode B, GuidedCreator) kept as internal utilities.
 
 ## Environment Variables
 ```
-VITE_ANTHROPIC_API_KEY=<Claude API key>  # Optional: only for Mode C free chat
-VITE_GEMINI_API_KEY=<Gemini API key>     # Optional: for AI asset generation
+VITE_ANTHROPIC_API_KEY=<Claude API key>  # For ConversationAgent (optional: regex fallback without key)
+VITE_GEMINI_API_KEY=<Gemini API key>     # For AI asset generation (optional)
 ```
 Wizard and Mode B work WITHOUT any API keys.
 
@@ -174,6 +182,13 @@ Previous prototype at `C:\Users\yixin\Downloads\secret demo\index.html` — sing
 47. Background rendering fix (buildConfig assets, config sync, sprite cache invalidation)
 48. Art style wizard step — 6 styles (cartoon, pixel, flat, realistic, watercolor, chibi)
 49. Green screen sprite prompts (#00FF00) + HSV chroma-key bg removal (~10ms vs ~30s)
+
+### 2026-03-25
+50. Conversational UI redesign — Google AI Studio inspired landing page + studio layout
+51. ConversationAgent: unified Claude tool_use agent (create_game, modify_game, suggest_enhancements)
+52. Dynamic suggestion chips: game types → module recommendations → enhancement suggestions
+53. Two-phase layout: centered landing → chat+preview studio, collapsible editor
+54. LandingPage + StudioChatPanel + SuggestionChips components
 
 ## Game Flow
 ```
