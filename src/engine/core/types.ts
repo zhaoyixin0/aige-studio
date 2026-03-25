@@ -53,6 +53,7 @@ export interface GameMeta {
   createdAt: string;
   theme?: string;
   artStyle?: string;
+  assetDescriptions?: Record<string, string>;
   playerEmoji?: string;
 }
 

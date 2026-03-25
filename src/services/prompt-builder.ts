@@ -11,6 +11,7 @@ export interface PromptContext {
   theme: string;
   role: 'good' | 'bad' | 'player' | 'bullet' | 'background';
   style: string;
+  assetDescriptions?: Record<string, string>;
 }
 
 const THEME_AESTHETICS: Record<string, string> = {
@@ -148,8 +149,10 @@ Fill the entire canvas — no borders, no letterboxing.`;
 
 export class PromptBuilder {
   static build(assetKey: string, ctx: PromptContext): string {
+    // Priority: custom LLM descriptions > preset theme descriptions > generic descriptions
+    const customDesc = ctx.assetDescriptions?.[assetKey];
     const themedDescs = THEMED_ITEM_DESCRIPTIONS[ctx.theme];
-    const itemDesc = themedDescs?.[assetKey] ?? ITEM_DESCRIPTIONS[assetKey] ?? assetKey;
+    const itemDesc = customDesc ?? themedDescs?.[assetKey] ?? ITEM_DESCRIPTIONS[assetKey] ?? assetKey;
     // For custom themes (not in preset), use the theme name as the aesthetic description
     const aesthetic = THEME_AESTHETICS[ctx.theme]
       ?? `${ctx.theme} themed, ${ctx.theme}-inspired visual elements, fun and playful`;

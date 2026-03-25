@@ -153,6 +153,11 @@ const TOOLS: Anthropic.Messages.Tool[] = [
           type: 'boolean',
           description: '是否生成 AI 背景图',
         },
+        asset_descriptions: {
+          type: 'object',
+          description: '自定义素材描述，根据主题生成匹配的素材。key 是素材 ID（如 star, coin, bomb, player, background），value 是该素材在当前主题下应该是什么。例如动物主题：{"star":"a cute golden puppy","coin":"a shiny bone treat","bomb":"an angry hedgehog","player":"a happy corgi dog","background":"a sunny green meadow with trees and flowers"}',
+          additionalProperties: { type: 'string' },
+        },
       },
       required: ['game_type'],
     },
@@ -338,6 +343,7 @@ export class ConversationAgent {
                 input_method?: string;
                 extra_modules?: string[];
                 want_background?: boolean;
+                asset_descriptions?: Record<string, string>;
               };
               config = this.buildGameConfig(input);
               // Auto-generate suggestions for the newly created game
@@ -443,6 +449,7 @@ export class ConversationAgent {
     input_method?: string;
     extra_modules?: string[];
     want_background?: boolean;
+    asset_descriptions?: Record<string, string>;
   }): GameConfig {
     const gameType = ALL_GAME_TYPES.includes(params.game_type as any)
       ? params.game_type
@@ -533,6 +540,7 @@ export class ConversationAgent {
         createdAt: new Date().toISOString(),
         theme: themeId,
         artStyle,
+        ...(params.asset_descriptions ? { assetDescriptions: params.asset_descriptions } : {}),
       },
       canvas: { width: 1080, height: 1920 },
       modules,

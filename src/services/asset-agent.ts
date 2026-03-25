@@ -123,6 +123,7 @@ export class AssetAgent {
 
     const theme = config.meta?.theme ?? '';
     const style = (config.meta?.artStyle as PromptContext['style']) || 'cartoon';
+    const assetDescriptions = config.meta?.assetDescriptions;
 
     for (let i = 0; i < keysToProcess.length; i++) {
       if (signal.aborted) return result;
@@ -150,6 +151,7 @@ export class AssetAgent {
           theme: theme || 'default',
           role,
           style,
+          assetDescriptions,
         });
 
         // Use generateImageRaw — PromptBuilder already includes style
