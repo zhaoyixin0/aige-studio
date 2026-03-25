@@ -103,12 +103,8 @@ export function StudioChatPanel() {
               timestamp: Date.now(),
             });
           } else {
-            addChatMessage({
-              id: crypto.randomUUID(),
-              role: 'assistant',
-              content: '\u26A0\uFE0F \u7D20\u6750\u751F\u6210\u8DF3\u8FC7\uFF08\u53EF\u80FD\u672A\u914D\u7F6E Gemini API Key\uFF09',
-              timestamp: Date.now(),
-            });
+            // count === 0: either all assets cached, no assets needed, or no API key
+            // Don't show a warning — this is normal when assets are already cached
           }
         })
         .catch((err) => {
