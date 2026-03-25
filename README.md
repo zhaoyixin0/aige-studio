@@ -38,7 +38,7 @@ React 19 · TypeScript · Vite · PixiJS 8 · Zustand · Tailwind CSS · Radix U
 ## Tests
 
 ```bash
-npx vitest run   # 543+ tests
+npx vitest run   # 938+ tests
 ```
 
 ## License

@@ -16,7 +16,7 @@ AIGE Studio is a modular social platform game creation tool. Users create games 
 - **AI:** Claude API (free-form chat), Gemini Imagen 4 (asset generation)
 - **Image Processing:** @imgly/background-removal (ONNX WASM, browser-side)
 - **Storage:** IndexedDB (asset library via idb-keyval)
-- **Testing:** Vitest (544+ tests)
+- **Testing:** Vitest (938+ tests)
 - **Tracking:** MediaPipe (face/hand/body, optional)
 
 ## Architecture
@@ -104,7 +104,7 @@ Wizard and Mode B work WITHOUT any API keys.
 npm run dev          # Dev server
 npm run dev -- --host  # Dev server + LAN access
 npm run build        # Production build
-npx vitest run       # Run all tests (543+)
+npx vitest run       # Run all tests (938+)
 npx tsc --noEmit     # Type check
 ```
 
@@ -165,6 +165,15 @@ Previous prototype at `C:\Users\yixin\Downloads\secret demo\index.html` — sing
 38. GuidedCreator: LLM-guided game creation through free conversation (Claude API tool_use)
 39. PixiRenderer event listener cleanup prevents accumulation on restart
 40. Asset extraction expanded for Collectible/Hazard/PlayerMovement modules
+41. Architecture improvements: BaseModule auto-track listeners, module dependency declarations, EventBus debug mode, PixiRenderer destroy leak fix
+42. Event constants registry (src/engine/core/events.ts) — centralized event names + payload interfaces
+43. Module combination diagnostics system (EventRecorder + 9 rules + CombinationGenerator)
+44. Integration test matrix: 90 lifecycle tests (15 types × 6) + 300 combination tests
+45. Browser console diagnostics: window.__diagnostics.start/stop/report
+46. Dodge game scoring fix (scorePerSecond for survival-based scoring)
+47. Background rendering fix (buildConfig assets, config sync, sprite cache invalidation)
+48. Art style wizard step — 6 styles (cartoon, pixel, flat, realistic, watercolor, chibi)
+49. Green screen sprite prompts (#00FF00) + HSV chroma-key bg removal (~10ms vs ~30s)
 
 ## Game Flow
 ```
@@ -185,8 +194,12 @@ Restart → Countdown...
 - **Batch 3 (planned):** ~6 action-RPG modules — MeleeAttack, Patrol, ResourcePool, LootDrop, StatusEffect, DialogTrigger
 - Design docs: `docs/plans/2026-03-23-module-expansion-design.md`
 
+## Diagnostics System
+- **Vitest:** `npx vitest run src/__tests__/integration/module-combinations.test.ts` — 300 combination tests
+- **Browser console:** `__diagnostics.start()` → play → `__diagnostics.stop()` — event flow analysis
+- **EventBus debug:** `__engine.eventBus.setDebug(true)` — real-time event logging
+
 ## Known Issues / Next Steps
-- Background removal is slow (~10-30s/image, single-threaded WASM)
 - Gemini API key exposed in frontend (fine for internal use, need proxy for public)
 - Comprehensive mobile touch testing needed
 - Batch 2 & 3 module expansion pending
