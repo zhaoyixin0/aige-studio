@@ -133,6 +133,11 @@ const TOOLS: Anthropic.Messages.Tool[] = [
           type: 'number',
           description: '游戏时长（秒），0 表示无限制。默认 30。',
         },
+        input_method: {
+          type: 'string',
+          enum: ['TouchInput', 'FaceInput', 'HandInput', 'DeviceInput', 'AudioInput'],
+          description: '输入方式（默认 TouchInput 触屏）',
+        },
         extra_modules: {
           type: 'array',
           items: { type: 'string' },
@@ -319,6 +324,7 @@ export class ConversationAgent {
                 theme?: string;
                 art_style?: string;
                 duration?: number;
+                input_method?: string;
                 extra_modules?: string[];
                 want_background?: boolean;
               };
@@ -403,6 +409,7 @@ export class ConversationAgent {
     theme?: string;
     art_style?: string;
     duration?: number;
+    input_method?: string;
     extra_modules?: string[];
     want_background?: boolean;
   }): GameConfig {
@@ -427,18 +434,24 @@ export class ConversationAgent {
       });
     };
 
-    // Add all modules from the preset
+    // Input modules from preset — only add ONE (default: TouchInput)
+    const INPUT_TYPES = new Set(['FaceInput', 'HandInput', 'BodyInput', 'TouchInput', 'DeviceInput', 'AudioInput']);
+
+    // Add all non-input modules from the preset, plus one input module
     if (preset) {
       for (const moduleType of Object.keys(preset)) {
+        if (INPUT_TYPES.has(moduleType)) continue; // skip — we'll add one below
         addModule(moduleType);
       }
     } else {
-      // Minimal fallback if no preset found
       addModule('GameFlow');
       addModule('UIOverlay');
       addModule('ResultScreen');
-      addModule('TouchInput');
     }
+
+    // Add exactly one input module (default TouchInput for mobile games)
+    const inputMethod = params.input_method ?? 'TouchInput';
+    addModule(inputMethod);
 
     // Add any extra modules requested by the LLM
     if (params.extra_modules) {
