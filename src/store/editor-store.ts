@@ -13,11 +13,34 @@ export interface ChatMessage {
   timestamp: number;
 }
 
+export interface Chip {
+  id: string;
+  label: string;
+  emoji?: string;
+}
+
+export const DEFAULT_CHIPS: Chip[] = [
+  { id: 'catch', label: '接住游戏', emoji: '🎯' },
+  { id: 'shooting', label: '射击游戏', emoji: '🔫' },
+  { id: 'dodge', label: '躲避游戏', emoji: '💨' },
+  { id: 'quiz', label: '答题游戏', emoji: '❓' },
+  { id: 'runner', label: '跑酷游戏', emoji: '🏃' },
+  { id: 'tap', label: '点击游戏', emoji: '👆' },
+  { id: 'rhythm', label: '节奏游戏', emoji: '🎵' },
+  { id: 'platformer', label: '平台跳跃', emoji: '🎮' },
+  { id: 'random-wheel', label: '幸运转盘', emoji: '🎰' },
+  { id: 'expression', label: '表情挑战', emoji: '😊' },
+];
+
 interface EditorStore {
   selectedModuleId: string | null;
   previewMode: PreviewMode;
   chatMessages: ChatMessage[];
   isChatLoading: boolean;
+
+  layoutPhase: 'landing' | 'studio';
+  suggestionChips: Chip[];
+  editorExpanded: boolean;
 
   selectModule: (id: string | null) => void;
   setPreviewMode: (mode: PreviewMode) => void;
@@ -25,6 +48,9 @@ interface EditorStore {
   truncateChatAfter: (messageId: string) => void;
   setChatLoading: (loading: boolean) => void;
   clearChat: () => void;
+  setLayoutPhase: (phase: 'landing' | 'studio') => void;
+  setSuggestionChips: (chips: Chip[]) => void;
+  toggleEditor: () => void;
 }
 
 export const useEditorStore = create<EditorStore>((set) => ({
@@ -32,6 +58,9 @@ export const useEditorStore = create<EditorStore>((set) => ({
   previewMode: 'edit',
   chatMessages: [],
   isChatLoading: false,
+  layoutPhase: 'landing',
+  suggestionChips: DEFAULT_CHIPS,
+  editorExpanded: false,
 
   selectModule: (id) => set({ selectedModuleId: id }),
 
@@ -52,4 +81,8 @@ export const useEditorStore = create<EditorStore>((set) => ({
   setChatLoading: (loading) => set({ isChatLoading: loading }),
 
   clearChat: () => set({ chatMessages: [], isChatLoading: false }),
+
+  setLayoutPhase: (phase) => set({ layoutPhase: phase }),
+  setSuggestionChips: (chips) => set({ suggestionChips: chips }),
+  toggleEditor: () => set((state) => ({ editorExpanded: !state.editorExpanded })),
 }));
