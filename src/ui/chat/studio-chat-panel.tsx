@@ -4,25 +4,12 @@ import { useEditorStore } from '@/store/editor-store.ts';
 import type { ChatMessage, Chip } from '@/store/editor-store.ts';
 import { useGameStore } from '@/store/game-store.ts';
 import { useEngineContext } from '@/app/hooks/use-engine.ts';
-import { ConversationAgent } from '@/agent/conversation-agent.ts';
 import type { ConversationResult } from '@/agent/conversation-agent.ts';
+import { getConversationAgent } from '@/agent/singleton.ts';
 import { AssetAgent } from '@/services/asset-agent.ts';
 import { SuggestionChips } from './suggestion-chips.tsx';
 
 import type { GameConfig, AssetEntry } from '@/engine/core';
-
-/* ------------------------------------------------------------------ */
-/*  Singleton ConversationAgent                                        */
-/* ------------------------------------------------------------------ */
-
-function getConversationAgent(): ConversationAgent {
-  const w = window as any;
-  if (!w.__conversationAgent) {
-    const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY as string | undefined;
-    w.__conversationAgent = new ConversationAgent(apiKey);
-  }
-  return w.__conversationAgent;
-}
 
 /* ------------------------------------------------------------------ */
 /*  Stable Zustand selectors                                           */
