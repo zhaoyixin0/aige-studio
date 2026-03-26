@@ -109,14 +109,14 @@ export class DifficultyRamp extends BaseModule {
 
     // Clamp to bounds
     if (rule.min != null) {
-      currentValue = Math.max(rule.min, currentValue);
+      currentValue = Math.max(rule.min, currentValue as number);
     }
     if (rule.max != null) {
-      currentValue = Math.min(rule.max, currentValue);
+      currentValue = Math.min(rule.max, currentValue as number);
     }
 
     // Support dot-path: build update that preserves sibling keys
-    const update = buildNestedUpdate(targetParams, rule.field, currentValue);
+    const update = buildNestedUpdate(targetParams, rule.field, currentValue as number);
     target.configure(update);
 
     this.emit('difficulty:update', {

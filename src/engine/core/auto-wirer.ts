@@ -1,7 +1,7 @@
 import type { GameEngine, GameModule } from './types';
 import type { Collision } from '@/engine/modules/mechanic/collision';
 import type { Spawner } from '@/engine/modules/mechanic/spawner';
-import type { Gravity, PlatformSurface } from '@/engine/modules/mechanic/gravity';
+import type { Gravity } from '@/engine/modules/mechanic/gravity';
 import type { PlayerMovement } from '@/engine/modules/mechanic/player-movement';
 
 interface WiringRule {
@@ -39,7 +39,7 @@ const WIRING_RULES: WiringRule[] = [
   {
     // Collectible + Collision: auto-register collectible items for collision detection
     requires: ['Collectible', 'Collision'],
-    setup: (engine, modules) => {
+    setup: (_engine, modules) => {
       const collision = modules.get('Collision') as Collision;
       const collectible = modules.get('Collectible') as any;
       const collectibleSize = collectible.getParams?.().spriteSize ?? 32;

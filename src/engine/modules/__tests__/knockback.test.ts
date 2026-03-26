@@ -76,7 +76,7 @@ describe('Knockback', () => {
   });
 
   it('should compute direction from player to hazard using playerX/playerY and hazardX/hazardY', () => {
-    const { engine, knockback } = setup();
+    const { engine } = setup();
     const handler = vi.fn();
     engine.eventBus.on('knockback:start', handler);
 
@@ -93,7 +93,7 @@ describe('Knockback', () => {
   });
 
   it('should push player away from hazard below', () => {
-    const { engine, knockback } = setup();
+    const { engine } = setup();
     const handler = vi.fn();
     engine.eventBus.on('knockback:start', handler);
 

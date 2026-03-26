@@ -101,7 +101,7 @@ describe('Platform Physics Integration', () => {
       active: true,
     });
 
-    const initialX = pm.getX();
+    void pm.getX(); // record initial position
 
     // Tick several frames — platform should move and carry the player
     for (let i = 0; i < 60; i++) engine.tick(16);
@@ -183,7 +183,7 @@ describe('Platform Physics Integration', () => {
     // Record Y after one gravity frame
     engine.tick(16);
     const yBeforeDash = gravity.getObject('player')!.y;
-    const velBeforeDash = gravity.getObject('player')!.velocityY;
+    void gravity.getObject('player')!.velocityY; // record velocity before dash
 
     // Start dash — gravity should freeze Y velocity
     engine.eventBus.emit('dash:trigger');

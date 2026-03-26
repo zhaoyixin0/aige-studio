@@ -409,8 +409,8 @@ export class ConversationAgent {
     } catch (error) {
       const errMsg = error instanceof Error ? error.message : String(error);
       return {
-        reply: `API 调用失败：${errMsg}。正在使用本地模式...`,
         ...this.processWithoutApi(message),
+        reply: `API 调用失败：${errMsg}。正在使用本地模式...`,
       };
     }
   }
@@ -619,7 +619,7 @@ export class ConversationAgent {
   /*  Private: generate suggestion chips                               */
   /* ---------------------------------------------------------------- */
 
-  private generateSuggestions(currentModules: string[], gameType: string): Chip[] {
+  private generateSuggestions(currentModules: string[], _gameType: string): Chip[] {
     const chips: Chip[] = [];
 
     // Module suggestions — modules NOT currently in the config

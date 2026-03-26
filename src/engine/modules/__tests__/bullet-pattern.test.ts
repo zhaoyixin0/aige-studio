@@ -123,7 +123,7 @@ describe('BulletPattern', () => {
   });
 
   it('should emit bulletpattern:fire with directions on projectile:fire event', () => {
-    const { engine, mod } = setup({
+    const { engine } = setup({
       pattern: 'spread',
       bulletCount: 3,
       spreadAngle: 60,

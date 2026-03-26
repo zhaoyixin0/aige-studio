@@ -90,7 +90,7 @@ export class Aim extends BaseModule {
     }
   }
 
-  update(dt: number): void {
+  update(_dt: number): void {
     if (this.gameflowPaused) return;
 
     if (this.params.mode === 'auto') {

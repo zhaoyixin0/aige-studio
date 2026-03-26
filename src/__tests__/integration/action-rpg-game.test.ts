@@ -11,7 +11,7 @@
  * 7. Full action-rpg lifecycle: start → fight → level up → waves → finish
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { Engine } from '@/engine/core/engine';
 import { ConfigLoader } from '@/engine/core/config-loader';
 import { createModuleRegistry } from '@/engine/module-setup';
@@ -21,7 +21,6 @@ import type { WaveSpawner } from '@/engine/modules/mechanic/wave-spawner';
 import type { Health } from '@/engine/modules/mechanic/health';
 import type { LevelUp } from '@/engine/modules/mechanic/level-up';
 import type { Lives } from '@/engine/modules/mechanic/lives';
-import type { Projectile } from '@/engine/modules/mechanic/projectile';
 import type { GameFlow } from '@/engine/modules/feedback/game-flow';
 
 // ── helpers ────────────────────────────────────────────────────────────────

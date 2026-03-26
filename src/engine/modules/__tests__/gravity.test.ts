@@ -47,7 +47,7 @@ describe('Gravity', () => {
       gravity.update(16);
     }
 
-    const obj = gravity.getObject('player-1');
+    void gravity.getObject('player-1');
     // If object already landed, velocityY would be 0, so check while still falling
     // Instead, add an object with a very far floor
     const { gravity: g2 } = setup({ strength: 2000, terminalVelocity: 100 });

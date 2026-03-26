@@ -92,7 +92,7 @@ function getEnhancementSuggestions(config: GameConfig): EnhancementSuggestion[] 
  * Auto-build a game config from a detected game type (Mode B).
  * Includes all required modules + recommended optional modules with sensible defaults.
  */
-function autoBuildConfig(gameType: string): GameConfig | null {
+export function autoBuildConfig(gameType: string): GameConfig | null {
   const gameDef = GAME_TYPE_MAP.get(gameType);
   if (!gameDef) return null;
 
@@ -159,10 +159,7 @@ export class Agent {
   private recommender: Recommender;
   private guidedCreator: GuidedCreator | null = null;
   private wizard = new GameWizard();
-  private apiKey: string;
-
   constructor(apiKey: string) {
-    this.apiKey = apiKey;
     this.intentParser = new IntentParser(apiKey);
     this.recipeGenerator = new RecipeGenerator(apiKey);
     this.recommender = new Recommender(apiKey);

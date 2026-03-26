@@ -6,7 +6,7 @@
  */
 import Anthropic from '@anthropic-ai/sdk';
 import type { GameConfig, ModuleConfig } from '@/engine/core/index.ts';
-import { GAME_TYPES, GAME_TYPE_MAP, DEFAULT_THEME_FOR_GAME } from './wizard.ts';
+import { DEFAULT_THEME_FOR_GAME } from './wizard.ts';
 import { ALL_GAME_TYPES, getModuleParams } from './game-presets.ts';
 
 interface ConversationMessage {

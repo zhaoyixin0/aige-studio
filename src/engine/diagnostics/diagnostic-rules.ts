@@ -4,7 +4,6 @@ import type { GameConfig } from '@/engine/core';
 import type { GameFlow } from '@/engine/modules/feedback/game-flow';
 import type { Scorer } from '@/engine/modules/mechanic/scorer';
 import type { Lives } from '@/engine/modules/mechanic/lives';
-import type { Timer } from '@/engine/modules/mechanic/timer';
 import {
   GAMEFLOW_STATE, GAMEFLOW_RESUME, GAMEFLOW_PAUSE,
   COLLISION_HIT, COLLISION_DAMAGE, SCORER_UPDATE,
@@ -51,7 +50,7 @@ const orphanEventRule: DiagnosticRule = (_engine, recorder) => {
 };
 
 // ── Rule 2: Event Chain Break Detector ─────────────────────
-const chainBreakRule: DiagnosticRule = (engine, recorder, config) => {
+const chainBreakRule: DiagnosticRule = (_engine, recorder, config) => {
   const issues: DiagnosticIssue[] = [];
   const moduleTypes = new Set(config.modules.filter((m) => m.enabled).map((m) => m.type));
 

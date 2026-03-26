@@ -131,7 +131,7 @@ describe('Collectible', () => {
     const { collectible } = setup();
 
     // At elapsed=0 the sin values may or may not be zero depending on index
-    const posBefore = collectible.getItemPositions();
+    void collectible.getItemPositions(); // snapshot before update
 
     // Advance time to change the sine wave
     collectible.update(250);

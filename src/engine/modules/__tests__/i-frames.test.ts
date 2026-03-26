@@ -52,7 +52,7 @@ describe('IFrames', () => {
   });
 
   it('should NOT re-trigger while already active', () => {
-    const { engine, iframes } = setup({ duration: 1000 });
+    const { engine } = setup({ duration: 1000 });
     const startHandler = vi.fn();
     engine.eventBus.on('iframes:start', startHandler);
 

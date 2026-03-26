@@ -12,6 +12,7 @@ function createTestModule(id: string, type: string): GameModule {
     getSchema: vi.fn<() => ModuleSchema>(() => ({})),
     configure: vi.fn(),
     getParams: vi.fn<() => Record<string, any>>(() => ({})),
+    getDependencies: vi.fn(() => ({ requires: [], optional: [] })),
     onAttach: vi.fn(),
     onDetach: vi.fn(),
   };

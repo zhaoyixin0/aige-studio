@@ -1,4 +1,4 @@
-import { Container, Graphics, Text, TextStyle, Sprite, Texture, Assets } from 'pixi.js';
+import { Container, Graphics, Text, TextStyle, Sprite, Texture } from 'pixi.js';
 import type { Engine } from '@/engine/core/engine';
 import type { Spawner } from '@/engine/modules/mechanic/spawner';
 import type { FaceInput } from '@/engine/modules/input/face-input';
