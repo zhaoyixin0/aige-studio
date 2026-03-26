@@ -154,45 +154,33 @@ const PRESETS: Record<GameType, GamePreset> = {
   // Benchmark: Snapchat "Space Shooter", TikTok "射击大挑战"
   // ──────────────────────────────────────────
   shooting: {
-    GameFlow:     { countdown: 3, onFinish: 'show_result' },
-    Spawner:      {
-      frequency: 1.0, maxCount: 6,
-      speed: { min: 100, max: 250 },
-      direction: 'random',   // CRITICAL: was 'down', real games use random
-      items: [
-        { asset: 'target_normal', weight: 3 },
-        { asset: 'target_gold', weight: 1 },
-        { asset: 'target_small', weight: 1 },
-      ],
-      spawnArea: { x: 50, y: 50, width: 980, height: 1600 },
-    },
-    Collision:    { rules: [{ a: 'player', b: 'items', event: 'hit', destroy: ['b'] }] },
-    Scorer:       { perHit: 10, combo: { enabled: true, window: 1200, multiplier: [1, 1.5, 2] } },
-    Timer:        { duration: 30, mode: 'countdown' },
-    Lives:        { count: 5 },
-    UIOverlay:    {},
-    ResultScreen: { show: ['score', 'accuracy', 'combo_max'], rating: { '3star': 250, '2star': 120, '1star': 50 } },
-    // Input-specific presets (intentional — for per-game-type tuning of input sensitivity)
-    FaceInput:    { smoothing: 0.2, sensitivity: 1.0 },
-    TouchInput:   {},
-    DifficultyRamp: {
-      target: 'spawner_1', mode: 'time',
-      rules: [
-        { field: 'frequency', decrease: 0.1, min: 0.5, every: 10 },
-      ],
-    },
-    ComboSystem:  { comboWindow: 1200, multiplierStep: 0.5, maxMultiplier: 3 },
-    // Batch 2 enhancements — shooter-specific bullet/aim/health/shield modules
-    Projectile:   { speed: 600, damage: 10, lifetime: 3000, fireRate: 200, fireEvent: 'input:touch:tap', layer: 'projectiles', maxProjectiles: 50 },
-    Aim:          { mode: 'manual', manualEvent: 'input:touch:hold' },
-    Health:       { maxHp: 100, damageEvent: 'collision:damage' },
-    Shield:       { maxCharges: 3, rechargeCooldown: 5000, damageEvent: 'collision:damage' },
-    ParticleVFX:  {
-      events: {
-        'collision:hit': { effect: 'sparkle', at: 'target', duration: 400, color: '#ffdd00' },
-      },
-    },
-    SoundFX:      { events: { 'collision:hit': 'pop', 'scorer:update': 'ding' } },
+    GameFlow:       { countdown: 3, onFinish: 'show_result' },
+    // Player movement (horizontal control for dodging)
+    PlayerMovement: { speed: 250, acceleration: 800, deceleration: 600 },
+    // Projectile system — player fires bullets upward
+    Projectile:     { speed: 600, damage: 10, lifetime: 3000, fireRate: 200, fireEvent: 'input:touch:tap', layer: 'projectiles', maxProjectiles: 50 },
+    Aim:            { mode: 'auto', autoTargetLayer: 'enemies', autoRange: 500 },
+    // Enemy system — waves of enemies spawn from the top
+    EnemyAI:        { behavior: 'patrol', speed: 100, detectionRange: 300, attackRange: 150, attackCooldown: 2000, attackDamage: 10, hp: 30, fleeHpThreshold: 0, waypoints: [] },
+    WaveSpawner:    { enemiesPerWave: 3, waveCooldown: 3000, spawnDelay: 500, scalingFactor: 1.15, maxWaves: 10, spawnAreaX: 100, spawnAreaWidth: 880, spawnY: 100 },
+    // Collision — projectiles hit enemies (score), enemies damage player (health)
+    Collision:      { rules: [{ a: 'projectiles', b: 'enemies', event: 'hit', destroy: ['a'] }, { a: 'player', b: 'enemies', event: 'damage' }] },
+    Scorer:         { perHit: 10, hitEvent: 'collision:hit', combo: { enabled: true, window: 1200, multiplier: [1, 1.5, 2] } },
+    Health:         { maxHp: 100, damageEvent: 'collision:damage' },
+    Lives:          { count: 3 },
+    IFrames:        { duration: 1000 },
+    Timer:          { duration: 60, mode: 'countdown' },
+    UIOverlay:      { elements: ['score', 'lives', 'timer'] },
+    ResultScreen:   { show: ['score', 'accuracy', 'waves_cleared'], rating: { '3star': 300, '2star': 150, '1star': 50 } },
+    // Input-specific presets
+    FaceInput:      { smoothing: 0.2, sensitivity: 1.0 },
+    TouchInput:     {},
+    // Optional enhancements
+    Shield:         { maxCharges: 3, rechargeCooldown: 5000, damageEvent: 'collision:damage' },
+    DifficultyRamp: { target: 'wavespawner_1', mode: 'time', rules: [{ field: 'enemiesPerWave', increase: 1, max: 8, every: 15 }] },
+    ComboSystem:    { comboWindow: 1200, multiplierStep: 0.5, maxMultiplier: 3 },
+    ParticleVFX:    { events: { 'collision:hit': { effect: 'sparkle', at: 'target', duration: 400, color: '#ffaa00' }, 'enemy:death': { effect: 'burst', at: 'target', duration: 500, color: '#ff0000' } } },
+    SoundFX:        { events: { 'collision:hit': 'pop', 'enemy:death': 'boom', 'wave:complete': 'ding' } },
   },
 
   // ──────────────────────────────────────────
@@ -285,19 +273,18 @@ const PRESETS: Record<GameType, GamePreset> = {
       speed: { min: 200, max: 300 },
       direction: 'left',
       items: [
-        { asset: 'bad_1', weight: 2 },
-        { asset: 'good_1', weight: 3 },
+        { asset: 'bad_1', weight: 2, layer: 'obstacles' },
+        { asset: 'good_1', weight: 3, layer: 'items' },
       ],
       spawnArea: { x: 1080, y: 200, width: 0, height: 1400 },
     },
     Collision:    {
       rules: [
         { a: 'player', b: 'items', event: 'hit', destroy: ['b'] },
-        // Runner uses a second collision check: obstacles deal damage
-        // Items with asset='obstacle' trigger damage via hit event handler
+        { a: 'player', b: 'obstacles', event: 'damage', destroy: ['b'] },
       ],
     },
-    Scorer:       { perHit: 5, deductOnMiss: false },
+    Scorer:       { perHit: 5, hitEvent: 'collision:hit', deductOnMiss: false },
     Lives:        { count: 3 },
     UIOverlay:    {},
     ResultScreen: { show: ['score', 'time'], rating: { '3star': 500, '2star': 250, '1star': 80 } },

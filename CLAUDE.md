@@ -202,6 +202,15 @@ Previous prototype at `C:\Users\yixin\Downloads\secret demo\index.html` — sing
 62. Batch 3: 6 action-RPG modules (LevelUp, StatusEffect, EquipmentSlot, EnemyDrop, SkillTree, DialogueSystem)
 63. 157 new tests (963 → 1120), TDD methodology for all new modules
 
+### 2026-03-26
+64. Game generation quality fix — shooting preset rewritten as combat shooter (Projectile+EnemyAI+WaveSpawner), old Spawner-based pattern removed
+65. AutoWirer: 3 new rules — Projectile+Collision (register/track/destroy), WaveSpawner+Collision (enemy lifecycle), Spawner position sync
+66. Runner preset: dual collision rules (items=hit for coins, obstacles=damage for obstacles) + Spawner per-item layer support
+67. ConversationAgent: 14 missing modules added to ALL_MODULES, per-game-type "module recipe" knowledge in system prompt, action-rpg game type support
+68. Wizard shooting definition updated with combat modules (Projectile, Aim, EnemyAI, WaveSpawner, Health)
+69. Knowledge base: shooting.md rewritten for combat shooter, new platformer.md and action-rpg.md skill files (16/16 game types documented)
+70. 1175 tests passing (+55 from 1120)
+
 ## Game Flow
 ```
 Start Screen ("click to start")
@@ -230,6 +239,6 @@ Restart → Countdown...
 - Gemini API key exposed in frontend (fine for internal use, need proxy for public)
 - Comprehensive mobile touch testing needed
 - Platformer physics: platform-gravity surface wiring complete, renderer integration pending
-- Shooter/RPG module rendering in PixiJS not yet implemented
+- Shooter/RPG module rendering in PixiJS not yet implemented (modules work, visual rendering pending)
 - Knowledge skill files need updating for 13 new modules
 - GuidedCreator conversation could benefit from streaming responses

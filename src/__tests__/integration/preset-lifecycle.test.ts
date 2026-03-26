@@ -55,7 +55,7 @@ describe('Preset Lifecycle', () => {
     expect((spawner!.params as any).speed?.max).toBe(300);
   });
 
-  it('shooting preset should use random spawn direction', () => {
+  it('shooting preset should use combat shooter modules', () => {
     const wizard = new GameWizard();
     wizard.start();
     let result = wizard.answer('shooting');
@@ -63,9 +63,12 @@ describe('Preset Lifecycle', () => {
       result = wizard.answer(result.question.choices[0].id);
     }
     const config = result.config!;
-    const spawner = config.modules.find(m => m.type === 'Spawner');
-    expect(spawner).toBeDefined();
-    expect((spawner!.params as any).direction).toBe('random');
+    const projectile = config.modules.find(m => m.type === 'Projectile');
+    const enemyAI = config.modules.find(m => m.type === 'EnemyAI');
+    const waveSpawner = config.modules.find(m => m.type === 'WaveSpawner');
+    expect(projectile).toBeDefined();
+    expect(enemyAI).toBeDefined();
+    expect(waveSpawner).toBeDefined();
   });
 
   it('runner preset should use perHit=5 for scoring', () => {

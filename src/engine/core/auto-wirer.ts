@@ -17,11 +17,20 @@ const WIRING_RULES: WiringRule[] = [
       const collision = modules.get('Collision') as Collision;
       const spawner = modules.get('Spawner') as Spawner;
 
+      // Build asset→layer lookup from spawner item config
+      const itemConfigs: Array<{ asset: string; layer?: string }> =
+        (spawner as any).getParams().items ?? [];
+      const assetLayerMap = new Map<string, string>();
+      for (const item of itemConfigs) {
+        if (item.layer) assetLayerMap.set(item.asset, item.layer);
+      }
+
       engine.eventBus.on('spawner:created', (data?: any) => {
         if (data?.id != null) {
           const spriteSize = (spawner as any).getParams().spriteSize ?? 48;
           const radius = spriteSize / 2;
-          collision.registerObject(data.id, 'items', {
+          const layer = assetLayerMap.get(data.asset) ?? 'items';
+          collision.registerObject(data.id, layer, {
             x: data.x ?? 0,
             y: data.y ?? 0,
             radius,
@@ -34,6 +43,16 @@ const WIRING_RULES: WiringRule[] = [
           collision.unregisterObject(data.id);
         }
       });
+
+      // Sync spawned object positions with collision each frame.
+      // Spawner moves objects in its update() but doesn't notify Collision.
+      const originalUpdate = collision.update.bind(collision);
+      collision.update = (dt: number) => {
+        for (const obj of spawner.getObjects()) {
+          collision.updateObject(obj.id, { x: obj.x, y: obj.y });
+        }
+        originalUpdate(dt);
+      };
     },
   },
   {
@@ -167,6 +186,73 @@ const WIRING_RULES: WiringRule[] = [
       });
       engine.eventBus.on('knockback:end', () => {
         pm.unlockInput();
+      });
+    },
+  },
+  {
+    // Projectile + Collision: register projectiles for collision detection
+    requires: ['Projectile', 'Collision'],
+    setup: (engine, modules) => {
+      const collision = modules.get('Collision') as Collision;
+      const projectile = modules.get('Projectile') as any;
+      const layer = projectile.getParams?.().layer ?? 'projectiles';
+
+      engine.eventBus.on('projectile:fire', (data?: any) => {
+        if (data?.id != null) {
+          collision.registerObject(data.id, layer, {
+            x: data.x ?? 0,
+            y: data.y ?? 0,
+            radius: 8,
+          });
+        }
+      });
+
+      engine.eventBus.on('projectile:destroyed', (data?: any) => {
+        if (data?.id != null) {
+          collision.unregisterObject(data.id);
+        }
+      });
+
+      // Sync projectile positions with collision each frame.
+      // Wrap Collision.update so positions are current before collision checks.
+      const originalUpdate = collision.update.bind(collision);
+      collision.update = (dt: number) => {
+        for (const p of projectile.getActiveProjectiles?.() ?? []) {
+          collision.updateObject(p.id, { x: p.x, y: p.y });
+        }
+        originalUpdate(dt);
+      };
+    },
+  },
+  {
+    // WaveSpawner + EnemyAI + Collision: register enemies for collision detection
+    requires: ['WaveSpawner', 'Collision'],
+    setup: (engine, modules) => {
+      const collision = modules.get('Collision') as Collision;
+
+      engine.eventBus.on('wave:spawn', (data?: any) => {
+        if (data?.id != null) {
+          collision.registerObject(data.id, 'enemies', {
+            x: data.x ?? 0,
+            y: data.y ?? 0,
+            radius: 24,
+          });
+        }
+      });
+
+      engine.eventBus.on('enemy:move', (data?: any) => {
+        if (data?.id != null) {
+          collision.updateObject(data.id, {
+            x: data.x ?? 0,
+            y: data.y ?? 0,
+          });
+        }
+      });
+
+      engine.eventBus.on('enemy:death', (data?: any) => {
+        if (data?.id != null) {
+          collision.unregisterObject(data.id);
+        }
       });
     },
   },

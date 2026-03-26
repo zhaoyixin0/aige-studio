@@ -41,14 +41,22 @@ export interface ConversationResult {
 const MAX_HISTORY = 10;
 
 const ALL_MODULES = [
-  'FaceInput', 'HandInput', 'TouchInput', 'DeviceInput', 'AudioInput',
+  // Input
+  'FaceInput', 'HandInput', 'BodyInput', 'TouchInput', 'DeviceInput', 'AudioInput',
+  // Mechanic — core
   'Spawner', 'Collision', 'Scorer', 'Timer', 'Lives', 'DifficultyRamp',
-  'PlayerMovement', 'Jump', 'Gravity', 'StaticPlatform', 'MovingPlatform',
-  'CrumblingPlatform', 'CoyoteTime', 'Dash', 'Collectible', 'Hazard',
-  'Checkpoint', 'IFrames', 'Knockback', 'Inventory', 'WallDetect',
   'QuizEngine', 'Randomizer', 'ExpressionDetector', 'GestureMatch',
   'BeatMap', 'MatchEngine', 'Runner', 'DressUpEngine', 'BranchStateMachine',
   'PlaneDetection', 'ComboSystem', 'PowerUp',
+  // Mechanic — platformer
+  'PlayerMovement', 'Jump', 'Gravity', 'StaticPlatform', 'MovingPlatform',
+  'OneWayPlatform', 'CrumblingPlatform', 'CoyoteTime', 'Dash', 'Collectible', 'Hazard',
+  'Checkpoint', 'IFrames', 'Knockback', 'Inventory', 'WallDetect',
+  // Mechanic — shooter (Batch 2)
+  'Projectile', 'BulletPattern', 'Aim', 'EnemyAI', 'WaveSpawner', 'Health', 'Shield',
+  // Mechanic — RPG (Batch 3)
+  'EnemyDrop', 'LevelUp', 'StatusEffect', 'SkillTree', 'EquipmentSlot', 'DialogueSystem',
+  // Feedback
   'GameFlow', 'CameraFollow', 'ParticleVFX', 'SoundFX', 'UIOverlay', 'ResultScreen',
 ];
 
@@ -61,7 +69,7 @@ const GAME_TYPE_DESCRIPTIONS: Record<string, string> = {
   'quiz':         '答题类 — 限时回答趣味问题',
   'random-wheel': '随机转盘 — 转动转盘看结果',
   'tap':          '点击类 — 点击屏幕上出现的目标',
-  'shooting':     '射击类 — 瞄准并击中移动的靶子',
+  'shooting':     '射击类 — 发射子弹消灭敌人、躲避攻击',
   'expression':   '表情挑战 — 用面部表情匹配目标',
   'runner':       '跑酷类 — 控制角色躲避障碍跑到最远',
   'gesture':      '手势互动 — 用手势匹配目标动作',
@@ -71,6 +79,7 @@ const GAME_TYPE_DESCRIPTIONS: Record<string, string> = {
   'world-ar':     '世界AR — 在真实环境中放置虚拟物品',
   'narrative':    '分支叙事 — 做出选择影响故事走向',
   'platformer':   '平台跳跃 — 跳跃闯关、收集金币、躲避障碍',
+  'action-rpg':   '动作RPG — 射击敌人、升级角色、收集装备',
 };
 
 const DEFAULT_THEME: Record<string, string> = {
@@ -78,19 +87,56 @@ const DEFAULT_THEME: Record<string, string> = {
   runner: 'ocean', quiz: 'fruit', 'random-wheel': 'candy',
   expression: 'fruit', gesture: 'fruit', rhythm: 'candy',
   puzzle: 'ocean', 'dress-up': 'candy', 'world-ar': 'space',
-  narrative: 'halloween', platformer: 'fruit',
+  narrative: 'halloween', platformer: 'fruit', 'action-rpg': 'space',
 };
 
 const SYSTEM_PROMPT = `你是 AIGE Studio 的游戏创建对话助手。用户通过自然语言描述想要的游戏，你直接创建或修改。
 
-## 15 种游戏类型
+## 16 种游戏类型
 ${Object.entries(GAME_TYPE_DESCRIPTIONS).map(([id, desc]) => `- ${id}: ${desc}`).join('\n')}
 
 ## 可用模块
 ${ALL_MODULES.join(', ')}
 
+## 游戏类型模块配方（重要：必须遵循正确的碰撞规则）
+
+### shooting（射击/飞机大战）
+核心: GameFlow, PlayerMovement, Projectile, Aim, EnemyAI, WaveSpawner, Collision, Scorer, Health, Lives, IFrames, Timer
+碰撞: [{ a:'projectiles', b:'enemies', event:'hit', destroy:['a'] }, { a:'player', b:'enemies', event:'damage' }]
+计分: collision:hit（射弹命中敌人）= +分; collision:damage（被敌人碰到）= 扣血
+
+### catch（接住）
+核心: GameFlow, Spawner, Collision, Scorer, Timer, Lives
+碰撞: [{ a:'player', b:'items', event:'hit', destroy:['b'] }]
+计分: collision:hit = +分
+
+### dodge（躲避）
+核心: GameFlow, Spawner, Collision, Lives, Timer, Scorer
+碰撞: [{ a:'player', b:'items', event:'damage', destroy:['b'] }]
+计分: scorePerSecond（存活时间）= +分; collision:damage = 扣血
+
+### runner（跑酷）
+核心: GameFlow, Runner, Spawner, Collision, Scorer, Lives
+碰撞: [{ a:'player', b:'items', event:'hit', destroy:['b'] }, { a:'player', b:'obstacles', event:'damage', destroy:['b'] }]
+计分: collision:hit（收集金币）= +分; collision:damage（碰障碍）= 扣血
+
+### platformer（平台跳跃）
+核心: GameFlow, PlayerMovement, Jump, Gravity, StaticPlatform, Collectible, Hazard, Collision, Scorer, Lives, Timer
+碰撞: [{ a:'player', b:'collectibles', event:'hit', destroy:['b'] }, { a:'player', b:'hazards', event:'damage' }]
+
+### action-rpg（动作RPG）
+核心: GameFlow, PlayerMovement, Projectile, Aim, EnemyAI, WaveSpawner, Health, LevelUp, EnemyDrop, Collision, Scorer, Lives
+碰撞: [{ a:'projectiles', b:'enemies', event:'hit', destroy:['a'] }, { a:'player', b:'enemies', event:'damage' }]
+
+### tap（点击）
+核心: GameFlow, Spawner, Collision, Scorer, Timer
+碰撞: [{ a:'player', b:'items', event:'hit', destroy:['b'] }]
+
+### quiz/random-wheel/expression/gesture/rhythm/puzzle/dress-up/narrative/world-ar
+这些类型由专用模块驱动（QuizEngine/Randomizer/ExpressionDetector/GestureMatch/BeatMap/MatchEngine/DressUpEngine/BranchStateMachine/PlaneDetection），直接使用预设即可。
+
 ## 主题
-fruit（水果派对）、space（太空冒险）、ocean（海洋探索）、halloween（万圣节）、candy（糖果世界）
+fruit（水果派对）、space（太空冒险）、ocean（海洋探索）、halloween（万圣节）、candy（糖果世界）。也可用自定义主题。
 
 ## 画风
 cartoon（卡通）、pixel（像素）、flat（扁平）、realistic（写实）、watercolor（水彩）、chibi（Q版）
@@ -241,7 +287,7 @@ const KEYWORD_MAP: Array<{ pattern: RegExp; gameType: string }> = [
   { pattern: /答题|问答|知识|答案|quiz/i, gameType: 'quiz' },
   { pattern: /转盘|抽奖|随机|轮盘/i, gameType: 'random-wheel' },
   { pattern: /点击|点点|戳|tap/i, gameType: 'tap' },
-  { pattern: /射击|打靶|shoot|瞄准/i, gameType: 'shooting' },
+  { pattern: /射击|打靶|shoot|瞄准|飞机|大战|子弹/i, gameType: 'shooting' },
   { pattern: /表情|emoji|笑脸/i, gameType: 'expression' },
   { pattern: /跑酷|奔跑|runner|酷跑/i, gameType: 'runner' },
   { pattern: /手势|gesture|比划/i, gameType: 'gesture' },
@@ -251,6 +297,7 @@ const KEYWORD_MAP: Array<{ pattern: RegExp; gameType: string }> = [
   { pattern: /AR|增强现实|世界/i, gameType: 'world-ar' },
   { pattern: /故事|叙事|选择.*影响|剧情/i, gameType: 'narrative' },
   { pattern: /平台|跳跃|闯关|mario|马里奥/i, gameType: 'platformer' },
+  { pattern: /RPG|角色扮演|升级|刷怪|打怪/i, gameType: 'action-rpg' },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -729,8 +776,8 @@ export class ConversationAgent {
   private inferGameType(config: GameConfig): string {
     const moduleTypes = new Set(config.modules.map((m) => m.type));
 
+    // Specialized modules first (most specific → least specific)
     if (moduleTypes.has('Runner'))               return 'runner';
-    if (moduleTypes.has('PlayerMovement'))        return 'platformer';
     if (moduleTypes.has('QuizEngine'))            return 'quiz';
     if (moduleTypes.has('Randomizer'))            return 'random-wheel';
     if (moduleTypes.has('ExpressionDetector'))    return 'expression';
@@ -741,7 +788,15 @@ export class ConversationAgent {
     if (moduleTypes.has('BranchStateMachine'))    return 'narrative';
     if (moduleTypes.has('PlaneDetection'))        return 'world-ar';
 
-    // Heuristic for catch vs dodge vs tap vs shooting
+    // Shooter/RPG detection (before platformer — all three use PlayerMovement)
+    if (moduleTypes.has('LevelUp') && moduleTypes.has('EnemyAI'))  return 'action-rpg';
+    if (moduleTypes.has('Projectile') && moduleTypes.has('EnemyAI')) return 'shooting';
+    if (moduleTypes.has('WaveSpawner'))           return 'shooting';
+
+    // Platformer (has PlayerMovement but no shooter modules)
+    if (moduleTypes.has('PlayerMovement') && moduleTypes.has('StaticPlatform')) return 'platformer';
+
+    // Heuristic for catch vs dodge vs tap
     if (moduleTypes.has('Spawner') && moduleTypes.has('Collision')) {
       if (moduleTypes.has('Lives') && !moduleTypes.has('Scorer')) return 'dodge';
       return 'catch';

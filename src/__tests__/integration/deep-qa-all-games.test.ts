@@ -295,45 +295,28 @@ describe('Deep QA: Tap', () => {
 /* ================================================================== */
 
 describe('Deep QA: Shooting', () => {
-  it('spawner should have objects after 3 seconds', () => {
+  it('should have combat shooter modules (Projectile, EnemyAI, WaveSpawner)', () => {
     const config = createGameAllYes('shooting');
     const engine = createEngine(config);
-    startPlaying(engine);
 
-    tickMs(engine, 3000);
-
-    const spawner = engine.getModulesByType('Spawner')[0] as Spawner;
-    expect(spawner).toBeDefined();
-    expect(spawner.getObjects().length).toBeGreaterThan(0);
+    expect(engine.getModulesByType('Projectile').length).toBeGreaterThan(0);
+    expect(engine.getModulesByType('EnemyAI').length).toBeGreaterThan(0);
+    expect(engine.getModulesByType('WaveSpawner').length).toBeGreaterThan(0);
     engine.restart();
   });
 
-  it('spawner should use random direction', () => {
+  it('should have projectile-enemy collision rules', () => {
     const config = createGameAllYes('shooting');
-    const engine = createEngine(config);
-
-    const spawner = engine.getModulesByType('Spawner')[0] as Spawner;
-    expect(spawner.getParams().direction).toBe('random');
-    engine.restart();
+    const collision = config.modules.find(m => m.type === 'Collision');
+    const rules = collision!.params.rules as Array<{ a: string; b: string; event: string }>;
+    expect(rules.some(r => r.a === 'projectiles' && r.b === 'enemies' && r.event === 'hit')).toBe(true);
+    expect(rules.some(r => r.a === 'player' && r.b === 'enemies' && r.event === 'damage')).toBe(true);
   });
 
-  it('spawned objects should have varied directions (random)', () => {
+  it('should not have legacy Spawner module', () => {
     const config = createGameAllYes('shooting');
     const engine = createEngine(config);
-    startPlaying(engine);
-
-    // Spawn many objects by ticking a while
-    tickMs(engine, 8000);
-
-    const spawner = engine.getModulesByType('Spawner')[0] as Spawner;
-    const objects = spawner.getObjects();
-
-    // With random direction, we expect at least 2 different directions
-    // over many spawns (statistically guaranteed)
-    if (objects.length >= 4) {
-      const directions = new Set(objects.map((o: SpawnedObject) => o.direction));
-      expect(directions.size).toBeGreaterThanOrEqual(2);
-    }
+    expect(engine.getModulesByType('Spawner').length).toBe(0);
     engine.restart();
   });
 

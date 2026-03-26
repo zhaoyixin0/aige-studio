@@ -146,10 +146,19 @@ describe('QA: All Game Types', () => {
   });
 
   describe('shooting specific', () => {
-    it('should use random direction (not down)', () => {
+    it('should use combat shooter modules (Projectile, EnemyAI, WaveSpawner)', () => {
       const config = createGame('shooting');
-      const spawner = config.modules.find(m => m.type === 'Spawner');
-      expect(spawner!.params.direction).toBe('random');
+      expect(config.modules.find(m => m.type === 'Projectile')).toBeDefined();
+      expect(config.modules.find(m => m.type === 'EnemyAI')).toBeDefined();
+      expect(config.modules.find(m => m.type === 'WaveSpawner')).toBeDefined();
+    });
+
+    it('should use projectile-enemy collision rules', () => {
+      const config = createGame('shooting');
+      const collision = config.modules.find(m => m.type === 'Collision');
+      const rules = collision!.params.rules as Array<{ a: string; b: string; event: string }>;
+      expect(rules.some(r => r.a === 'projectiles' && r.b === 'enemies' && r.event === 'hit')).toBe(true);
+      expect(rules.some(r => r.a === 'player' && r.b === 'enemies' && r.event === 'damage')).toBe(true);
     });
   });
 
