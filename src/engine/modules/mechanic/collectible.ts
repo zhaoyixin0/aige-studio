@@ -36,6 +36,30 @@ export class Collectible extends BaseModule {
         label: 'Float Animation',
         default: true,
       },
+      magnetRadius: {
+        type: 'range',
+        label: 'Magnet Radius',
+        default: 16,
+        min: 0,
+        max: 200,
+        step: 1,
+      },
+      floatAmplitude: {
+        type: 'range',
+        label: 'Float Amplitude',
+        default: 6,
+        min: 1,
+        max: 30,
+        step: 1,
+      },
+      floatFrequency: {
+        type: 'range',
+        label: 'Float Frequency (ms)',
+        default: 500,
+        min: 100,
+        max: 2000,
+        step: 50,
+      },
     };
   }
 
@@ -85,7 +109,8 @@ export class Collectible extends BaseModule {
       const dx = px - items[i].x;
       const dy = py - items[i].y;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      const threshold = radius + 16;
+      const magnetRadius = this.params.magnetRadius ?? 16;
+      const threshold = radius + magnetRadius;
 
       if (dist < threshold) {
         this.pickup(i);
@@ -104,8 +129,10 @@ export class Collectible extends BaseModule {
       if (this.collected.has(i)) continue;
 
       const item = items[i];
+      const amplitude = this.params.floatAmplitude ?? 6;
+      const frequency = this.params.floatFrequency ?? 500;
       const floatOffset = this.params.floatAnimation
-        ? Math.sin(this.elapsed / 500 + i) * 6
+        ? Math.sin(this.elapsed / frequency + i) * amplitude
         : 0;
 
       positions.push({

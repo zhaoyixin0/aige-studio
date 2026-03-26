@@ -181,12 +181,16 @@ export class Spawner extends BaseModule {
         ? directions[Math.floor(Math.random() * directions.length)]
         : (this.params.direction ?? 'down');
 
+    // Clamp speed range: ensure min <= max
+    const speedMin = Math.max(0, speed.min ?? 100);
+    const speedMax = Math.max(speedMin, speed.max ?? 200);
+
     const obj: SpawnedObject = {
       id: `spawn-${++spawnCounter}`,
       asset: picked.asset,
       x: area.x + Math.random() * (area.width ?? 0),
       y: area.y + Math.random() * (area.height ?? 0),
-      speed: speed.min + Math.random() * (speed.max - speed.min),
+      speed: speedMin + Math.random() * (speedMax - speedMin),
       direction,
       rotation: 0,
       rotationSpeed: this.params.rotation ? (this.params.rotationSpeed ?? 0) : 0,

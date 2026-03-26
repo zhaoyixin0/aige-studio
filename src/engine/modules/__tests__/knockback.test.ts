@@ -74,4 +74,37 @@ describe('Knockback', () => {
     expect(knockback.isActive()).toBe(false);
     expect(knockback.getDirection()).toEqual({ x: 0, y: 0 });
   });
+
+  it('should compute direction from player to hazard using playerX/playerY and hazardX/hazardY', () => {
+    const { engine, knockback } = setup();
+    const handler = vi.fn();
+    engine.eventBus.on('knockback:start', handler);
+
+    // Player at (100, 200), hazard at (50, 200) → direction should push player right (+x)
+    engine.eventBus.emit('collision:damage', {
+      playerX: 100, playerY: 200,
+      hazardX: 50, hazardY: 200,
+    });
+
+    expect(handler).toHaveBeenCalledOnce();
+    const dir = handler.mock.calls[0][0].direction;
+    expect(dir.x).toBeGreaterThan(0); // pushed right (away from hazard)
+    expect(dir.y).toBeCloseTo(0, 5);
+  });
+
+  it('should push player away from hazard below', () => {
+    const { engine, knockback } = setup();
+    const handler = vi.fn();
+    engine.eventBus.on('knockback:start', handler);
+
+    // Player at (200, 100), hazard at (200, 300) → direction should push player up (-y)
+    engine.eventBus.emit('collision:damage', {
+      playerX: 200, playerY: 100,
+      hazardX: 200, hazardY: 300,
+    });
+
+    const dir = handler.mock.calls[0][0].direction;
+    expect(dir.x).toBeCloseTo(0, 5);
+    expect(dir.y).toBeLessThan(0); // pushed up (away from hazard)
+  });
 });

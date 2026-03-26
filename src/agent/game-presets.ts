@@ -11,7 +11,7 @@ export const ALL_GAME_TYPES = [
   'catch', 'dodge', 'quiz', 'random-wheel',
   'tap', 'shooting', 'expression', 'runner',
   'gesture', 'rhythm', 'puzzle', 'dress-up', 'world-ar', 'narrative',
-  'platformer',
+  'platformer', 'action-rpg',
 ] as const;
 
 export type GameType = (typeof ALL_GAME_TYPES)[number];
@@ -182,6 +182,11 @@ const PRESETS: Record<GameType, GamePreset> = {
       ],
     },
     ComboSystem:  { comboWindow: 1200, multiplierStep: 0.5, maxMultiplier: 3 },
+    // Batch 2 enhancements — shooter-specific bullet/aim/health/shield modules
+    Projectile:   { speed: 600, damage: 10, lifetime: 3000, fireRate: 200, fireEvent: 'input:touch:tap', layer: 'projectiles', maxProjectiles: 50 },
+    Aim:          { mode: 'manual', manualEvent: 'input:touch:hold' },
+    Health:       { maxHp: 100, damageEvent: 'collision:damage' },
+    Shield:       { maxCharges: 3, rechargeCooldown: 5000, damageEvent: 'collision:damage' },
     ParticleVFX:  {
       events: {
         'collision:hit': { effect: 'sparkle', at: 'target', duration: 400, color: '#ffdd00' },
@@ -575,6 +580,37 @@ const PRESETS: Record<GameType, GamePreset> = {
     SoundFX:         { events: { 'collectible:pickup': 'ding', 'jump:start': 'pop', 'collision:damage': 'hurt' } },
     UIOverlay:       { elements: ['score', 'timer', 'lives'] },
     ResultScreen:    { show: ['score', 'time'], rating: { excellent: 200, good: 100, ok: 50 } },
+  },
+
+  // ──────────────────────────────────────────
+  // ACTION-RPG (动作角色扮演)
+  // Combines shooter + RPG mechanics: waves, projectiles, leveling, skills
+  // ──────────────────────────────────────────
+  'action-rpg': {
+    GameFlow:       { countdown: 0, onFinish: 'show_result' },
+    PlayerMovement: { speed: 200, acceleration: 800, deceleration: 600 },
+    Gravity:        { strength: 980, terminalVelocity: 800 },
+    Jump:           { jumpForce: 500, gravity: 980, groundY: 0.8, triggerEvent: 'input:touch:tap' },
+    Health:         { maxHp: 100, damageEvent: 'collision:damage' },
+    Projectile:     { speed: 500, damage: 15, lifetime: 2000, fireRate: 300, fireEvent: 'input:touch:doubleTap', layer: 'projectiles', maxProjectiles: 30 },
+    Aim:            { mode: 'auto', autoTargetLayer: 'enemies', autoRange: 400 },
+    EnemyAI:        { behavior: 'patrol', speed: 80, detectionRange: 200, attackRange: 50, attackCooldown: 1500, attackDamage: 10, hp: 50, fleeHpThreshold: 0.2, waypoints: [] },
+    WaveSpawner:    { enemiesPerWave: 3, waveCooldown: 3000, spawnDelay: 500, scalingFactor: 1.2, maxWaves: 10, spawnAreaX: 100, spawnAreaWidth: 880, spawnY: 100 },
+    EnemyDrop:      { lootTable: [{ item: 'potion', weight: 3, minCount: 1, maxCount: 1, type: 'health' }, { item: 'coin', weight: 5, minCount: 1, maxCount: 3, type: 'collectible' }], dropChance: 0.6, xpAmount: 15 },
+    LevelUp:        { xpPerLevel: 50, scalingCurve: 'quadratic', maxLevel: 20, xpSource: 'enemy:death', xpAmount: 15, statGrowth: { hp: 10, attack: 2, defense: 1 } },
+    StatusEffect:   { maxEffects: 5 },
+    SkillTree:      { skills: [], pointsPerLevel: 1, activateEvent: 'input:touch:doubleTap' },
+    Shield:         { maxCharges: 2, rechargeCooldown: 8000, damageEvent: 'collision:damage' },
+    Collision:      { rules: [{ a: 'projectiles', b: 'enemies', event: 'hit', destroy: ['a'] }, { a: 'player', b: 'enemies', event: 'damage' }] },
+    Scorer:         { perHit: 10 },
+    Lives:          { count: 3 },
+    IFrames:        { duration: 1000 },
+    Knockback:      { force: 200, duration: 150 },
+    UIOverlay:      { elements: ['score', 'lives', 'level'] },
+    ResultScreen:   { show: ['score', 'level', 'waves_cleared'], rating: { '3star': 500, '2star': 250, '1star': 100 } },
+    TouchInput:     {},
+    ParticleVFX:    { events: { 'collision:hit': { effect: 'sparkle', at: 'target', duration: 400, color: '#ffaa00' }, 'enemy:death': { effect: 'burst', at: 'target', duration: 500, color: '#ff0000' }, 'levelup:levelup': { effect: 'burst', at: 'player', duration: 800, color: '#00ff88' } } },
+    SoundFX:        { events: { 'collision:hit': 'pop', 'enemy:death': 'boom', 'levelup:levelup': 'cheer', 'wave:complete': 'ding' } },
   },
 };
 

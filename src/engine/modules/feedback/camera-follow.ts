@@ -95,8 +95,8 @@ export class CameraFollow extends BaseModule {
 
   update(dt: number): void {
     if (this.gameflowPaused) return;
-    const mode: CameraMode = this.params.mode;
-    const smoothing: number = this.params.smoothing;
+    const mode: CameraMode = (this.params.mode ?? 'center') as CameraMode;
+    const smoothing: number = this.params.smoothing ?? 0.1;
     const t = 1 - smoothing;
 
     // Compute goal based on mode

@@ -15,7 +15,7 @@ describe('ComboSystem', () => {
     const handler = vi.fn();
     engine.eventBus.on('combo:hit', handler);
 
-    engine.eventBus.emit('scorer:update', { score: 10 });
+    engine.eventBus.emit('scorer:update', { score: 10, delta: 10, combo: 0 });
 
     expect(handler).toHaveBeenCalledWith(
       expect.objectContaining({ count: 1, multiplier: 1 }),
@@ -27,9 +27,9 @@ describe('ComboSystem', () => {
     const handler = vi.fn();
     engine.eventBus.on('combo:hit', handler);
 
-    engine.eventBus.emit('scorer:update', { score: 10 });
-    engine.eventBus.emit('scorer:update', { score: 20 });
-    engine.eventBus.emit('scorer:update', { score: 30 });
+    engine.eventBus.emit('scorer:update', { score: 10, delta: 10, combo: 0 });
+    engine.eventBus.emit('scorer:update', { score: 20, delta: 10, combo: 0 });
+    engine.eventBus.emit('scorer:update', { score: 30, delta: 10, combo: 0 });
 
     expect(combo.getComboCount()).toBe(3);
     expect(handler).toHaveBeenCalledTimes(3);
@@ -48,7 +48,7 @@ describe('ComboSystem', () => {
 
     // Hit 5 times — multiplier should be capped at 3
     for (let i = 0; i < 5; i++) {
-      engine.eventBus.emit('scorer:update', { score: i * 10 });
+      engine.eventBus.emit('scorer:update', { score: i * 10, delta: 10, combo: 0 });
     }
 
     expect(combo.getMultiplier()).toBe(3);

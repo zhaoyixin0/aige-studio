@@ -46,6 +46,21 @@ import { Collectible } from './modules/mechanic/collectible.ts';
 import { Hazard } from './modules/mechanic/hazard.ts';
 import { Checkpoint } from './modules/mechanic/checkpoint.ts';
 import { Inventory } from './modules/mechanic/inventory.ts';
+import { Health } from './modules/mechanic/health.ts';
+import { Shield } from './modules/mechanic/shield.ts';
+// RPG mechanic modules (Batch 3)
+import { EquipmentSlot } from './modules/mechanic/equipment-slot.ts';
+import { EnemyDrop } from './modules/mechanic/enemy-drop.ts';
+import { LevelUp } from './modules/mechanic/level-up.ts';
+import { StatusEffect } from './modules/mechanic/status-effect.ts';
+import { SkillTree } from './modules/mechanic/skill-tree.ts';
+import { DialogueSystem } from './modules/mechanic/dialogue-system.ts';
+// Shooter mechanic modules (Batch 2)
+import { Projectile } from './modules/mechanic/projectile.ts';
+import { BulletPattern } from './modules/mechanic/bullet-pattern.ts';
+import { Aim } from './modules/mechanic/aim.ts';
+import { EnemyAI } from './modules/mechanic/enemy-ai.ts';
+import { WaveSpawner } from './modules/mechanic/wave-spawner.ts';
 // Feedback modules
 import { GameFlow } from './modules/feedback/game-flow.ts';
 import { ParticleVFX } from './modules/feedback/particle-vfx.ts';
@@ -104,6 +119,22 @@ export function createModuleRegistry(): ModuleRegistry {
   registry.register('Hazard', Hazard as unknown as ModuleConstructor);
   registry.register('Checkpoint', Checkpoint as unknown as ModuleConstructor);
   registry.register('Inventory', Inventory as unknown as ModuleConstructor);
+  registry.register('Health', Health as unknown as ModuleConstructor);
+  registry.register('Shield', Shield as unknown as ModuleConstructor);
+  // RPG (Batch 3)
+  registry.register('EquipmentSlot', EquipmentSlot as unknown as ModuleConstructor);
+  registry.register('EnemyDrop', EnemyDrop as unknown as ModuleConstructor);
+  registry.register('LevelUp', LevelUp as unknown as ModuleConstructor);
+  registry.register('StatusEffect', StatusEffect as unknown as ModuleConstructor);
+  registry.register('SkillTree', SkillTree as unknown as ModuleConstructor);
+  registry.register('DialogueSystem', DialogueSystem as unknown as ModuleConstructor);
+
+  // Shooter (Batch 2)
+  registry.register('Projectile', Projectile as unknown as ModuleConstructor);
+  registry.register('BulletPattern', BulletPattern as unknown as ModuleConstructor);
+  registry.register('Aim', Aim as unknown as ModuleConstructor);
+  registry.register('EnemyAI', EnemyAI as unknown as ModuleConstructor);
+  registry.register('WaveSpawner', WaveSpawner as unknown as ModuleConstructor);
 
   // Feedback modules
   registry.register('GameFlow', GameFlow as unknown as ModuleConstructor);

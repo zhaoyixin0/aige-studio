@@ -68,18 +68,15 @@ export class SkillLoader {
       'DeviceInput',
       'AudioInput',
     ];
-    const mechanic = [
-      'Spawner',
-      'Collision',
-      'Scorer',
-      'Timer',
-      'Lives',
-      'DifficultyRamp',
-      'Randomizer',
-      'QuizEngine',
+    const feedback = [
+      'GameFlow',
+      'UIOverlay',
+      'ResultScreen',
+      'ParticleVFX',
+      'SoundFX',
     ];
     if (input.includes(moduleType)) return 'input';
-    if (mechanic.includes(moduleType)) return 'mechanic';
-    return 'feedback';
+    if (feedback.includes(moduleType)) return 'feedback';
+    return 'mechanic';
   }
 }

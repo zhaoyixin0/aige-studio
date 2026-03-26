@@ -168,14 +168,205 @@ DifficultyRamp → rules: [
 
 **适用**: catch、dodge、runner、rhythm
 
+---
+
+## 平台跳跃协同组合
+
+### 13. Gravity + Jump + CoyoteTime（平台三件套）
+
+**效果**: 构成完整的平台跳跃物理体验。CoyoteTime 让跳跃操作更宽容，玩家离开平台边缘后仍有短暂跳跃窗口，大幅降低操作挫败感。
+
+```
+Gravity(持续下拉) + Jump(跳跃脉冲) + CoyoteTime(离地容错)
+    ↓
+流畅、宽容的跳跃手感
+```
+
+**配置要点**: CoyoteTime.window 通常设为 80-150ms。Jump.jumpForce 需与 Gravity.gravity 配合调参。
+
+**适用**: platformer
+
+---
+
+### 14. Lives + IFrames + Knockback（伤害三件套）
+
+**效果**: 完整的受伤反馈链——扣血+无敌闪烁+击退位移，让伤害可感知且不会连续致死。
+
+```
+collision:damage → Lives(扣血) → IFrames(无敌保护) + Knockback(位移反馈)
+    ↓
+安全窗口让玩家有机会恢复，击退把玩家推离危险区域
+```
+
+**配置要点**: IFrames.duration 建议 1-2 秒。Knockback.force 不宜过大以免推入另一个 Hazard。
+
+**适用**: platformer、runner、dodge
+
+---
+
+### 15. Collectible + Inventory + Checkpoint（收集三件套）
+
+**效果**: 收集物品存入背包+存档点保护进度，形成探索激励循环。死亡后从存档点重生，已收集物品保留。
+
+```
+Collectible(物品散布) → Inventory(背包管理) + Checkpoint(进度存档)
+    ↓
+玩家愿意冒险探索，因为 Checkpoint 保护进度
+```
+
+**配置要点**: Checkpoint 间距要合理，太远容易劝退，太近失去紧张感。
+
+**适用**: platformer
+
+---
+
+### 16. PlayerMovement + Dash + WallDetect（移动三件套）
+
+**效果**: 丰富的移动选项——地面走/跑+冲刺+蹬墙跳/滑墙，使关卡设计空间大幅扩展。
+
+```
+PlayerMovement(基础移动) + Dash(高速闪避) + WallDetect(墙壁交互)
+    ↓
+可设计需要 Dash 飞跃大坑 + 蹬墙跳到达高台的复杂关卡
+```
+
+**配置要点**: Dash.cooldown 和 Dash.duration 需要精心调参。WallDetect 开启 wallJump 需配合 Jump 模块。
+
+**适用**: platformer
+
+---
+
+### 17. StaticPlatform + MovingPlatform + CrumblingPlatform（混合平台挑战）
+
+**效果**: 三种平台类型混合使用，创造节奏变化——安全站立+移动跟随+限时踏脚，关卡层次更丰富。
+
+```
+StaticPlatform(安全休息点) → MovingPlatform(考验时机) → CrumblingPlatform(紧迫感)
+    ↓
+玩家在不同平台间切换，节奏张弛有度
+```
+
+**配置要点**: CrumblingPlatform.crumbleDelay 和 respawnTime 控制紧张度。MovingPlatform 的路径 waypoints 设计要与关卡布局配合。
+
+**适用**: platformer
+
+---
+
+### 18. Jump + Gravity + 非平台游戏（给非平台游戏加跳跃元素）
+
+**效果**: 在 dodge、catch 等游戏中加入跳跃元素，让玩家可以跳起躲避或够到高处物体，增加维度。
+
+```
+dodge + Jump + Gravity → 玩家可以跳起躲避低空障碍物
+catch + Jump + Gravity → 跳起抓住更高处的物品得额外分
+```
+
+**配置要点**: 非平台游戏使用 Jump 时需设置 groundY 为固定地面线。Gravity 的强度比平台游戏可以弱一些。
+
+**适用**: dodge、catch（实验性）
+
+---
+
+### 19. Runner + DifficultyRamp + Spawner（跑酷核心）
+
+**效果**: 自动奔跑+难度递增+障碍/收集物生成，构成完整的跑酷循环。跑得越远越难，形成天然高分挑战。
+
+```
+Runner(自动推进) → Spawner(生成障碍/物品) → DifficultyRamp(加速+加密)
+    ↓
+距离即分数，速度持续加快，紧张感递增
+```
+
+**配置要点**: Runner.initialSpeed 和 DifficultyRamp.rules 的 increase 要配合，避免后期速度过快无法反应。
+
+**适用**: runner
+
+---
+
+### 20. BeatMap + Spawner + Collision（节奏核心）
+
+**效果**: 节拍数据驱动物体生成+碰撞判定=节奏游戏核心循环。音乐节拍与操作同步，命中时机影响得分。
+
+```
+BeatMap(节拍数据) → Spawner(按拍生成) → Collision(命中判定)
+    ↓ beatmap:hit { timing }
+    ↓ 'perfect' 100分, 'great' 80分, 'good' 50分
+```
+
+**配置要点**: BeatMap 的 notes 数据需与音乐节拍匹配。判定窗口（perfect/great/good）宽度影响难度。
+
+**适用**: rhythm
+
+---
+
+### 21. MatchEngine + Timer + Scorer（记忆配对核心）
+
+**效果**: 限时翻牌配对+计分，经典记忆游戏循环。时间压力激励快速记忆。
+
+```
+MatchEngine(配对逻辑) + Timer(限时) + Scorer(翻对加分)
+    ↓
+match:pair → Scorer 加分
+timer:end / match:complete → GameFlow 结束
+```
+
+**配置要点**: Timer 时间 vs 卡片数量需平衡。配对成功可加时作为奖励。
+
+**适用**: puzzle
+
+---
+
+### 22. ExpressionDetector + Scorer + ComboSystem（表情连击）
+
+**效果**: 识别表情+连续匹配得分+连击倍率，独特的面部表情游戏体验。
+
+```
+ExpressionDetector(识别表情) → Scorer(匹配得分) → ComboSystem(连击倍率)
+    ↓
+连续做对表情 → 连击倍率飙升 → 高分
+```
+
+**配置要点**: ComboSystem.decayTime 控制表情间隔容错。注意不要开启 Scorer 的内置 combo 以避免冗余。
+
+**适用**: expression
+
+---
+
+### 23. PowerUp + Lives + Timer（增益系统）
+
+**效果**: 增益道具为有限的生命和时间提供缓冲——回血、加时、护盾，让游戏体验更有弹性。
+
+```
+PowerUp('heal') → Lives 回复
+PowerUp('timeExtend') → Timer 加时
+PowerUp('shield') → IFrames 延长无敌
+```
+
+**配置要点**: PowerUp 的 duration 和出现频率需与游戏难度曲线配合。不宜过多，否则失去紧张感。
+
+**适用**: platformer、runner、dodge
+
+---
+
 ## 协同强度评级
 
 | 组合 | 强度 | 说明 |
 |------|------|------|
 | Spawner + Collision + Scorer | ★★★★★ | 核心游戏循环，大多数游戏的基础 |
 | GameFlow + Timer | ★★★★★ | 游戏生命周期必备 |
+| Gravity + Jump + CoyoteTime | ★★★★★ | 平台跳跃核心，手感决定性组合 |
+| Lives + IFrames + Knockback | ★★★★★ | 伤害系统基石，平台类/动作类必备 |
+| Runner + DifficultyRamp + Spawner | ★★★★★ | 跑酷类核心循环 |
+| BeatMap + Spawner + Collision | ★★★★★ | 节奏类核心循环 |
 | Scorer + ParticleVFX + SoundFX | ★★★★☆ | 反馈三件套，体验倍增 |
 | DifficultyRamp + Spawner | ★★★★☆ | 难度曲线核心 |
-| Timer + Lives | ★★★☆☆ | 双条件适合硬核玩法 |
+| PlayerMovement + Dash + WallDetect | ★★★★☆ | 高级移动系统，关卡设计空间大 |
+| StaticPlatform + MovingPlatform + CrumblingPlatform | ★★★★☆ | 混合平台挑战，节奏丰富 |
+| Collectible + Inventory + Checkpoint | ★★★★☆ | 收集+存档，探索激励循环 |
+| MatchEngine + Timer + Scorer | ★★★★☆ | 配对类核心循环 |
+| ExpressionDetector + Scorer + ComboSystem | ★★★★☆ | 表情游戏特色组合 |
 | QuizEngine + UIOverlay | ★★★★☆ | 答题类必备 |
+| PowerUp + Lives + Timer | ★★★☆☆ | 增益系统，增加弹性 |
+| Timer + Lives | ★★★☆☆ | 双条件适合硬核玩法 |
+| Jump + Gravity + 非平台游戏 | ★★★☆☆ | 实验性，增加游戏维度 |
 | FaceInput + Randomizer | ★★★☆☆ | 趣味互动增强 |

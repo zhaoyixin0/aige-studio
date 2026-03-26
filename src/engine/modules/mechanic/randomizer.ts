@@ -18,6 +18,7 @@ export class Randomizer extends BaseModule {
   private spinning = false;
   private spinTimer = 0;
   private result: RandomizerResult | null = null;
+  private autoSpinPending = false;
 
   getSchema(): ModuleSchema {
     return {
@@ -58,6 +59,8 @@ export class Randomizer extends BaseModule {
       this.on('input:touch:tap', () => this.spin());
     } else if (trigger === 'mouthOpen') {
       this.on('input:face:mouthOpen', () => this.spin());
+    } else if (trigger === 'auto') {
+      this.on('gameflow:resume', () => this.spin());
     }
   }
 
@@ -76,20 +79,32 @@ export class Randomizer extends BaseModule {
 
   update(dt: number): void {
     if (this.gameflowPaused) return;
-    if (!this.spinning) return;
 
-    this.spinTimer += dt / 1000; // convert ms to seconds
-    const spinDuration = this.params.spinDuration ?? 3;
+    if (this.spinning) {
+      this.spinTimer += dt / 1000; // convert ms to seconds
+      const spinDuration = this.params.spinDuration ?? 3;
 
-    if (this.spinTimer >= spinDuration) {
-      // Pick a result using weighted random
-      this.result = this.pickWeightedRandom();
-      this.spinning = false;
-      this.spinTimer = 0;
+      if (this.spinTimer >= spinDuration) {
+        // Pick a result using weighted random
+        this.result = this.pickWeightedRandom();
+        this.spinning = false;
+        this.spinTimer = 0;
 
-      if (this.result) {
-        this.emit('randomizer:result', this.result);
+        if (this.result) {
+          this.emit('randomizer:result', this.result);
+
+          // Auto mode: re-spin after result
+          if ((this.params.trigger ?? 'tap') === 'auto') {
+            this.autoSpinPending = true;
+          }
+        }
       }
+    }
+
+    // Deferred auto-spin to avoid re-entry during update
+    if (this.autoSpinPending) {
+      this.autoSpinPending = false;
+      this.spin();
     }
   }
 
@@ -133,5 +148,6 @@ export class Randomizer extends BaseModule {
     this.spinning = false;
     this.spinTimer = 0;
     this.result = null;
+    this.autoSpinPending = false;
   }
 }

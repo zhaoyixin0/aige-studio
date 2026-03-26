@@ -126,14 +126,17 @@ export class Hazard extends BaseModule {
     }));
   }
 
-  checkCollision(px: number, py: number): boolean {
+  checkCollision(px: number, py: number, playerRadius = 0): boolean {
     for (const state of this.states) {
       const { currentX, currentY, def } = state;
+      // Skip hazards with invalid dimensions
+      if (def.width <= 0 || def.height <= 0) continue;
+      // Expand hazard rect by playerRadius for circle-rect collision
       if (
-        px >= currentX &&
-        px <= currentX + def.width &&
-        py >= currentY &&
-        py <= currentY + def.height
+        px + playerRadius >= currentX &&
+        px - playerRadius <= currentX + def.width &&
+        py + playerRadius >= currentY &&
+        py - playerRadius <= currentY + def.height
       ) {
         this.emit(this.params.damageEvent ?? 'collision:damage', {
           damage: this.params.damage ?? 1,

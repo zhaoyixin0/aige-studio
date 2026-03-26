@@ -1,6 +1,8 @@
 import type { GameEngine, GameModule } from './types';
 import type { Collision } from '@/engine/modules/mechanic/collision';
 import type { Spawner } from '@/engine/modules/mechanic/spawner';
+import type { Gravity, PlatformSurface } from '@/engine/modules/mechanic/gravity';
+import type { PlayerMovement } from '@/engine/modules/mechanic/player-movement';
 
 interface WiringRule {
   requires: string[];
@@ -50,10 +52,129 @@ const WIRING_RULES: WiringRule[] = [
       }
     },
   },
+  {
+    // StaticPlatform + Gravity: register static platform surfaces
+    requires: ['StaticPlatform', 'Gravity'],
+    setup: (_engine, modules) => {
+      const gravity = modules.get('Gravity') as Gravity;
+      const sp = modules.get('StaticPlatform') as any;
+      const platforms = sp.getPlatforms?.() ?? [];
+      for (let i = 0; i < platforms.length; i++) {
+        const p = platforms[i];
+        gravity.addSurface({
+          id: `static-${sp.id}-${i}`,
+          x: p.x,
+          y: p.y,
+          width: p.width,
+          oneWay: false,
+          active: true,
+        });
+      }
+    },
+  },
+  {
+    // MovingPlatform + Gravity: register and dynamically update surfaces
+    requires: ['MovingPlatform', 'Gravity'],
+    setup: (engine, modules) => {
+      const gravity = modules.get('Gravity') as Gravity;
+      const mp = modules.get('MovingPlatform') as any;
+      const positions = mp.getPlatformPositions?.() ?? [];
+      for (let i = 0; i < positions.length; i++) {
+        const p = positions[i];
+        gravity.addSurface({
+          id: `moving-${mp.id}-${i}`,
+          x: p.x,
+          y: p.y,
+          width: p.width,
+          oneWay: false,
+          active: true,
+        });
+      }
+      // Update surface position each frame via platform:move events
+      engine.eventBus.on('platform:move', (data?: any) => {
+        if (data?.id != null) {
+          gravity.updateSurface(`moving-${mp.id}-${data.id}`, {
+            x: data.x,
+            y: data.y,
+            width: data.width,
+          });
+        }
+      });
+    },
+  },
+  {
+    // OneWayPlatform + Gravity: register one-way surfaces
+    requires: ['OneWayPlatform', 'Gravity'],
+    setup: (_engine, modules) => {
+      const gravity = modules.get('Gravity') as Gravity;
+      const owp = modules.get('OneWayPlatform') as any;
+      const platforms = owp.getPlatforms?.() ?? [];
+      for (let i = 0; i < platforms.length; i++) {
+        const p = platforms[i];
+        gravity.addSurface({
+          id: `oneway-${owp.id}-${i}`,
+          x: p.x,
+          y: p.y,
+          width: p.width,
+          oneWay: true,
+          active: true,
+        });
+      }
+    },
+  },
+  {
+    // CrumblingPlatform + Gravity: register surfaces, deactivate on crumble, reactivate on respawn
+    requires: ['CrumblingPlatform', 'Gravity'],
+    setup: (engine, modules) => {
+      const gravity = modules.get('Gravity') as Gravity;
+      const cp = modules.get('CrumblingPlatform') as any;
+      const platforms = cp.getPlatforms?.() ?? [];
+      for (let i = 0; i < platforms.length; i++) {
+        const p = platforms[i] as any;
+        gravity.addSurface({
+          id: `crumble-${i}`,
+          x: p.x ?? 0,
+          y: p.y ?? 0,
+          width: p.width ?? 100,
+          oneWay: false,
+          active: true,
+        });
+      }
+      engine.eventBus.on('platform:crumble', (data?: any) => {
+        if (data?.id != null) {
+          gravity.updateSurface(data.id, { active: false });
+          // Check if any object on this surface needs to fall
+          const obj = gravity.getObject('player');
+          if (obj?.currentSurfaceId === data.id) {
+            gravity.checkSurfaceDeparture('player');
+          }
+        }
+      });
+      engine.eventBus.on('platform:respawn', (data?: any) => {
+        if (data?.id != null) {
+          gravity.updateSurface(data.id, { active: true });
+        }
+      });
+    },
+  },
+  {
+    // Knockback + PlayerMovement: lock input during knockback
+    requires: ['Knockback', 'PlayerMovement'],
+    setup: (engine, modules) => {
+      const pm = modules.get('PlayerMovement') as PlayerMovement;
+      engine.eventBus.on('knockback:start', () => {
+        pm.lockInput();
+      });
+      engine.eventBus.on('knockback:end', () => {
+        pm.unlockInput();
+      });
+    },
+  },
   // Timer + GameFlow: handled internally (GameFlow listens to timer:end)
   // Lives + GameFlow: handled internally (GameFlow listens to lives:zero)
   // Checkpoint + Lives: handled internally (Checkpoint listens to lives:zero)
   // IFrames + Collision: checked via iframes.isActive() at runtime
+  // Dash + Gravity: handled internally (Gravity listens to dash:start/dash:end)
 ];
 
 export class AutoWirer {

@@ -84,4 +84,19 @@ describe('QuizEngine', () => {
       }),
     );
   });
+
+  it('should ignore negative optionIndex', () => {
+    const { engine, quiz } = setup();
+    const wrongHandler = vi.fn();
+    const correctHandler = vi.fn();
+    engine.eventBus.on('quiz:wrong', wrongHandler);
+    engine.eventBus.on('quiz:correct', correctHandler);
+
+    quiz.start();
+    quiz.answer(-1);
+
+    // Should not emit any answer event
+    expect(wrongHandler).not.toHaveBeenCalled();
+    expect(correctHandler).not.toHaveBeenCalled();
+  });
 });

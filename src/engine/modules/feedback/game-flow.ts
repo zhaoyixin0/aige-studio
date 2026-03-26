@@ -1,4 +1,4 @@
-import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { GameEngine, GameModule, ModuleSchema } from '@/engine/core';
 import { BaseModule } from '../base-module';
 
 export type GameState = 'ready' | 'countdown' | 'playing' | 'finished';
@@ -41,6 +41,8 @@ export class GameFlow extends BaseModule {
 
     this.on('lives:zero', () => {
       if (this.state === 'playing') {
+        // If a Checkpoint is active, let it handle respawn instead of ending
+        if (this.hasActiveCheckpoint()) return;
         this.transition('finished');
       }
     });
@@ -88,6 +90,14 @@ export class GameFlow extends BaseModule {
 
   getCountdownRemaining(): number {
     return this.countdownTimer;
+  }
+
+  private hasActiveCheckpoint(): boolean {
+    if (!this.engine) return false;
+    const checkpoints = this.engine.getModulesByType('Checkpoint');
+    if (checkpoints.length === 0) return false;
+    const cp = checkpoints[0] as GameModule & { getRespawnPoint?(): unknown };
+    return typeof cp.getRespawnPoint === 'function' && cp.getRespawnPoint() !== null;
   }
 
   reset(): void {

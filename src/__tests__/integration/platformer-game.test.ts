@@ -97,9 +97,11 @@ describe('Platformer Game Integration', () => {
 
     cp.activate(0);
 
-    // Trigger 3 damage events to reach lives:zero
+    // Trigger 3 damage events to reach lives:zero, waiting for IFrames to expire between each
     engine.eventBus.emit('collision:damage');
+    engine.tick(1100); // IFrames duration=1000ms, tick past it
     engine.eventBus.emit('collision:damage');
+    engine.tick(1100);
     engine.eventBus.emit('collision:damage');
 
     expect(respawnHandler).toHaveBeenCalled();

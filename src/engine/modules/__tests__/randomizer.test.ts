@@ -68,4 +68,69 @@ describe('Randomizer', () => {
     // Common (weight 100) should be selected far more often than Rare (weight 1)
     expect(commonCount).toBeGreaterThan(rareCount * 5);
   });
+
+  it('should auto-spin on gameflow:resume when trigger is auto', () => {
+    // Build without auto gameflow:resume so we can attach spy first
+    const engine = new Engine();
+    const randomizer = new Randomizer('rand-1', {
+      items: [
+        { asset: 'prize-a', label: 'Prize A', weight: 1 },
+        { asset: 'prize-b', label: 'Prize B', weight: 1 },
+      ],
+      animation: 'instant',
+      spinDuration: 0.5,
+      trigger: 'auto',
+    });
+    engine.addModule(randomizer);
+
+    const spinHandler = vi.fn();
+    engine.eventBus.on('randomizer:spinning', spinHandler);
+
+    // Now emit gameflow:resume — should trigger auto-spin
+    engine.eventBus.emit('gameflow:resume');
+
+    expect(spinHandler).toHaveBeenCalledOnce();
+    expect(randomizer.isSpinning()).toBe(true);
+  });
+
+  it('should not advance spin timer when gameflow is paused', () => {
+    const engine = new Engine();
+    const randomizer = new Randomizer('rand-1', {
+      items: [
+        { asset: 'prize-a', label: 'Prize A', weight: 1 },
+      ],
+      animation: 'instant',
+      spinDuration: 1,
+      trigger: 'tap',
+    });
+    engine.addModule(randomizer);
+    // Do NOT emit gameflow:resume — module stays paused
+
+    randomizer.spin();
+    expect(randomizer.isSpinning()).toBe(true);
+
+    // Timer should not advance while paused
+    randomizer.update(2000);
+    expect(randomizer.isSpinning()).toBe(true); // still spinning, not resolved
+  });
+
+  it('should auto-spin again after result in auto mode', () => {
+    const { engine, randomizer } = setup({ trigger: 'auto', spinDuration: 0.5 });
+    const resultHandler = vi.fn();
+    engine.eventBus.on('randomizer:result', resultHandler);
+
+    // Already spinning from setup's gameflow:resume
+    expect(randomizer.isSpinning()).toBe(true);
+
+    // Complete first spin — deferred auto-spin fires in same tick
+    engine.tick(600);
+    expect(resultHandler).toHaveBeenCalledOnce();
+
+    // Should already be spinning again (deferred auto-spin)
+    expect(randomizer.isSpinning()).toBe(true);
+
+    // Complete second spin
+    engine.tick(600);
+    expect(resultHandler).toHaveBeenCalledTimes(2);
+  });
 });

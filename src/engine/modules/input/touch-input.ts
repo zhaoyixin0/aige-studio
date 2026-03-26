@@ -213,7 +213,7 @@ export class TouchInput extends BaseModule {
 
   update(_dt: number): void {
     // Re-emit hold event every frame while pointer is down (for continuous movement)
-    if (this.pointerState && this.currentPosition) {
+    if (this.pointerState && this.currentPosition && this.canvas) {
       const canvasWidth = (this.canvas as HTMLCanvasElement)?.width ?? 800;
       const side = this.currentPosition.x < canvasWidth / 2 ? 'left' : 'right';
       this.emit('input:touch:hold', { x: this.currentPosition.x, y: this.currentPosition.y, side });

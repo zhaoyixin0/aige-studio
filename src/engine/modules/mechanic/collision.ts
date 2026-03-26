@@ -28,6 +28,14 @@ export class Collision extends BaseModule {
         label: 'Collision Rules',
         default: [],
       },
+      hitboxScale: {
+        type: 'range',
+        label: 'Hitbox Scale',
+        default: 1.0,
+        min: 0.1,
+        max: 2.0,
+        step: 0.1,
+      },
     };
   }
 
@@ -89,7 +97,8 @@ export class Collision extends BaseModule {
           const dy = objA.y - objB.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (distance < objA.radius + objB.radius) {
+          const scale = this.params.hitboxScale ?? 1.0;
+          if (distance < (objA.radius + objB.radius) * scale) {
             // Collision detected
             const midX = (objA.x + objB.x) / 2;
             const midY = (objA.y + objB.y) / 2;

@@ -68,4 +68,40 @@ describe('DifficultyRamp', () => {
     // Should still be 10, not 15
     expect(spawner.getParams().frequency).toBeCloseTo(10);
   });
+
+  it('should track score milestones independently per rule in score mode', () => {
+    const engine = new Engine();
+    const spawner = new Spawner('spawner-1', {
+      items: [{ asset: 'apple', weight: 1 }],
+      speed: { min: 100, max: 200 },
+      frequency: 2,
+      spawnArea: { x: 0, y: 0, width: 800, height: 0 },
+      direction: 'down',
+      maxCount: 50,
+    });
+    engine.addModule(spawner);
+
+    const ramp = new DifficultyRamp('ramp-1', {
+      target: 'spawner-1',
+      rules: [
+        { every: 100, field: 'frequency', decrease: 0.1, min: 0.5 },
+        { every: 200, field: 'maxCount', increase: 5, max: 100 },
+      ],
+      mode: 'score',
+    });
+    engine.addModule(ramp);
+    engine.eventBus.emit('gameflow:resume');
+
+    // Score reaches 200
+    engine.eventBus.emit('scorer:update', { score: 200 });
+    engine.tick(16);
+
+    // Rule A (every:100) should have fired 2 times: at 100 and 200
+    // frequency: 2 - 0.1 - 0.1 = 1.8
+    expect(spawner.getParams().frequency).toBeCloseTo(1.8);
+
+    // Rule B (every:200) should have fired 1 time: at 200
+    // maxCount: 50 + 5 = 55
+    expect(spawner.getParams().maxCount).toBe(55);
+  });
 });

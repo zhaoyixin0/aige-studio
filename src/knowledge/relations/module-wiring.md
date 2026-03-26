@@ -134,6 +134,340 @@ QuizEngine.answer(optionIndex)
 任意事件 ──→ SoundFX (按 events 映射加入播放队列)
 ```
 
+---
+
+## 平台跳跃事件流
+
+### 15. 平台物理事件流：Gravity → Jump → CoyoteTime → PlayerMovement
+
+```
+Gravity.update()
+    ↓ 每帧对 velocityY 施加 gravity 加速度
+    ↓ gravity:update { velocityY, grounded }
+    ↓
+Jump 监听 input:touch:tap / input:key:space
+    ↓ 检查 grounded 状态（直接或通过 coyote 窗口）
+    ↓ jump:start { velocityY: -jumpForce }
+    ↓
+CoyoteTime 监听 gravity:update
+    ↓ 离开平台时开启 coyote 窗口（通常 80-150ms）
+    ↓ coyote:available { remaining } — 通知 Jump 仍可起跳
+    ↓ coyote:expired — 窗口关闭，Jump 不再接受地面跳
+    ↓
+PlayerMovement 监听输入事件
+    ↓ 每帧根据 input 更新 X 轴位移
+    ↓ playermovement:update { x, y, velocityX, velocityY, grounded }
+```
+
+**交互关系**: Gravity 管理 Y 轴加速度，Jump 叠加跳跃脉冲，CoyoteTime 延长跳跃窗口，PlayerMovement 综合所有物理量更新最终位置。
+
+### 16. 平台碰撞事件流：平台 + Collision + Gravity 落地检测
+
+```
+StaticPlatform.init()
+    ↓ 注册平台碰撞体到 Collision(platform 层)
+    ↓
+MovingPlatform.update()
+    ↓ 每帧更新平台位置 → Collision.updateObject(platformId, { x, y })
+    ↓ movingplatform:move { id, x, y, dx, dy }
+    ↓
+Collision 检测 player 层 vs platform 层
+    ↓ collision:platform { playerId, platformId, side, overlap }
+    ↓
+Gravity 监听 collision:platform (side=top)
+    ↓ 设置 grounded = true, velocityY = 0
+    ↓ gravity:land { platformId }
+    ↓
+OneWayPlatform — 仅当 player.velocityY > 0（下落）且 player.bottom <= platform.top 时触发碰撞
+CrumblingPlatform — 落地后启动 crumbleDelay 计时
+    ↓ crumbling:shake { platformId } (抖动预警)
+    ↓ crumbling:collapse { platformId } (平台消失)
+    ↓ crumbling:respawn { platformId } (respawnTime 后重现)
+```
+
+### 17. 伤害事件流：Hazard → Collision → Lives → IFrames → Knockback
+
+```
+Hazard 注册碰撞体到 Collision(hazard 层)
+    ↓
+Collision 检测 player 层 vs hazard 层
+    ↓ collision:damage { playerId, hazardId, damageAmount }
+    ↓
+IFrames 检查无敌状态
+    ├── 无敌中 → 过滤，不传递给 Lives
+    └── 非无敌 →
+        ↓
+        Lives.decrease(damageAmount)
+        ↓ lives:change { current, max }
+        ↓ lives:zero (如果 current <= 0)
+        ↓
+        IFrames 激活无敌状态
+        ↓ iframes:start { duration }
+        ↓ 闪烁视觉效果（渲染层处理）
+        ↓ iframes:end — 无敌结束
+        ↓
+        Knockback 同时触发
+        ↓ knockback:start { direction, force }
+        ↓ 施加反方向位移脉冲
+        ↓ knockback:end — 击退结束，恢复控制
+```
+
+### 18. 收集事件流：Collectible → Collision → Inventory + Scorer
+
+```
+Collectible 注册碰撞体到 Collision(collectible 层)
+    ↓
+Collision 检测 player 层 vs collectible 层
+    ↓ collision:hit { playerId, targetId, collectibleType }
+    ↓
+Collectible 移除已收集物体
+    ↓ collectible:collected { id, type, value }
+    ↓
+Inventory 监听 collectible:collected
+    ↓ inventory:update { items, total }
+    ↓
+Scorer 监听 collision:hit (collectible 层)
+    ↓ scorer:update { score, delta, combo }
+```
+
+### 19. 存档事件流：Checkpoint → Lives（重生点）
+
+```
+Checkpoint 注册碰撞体到 Collision(checkpoint 层)
+    ↓
+Collision 检测 player 层 vs checkpoint 层
+    ↓ collision:hit { playerId, checkpointId }
+    ↓
+Checkpoint 激活
+    ↓ checkpoint:activate { id, x, y }
+    ↓ 记录当前重生坐标
+    ↓
+Lives 监听 lives:zero (或 collision:damage 后 current > 0)
+    ↓ 读取 Checkpoint 最近激活点
+    ↓ checkpoint:respawn { x, y }
+    ↓ PlayerMovement 将角色传送到重生点
+```
+
+### 20. Camera 事件流：CameraFollow → 跟随 PlayerMovement
+
+```
+PlayerMovement ──→ playermovement:update { x, y }
+    ↓
+CameraFollow 监听 playermovement:update
+    ↓ 计算相机偏移量（平滑跟随 / deadzone / 边界限制）
+    ↓ camera:update { offsetX, offsetY, zoom }
+    ↓
+渲染层接收 camera:update → 移动 PixiJS 容器 / stage 位置
+```
+
+**配置要点**: CameraFollow 有 smoothing（平滑系数）、deadzone（死区范围）、bounds（边界限制）参数。
+
+### 21. Dash 事件流：input → Dash → 位移 + IFrames 联动
+
+```
+input:touch:doubleTap / input:key:shift / input:hand:gesture:swipe
+    ↓
+Dash 检查冷却时间
+    ├── 冷却中 → 忽略
+    └── 可用 →
+        ↓ dash:start { direction, speed, duration }
+        ↓ 在 duration 期间：
+        │   ├── PlayerMovement 速度被 Dash 覆盖（高速位移）
+        │   ├── Gravity 冻结（不施加 Y 轴加速度）
+        │   └── IFrames 激活（dash 期间无敌，可选配置）
+        ↓ dash:end
+        ↓ 恢复正常物理 + 开始冷却计时
+```
+
+---
+
+## 扩展模块事件流
+
+### 22. PowerUp 事件流：Collectible → PowerUp → activate/expire
+
+```
+Collectible ──→ collectible:collected { type: 'powerup', powerUpType }
+    ↓
+PowerUp 监听 collectible:collected (过滤 type=powerup)
+    ↓ powerup:activate { type, duration, effect }
+    ↓ 根据 type 修改目标模块参数：
+    │   ├── 'speed' → PlayerMovement.configure({ speed: boosted })
+    │   ├── 'jump' → Jump.configure({ jumpForce: boosted })
+    │   ├── 'shield' → IFrames.configure({ duration: extended })
+    │   └── 'magnet' → Collectible.configure({ attractRadius: large })
+    ↓ duration 倒计时
+    ↓ powerup:expire { type }
+    ↓ 恢复目标模块原始参数
+```
+
+### 23. ComboSystem 事件流
+
+```
+collision:hit / collectible:collected / 任意计分事件
+    ↓
+ComboSystem 更新连击计数
+    ↓ combo:update { count, multiplier, timeLeft }
+    ↓ combo:milestone { count } (达到特定连击数)
+    ↓
+Scorer 监听 combo:update → 应用倍率到下一次加分
+    ↓
+combo:break (超时未命中)
+    ↓ 连击重置为 0
+```
+
+**注意**: 如果 Scorer 自身的 `combo.enabled` 为 true，会与 ComboSystem 产生冗余（见冲突文档）。
+
+### 24. Runner 事件流：Runner → Spawner → Collision → Scorer
+
+```
+Runner.update()
+    ↓ 每帧推进世界滚动（自动向右/向前）
+    ↓ runner:scroll { speed, distance }
+    ↓
+Spawner 根据 Runner 的滚动速度生成障碍物/收集物
+    ↓ 物体随世界滚动向玩家移动
+    ↓
+Collision 检测碰撞
+    ├── collision:hit (收集物) → Scorer 加分
+    └── collision:damage (障碍物) → Lives 扣血
+    ↓
+DifficultyRamp 监听 runner:scroll 的 distance
+    ↓ 随距离增加 Runner.speed
+```
+
+### 25. ExpressionDetector 事件流
+
+```
+FaceInput ──→ input:face:landmarks { landmarks }
+    ↓
+ExpressionDetector 分析面部特征
+    ↓ expression:detected { type, confidence }
+    │   type: 'smile' | 'surprise' | 'angry' | 'sad' | 'wink' | ...
+    ↓
+Scorer / ComboSystem / 自定义逻辑 监听 expression:detected
+    ↓ 根据当前目标表情匹配给分
+```
+
+**适用**: expression 类游戏。与 ComboSystem 配合可做表情连击。
+
+### 26. BeatMap 事件流
+
+```
+BeatMap.init()
+    ↓ 加载节拍数据 { bpm, notes: [{ time, lane, type }] }
+    ↓
+BeatMap.update()
+    ↓ 根据当前时间生成节拍物体
+    ↓ beatmap:note { time, lane, type }
+    ↓
+Spawner 监听 beatmap:note → 在对应 lane 生成物体
+    ↓
+Collision 检测玩家命中
+    ├── collision:hit + 时机判定
+    │   ↓ beatmap:hit { timing: 'perfect'|'great'|'good'|'miss' }
+    │   ↓ Scorer 根据 timing 加不同分数
+    └── 未命中
+        ↓ beatmap:miss { noteId }
+```
+
+### 27. GestureMatch 事件流
+
+```
+HandInput ──→ input:hand:gesture { type, confidence }
+    ↓
+GestureMatch 比较当前目标手势
+    ↓ gesture:match { gesture, accuracy }  (匹配成功)
+    ↓ gesture:fail { expected, actual }    (匹配失败)
+    ↓
+gesture:next { gesture, timeLimit } (下一个目标手势)
+    ↓
+Scorer 监听 gesture:match 加分
+Timer 可选配合限时模式
+```
+
+### 28. MatchEngine 事件流
+
+```
+MatchEngine.init()
+    ↓ 生成配对网格 { rows, cols, pairs }
+    ↓ match:board { cards }
+    ↓
+input:touch:tap { x, y } → 翻开卡片
+    ↓ match:flip { cardId, value }
+    ↓
+MatchEngine 检查配对
+    ├── 配对成功
+    │   ↓ match:pair { card1, card2, value }
+    │   ↓ Scorer 加分
+    └── 配对失败
+        ↓ match:mismatch { card1, card2 }
+        ↓ 翻回卡片
+    ↓
+match:complete { totalPairs, moves, time } (全部配对完成)
+    ↓ GameFlow → finished
+```
+
+### 29. BranchStateMachine 事件流
+
+```
+BranchStateMachine.init()
+    ↓ 加载叙事树 { nodes: [{ id, text, choices }] }
+    ↓ narrative:node { id, text, choices }
+    ↓
+input:touch:tap → 选择分支
+    ↓ narrative:choice { nodeId, choiceIndex }
+    ↓
+BranchStateMachine 转移到下一个节点
+    ↓ narrative:node { id, text, choices }  (下一个节点)
+    ↓ narrative:end { endingId }            (到达结局)
+    ↓ GameFlow → finished
+```
+
+### 30. DressUpEngine 事件流
+
+```
+DressUpEngine.init()
+    ↓ 加载角色和服饰列表 { character, categories, items }
+    ↓ dressup:ready { character, categories }
+    ↓
+input:touch:tap → 选择服饰
+    ↓ dressup:equip { category, itemId }
+    ↓
+DressUpEngine 更新角色外观
+    ↓ dressup:update { character, equipped }
+    ↓
+dressup:screenshot → 导出截图
+dressup:complete → 完成换装
+```
+
+### 31. PlaneDetection 事件流（AR）
+
+```
+摄像头 ──→ PlaneDetection 分析画面
+    ↓ plane:detected { id, position, normal, size }
+    ↓
+Spawner 在检测到的平面上放置虚拟物体
+    ↓ plane:anchor { objectId, planeId, position }
+    ↓
+Collision 检测手/触摸与锚定物体的碰撞
+```
+
+### 32. WallDetect 事件流
+
+```
+PlayerMovement ──→ playermovement:update { x, y }
+    ↓
+WallDetect 检查玩家与墙壁碰撞
+    ↓ wall:contact { side: 'left'|'right', wallId }
+    ↓
+Jump 监听 wall:contact → 允许蹬墙跳（wall jump）
+    ↓ jump:walljump { direction }
+    ↓
+PlayerMovement 添加墙跳反弹速度
+```
+
+---
+
 ## 完整事件清单
 
 | 事件名 | 发出者 | 监听者 |
@@ -142,14 +476,15 @@ QuizEngine.answer(optionIndex)
 | `input:face:mouthOpen` | FaceInput | Randomizer |
 | `input:face:blink` | FaceInput | 自定义逻辑 |
 | `input:face:smile` | FaceInput | 自定义逻辑 |
+| `input:face:landmarks` | FaceInput | ExpressionDetector |
 | `input:hand:move` | HandInput | Collision(wiring) |
-| `input:hand:gesture` | HandInput | 自定义逻辑 |
+| `input:hand:gesture` | HandInput | GestureMatch, 自定义逻辑 |
 | `input:body:move` | BodyInput | Collision(wiring) |
 | `input:body:pose` | BodyInput | 自定义逻辑 |
-| `input:touch:tap` | TouchInput | Randomizer, 自定义逻辑 |
+| `input:touch:tap` | TouchInput | Randomizer, Jump, MatchEngine, BranchStateMachine, DressUpEngine, 自定义逻辑 |
 | `input:touch:swipe` | TouchInput | 自定义逻辑 |
 | `input:touch:longPress` | TouchInput | 自定义逻辑 |
-| `input:touch:doubleTap` | TouchInput | 自定义逻辑 |
+| `input:touch:doubleTap` | TouchInput | Dash, 自定义逻辑 |
 | `input:device:tilt` | DeviceInput | 自定义逻辑 |
 | `input:device:shake` | DeviceInput | 自定义逻辑 |
 | `input:audio:volume` | AudioInput | 自定义逻辑 |
@@ -157,15 +492,19 @@ QuizEngine.answer(optionIndex)
 | `input:audio:frequency` | AudioInput | 自定义逻辑 |
 | `spawner:destroyed` | Spawner | Scorer |
 | `collision:{event}` | Collision | Scorer, Lives, Spawner |
+| `collision:platform` | Collision | Gravity, OneWayPlatform, CrumblingPlatform |
+| `collision:damage` | Collision | IFrames, Lives, Knockback |
+| `collision:hit` (collectible) | Collision | Collectible, Inventory, Scorer |
+| `collision:hit` (checkpoint) | Collision | Checkpoint |
 | `scorer:update` | Scorer | UIOverlay, DifficultyRamp |
 | `scorer:combo:{N}` | Scorer | UIOverlay, ParticleVFX |
 | `timer:tick` | Timer | UIOverlay |
 | `timer:end` | Timer | GameFlow |
 | `lives:change` | Lives | UIOverlay |
-| `lives:zero` | Lives | GameFlow |
+| `lives:zero` | Lives | GameFlow, Checkpoint(重生) |
 | `gameflow:state` | GameFlow | ResultScreen |
-| `gameflow:pause` | GameFlow | Spawner, Collision, Timer |
-| `gameflow:resume` | GameFlow | Spawner, Collision, Timer |
+| `gameflow:pause` | GameFlow | Spawner, Collision, Timer, Runner |
+| `gameflow:resume` | GameFlow | Spawner, Collision, Timer, Runner |
 | `difficulty:update` | DifficultyRamp | 自定义逻辑 |
 | `randomizer:spinning` | Randomizer | SoundFX |
 | `randomizer:result` | Randomizer | SoundFX, ParticleVFX |
@@ -174,3 +513,53 @@ QuizEngine.answer(optionIndex)
 | `quiz:wrong` | QuizEngine | SoundFX |
 | `quiz:score` | QuizEngine | Scorer |
 | `quiz:finished` | QuizEngine | GameFlow |
+| `gravity:update` | Gravity | CoyoteTime, Jump |
+| `gravity:land` | Gravity | PlayerMovement |
+| `jump:start` | Jump | Gravity, PlayerMovement |
+| `jump:walljump` | Jump | PlayerMovement |
+| `coyote:available` | CoyoteTime | Jump |
+| `coyote:expired` | CoyoteTime | Jump |
+| `playermovement:update` | PlayerMovement | CameraFollow, WallDetect, Collision(wiring) |
+| `dash:start` | Dash | PlayerMovement, Gravity, IFrames |
+| `dash:end` | Dash | PlayerMovement, Gravity |
+| `movingplatform:move` | MovingPlatform | Collision(wiring) |
+| `crumbling:shake` | CrumblingPlatform | 渲染层(抖动效果) |
+| `crumbling:collapse` | CrumblingPlatform | Collision(移除碰撞体) |
+| `crumbling:respawn` | CrumblingPlatform | Collision(重新注册) |
+| `collectible:collected` | Collectible | Inventory, PowerUp |
+| `inventory:update` | Inventory | UIOverlay |
+| `checkpoint:activate` | Checkpoint | 渲染层(激活动画) |
+| `checkpoint:respawn` | Checkpoint | PlayerMovement |
+| `camera:update` | CameraFollow | 渲染层(移动容器) |
+| `iframes:start` | IFrames | 渲染层(闪烁效果) |
+| `iframes:end` | IFrames | Collision(恢复检测) |
+| `knockback:start` | Knockback | PlayerMovement |
+| `knockback:end` | Knockback | PlayerMovement |
+| `wall:contact` | WallDetect | Jump |
+| `powerup:activate` | PowerUp | 目标模块(参数修改) |
+| `powerup:expire` | PowerUp | 目标模块(参数恢复) |
+| `combo:update` | ComboSystem | Scorer, UIOverlay |
+| `combo:milestone` | ComboSystem | ParticleVFX, SoundFX |
+| `combo:break` | ComboSystem | UIOverlay |
+| `runner:scroll` | Runner | Spawner, DifficultyRamp |
+| `expression:detected` | ExpressionDetector | Scorer, ComboSystem |
+| `beatmap:note` | BeatMap | Spawner |
+| `beatmap:hit` | BeatMap | Scorer |
+| `beatmap:miss` | BeatMap | Scorer |
+| `gesture:match` | GestureMatch | Scorer |
+| `gesture:fail` | GestureMatch | SoundFX |
+| `gesture:next` | GestureMatch | UIOverlay |
+| `match:board` | MatchEngine | 渲染层 |
+| `match:flip` | MatchEngine | 渲染层 |
+| `match:pair` | MatchEngine | Scorer, ParticleVFX |
+| `match:mismatch` | MatchEngine | SoundFX |
+| `match:complete` | MatchEngine | GameFlow |
+| `narrative:node` | BranchStateMachine | UIOverlay |
+| `narrative:choice` | BranchStateMachine | 自身(状态转移) |
+| `narrative:end` | BranchStateMachine | GameFlow |
+| `dressup:ready` | DressUpEngine | 渲染层 |
+| `dressup:equip` | DressUpEngine | 渲染层 |
+| `dressup:update` | DressUpEngine | 渲染层 |
+| `dressup:complete` | DressUpEngine | GameFlow |
+| `plane:detected` | PlaneDetection | Spawner |
+| `plane:anchor` | PlaneDetection | Collision |

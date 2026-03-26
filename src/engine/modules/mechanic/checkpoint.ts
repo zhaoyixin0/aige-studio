@@ -1,5 +1,9 @@
-import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { GameEngine, GameModule, ModuleSchema } from '@/engine/core';
 import { BaseModule } from '../base-module';
+
+function hasReset(m: GameModule): m is GameModule & { reset(): void } {
+  return typeof (m as any).reset === 'function';
+}
 
 export interface CheckpointDef {
   x: number;
@@ -89,6 +93,14 @@ export class Checkpoint extends BaseModule {
 
     const checkpoints = this.getCheckpoints();
     const cp = checkpoints[this.lastActivated];
+
+    // Restore lives before emitting respawn so the player isn't stuck at 0
+    if (this.engine) {
+      const livesModules = this.engine.getModulesByType('Lives');
+      for (const mod of livesModules) {
+        if (hasReset(mod)) mod.reset();
+      }
+    }
 
     this.emit('checkpoint:respawn', {
       id: `checkpoint-${this.lastActivated}`,

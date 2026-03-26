@@ -43,6 +43,31 @@ export { Collectible } from './mechanic/collectible';
 export { Inventory } from './mechanic/inventory';
 export { Checkpoint } from './mechanic/checkpoint';
 export { WallDetect } from './mechanic/wall-detect';
+export { Health } from './mechanic/health';
+export type { HealthEntity } from './mechanic/health';
+export { Shield } from './mechanic/shield';
+
+// Mechanic — RPG (Batch 3)
+export { EquipmentSlot } from './mechanic/equipment-slot';
+export type { Equipment, SlotType } from './mechanic/equipment-slot';
+export { EnemyDrop } from './mechanic/enemy-drop';
+export type { LootEntry } from './mechanic/enemy-drop';
+export { LevelUp } from './mechanic/level-up';
+export { StatusEffect } from './mechanic/status-effect';
+export type { ActiveEffect } from './mechanic/status-effect';
+export { SkillTree } from './mechanic/skill-tree';
+export type { SkillDef } from './mechanic/skill-tree';
+export { DialogueSystem } from './mechanic/dialogue-system';
+export type { DialogueNode, DialogueTree, DialogueChoice } from './mechanic/dialogue-system';
+
+// Mechanic — Shooter (Batch 2)
+export { Projectile } from './mechanic/projectile';
+export type { ProjectileInstance } from './mechanic/projectile';
+export { BulletPattern } from './mechanic/bullet-pattern';
+export { Aim } from './mechanic/aim';
+export { EnemyAI } from './mechanic/enemy-ai';
+export type { EnemyInstance, AIState } from './mechanic/enemy-ai';
+export { WaveSpawner } from './mechanic/wave-spawner';
 
 // Feedback
 export { GameFlow } from './feedback/game-flow';

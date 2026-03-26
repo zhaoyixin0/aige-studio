@@ -1,5 +1,9 @@
-import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { GameEngine, GameModule, ModuleSchema } from '@/engine/core';
 import { BaseModule } from '../base-module';
+
+function hasIsActive(m: GameModule): m is GameModule & { isActive(type?: string): boolean } {
+  return typeof (m as any).isActive === 'function';
+}
 
 export class Lives extends BaseModule {
   readonly type = 'Lives';
@@ -43,6 +47,9 @@ export class Lives extends BaseModule {
     this.current = this.params.count;
 
     this.on('collision:damage', () => {
+      // Skip damage during invincibility frames
+      if (this.isInvincible()) return;
+
       const amount = Math.abs(this.params.events?.damage ?? 1);
       this.decrease(amount);
     });
@@ -74,6 +81,24 @@ export class Lives extends BaseModule {
 
   getCurrent(): number {
     return this.current;
+  }
+
+  private isInvincible(): boolean {
+    if (!this.engine) return false;
+
+    // Check IFrames
+    const iframes = this.engine.getModulesByType('IFrames');
+    if (iframes.length > 0 && hasIsActive(iframes[0]) && iframes[0].isActive()) {
+      return true;
+    }
+
+    // Check PowerUp shield
+    const powerUps = this.engine.getModulesByType('PowerUp');
+    if (powerUps.length > 0 && hasIsActive(powerUps[0]) && powerUps[0].isActive('shield')) {
+      return true;
+    }
+
+    return false;
   }
 
   reset(): void {

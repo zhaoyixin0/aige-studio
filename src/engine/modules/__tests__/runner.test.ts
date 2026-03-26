@@ -59,4 +59,25 @@ describe('Runner', () => {
     runner.update(1000); // 1 second
     expect(runner.getCurrentSpeed()).toBeCloseTo(150, 0);
   });
+
+  it('should cap speed at maxSpeed', () => {
+    const { runner } = setup({ speed: 100, acceleration: 100, maxSpeed: 200 });
+    runner.start();
+
+    // After 5 seconds: 100 + 100*5 = 600, but should be capped at 200
+    for (let i = 0; i < 5; i++) runner.update(1000);
+
+    expect(runner.getCurrentSpeed()).toBe(200);
+  });
+
+  it('should use default maxSpeed when not configured', () => {
+    const { runner } = setup({ speed: 100, acceleration: 100 });
+    runner.start();
+
+    // After 20 seconds: 100 + 100*20 = 2100, should be capped at default maxSpeed
+    for (let i = 0; i < 20; i++) runner.update(1000);
+
+    // Default maxSpeed should be a reasonable limit (e.g., 3x initial speed or 1500)
+    expect(runner.getCurrentSpeed()).toBeLessThanOrEqual(1500);
+  });
 });

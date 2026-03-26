@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { Engine } from '@/engine/core';
-import { Gravity } from '../mechanic/gravity';
+import { Gravity, type PlatformSurface } from '../mechanic/gravity';
 
 describe('Gravity', () => {
   function setup(params: Record<string, any> = {}) {
@@ -84,18 +84,73 @@ describe('Gravity', () => {
     expect(obj!.y).toBe(0.8);
   });
 
-  it('should emit gravity:falling when object starts falling', () => {
+  it('should emit gravity:falling only once when object becomes airborne', () => {
+    const { engine, gravity } = setup({ strength: 980 });
+    const fallingHandler = vi.fn();
+    engine.eventBus.on('gravity:falling', fallingHandler);
+
+    gravity.addObject('player-1', { x: 0.5, y: 0.2, floorY: 99999, airborne: true });
+
+    // Multiple update frames
+    gravity.update(16);
+    gravity.update(16);
+    gravity.update(16);
+    gravity.update(16);
+    gravity.update(16);
+
+    // Should only emit once on the first frame, not every frame
+    expect(fallingHandler).toHaveBeenCalledTimes(1);
+    expect(fallingHandler).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'player-1' }),
+    );
+  });
+
+  it('should re-emit gravity:falling after landing and becoming airborne again', () => {
     const { engine, gravity } = setup({ strength: 980 });
     const fallingHandler = vi.fn();
     engine.eventBus.on('gravity:falling', fallingHandler);
 
     gravity.addObject('player-1', { x: 0.5, y: 0.2, floorY: 0.8, airborne: true });
 
+    // Fall and land
+    for (let i = 0; i < 200; i++) gravity.update(16);
+    const firstCallCount = fallingHandler.mock.calls.length;
+    expect(firstCallCount).toBeGreaterThanOrEqual(1);
+
+    // Make airborne again via jump
+    engine.eventBus.emit('jump:start', { id: 'player-1' });
+    const obj = gravity.getObject('player-1')!;
+    obj.y = 0.2; // reset position
+    obj.velocityY = -500; // upward
+
     gravity.update(16);
 
-    expect(fallingHandler).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'player-1' }),
-    );
+    // Should have emitted one more gravity:falling
+    expect(fallingHandler.mock.calls.length).toBe(firstCallCount + 1);
+  });
+
+  it('should re-emit gravity:falling via jump:start event path (fallingEmitted reset)', () => {
+    const { engine, gravity } = setup({ strength: 980 });
+    const fallingHandler = vi.fn();
+    engine.eventBus.on('gravity:falling', fallingHandler);
+
+    gravity.addObject('player-1', { x: 0.5, y: 0.2, floorY: 0.8, airborne: true });
+
+    // First airborne phase — 1 falling event
+    gravity.update(16);
+    expect(fallingHandler).toHaveBeenCalledTimes(1);
+
+    // Land
+    for (let i = 0; i < 200; i++) gravity.update(16);
+    expect(gravity.getObject('player-1')!.airborne).toBe(false);
+
+    // Jump again via event
+    engine.eventBus.emit('jump:start', { id: 'player-1' });
+    expect(gravity.getObject('player-1')!.airborne).toBe(true);
+
+    // Second airborne phase — should emit again
+    gravity.update(16);
+    expect(fallingHandler).toHaveBeenCalledTimes(2);
   });
 
   it('should mark object airborne on jump:start event', () => {
@@ -146,5 +201,184 @@ describe('Gravity', () => {
 
     expect(gravity.getObject('player-1')).toBeUndefined();
     expect(gravity.getObject('player-2')).toBeUndefined();
+  });
+
+  // ── Platform Surface System ──
+
+  describe('surface system', () => {
+    const SURFACE_A: PlatformSurface = {
+      id: 'plat-0',
+      x: 100,
+      y: 500,
+      width: 200,
+      oneWay: false,
+      active: true,
+    };
+
+    it('should land on a registered surface instead of floorY', () => {
+      const { engine, gravity } = setup({ strength: 980 });
+      const landHandler = vi.fn();
+      engine.eventBus.on('gravity:landed', landHandler);
+
+      // floorY is very far below, but surface is at y=500
+      gravity.addObject('p', { x: 150, y: 100, floorY: 9999, airborne: true });
+      gravity.addSurface(SURFACE_A);
+
+      // Run until landing
+      for (let i = 0; i < 300; i++) gravity.update(16);
+
+      const obj = gravity.getObject('p')!;
+      expect(obj.airborne).toBe(false);
+      expect(obj.y).toBe(500);
+      expect(landHandler).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'p', y: 500, surfaceId: 'plat-0' }),
+      );
+    });
+
+    it('should land on the highest surface below the object', () => {
+      const { gravity } = setup({ strength: 980 });
+
+      gravity.addSurface({ id: 'low', x: 100, y: 800, width: 200, oneWay: false, active: true });
+      gravity.addSurface({ id: 'high', x: 100, y: 400, width: 200, oneWay: false, active: true });
+
+      gravity.addObject('p', { x: 150, y: 100, floorY: 9999, airborne: true });
+
+      for (let i = 0; i < 300; i++) gravity.update(16);
+
+      expect(gravity.getObject('p')!.y).toBe(400);
+    });
+
+    it('should fall through one-way surface when moving upward', () => {
+      const { gravity } = setup({ strength: 980 });
+
+      gravity.addSurface({ id: 'ow', x: 100, y: 400, width: 200, oneWay: true, active: true });
+
+      // Object starts below the surface, moving upward (negative velocityY)
+      gravity.addObject('p', { x: 150, y: 500, floorY: 9999, airborne: true, velocityY: -300 });
+
+      gravity.update(16);
+
+      // Should NOT land on the one-way platform while moving up
+      const obj = gravity.getObject('p')!;
+      expect(obj.airborne).toBe(true);
+    });
+
+    it('should land on one-way surface when falling', () => {
+      const { engine, gravity } = setup({ strength: 980 });
+      const landHandler = vi.fn();
+      engine.eventBus.on('gravity:landed', landHandler);
+
+      gravity.addSurface({ id: 'ow', x: 100, y: 500, width: 200, oneWay: true, active: true });
+      gravity.addObject('p', { x: 150, y: 100, floorY: 9999, airborne: true });
+
+      for (let i = 0; i < 300; i++) gravity.update(16);
+
+      expect(gravity.getObject('p')!.y).toBe(500);
+      expect(landHandler).toHaveBeenCalled();
+    });
+
+    it('should ignore inactive surfaces', () => {
+      const { gravity } = setup({ strength: 980 });
+
+      gravity.addSurface({ id: 'dead', x: 100, y: 400, width: 200, oneWay: false, active: false });
+      gravity.addObject('p', { x: 150, y: 100, floorY: 800, airborne: true });
+
+      for (let i = 0; i < 300; i++) gravity.update(16);
+
+      // Should fall to floorY, not the inactive surface
+      expect(gravity.getObject('p')!.y).toBe(800);
+    });
+
+    it('should update surface position dynamically', () => {
+      const { gravity } = setup({ strength: 980 });
+
+      gravity.addSurface({ id: 's1', x: 100, y: 500, width: 200, oneWay: false, active: true });
+      gravity.addObject('p', { x: 150, y: 100, floorY: 9999, airborne: true });
+
+      // Move surface down before object reaches it
+      gravity.updateSurface('s1', { y: 700 });
+
+      for (let i = 0; i < 300; i++) gravity.update(16);
+
+      expect(gravity.getObject('p')!.y).toBe(700);
+    });
+
+    it('should remove surface causing object to fall to next surface or floorY', () => {
+      const { gravity } = setup({ strength: 980 });
+
+      gravity.addSurface({ id: 's1', x: 100, y: 400, width: 200, oneWay: false, active: true });
+      gravity.addObject('p', { x: 150, y: 400, floorY: 800, airborne: false });
+
+      // Remove the surface — object should become airborne
+      gravity.removeSurface('s1');
+
+      // Object is no longer on any surface, mark airborne
+      gravity.checkSurfaceDeparture('p');
+
+      for (let i = 0; i < 300; i++) gravity.update(16);
+
+      expect(gravity.getObject('p')!.y).toBe(800);
+    });
+
+    it('should not land on surface when object X is outside surface range', () => {
+      const { gravity } = setup({ strength: 980 });
+
+      // Surface at x=100, width=200, so range is [100, 300]
+      gravity.addSurface({ id: 's1', x: 100, y: 400, width: 200, oneWay: false, active: true });
+      // Object at x=50 — outside platform range
+      gravity.addObject('p', { x: 50, y: 100, floorY: 800, airborne: true });
+
+      for (let i = 0; i < 300; i++) gravity.update(16);
+
+      // Should fall to floorY, not the surface
+      expect(gravity.getObject('p')!.y).toBe(800);
+    });
+
+    it('should become airborne when walking off surface edge', () => {
+      const { engine, gravity } = setup({ strength: 980 });
+      const fallingHandler = vi.fn();
+      engine.eventBus.on('gravity:falling', fallingHandler);
+
+      gravity.addSurface({ id: 's1', x: 100, y: 400, width: 200, oneWay: false, active: true });
+      gravity.addObject('p', { x: 150, y: 400, floorY: 800, airborne: false });
+
+      // Move object off the edge (x goes past surface range)
+      const obj = gravity.getObject('p')!;
+      // Update object position immutably via internal Map
+      (gravity as any).objects.set('p', { ...obj, x: 350 }); // past x + width = 300
+
+      gravity.checkSurfaceDeparture('p');
+      gravity.update(16);
+
+      const updated = gravity.getObject('p')!;
+      expect(updated.airborne).toBe(true);
+      expect(fallingHandler).toHaveBeenCalled();
+    });
+
+    it('should clear surfaces on reset', () => {
+      const { gravity } = setup();
+      gravity.addSurface(SURFACE_A);
+
+      expect(gravity.getSurfaces().length).toBe(1);
+
+      gravity.reset();
+
+      expect(gravity.getSurfaces().length).toBe(0);
+    });
+
+    it('should deactivate surface and object falls through', () => {
+      const { gravity } = setup({ strength: 980 });
+
+      gravity.addSurface({ id: 's1', x: 100, y: 400, width: 200, oneWay: false, active: true });
+      gravity.addObject('p', { x: 150, y: 400, floorY: 800, airborne: false });
+
+      // Deactivate surface (crumble)
+      gravity.updateSurface('s1', { active: false });
+      gravity.checkSurfaceDeparture('p');
+
+      for (let i = 0; i < 300; i++) gravity.update(16);
+
+      expect(gravity.getObject('p')!.y).toBe(800);
+    });
   });
 });

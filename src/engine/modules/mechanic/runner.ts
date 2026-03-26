@@ -35,6 +35,14 @@ export class Runner extends BaseModule {
         max: 50,
         step: 1,
       },
+      maxSpeed: {
+        type: 'range',
+        label: 'Max Speed',
+        default: 1500,
+        min: 100,
+        max: 5000,
+        step: 50,
+      },
     };
   }
 
@@ -84,9 +92,13 @@ export class Runner extends BaseModule {
     if (!this.started) return;
 
     const acceleration = this.params.acceleration ?? 10;
+    const maxSpeed = this.params.maxSpeed ?? 1500;
 
-    // Increase speed over time
+    // Increase speed over time, clamped to maxSpeed
     this.currentSpeed += acceleration * (dt / 1000);
+    if (this.currentSpeed > maxSpeed) {
+      this.currentSpeed = maxSpeed;
+    }
 
     // Accumulate distance
     this.distance += this.currentSpeed * (dt / 1000);

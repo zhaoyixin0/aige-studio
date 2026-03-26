@@ -8,13 +8,28 @@ export interface GravityObject {
   velocityY: number;
   floorY: number;
   airborne: boolean;
+  /** Whether gravity:falling has been emitted for the current airborne phase */
+  fallingEmitted?: boolean;
+  /** ID of the surface the object is currently standing on */
+  currentSurfaceId?: string;
+}
+
+export interface PlatformSurface {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  oneWay: boolean;
+  active: boolean;
 }
 
 export class Gravity extends BaseModule {
   readonly type = 'Gravity';
 
   private objects = new Map<string, GravityObject>();
+  private surfaces = new Map<string, PlatformSurface>();
   private enabled = true;
+  private frozen = false;
 
   getSchema(): ModuleSchema {
     return {
@@ -55,9 +70,22 @@ export class Gravity extends BaseModule {
       if (data?.id) {
         const obj = this.objects.get(data.id);
         if (obj) {
-          obj.airborne = true;
+          this.objects.set(data.id, {
+            ...obj,
+            airborne: true,
+            fallingEmitted: false,
+            currentSurfaceId: undefined,
+          });
         }
       }
+    });
+
+    this.on('dash:start', () => {
+      this.frozen = true;
+    });
+
+    this.on('dash:end', () => {
+      this.frozen = false;
     });
 
     const toggleEvent = this.params.toggleEvent;
@@ -67,6 +95,8 @@ export class Gravity extends BaseModule {
       });
     }
   }
+
+  // ── Object API ──
 
   addObject(
     id: string,
@@ -90,9 +120,65 @@ export class Gravity extends BaseModule {
     this.objects.delete(id);
   }
 
+  // ── Surface API ──
+
+  addSurface(surface: PlatformSurface): void {
+    this.surfaces.set(surface.id, { ...surface });
+  }
+
+  updateSurface(id: string, updates: Partial<PlatformSurface>): void {
+    const existing = this.surfaces.get(id);
+    if (!existing) return;
+    this.surfaces.set(id, { ...existing, ...updates });
+  }
+
+  removeSurface(id: string): void {
+    this.surfaces.delete(id);
+  }
+
+  getSurfaces(): PlatformSurface[] {
+    return [...this.surfaces.values()];
+  }
+
+  /**
+   * Check if an object is no longer on its current surface and mark airborne if so.
+   * Call this after a surface is removed, deactivated, or the object has moved.
+   */
+  checkSurfaceDeparture(objId: string): void {
+    const obj = this.objects.get(objId);
+    if (!obj || obj.airborne) return;
+
+    const surfaceId = obj.currentSurfaceId;
+    if (surfaceId) {
+      const surface = this.surfaces.get(surfaceId);
+      if (!surface || !surface.active || !this.isOnSurface(obj, surface)) {
+        this.objects.set(objId, {
+          ...obj,
+          airborne: true,
+          fallingEmitted: false,
+          currentSurfaceId: undefined,
+        });
+      }
+    } else {
+      // Object has no tracked surface — check if still on any surface
+      const resolved = this.findSurface(obj);
+      if (!resolved) {
+        this.objects.set(objId, {
+          ...obj,
+          airborne: true,
+          fallingEmitted: false,
+        });
+      }
+    }
+  }
+
+  // ── Physics ──
+
   reset(): void {
     this.objects.clear();
+    this.surfaces.clear();
     this.enabled = true;
+    this.frozen = false;
   }
 
   update(dt: number): void {
@@ -106,27 +192,99 @@ export class Gravity extends BaseModule {
     for (const obj of this.objects.values()) {
       if (!obj.airborne) continue;
 
-      // Emit falling event on first frame of being airborne
-      this.emit('gravity:falling', { id: obj.id });
+      let updated = obj;
+
+      // Emit falling event only on the first frame of being airborne
+      if (!updated.fallingEmitted) {
+        updated = { ...updated, fallingEmitted: true };
+        this.emit('gravity:falling', { id: updated.id });
+      }
+
+      // Skip physics when frozen (e.g., during dash)
+      if (this.frozen) {
+        if (updated !== obj) this.objects.set(updated.id, updated);
+        continue;
+      }
 
       // Apply gravity acceleration
-      obj.velocityY += strength * dtSec;
+      let newVelocityY = updated.velocityY + strength * dtSec;
 
       // Cap at terminal velocity
-      if (obj.velocityY > terminalVelocity) {
-        obj.velocityY = terminalVelocity;
+      if (newVelocityY > terminalVelocity) {
+        newVelocityY = terminalVelocity;
       }
 
       // Update position
-      obj.y += obj.velocityY * dtSec;
+      const newY = updated.y + newVelocityY * dtSec;
+      updated = { ...updated, velocityY: newVelocityY, y: newY };
 
-      // Check for landing
-      if (obj.y >= obj.floorY) {
-        obj.y = obj.floorY;
-        obj.velocityY = 0;
-        obj.airborne = false;
-        this.emit('gravity:landed', { id: obj.id, y: obj.y });
+      // Check for landing on surfaces first, then fallback to floorY
+      const resolvedFloor = this.resolveFloorY(updated);
+
+      if (updated.y >= resolvedFloor.y) {
+        updated = {
+          ...updated,
+          y: resolvedFloor.y,
+          velocityY: 0,
+          airborne: false,
+          fallingEmitted: false,
+          currentSurfaceId: resolvedFloor.surfaceId,
+        };
+        this.objects.set(updated.id, updated);
+        this.emit('gravity:landed', {
+          id: updated.id,
+          y: updated.y,
+          surfaceId: resolvedFloor.surfaceId,
+        });
+      } else {
+        this.objects.set(updated.id, updated);
       }
     }
+  }
+
+  /**
+   * Find the highest valid surface or floorY below the object.
+   */
+  private resolveFloorY(obj: GravityObject): { y: number; surfaceId?: string } {
+    let bestY = obj.floorY;
+    let bestSurfaceId: string | undefined;
+
+    for (const surface of this.surfaces.values()) {
+      if (!surface.active) continue;
+
+      // One-way surfaces: only land when falling (velocityY >= 0)
+      if (surface.oneWay && obj.velocityY < 0) continue;
+
+      // Object X must overlap surface horizontally
+      if (!this.isXOverlapping(obj, surface)) continue;
+
+      // Surface must be at or below current Y (we're falling toward it)
+      // and must be the highest (smallest Y value that's >= object start of frame)
+      if (surface.y >= obj.y - obj.velocityY * 0.016 - 1 && surface.y < bestY) {
+        bestY = surface.y;
+        bestSurfaceId = surface.id;
+      }
+    }
+
+    return { y: bestY, surfaceId: bestSurfaceId };
+  }
+
+  private findSurface(obj: GravityObject): PlatformSurface | undefined {
+    for (const surface of this.surfaces.values()) {
+      if (!surface.active) continue;
+      if (this.isOnSurface(obj, surface)) return surface;
+    }
+    return undefined;
+  }
+
+  private isOnSurface(obj: GravityObject, surface: PlatformSurface): boolean {
+    return (
+      this.isXOverlapping(obj, surface) &&
+      Math.abs(obj.y - surface.y) < 2
+    );
+  }
+
+  private isXOverlapping(obj: GravityObject, surface: PlatformSurface): boolean {
+    return obj.x >= surface.x && obj.x <= surface.x + surface.width;
   }
 }

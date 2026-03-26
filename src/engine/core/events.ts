@@ -111,7 +111,7 @@ export interface GravityPayload { id: string; y?: number }
 export const PLAYER_MOVE = 'player:move';
 export const PLAYER_STOP = 'player:stop';
 
-export interface PlayerMovePayload { x: number; direction: number; speed: number }
+export interface PlayerMovePayload { x: number; y?: number; direction: number; speed: number }
 
 // ── Dash ────────────────────────────────────────────────────
 export const DASH_START = 'dash:start';
@@ -219,3 +219,105 @@ export const BRANCH_CHOICE = 'branch:choice';
 
 // ── Plane Detection ─────────────────────────────────────────
 export const PLANE_DETECTED = 'plane:detected';
+
+// ── Health ─────────────────────────────────────────────────
+export const HEALTH_CHANGE = 'health:change';
+export const HEALTH_ZERO = 'health:zero';
+
+export interface HealthChangePayload { id: string; hp: number; maxHp: number; delta: number }
+export interface HealthZeroPayload { id: string }
+
+// ── Shield ─────────────────────────────────────────────────
+export const SHIELD_BLOCK = 'shield:block';
+export const SHIELD_BREAK = 'shield:break';
+export const SHIELD_RECHARGE = 'shield:recharge';
+
+export interface ShieldBlockPayload { chargesRemaining: number }
+export interface ShieldRechargePayload { chargesRemaining: number }
+
+// ── Projectile ─────────────────────────────────────────────
+export const PROJECTILE_FIRE = 'projectile:fire';
+export const PROJECTILE_DESTROYED = 'projectile:destroyed';
+
+export interface ProjectileFirePayload { id: string; x: number; y: number; dx: number; dy: number; speed: number; damage: number }
+export interface ProjectileDestroyedPayload { id: string }
+
+// ── BulletPattern ──────────────────────────────────────────
+export const BULLETPATTERN_FIRE = 'bulletpattern:fire';
+
+export interface BulletPatternFirePayload { directions: Array<{ dx: number; dy: number }> }
+
+// ── Aim ────────────────────────────────────────────────────
+export const AIM_UPDATE = 'aim:update';
+
+export interface AimUpdatePayload { dx: number; dy: number; targetId?: string }
+
+// ── EnemyAI ────────────────────────────────────────────────
+export const ENEMY_MOVE = 'enemy:move';
+export const ENEMY_ATTACK = 'enemy:attack';
+export const ENEMY_DEATH = 'enemy:death';
+
+export interface EnemyMovePayload { id: string; x: number; y: number; state: string }
+export interface EnemyAttackPayload { id: string; damage: number }
+export interface EnemyDeathPayload { id: string; x: number; y: number }
+
+// ── WaveSpawner ────────────────────────────────────────────
+export const WAVE_START = 'wave:start';
+export const WAVE_SPAWN = 'wave:spawn';
+export const WAVE_COMPLETE = 'wave:complete';
+export const WAVE_ALL_COMPLETE = 'wave:allComplete';
+
+export interface WaveStartPayload { wave: number; enemyCount: number }
+export interface WaveCompletePayload { wave: number }
+export interface WaveSpawnPayload { id: string; x: number; y: number; wave: number }
+export interface WaveAllCompletePayload { totalWaves: number }
+
+// ── LevelUp ────────────────────────────────────────────────
+export const LEVELUP_XP = 'levelup:xp';
+export const LEVELUP_LEVELUP = 'levelup:levelup';
+
+export interface LevelUpXpPayload { current: number; required: number; delta: number }
+export interface LevelUpPayload { level: number; previous: number }
+
+// ── StatusEffect ───────────────────────────────────────────
+export const STATUS_APPLY = 'status:apply';
+export const STATUS_STACK = 'status:stack';
+export const STATUS_TICK = 'status:tick';
+export const STATUS_EXPIRE = 'status:expire';
+export const STATUS_IMMUNITY = 'status:immunity';
+
+export interface StatusApplyPayload { name: string; type: string; duration: number; stacks: number }
+export interface StatusStackPayload { name: string; stacks: number }
+export interface StatusTickPayload { name: string; value: number }
+export interface StatusExpirePayload { name: string }
+export interface StatusImmunityPayload { name: string }
+
+// ── EquipmentSlot ──────────────────────────────────────────
+export const EQUIPMENT_EQUIP = 'equipment:equip';
+export const EQUIPMENT_UNEQUIP = 'equipment:unequip';
+export const EQUIPMENT_STATS = 'equipment:stats';
+
+export interface EquipmentPayload { slot: string; item: string }
+export interface EquipmentStatsPayload { stats: Record<string, number> }
+
+// ── EnemyDrop ──────────────────────────────────────────────
+export const DROP_SPAWN = 'drop:spawn';
+
+export interface DropSpawnPayload { id: string; x: number; y: number; loot: string }
+
+// ── SkillTree ──────────────────────────────────────────────
+export const SKILL_UNLOCK = 'skill:unlock';
+export const SKILL_ACTIVATE = 'skill:activate';
+export const SKILL_COOLDOWN = 'skill:cooldown';
+
+export interface SkillPayload { skillId: string; name: string }
+export interface SkillCooldownPayload { skillId: string; remaining: number; total: number }
+
+// ── DialogueSystem ─────────────────────────────────────────
+export const DIALOGUE_START = 'dialogue:start';
+export const DIALOGUE_NODE = 'dialogue:node';
+export const DIALOGUE_CHOICE = 'dialogue:choice';
+export const DIALOGUE_END = 'dialogue:end';
+
+export interface DialogueNodePayload { nodeId: string; speaker: string; text: string }
+export interface DialogueChoicePayload { nodeId: string; choiceIndex: number; text: string }

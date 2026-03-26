@@ -127,6 +127,59 @@ describe('Hazard', () => {
     expect(damageHandler).not.toHaveBeenCalled();
   });
 
+  it('should detect collision when player radius overlaps hazard rect', () => {
+    const { engine, hazard } = setup({
+      hazards: [
+        { x: 100, y: 100, width: 50, height: 50, pattern: 'static' },
+      ],
+    });
+
+    const damageHandler = vi.fn();
+    engine.eventBus.on('collision:damage', damageHandler);
+
+    // Player center at (90, 125) with radius 15 — extends into hazard rect (100-150, 100-150)
+    // Point (90, 125) is outside rect, but circle edge at x=90+15=105 is inside
+    const hit = hazard.checkCollision(90, 125, 15);
+    expect(hit).toBe(true);
+    expect(damageHandler).toHaveBeenCalledOnce();
+  });
+
+  it('should miss when player radius does not reach hazard', () => {
+    const { engine, hazard } = setup({
+      hazards: [
+        { x: 100, y: 100, width: 50, height: 50, pattern: 'static' },
+      ],
+    });
+
+    const damageHandler = vi.fn();
+    engine.eventBus.on('collision:damage', damageHandler);
+
+    // Player center at (80, 125) with radius 15 — edge at x=95, doesn't reach rect start at x=100
+    const hit = hazard.checkCollision(80, 125, 15);
+    expect(hit).toBe(false);
+    expect(damageHandler).not.toHaveBeenCalled();
+  });
+
+  it('should skip hazards with zero or negative dimensions', () => {
+    const { engine, hazard } = setup({
+      hazards: [
+        { x: 100, y: 100, width: 0, height: 50, pattern: 'static' },
+        { x: 200, y: 200, width: -10, height: 50, pattern: 'static' },
+        { x: 300, y: 300, width: 50, height: 0, pattern: 'static' },
+      ],
+    });
+
+    const damageHandler = vi.fn();
+    engine.eventBus.on('collision:damage', damageHandler);
+
+    // Even inside the nominal area, should not trigger for invalid dimensions
+    hazard.checkCollision(100, 125);
+    hazard.checkCollision(200, 225);
+    hazard.checkCollision(300, 300);
+
+    expect(damageHandler).not.toHaveBeenCalled();
+  });
+
   it('should reset hazard states to initial positions', () => {
     const { hazard } = setup({
       hazards: [

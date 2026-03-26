@@ -112,6 +112,12 @@ export class DeviceInput extends BaseModule {
     return { x: this.tiltX, y: this.tiltY };
   }
 
+  reset(): void {
+    this.tiltX = 0;
+    this.tiltY = 0;
+    this.unbindDeviceEvents();
+  }
+
   destroy(): void {
     this.unbindDeviceEvents();
     super.destroy();

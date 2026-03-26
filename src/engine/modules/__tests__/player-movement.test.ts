@@ -138,4 +138,98 @@ describe('PlayerMovement', () => {
 
     expect(pm.getVelocityX()).toBeGreaterThan(0);
   });
+
+  it('should sustain custom discrete event input across holdDuration frames', () => {
+    const { engine, pm } = setup({
+      speed: 300,
+      acceleration: 1000,
+      moveRightEvent: 'go-right',
+      holdDuration: 200,
+    });
+
+    // Fire discrete event once
+    engine.eventBus.emit('go-right');
+    pm.update(16);
+    const vel1 = pm.getVelocityX();
+    expect(vel1).toBeGreaterThan(0);
+
+    // Next frame: input should still be active (within holdDuration)
+    pm.update(16);
+    const vel2 = pm.getVelocityX();
+    // Should still be accelerating, not decelerating
+    expect(vel2).toBeGreaterThanOrEqual(vel1);
+
+    // After holdDuration expires, should start decelerating
+    pm.update(200);
+    const velAfterHold = pm.getVelocityX();
+    pm.update(100);
+    expect(pm.getVelocityX()).toBeLessThan(velAfterHold);
+  });
+
+  // ── Input Lock (for Knockback) ──
+
+  describe('input lock', () => {
+    it('should ignore input when locked', () => {
+      const { engine, pm } = setup();
+
+      pm.lockInput();
+
+      engine.eventBus.emit('input:touch:hold', { side: 'right' });
+      pm.update(16);
+
+      expect(pm.getVelocityX()).toBe(0);
+    });
+
+    it('should resume accepting input when unlocked', () => {
+      const { engine, pm } = setup();
+
+      pm.lockInput();
+      engine.eventBus.emit('input:touch:hold', { side: 'right' });
+      pm.update(16);
+      expect(pm.getVelocityX()).toBe(0);
+
+      pm.unlockInput();
+      engine.eventBus.emit('input:touch:hold', { side: 'right' });
+      pm.update(16);
+
+      expect(pm.getVelocityX()).toBeGreaterThan(0);
+    });
+
+    it('should reset lock state on reset', () => {
+      const { engine, pm } = setup();
+
+      pm.lockInput();
+      pm.reset();
+
+      engine.eventBus.emit('input:touch:hold', { side: 'right' });
+      pm.update(16);
+
+      expect(pm.getVelocityX()).toBeGreaterThan(0);
+    });
+  });
+
+  // ── External Delta (for Moving Platform carry) ──
+
+  describe('external delta', () => {
+    it('should apply external delta to position', () => {
+      const { pm } = setup();
+
+      pm.applyExternalDelta(10);
+
+      expect(pm.getX()).toBe(10);
+    });
+
+    it('should accumulate with normal movement', () => {
+      const { engine, pm } = setup({ speed: 300 });
+
+      // Start moving right
+      engine.eventBus.emit('input:touch:hold', { side: 'right' });
+      pm.update(16);
+      const xAfterMove = pm.getX();
+
+      // Apply external delta on top
+      pm.applyExternalDelta(50);
+      expect(pm.getX()).toBe(xAfterMove + 50);
+    });
+  });
 });

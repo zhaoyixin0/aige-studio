@@ -15,7 +15,7 @@ export class DifficultyRamp extends BaseModule {
 
   private ruleTimers: number[] = [];
   private currentScore = 0;
-  private lastScoreMilestone = 0;
+  private ruleMilestones: number[] = [];
   private warnedMissingTarget = false;
 
   getSchema(): ModuleSchema {
@@ -46,6 +46,7 @@ export class DifficultyRamp extends BaseModule {
 
     const rules: DifficultyRule[] = this.params.rules ?? [];
     this.ruleTimers = rules.map(() => 0);
+    this.ruleMilestones = rules.map(() => 0);
 
     if (this.params.mode === 'score') {
       this.on('scorer:update', (data?: any) => {
@@ -72,12 +73,12 @@ export class DifficultyRamp extends BaseModule {
         }
       }
     } else if (this.params.mode === 'score') {
-      // Check each rule for score milestones
+      // Check each rule independently for score milestones
       for (let i = 0; i < rules.length; i++) {
         const rule = rules[i];
         const milestone = rule.every; // "every" is a score milestone
-        while (this.currentScore >= this.lastScoreMilestone + milestone) {
-          this.lastScoreMilestone += milestone;
+        while (this.currentScore >= this.ruleMilestones[i] + milestone) {
+          this.ruleMilestones[i] += milestone;
           this.applyRule(rule);
         }
       }
@@ -95,7 +96,7 @@ export class DifficultyRamp extends BaseModule {
     }
 
     const targetParams = target.getParams();
-    let currentValue = targetParams[rule.field];
+    let currentValue = getNestedValue(targetParams, rule.field);
 
     if (typeof currentValue !== 'number') return;
 
@@ -114,7 +115,9 @@ export class DifficultyRamp extends BaseModule {
       currentValue = Math.min(rule.max, currentValue);
     }
 
-    target.configure({ [rule.field]: currentValue });
+    // Support dot-path: build update that preserves sibling keys
+    const update = buildNestedUpdate(targetParams, rule.field, currentValue);
+    target.configure(update);
 
     this.emit('difficulty:update', {
       field: rule.field,
@@ -125,8 +128,44 @@ export class DifficultyRamp extends BaseModule {
 
   reset(): void {
     this.ruleTimers = (this.params.rules ?? []).map(() => 0);
+    this.ruleMilestones = (this.params.rules ?? []).map(() => 0);
     this.currentScore = 0;
-    this.lastScoreMilestone = 0;
     this.warnedMissingTarget = false;
   }
+}
+
+/** Read a value from a nested object using dot-path (e.g. "speed.min") */
+function getNestedValue(obj: Record<string, any>, path: string): unknown {
+  const keys = path.split('.');
+  let current: any = obj;
+  for (const key of keys) {
+    if (current == null || typeof current !== 'object') return undefined;
+    current = current[key];
+  }
+  return current;
+}
+
+/** Build update object preserving sibling keys for nested paths.
+ *  "frequency", 0.5 → { frequency: 0.5 }
+ *  "speed.min", 150 (with existing speed: {min:100, max:200}) → { speed: {min:150, max:200} }
+ */
+function buildNestedUpdate(
+  existingParams: Record<string, any>,
+  path: string,
+  value: number,
+): Record<string, any> {
+  const keys = path.split('.');
+  if (keys.length === 1) return { [keys[0]]: value };
+
+  if (keys.length > 2) {
+    console.warn(`[DifficultyRamp] Dot-path deeper than 2 levels not supported: "${path}". Only top.leaf is allowed.`);
+  }
+
+  // For dot-path, spread the existing sub-object and override the leaf key
+  const topKey = keys[0];
+  const leafKey = keys[keys.length - 1];
+  const existing = existingParams[topKey];
+  const base = typeof existing === 'object' && existing !== null ? { ...existing } : {};
+  base[leafKey] = value;
+  return { [topKey]: base };
 }

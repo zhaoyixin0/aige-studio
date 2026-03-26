@@ -52,4 +52,20 @@ describe('PowerUp', () => {
     expect(active).toHaveLength(1);
     expect(active[0].duration).toBe(3000);
   });
+
+  it('should handle invalid duration gracefully', () => {
+    const { powerUp } = setup();
+
+    // NaN duration should not crash or create invalid state
+    powerUp.activate('speed', NaN);
+    expect(powerUp.isActive('speed')).toBe(false);
+
+    // Zero duration should not activate
+    powerUp.activate('speed', 0);
+    expect(powerUp.isActive('speed')).toBe(false);
+
+    // Negative duration should not activate
+    powerUp.activate('speed', -100);
+    expect(powerUp.isActive('speed')).toBe(false);
+  });
 });

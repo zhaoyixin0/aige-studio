@@ -16,7 +16,7 @@ AIGE Studio is a modular social platform game creation tool. Users create games 
 - **AI:** Claude API (free-form chat), Gemini Imagen 4 (asset generation)
 - **Image Processing:** @imgly/background-removal (ONNX WASM, browser-side)
 - **Storage:** IndexedDB (asset library via idb-keyval)
-- **Testing:** Vitest (939+ tests)
+- **Testing:** Vitest (1120+ tests)
 - **Tracking:** MediaPipe (face/hand/body, optional)
 
 ## Architecture
@@ -38,7 +38,7 @@ Export (Web HTML / .apjs)
 
 ### Engine Core
 - `src/engine/core/` — Engine, EventBus, ConfigLoader, AutoWirer, types
-- `src/engine/modules/` — 46 game modules (6 input, 13 mechanic, 5 feedback, 11 extended, 16 platformer batch 1)
+- `src/engine/modules/` — 60 game modules (6 input, 13 mechanic, 5 feedback, 11 extended, 16 platformer batch 1, 7 shooter batch 2, 6 RPG batch 3 — but only 2 dummy)
 - `src/engine/renderer/` — PixiJS rendering (emoji themes, particles, float text, sound synth, HUD)
 - `src/engine/tracking/` — MediaPipe wrappers (face, hand, body)
 
@@ -113,7 +113,7 @@ Wizard and Mode B work WITHOUT any API keys.
 npm run dev          # Dev server
 npm run dev -- --host  # Dev server + LAN access
 npm run build        # Production build
-npx vitest run       # Run all tests (938+)
+npx vitest run       # Run all tests (1120+)
 npx tsc --noEmit     # Type check
 ```
 
@@ -161,7 +161,7 @@ Previous prototype at `C:\Users\yixin\Downloads\secret demo\index.html` — sing
 27. HTML nesting fix (button-in-button → div with role=button)
 
 ### 2026-03-24
-28. BaseModule unified gameflowPaused mechanism — all 46 modules coordinate with GameFlow state
+28. BaseModule unified gameflowPaused mechanism — all modules coordinate with GameFlow state
 29. Comprehensive module coordination fixes: event names, collision radii, scorer configurability, restart state
 30. Platformer rendering: platforms, collectibles, hazards, checkpoints, camera follow
 31. Runner/Rhythm/World-AR HUD rendering (15/15 game types fully rendered)
@@ -196,6 +196,12 @@ Previous prototype at `C:\Users\yixin\Downloads\secret demo\index.html` — sing
 58. Style/theme change triggers asset regeneration (clears src to force re-generate)
 59. Collision module added to platformer preset, resolving dependency warnings
 
+### 2026-03-25 (continued)
+60. Platform physics integration — Gravity surface system, AutoWirer 5 new rules, PlayerMovement lock/delta, Dash freeze
+61. Batch 2: 7 shooter modules (Health, Shield, Projectile, BulletPattern, Aim, EnemyAI, WaveSpawner)
+62. Batch 3: 6 action-RPG modules (LevelUp, StatusEffect, EquipmentSlot, EnemyDrop, SkillTree, DialogueSystem)
+63. 157 new tests (963 → 1120), TDD methodology for all new modules
+
 ## Game Flow
 ```
 Start Screen ("click to start")
@@ -211,8 +217,8 @@ Restart → Countdown...
 
 ## Module Expansion Plan (3 batches)
 - **Batch 1 (done):** 16 platformer modules — physics, movement, platforms, collectibles, camera
-- **Batch 2 (planned):** ~7 shooter/bullet modules — Projectile, AimControl, EnemyAI, Health, WaveManager, BulletPattern, Shield
-- **Batch 3 (planned):** ~6 action-RPG modules — MeleeAttack, Patrol, ResourcePool, LootDrop, StatusEffect, DialogTrigger
+- **Batch 2 (done):** 7 shooter modules — Projectile, Aim, EnemyAI, Health, WaveSpawner, BulletPattern, Shield
+- **Batch 3 (done):** 6 action-RPG modules — LevelUp, StatusEffect, EquipmentSlot, EnemyDrop, SkillTree, DialogueSystem
 - Design docs: `docs/plans/2026-03-23-module-expansion-design.md`
 
 ## Diagnostics System
@@ -223,6 +229,7 @@ Restart → Countdown...
 ## Known Issues / Next Steps
 - Gemini API key exposed in frontend (fine for internal use, need proxy for public)
 - Comprehensive mobile touch testing needed
-- Batch 2 & 3 module expansion pending
-- Platformer physics: platform collision with player needs full integration (currently visual-only)
+- Platformer physics: platform-gravity surface wiring complete, renderer integration pending
+- Shooter/RPG module rendering in PixiJS not yet implemented
+- Knowledge skill files need updating for 13 new modules
 - GuidedCreator conversation could benefit from streaming responses

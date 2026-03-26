@@ -51,8 +51,10 @@ export class ComboSystem extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    this.on('scorer:update', () => {
-      this.onHit();
+    this.on('scorer:update', (data?: any) => {
+      if (data && typeof data.delta === 'number' && data.delta > 0) {
+        this.onHit();
+      }
     });
   }
 

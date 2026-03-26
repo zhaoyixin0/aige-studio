@@ -47,6 +47,9 @@ export class PowerUp extends BaseModule {
   }
 
   activate(type: string, duration: number, multiplier?: number): void {
+    // Validate duration
+    if (typeof duration !== 'number' || !Number.isFinite(duration) || duration <= 0) return;
+
     // Remove existing of same type
     this.activePowerUps = this.activePowerUps.filter((p) => p.type !== type);
 

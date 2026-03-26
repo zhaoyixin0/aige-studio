@@ -9,6 +9,8 @@ export class PlayerMovement extends BaseModule {
   private direction: -1 | 0 | 1 = 0;
   private inputActive = false;
   private wasStopped = true;
+  private holdTimer = 0;
+  private inputLocked = false;
 
   getSchema(): ModuleSchema {
     return {
@@ -50,6 +52,15 @@ export class PlayerMovement extends BaseModule {
         type: 'string',
         label: 'Continuous Event',
       },
+      holdDuration: {
+        type: 'range',
+        label: 'Hold Duration (ms)',
+        default: 0,
+        min: 0,
+        max: 1000,
+        step: 10,
+        unit: 'ms',
+      },
     };
   }
 
@@ -58,6 +69,7 @@ export class PlayerMovement extends BaseModule {
 
     // Touch hold: left half → move left, right half → move right
     this.on('input:touch:hold', (data?: any) => {
+      if (this.inputLocked) return;
       if (data?.side === 'left') {
         this.direction = -1;
         this.inputActive = true;
@@ -74,6 +86,7 @@ export class PlayerMovement extends BaseModule {
 
     // Swipe also works for quick direction changes
     this.on('input:touch:swipe', (data?: any) => {
+      if (this.inputLocked) return;
       if (data?.direction === 'left') {
         this.direction = -1;
         this.inputActive = true;
@@ -86,16 +99,21 @@ export class PlayerMovement extends BaseModule {
     // Support custom discrete events (for non-touch inputs like hand gesture)
     const moveLeftEvent = this.params.moveLeftEvent;
     const moveRightEvent = this.params.moveRightEvent;
+    const holdDuration = this.params.holdDuration ?? 0;
     if (moveLeftEvent && !moveLeftEvent.startsWith('input:touch:')) {
       this.on(moveLeftEvent, () => {
+        if (this.inputLocked) return;
         this.direction = -1;
         this.inputActive = true;
+        if (holdDuration > 0) this.holdTimer = holdDuration;
       });
     }
     if (moveRightEvent && !moveRightEvent.startsWith('input:touch:')) {
       this.on(moveRightEvent, () => {
+        if (this.inputLocked) return;
         this.direction = 1;
         this.inputActive = true;
+        if (holdDuration > 0) this.holdTimer = holdDuration;
       });
     }
 
@@ -138,8 +156,17 @@ export class PlayerMovement extends BaseModule {
         this.velocityX += Math.sign(diff) * acceleration * dtSec;
       }
 
-      // Consume input — one-shot per event, not continuous hold
-      this.inputActive = false;
+      // Hold timer: sustain input for holdDuration ms after discrete event
+      if (this.holdTimer > 0) {
+        this.holdTimer -= dt;
+        if (this.holdTimer <= 0) {
+          this.holdTimer = 0;
+          this.inputActive = false;
+        }
+      } else {
+        // Consume input — one-shot per event, not continuous hold
+        this.inputActive = false;
+      }
     } else {
       // Decelerate toward 0
       if (this.velocityX > 0) {
@@ -179,11 +206,26 @@ export class PlayerMovement extends BaseModule {
     return this.velocityX;
   }
 
+  lockInput(): void {
+    this.inputLocked = true;
+    this.inputActive = false;
+  }
+
+  unlockInput(): void {
+    this.inputLocked = false;
+  }
+
+  applyExternalDelta(dx: number): void {
+    this.x += dx;
+  }
+
   reset(): void {
     this.x = 0;
     this.velocityX = 0;
     this.direction = 0;
     this.inputActive = false;
     this.wasStopped = true;
+    this.holdTimer = 0;
+    this.inputLocked = false;
   }
 }

@@ -62,6 +62,7 @@ export class QuizEngine extends BaseModule {
 
   answer(optionIndex: number): void {
     if (!this.started || this.finished) return;
+    if (typeof optionIndex !== 'number' || optionIndex < 0) return;
 
     const questions: QuizQuestion[] = this.params.questions ?? [];
     if (this.currentIndex >= questions.length) return;

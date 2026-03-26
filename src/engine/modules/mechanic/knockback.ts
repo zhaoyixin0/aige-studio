@@ -55,9 +55,20 @@ export class Knockback extends BaseModule {
   private activate(data?: any): void {
     const force = this.params.force ?? 300;
 
-    // Compute direction from event data
-    const dx = data?.x ?? 0;
-    const dy = data?.y ?? 0;
+    // Compute direction: push player away from hazard
+    let dx = 0;
+    let dy = 0;
+
+    if (data?.playerX != null && data?.hazardX != null) {
+      // Best: explicit player and hazard positions
+      dx = data.playerX - data.hazardX;
+      dy = (data.playerY ?? 0) - (data.hazardY ?? 0);
+    } else if (data?.x != null) {
+      // Fallback: use collision point as rough direction from origin
+      dx = data.x;
+      dy = data.y ?? 0;
+    }
+
     const magnitude = Math.sqrt(dx * dx + dy * dy);
 
     if (magnitude > 0) {
