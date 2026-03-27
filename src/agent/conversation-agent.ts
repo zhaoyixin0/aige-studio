@@ -11,6 +11,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { GameConfig, ModuleConfig } from '@/engine/core/index.ts';
 import { ALL_GAME_TYPES, getGamePreset, getModuleParams } from './game-presets.ts';
+import { DEFAULT_THEME_FOR_GAME } from './wizard.ts';
 
 /* ------------------------------------------------------------------ */
 /*  Public types                                                       */
@@ -82,13 +83,8 @@ const GAME_TYPE_DESCRIPTIONS: Record<string, string> = {
   'action-rpg':   '动作RPG — 射击敌人、升级角色、收集装备',
 };
 
-const DEFAULT_THEME: Record<string, string> = {
-  catch: 'fruit', dodge: 'space', shooting: 'space', tap: 'candy',
-  runner: 'ocean', quiz: 'fruit', 'random-wheel': 'candy',
-  expression: 'fruit', gesture: 'fruit', rhythm: 'candy',
-  puzzle: 'ocean', 'dress-up': 'candy', 'world-ar': 'space',
-  narrative: 'halloween', platformer: 'fruit', 'action-rpg': 'space',
-};
+// Use wizard.ts DEFAULT_THEME_FOR_GAME as single source of truth
+const DEFAULT_THEME = DEFAULT_THEME_FOR_GAME;
 
 const SYSTEM_PROMPT = `你是 AIGE Studio 的游戏创建对话助手。用户通过自然语言描述想要的游戏，你直接创建或修改。
 
@@ -299,6 +295,105 @@ const KEYWORD_MAP: Array<{ pattern: RegExp; gameType: string }> = [
   { pattern: /平台|跳跃|闯关|mario|马里奥/i, gameType: 'platformer' },
   { pattern: /RPG|角色扮演|升级|刷怪|打怪/i, gameType: 'action-rpg' },
 ];
+
+/* ------------------------------------------------------------------ */
+/*  Pure function: apply config changes (immutable)                    */
+/* ------------------------------------------------------------------ */
+
+export interface ConfigChange {
+  action: string;
+  module_type?: string;
+  theme?: string;
+  art_style?: string;
+  duration?: number;
+  param_key?: string;
+  param_value?: unknown;
+}
+
+export function applyConfigChanges(
+  config: GameConfig,
+  changes: ConfigChange[],
+  inferGameType?: (config: GameConfig) => string,
+): GameConfig {
+  // Deep clone — the returned object is a completely independent copy
+  const updated: GameConfig = JSON.parse(JSON.stringify(config));
+
+  for (const change of changes) {
+    switch (change.action) {
+      case 'add_module': {
+        if (change.module_type && !updated.modules.some((m) => m.type === change.module_type)) {
+          const gameType = inferGameType?.(updated) ?? 'catch';
+          const count = updated.modules.filter((m) => m.type === change.module_type).length + 1;
+          updated.modules = [
+            ...updated.modules,
+            {
+              id: `${change.module_type!.toLowerCase()}_${count}`,
+              type: change.module_type!,
+              enabled: true,
+              params: getModuleParams(gameType, change.module_type!),
+            },
+          ];
+        }
+        break;
+      }
+
+      case 'remove_module': {
+        if (change.module_type) {
+          updated.modules = updated.modules.filter((m) => m.type !== change.module_type);
+        }
+        break;
+      }
+
+      case 'set_theme': {
+        if (change.theme) {
+          updated.meta = { ...updated.meta, theme: change.theme };
+          const clearedAssets: Record<string, any> = {};
+          for (const [key, entry] of Object.entries(updated.assets)) {
+            clearedAssets[key] = { ...entry, src: '' };
+          }
+          updated.assets = clearedAssets;
+        }
+        break;
+      }
+
+      case 'set_art_style': {
+        if (change.art_style) {
+          updated.meta = { ...updated.meta, artStyle: change.art_style };
+          const clearedAssets: Record<string, any> = {};
+          for (const [key, entry] of Object.entries(updated.assets)) {
+            clearedAssets[key] = { ...entry, src: '' };
+          }
+          updated.assets = clearedAssets;
+        }
+        break;
+      }
+
+      case 'set_duration': {
+        if (change.duration !== undefined) {
+          updated.modules = updated.modules.map((m) =>
+            m.type === 'Timer'
+              ? { ...m, params: { ...m.params, duration: change.duration } }
+              : m,
+          );
+        }
+        break;
+      }
+
+      case 'set_param': {
+        if (change.module_type && change.param_key !== undefined) {
+          updated.modules = updated.modules.map((m) =>
+            m.type === change.module_type
+              ? { ...m, params: { ...m.params, [change.param_key!]: change.param_value } }
+              : m,
+          );
+        }
+        break;
+      }
+    }
+  }
+
+  return updated;
+}
 
 /* ------------------------------------------------------------------ */
 /*  ConversationAgent                                                  */
@@ -573,93 +668,11 @@ export class ConversationAgent {
     };
   }
 
-  /* ---------------------------------------------------------------- */
-  /*  Private: apply modify_game changes to an existing config         */
-  /* ---------------------------------------------------------------- */
-
   private applyChanges(
     config: GameConfig,
-    changes: Array<{
-      action: string;
-      module_type?: string;
-      theme?: string;
-      art_style?: string;
-      duration?: number;
-      param_key?: string;
-      param_value?: unknown;
-    }>,
+    changes: ConfigChange[],
   ): GameConfig {
-    // Deep clone
-    const updated: GameConfig = JSON.parse(JSON.stringify(config));
-
-    for (const change of changes) {
-      switch (change.action) {
-        case 'add_module': {
-          if (change.module_type && !updated.modules.some((m) => m.type === change.module_type)) {
-            const gameType = this.inferGameType(updated);
-            const count = updated.modules.filter((m) => m.type === change.module_type).length + 1;
-            updated.modules.push({
-              id: `${change.module_type!.toLowerCase()}_${count}`,
-              type: change.module_type!,
-              enabled: true,
-              params: getModuleParams(gameType, change.module_type!),
-            });
-          }
-          break;
-        }
-
-        case 'remove_module': {
-          if (change.module_type) {
-            updated.modules = updated.modules.filter((m) => m.type !== change.module_type);
-          }
-          break;
-        }
-
-        case 'set_theme': {
-          if (change.theme) {
-            updated.meta.theme = change.theme;
-            // Clear all sprite assets to force regeneration with new theme
-            for (const entry of Object.values(updated.assets)) {
-              entry.src = '';
-            }
-          }
-          break;
-        }
-
-        case 'set_art_style': {
-          if (change.art_style) {
-            updated.meta.artStyle = change.art_style;
-            // Clear all assets to force regeneration with new style
-            for (const entry of Object.values(updated.assets)) {
-              entry.src = '';
-            }
-          }
-          break;
-        }
-
-        case 'set_duration': {
-          if (change.duration !== undefined) {
-            const timerMod = updated.modules.find((m) => m.type === 'Timer');
-            if (timerMod) {
-              timerMod.params.duration = change.duration;
-            }
-          }
-          break;
-        }
-
-        case 'set_param': {
-          if (change.module_type && change.param_key !== undefined) {
-            const mod = updated.modules.find((m) => m.type === change.module_type);
-            if (mod) {
-              mod.params[change.param_key] = change.param_value;
-            }
-          }
-          break;
-        }
-      }
-    }
-
-    return updated;
+    return applyConfigChanges(config, changes, (c) => this.inferGameType(c));
   }
 
   /* ---------------------------------------------------------------- */

@@ -76,6 +76,13 @@ export class Projectile extends BaseModule {
         min: 5,
         max: 200,
       },
+      collisionRadius: {
+        type: 'range',
+        label: 'Collision Radius',
+        default: 8,
+        min: 2,
+        max: 50,
+      },
     };
   }
 

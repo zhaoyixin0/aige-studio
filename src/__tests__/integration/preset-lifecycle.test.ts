@@ -5,7 +5,7 @@ import { createModuleRegistry } from '@/engine/module-setup';
 import { GameWizard } from '@/agent/wizard';
 
 describe('Preset Lifecycle', () => {
-  const GAME_TYPES = ['catch', 'dodge', 'tap', 'shooting', 'quiz', 'runner', 'expression', 'random-wheel', 'gesture', 'rhythm', 'puzzle', 'dress-up', 'world-ar', 'narrative'];
+  const GAME_TYPES = ['catch', 'dodge', 'tap', 'shooting', 'quiz', 'runner', 'expression', 'random-wheel', 'gesture', 'rhythm', 'puzzle', 'dress-up', 'world-ar', 'narrative', 'platformer', 'action-rpg'];
 
   for (const gameType of GAME_TYPES) {
     it(`should load ${gameType} preset into engine without errors`, () => {
@@ -82,5 +82,21 @@ describe('Preset Lifecycle', () => {
     const scorer = config.modules.find(m => m.type === 'Scorer');
     expect(scorer).toBeDefined();
     expect((scorer!.params as any).perHit).toBe(5);
+  });
+
+  it('action-rpg preset should have combat + RPG modules', () => {
+    const wizard = new GameWizard();
+    wizard.start();
+    let result = wizard.answer('action-rpg');
+    while (result.question) {
+      result = wizard.answer(result.question.choices[0].id);
+    }
+    const config = result.config!;
+    const moduleTypes = config.modules.map(m => m.type);
+    expect(moduleTypes).toContain('Projectile');
+    expect(moduleTypes).toContain('EnemyAI');
+    expect(moduleTypes).toContain('WaveSpawner');
+    expect(moduleTypes).toContain('LevelUp');
+    expect(moduleTypes).toContain('EnemyDrop');
   });
 });

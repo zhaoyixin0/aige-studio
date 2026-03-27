@@ -589,6 +589,8 @@ const PRESETS: Record<GameType, GamePreset> = {
     SkillTree:      { skills: [], pointsPerLevel: 1, activateEvent: 'input:touch:doubleTap' },
     Shield:         { maxCharges: 2, rechargeCooldown: 8000, damageEvent: 'collision:damage' },
     Collision:      { rules: [{ a: 'projectiles', b: 'enemies', event: 'hit', destroy: ['a'] }, { a: 'player', b: 'enemies', event: 'damage' }] },
+    DifficultyRamp: { target: 'wavespawner_1', mode: 'time', rules: [{ every: 30, field: 'enemiesPerWave', increase: 1, max: 10 }] },
+    ComboSystem:    { window: 2000, multiplier: [1, 1.5, 2, 3], resetOnMiss: true },
     Scorer:         { perHit: 10 },
     Lives:          { count: 3 },
     IFrames:        { duration: 1000 },

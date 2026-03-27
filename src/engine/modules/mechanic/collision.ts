@@ -16,10 +16,13 @@ interface CollisionRule {
   destroy?: string[];
 }
 
+export type PreUpdateHook = (dt: number) => void;
+
 export class Collision extends BaseModule {
   readonly type = 'Collision';
 
   private objects = new Map<string, CollisionObject>();
+  private preUpdateHooks: PreUpdateHook[] = [];
 
   getSchema(): ModuleSchema {
     return {
@@ -71,8 +74,17 @@ export class Collision extends BaseModule {
     this.objects.delete(id);
   }
 
+  addPreUpdateHook(hook: PreUpdateHook): void {
+    this.preUpdateHooks = [...this.preUpdateHooks, hook];
+  }
+
   update(_dt: number): void {
     if (this.gameflowPaused) return;
+
+    // Run all pre-update hooks (position sync, etc.) before collision checks
+    for (const hook of this.preUpdateHooks) {
+      hook(_dt);
+    }
 
     const rules: CollisionRule[] = this.params.rules ?? [];
     const toDestroy = new Set<string>();
@@ -133,5 +145,6 @@ export class Collision extends BaseModule {
 
   reset(): void {
     this.objects.clear();
+    this.preUpdateHooks = [];
   }
 }

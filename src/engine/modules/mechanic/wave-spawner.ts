@@ -24,6 +24,7 @@ export class WaveSpawner extends BaseModule {
       spawnAreaX: { type: 'range', label: 'Spawn Area X', default: 0, min: 0, max: 2000 },
       spawnAreaWidth: { type: 'range', label: 'Spawn Area Width', default: 800, min: 100, max: 2000 },
       spawnY: { type: 'range', label: 'Spawn Y', default: 0, min: 0, max: 2000 },
+      enemyCollisionRadius: { type: 'range', label: 'Enemy Collision Radius', default: 24, min: 8, max: 100 },
     };
   }
 

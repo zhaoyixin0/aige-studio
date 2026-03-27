@@ -44,15 +44,13 @@ const WIRING_RULES: WiringRule[] = [
         }
       });
 
-      // Sync spawned object positions with collision each frame.
+      // Sync spawned object positions with collision each frame via pre-update hook.
       // Spawner moves objects in its update() but doesn't notify Collision.
-      const originalUpdate = collision.update.bind(collision);
-      collision.update = (dt: number) => {
+      collision.addPreUpdateHook(() => {
         for (const obj of spawner.getObjects()) {
           collision.updateObject(obj.id, { x: obj.x, y: obj.y });
         }
-        originalUpdate(dt);
-      };
+      });
     },
   },
   {
@@ -197,12 +195,14 @@ const WIRING_RULES: WiringRule[] = [
       const projectile = modules.get('Projectile') as any;
       const layer = projectile.getParams?.().layer ?? 'projectiles';
 
+      const projectileRadius = projectile.getParams?.().collisionRadius ?? 8;
+
       engine.eventBus.on('projectile:fire', (data?: any) => {
         if (data?.id != null) {
           collision.registerObject(data.id, layer, {
             x: data.x ?? 0,
             y: data.y ?? 0,
-            radius: 8,
+            radius: projectileRadius,
           });
         }
       });
@@ -213,15 +213,12 @@ const WIRING_RULES: WiringRule[] = [
         }
       });
 
-      // Sync projectile positions with collision each frame.
-      // Wrap Collision.update so positions are current before collision checks.
-      const originalUpdate = collision.update.bind(collision);
-      collision.update = (dt: number) => {
+      // Sync projectile positions with collision each frame via pre-update hook.
+      collision.addPreUpdateHook(() => {
         for (const p of projectile.getActiveProjectiles?.() ?? []) {
           collision.updateObject(p.id, { x: p.x, y: p.y });
         }
-        originalUpdate(dt);
-      };
+      });
     },
   },
   {
@@ -229,13 +226,15 @@ const WIRING_RULES: WiringRule[] = [
     requires: ['WaveSpawner', 'Collision'],
     setup: (engine, modules) => {
       const collision = modules.get('Collision') as Collision;
+      const waveSpawner = modules.get('WaveSpawner') as any;
+      const enemyRadius = waveSpawner.getParams?.().enemyCollisionRadius ?? 24;
 
       engine.eventBus.on('wave:spawn', (data?: any) => {
         if (data?.id != null) {
           collision.registerObject(data.id, 'enemies', {
             x: data.x ?? 0,
             y: data.y ?? 0,
-            radius: 24,
+            radius: enemyRadius,
           });
         }
       });

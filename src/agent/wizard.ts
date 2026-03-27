@@ -332,6 +332,29 @@ const GAME_TYPES: GameTypeDef[] = [
     metaName: '平台跳跃游戏',
     metaDescription: '跳跃闯关，收集金币，躲避障碍',
   },
+  {
+    id: 'action-rpg',
+    label: '动作RPG',
+    emoji: '\u2694\uFE0F',
+    description: '像暗黑破坏神 — 射击敌人、升级角色、收集装备',
+    requiredModules: ['GameFlow', 'PlayerMovement', 'Gravity', 'Jump', 'Projectile', 'Aim', 'EnemyAI', 'WaveSpawner', 'Health', 'LevelUp', 'EnemyDrop', 'Collision', 'Scorer', 'Lives', 'UIOverlay', 'ResultScreen'],
+    inputOptions: ['TouchInput', 'FaceInput'],
+    optionalModules: [
+      { type: 'Timer', label: '倒计时', description: '限定游戏时长' },
+      { type: 'StatusEffect', label: '状态效果', description: '中毒、燃烧等持续效果' },
+      { type: 'EquipmentSlot', label: '装备系统', description: '穿戴和更换装备' },
+      { type: 'SkillTree', label: '技能树', description: '解锁和升级技能' },
+      { type: 'Shield', label: '护盾', description: '抵挡敌人攻击' },
+      { type: 'IFrames', label: '无敌帧', description: '受伤后短暂无敌' },
+      { type: 'Knockback', label: '击退', description: '受伤后被击退' },
+      { type: 'DifficultyRamp', label: '难度递增', description: '随时间增加敌人数量和强度' },
+      { type: 'ComboSystem', label: '连击系统', description: '连续击杀获得分数加成' },
+      { type: 'ParticleVFX', label: '粒子特效', description: '击中和爆炸效果' },
+      { type: 'SoundFX', label: '音效', description: '战斗和升级音效' },
+    ],
+    metaName: '动作RPG游戏',
+    metaDescription: '射击敌人，升级角色，收集装备',
+  },
 ];
 
 export { GAME_TYPES };
@@ -428,6 +451,7 @@ export const DEFAULT_THEME_FOR_GAME: Record<string, string> = {
   'world-ar': 'space',
   narrative: 'halloween',
   platformer: 'candy',
+  'action-rpg': 'space',
 };
 
 /* ------------------------------------------------------------------ */
