@@ -1,0 +1,4 @@
+- [Developer Profile](user_profile.md) — yixin: solo dev, pain points with Claude repeated mistakes and isolated debugging
+- [Debugging Style](feedback_debugging_style.md) — find root causes across modules, don't patch one-by-one
+- [Solo Dev Workflow](feedback_solo_dev_workflow.md) — no PR needed, push to branch, merge when stable
+- [Nano Banana Pro Migration](project_nano_banana_pro.md) — image gen upgraded from Imagen 4 to Nano Banana Pro on 2026-03-27
