@@ -5,8 +5,12 @@ import { FaceTracker } from '@/engine/tracking/face-tracker.ts';
  * Hook that acquires the user-facing camera stream, creates a hidden <video> element,
  * and initialises a FaceTracker.
  *
- * Returns refs to the video element and tracker, plus a `ready` flag that becomes
- * true once both the camera stream and tracker initialisation have completed.
+ * Strategy A: Requests 9:16 portrait resolution (ideal 720x1280) to match the game canvas.
+ * If the camera doesn't support 9:16, the actual resolution is exposed via videoDimensionsRef
+ * so downstream consumers can apply "cover" scaling (Strategy B fallback).
+ *
+ * Returns refs to the video element, tracker, actual video dimensions, plus a `ready` flag
+ * that becomes true once both the camera stream and tracker initialisation have completed.
  *
  * Cleanup: stops all media stream tracks and destroys the tracker on unmount.
  */
@@ -14,16 +18,22 @@ export function useCamera() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const trackerRef = useRef<FaceTracker | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const videoDimensionsRef = useRef<{ width: number; height: number } | null>(null);
   const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
     async function setup() {
       try {
-        // Request user-facing camera
+        // Strategy A: Request 9:16 portrait resolution to match game canvas
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'user', width: 640, height: 480 },
+          video: {
+            facingMode: 'user',
+            width: { ideal: 720 },
+            height: { ideal: 1280 },
+          },
           audio: false,
         });
 
@@ -43,6 +53,38 @@ export function useCamera() {
         video.style.display = 'none';
         document.body.appendChild(video);
         await video.play();
+
+        // Wait for actual dimensions to be available
+        if (video.videoWidth === 0) {
+          await new Promise<void>((resolve, reject) => {
+            if (video.videoWidth > 0) { resolve(); return; }
+            const onMeta = () => {
+              video.removeEventListener('loadedmetadata', onMeta);
+              video.removeEventListener('error', onErr);
+              resolve();
+            };
+            const onErr = () => {
+              video.removeEventListener('loadedmetadata', onMeta);
+              video.removeEventListener('error', onErr);
+              reject(new Error('Video metadata load failed'));
+            };
+            video.addEventListener('loadedmetadata', onMeta);
+            video.addEventListener('error', onErr);
+          });
+        }
+
+        if (cancelled) {
+          stream.getTracks().forEach((t) => t.stop());
+          video.remove();
+          return;
+        }
+
+        // Expose actual video dimensions for Strategy B fallback
+        videoDimensionsRef.current = {
+          width: video.videoWidth,
+          height: video.videoHeight,
+        };
+
         videoRef.current = video;
 
         // Initialise face tracker
@@ -58,8 +100,9 @@ export function useCamera() {
 
         trackerRef.current = tracker;
         setReady(true);
-      } catch (err) {
-        console.warn('Camera/FaceTracker setup failed:', err);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Camera/FaceTracker setup failed';
+        setError(message);
       }
     }
 
@@ -88,9 +131,10 @@ export function useCamera() {
         trackerRef.current = null;
       }
 
+      videoDimensionsRef.current = null;
       setReady(false);
     };
   }, []);
 
-  return { videoRef, trackerRef, ready };
+  return { videoRef, trackerRef, videoDimensionsRef, ready, error };
 }

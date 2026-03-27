@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { PreviewToolbar } from './preview-toolbar.tsx';
-import { useEngineContext } from '@/app/hooks/use-engine.ts';
+import { useEngineContext, CANVAS_WIDTH, CANVAS_HEIGHT } from '@/app/hooks/use-engine.ts';
 import { useCamera } from '@/app/hooks/use-camera.ts';
 import { useGameLoop } from '@/app/hooks/use-game-loop.ts';
 import { useGameStore } from '@/store/game-store.ts';
@@ -27,8 +27,8 @@ export function PreviewCanvas() {
   const previewMode = useEditorStore(selectPreviewMode);
   const setPreviewMode = useEditorStore(selectSetPreviewMode);
 
-  // Acquire camera + face tracker
-  const { videoRef, trackerRef, ready: cameraReady } = useCamera();
+  // Acquire camera + face tracker + actual video dimensions
+  const { videoRef, trackerRef, videoDimensionsRef, ready: cameraReady } = useCamera();
 
   // Set up render loop (tracking + PixiJS rendering)
   const { start: startLoop, stop: stopLoop } = useGameLoop({
@@ -36,6 +36,7 @@ export function PreviewCanvas() {
     rendererRef,
     trackerRef,
     videoRef,
+    videoDimensionsRef,
   });
 
   // Start/stop the render loop when the engine is ready
@@ -55,12 +56,15 @@ export function PreviewCanvas() {
     const video = videoRef.current;
     if (!renderer || !video) return;
 
+    const dims = videoDimensionsRef.current;
     const cameraLayer = new CameraLayer(renderer.getCameraLayer());
-    cameraLayer.setVideoElement(video, 1080, 1920);
+    cameraLayer.setVideoElement(video, CANVAS_WIDTH, CANVAS_HEIGHT, dims?.width, dims?.height);
 
     return () => {
       cameraLayer.destroy();
     };
+    // videoDimensionsRef is a stable ref; its .current is guaranteed to be populated
+    // before cameraReady becomes true (use-camera.ts sets dimensions before setReady).
   }, [engineReady, cameraReady, rendererRef, videoRef]);
 
   // Subscribe to structural config changes only (add/remove/toggle modules).

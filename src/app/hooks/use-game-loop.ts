@@ -10,6 +10,7 @@ export interface UseGameLoopOptions {
   rendererRef: RefObject<PixiRenderer | null>;
   trackerRef?: RefObject<FaceTracker | null>;
   videoRef?: RefObject<HTMLVideoElement | null>;
+  videoDimensionsRef?: RefObject<{ width: number; height: number } | null>;
 }
 
 /**
@@ -22,7 +23,7 @@ export interface UseGameLoopOptions {
  *
  * Returns start/stop controls.
  */
-export function useGameLoop({ engineRef, rendererRef, trackerRef, videoRef }: UseGameLoopOptions) {
+export function useGameLoop({ engineRef, rendererRef, trackerRef, videoRef, videoDimensionsRef }: UseGameLoopOptions) {
   const rafRef = useRef<number | null>(null);
   const runningRef = useRef(false);
   const lastTimeRef = useRef(0);
@@ -38,11 +39,21 @@ export function useGameLoop({ engineRef, rendererRef, trackerRef, videoRef }: Us
       const engine = engineRef.current;
       const renderer = rendererRef.current;
 
+      // Feed video dimensions to FaceInput modules (before tracking, so remapping is ready)
+      if (engine) {
+        const dims = videoDimensionsRef?.current;
+        if (dims) {
+          const faceModules = engine.getModulesByType('FaceInput');
+          for (const mod of faceModules) {
+            (mod as FaceInput).setVideoDimensions(dims.width, dims.height);
+          }
+        }
+      }
+
       // Run face tracking if available
       if (trackerRef?.current && videoRef?.current && engine) {
         const result = trackerRef.current.detect(videoRef.current, timestamp);
         if (result) {
-          // Feed tracking result to all FaceInput modules
           const faceModules = engine.getModulesByType('FaceInput');
           for (const mod of faceModules) {
             (mod as FaceInput).setTracker(trackerRef.current);
@@ -57,7 +68,7 @@ export function useGameLoop({ engineRef, rendererRef, trackerRef, videoRef }: Us
 
       rafRef.current = requestAnimationFrame(loop);
     },
-    [engineRef, rendererRef, trackerRef, videoRef],
+    [engineRef, rendererRef, trackerRef, videoRef, videoDimensionsRef],
   );
 
   const start = useCallback(() => {
