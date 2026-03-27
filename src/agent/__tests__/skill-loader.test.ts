@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { SkillLoader } from '../skill-loader';
+import { SkillLoader, toKebabCase } from '../skill-loader';
 
 describe('SkillLoader', () => {
   /* ------------------------------------------------------------------ */
@@ -23,6 +23,40 @@ describe('SkillLoader', () => {
       const first = await loader.load('game-types/catch.md');
       const second = await loader.load('game-types/catch.md');
       expect(first).toBe(second); // same reference = cached
+    });
+  });
+
+  /* ------------------------------------------------------------------ */
+  /*  toKebabCase — direct unit tests (L-1)                              */
+  /* ------------------------------------------------------------------ */
+
+  describe('toKebabCase', () => {
+    it('converts single-word PascalCase', () => {
+      expect(toKebabCase('Scorer')).toBe('scorer');
+    });
+
+    it('converts multi-word PascalCase', () => {
+      expect(toKebabCase('WaveSpawner')).toBe('wave-spawner');
+    });
+
+    it('handles consecutive capitals (EnemyAI)', () => {
+      expect(toKebabCase('EnemyAI')).toBe('enemy-ai');
+    });
+
+    it('handles leading capital group (IFrames)', () => {
+      expect(toKebabCase('IFrames')).toBe('i-frames');
+    });
+
+    it('handles double leading capitals (UIOverlay)', () => {
+      expect(toKebabCase('UIOverlay')).toBe('ui-overlay');
+    });
+
+    it('handles all-caps module names', () => {
+      expect(toKebabCase('HUD')).toBe('hud');
+    });
+
+    it('handles three-word names', () => {
+      expect(toKebabCase('BranchStateMachine')).toBe('branch-state-machine');
     });
   });
 
@@ -139,9 +173,15 @@ describe('SkillLoader', () => {
       // Must have content (Timer and Lives appear in wiring doc)
       expect(result).not.toBe('');
       expect(result).toContain('Timer');
-      // Should NOT include unrelated sections (e.g., QuizEngine, Randomizer)
-      expect(result).not.toContain('QuizEngine');
-      expect(result).not.toContain('Randomizer');
+      // Structural check: every ### section must mention at least one requested module
+      const sections = result.split(/(?=^### )/m).filter((s) => s.startsWith('### '));
+      expect(sections.length).toBeGreaterThan(0);
+      for (const section of sections) {
+        const mentionsModule = ['Timer', 'Lives'].some((mod) =>
+          new RegExp(`\\b${mod}\\b`).test(section),
+        );
+        expect(mentionsModule).toBe(true);
+      }
     });
 
     it('filters synergies to only include entries with current modules', async () => {
@@ -151,8 +191,15 @@ describe('SkillLoader', () => {
       expect(result).not.toBe('');
       // Should include Timer + DifficultyRamp synergy
       expect(result).toContain('DifficultyRamp');
-      // Should NOT include unrelated synergies
-      expect(result).not.toContain('QuizEngine');
+      // Structural check: every ### section must mention at least one requested module
+      const sections = result.split(/(?=^### )/m).filter((s) => s.startsWith('### '));
+      expect(sections.length).toBeGreaterThan(0);
+      for (const section of sections) {
+        const mentionsModule = ['Timer', 'DifficultyRamp'].some((mod) =>
+          new RegExp(`\\b${mod}\\b`).test(section),
+        );
+        expect(mentionsModule).toBe(true);
+      }
     });
 
     it('separates sections with ---', async () => {

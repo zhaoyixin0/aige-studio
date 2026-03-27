@@ -111,6 +111,43 @@ describe('applyConfigChanges', () => {
     expect(config.modules.some(m => m.type === 'Spawner')).toBe(true);
   });
 
+  it('should apply multiple changes in sequence correctly', () => {
+    const config: GameConfig = {
+      ...makeTestConfig(),
+      assets: { bg: { type: 'background', src: 'old.png' } },
+    };
+
+    const result = applyConfigChanges(config, [
+      { action: 'set_theme', theme: 'space' },
+      { action: 'set_duration', duration: 60 },
+      { action: 'add_module', module_type: 'ComboSystem' },
+      { action: 'remove_module', module_type: 'Spawner' },
+    ]);
+
+    // All four changes applied
+    expect(result.meta.theme).toBe('space');
+    expect(result.modules.find((m) => m.type === 'Timer')!.params.duration).toBe(60);
+    expect(result.modules.some((m) => m.type === 'ComboSystem')).toBe(true);
+    expect(result.modules.some((m) => m.type === 'Spawner')).toBe(false);
+    // Asset src cleared by theme change
+    expect(result.assets['bg'].src).toBe('');
+    // Original untouched
+    expect(config.meta.theme).toBe('fruit');
+    expect(config.modules.some((m) => m.type === 'Spawner')).toBe(true);
+    expect(config.modules.some((m) => m.type === 'ComboSystem')).toBe(false);
+  });
+
+  it('should produce independent module objects (no shared refs with input)', () => {
+    const config = makeTestConfig();
+    const result = applyConfigChanges(config, [
+      { action: 'set_duration', duration: 99 },
+    ]);
+    // Mutating the result's module should not affect the original
+    const resultTimer = result.modules.find((m) => m.type === 'Timer')!;
+    resultTimer.params.duration = 999;
+    expect(config.modules[0].params.duration).toBe(30);
+  });
+
   it('should change theme and clear asset src', () => {
     const config: GameConfig = {
       ...makeTestConfig(),

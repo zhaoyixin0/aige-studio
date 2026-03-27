@@ -8,11 +8,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { GameConfig, ModuleConfig } from '@/engine/core/index.ts';
 import { DEFAULT_THEME_FOR_GAME } from './wizard.ts';
 import { ALL_GAME_TYPES, getModuleParams } from './game-presets.ts';
-
-interface ConversationMessage {
-  role: 'user' | 'assistant';
-  content: string;
-}
+import type { ConversationMessage } from './conversation-defs.ts';
 
 interface GuidedResult {
   /** LLM's response text (question or summary) */
@@ -23,10 +19,13 @@ interface GuidedResult {
   quickReplies?: Array<{ id: string; label: string; emoji?: string }>;
 }
 
+// Module list with descriptions for LLM system prompt.
+// Keep in sync with ALL_MODULES in conversation-defs.ts when adding new modules.
 const ALL_MODULES = [
   // Input
   'FaceInput — 面部追踪：头部位置控制移动，张嘴/眨眼/微笑触发动作',
   'HandInput — 手势控制：手部位置控制移动，手势（拳头/剪刀/布）触发动作',
+  'BodyInput — 全身姿态：身体位置控制移动，姿态触发动作',
   'TouchInput — 触屏：点击、滑动、长按、双击',
   'DeviceInput — 重力感应：倾斜设备控制方向，摇晃触发动作',
   'AudioInput — 声音控制：音调高低控制位置，音量大小触发动作',
@@ -37,12 +36,30 @@ const ALL_MODULES = [
   'Timer — 计时器：倒计时或正计时',
   'Lives — 生命系统：碰撞扣血，血量为零结束',
   'DifficultyRamp — 难度递增：随时间/分数增加难度',
-  // Platformer
+  'ComboSystem — 连击系统：倍率、衰减、连击计数',
+  'PowerUp — 增益道具：加速、护盾、磁铁等',
+  // Shooter/Combat
   'PlayerMovement — 玩家移动：加速/减速的水平移动',
+  'Projectile — 弹丸系统：速度、伤害、射速、穿透',
+  'BulletPattern — 弹幕模式：扇形、螺旋、随机散射',
+  'Aim — 瞄准系统：手动/自动锁定最近敌人',
+  'EnemyAI — 敌人行为AI：巡逻、追击、逃跑',
+  'WaveSpawner — 波次生成器：波间冷却、递增系数',
+  'Health — 血量系统：最大血量、受伤事件',
+  'Shield — 护盾系统：充能次数、冷却',
+  // RPG/Progression
+  'LevelUp — 升级系统：经验值、等级、属性成长',
+  'EnemyDrop — 战利品掉落：掉落表、掉落概率',
+  'StatusEffect — 状态效果：中毒、燃烧、减速',
+  'SkillTree — 技能树：技能点、解锁、升级',
+  'EquipmentSlot — 装备系统：武器、护甲、饰品',
+  'DialogueSystem — 对话系统：NPC对话、任务提示',
+  // Platformer
   'Jump — 跳跃：可配置跳跃力度和重力',
   'Gravity — 重力系统：物体下落物理',
   'StaticPlatform — 静态平台：固定位置的平台',
   'MovingPlatform — 移动平台：水平/垂直/圆形运动的平台',
+  'OneWayPlatform — 单向平台：只从下方穿过',
   'CrumblingPlatform — 碎裂平台：踩上后碎裂，可重生',
   'CoyoteTime — 土狼时间：离开平台后短暂仍可跳跃',
   'Dash — 冲刺：快速方向冲刺',

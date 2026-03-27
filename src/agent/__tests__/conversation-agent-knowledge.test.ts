@@ -34,6 +34,19 @@ describe('detectGameTypeFromMessage', () => {
   it('returns null for empty string', () => {
     expect(detectGameTypeFromMessage('')).toBeNull();
   });
+
+  /* M-2: 世界 regex false positive fix */
+  it('does not match standalone 世界 as world-ar', () => {
+    expect(detectGameTypeFromMessage('这个世界真美好')).toBeNull();
+    expect(detectGameTypeFromMessage('世界和平')).toBeNull();
+    expect(detectGameTypeFromMessage('全世界')).toBeNull();
+  });
+
+  it('still detects world-ar with AR-specific keywords', () => {
+    expect(detectGameTypeFromMessage('做个AR游戏')).toBe('world-ar');
+    expect(detectGameTypeFromMessage('增强现实体验')).toBe('world-ar');
+    expect(detectGameTypeFromMessage('做个AR世界')).toBe('world-ar');
+  });
 });
 
 /* ------------------------------------------------------------------ */

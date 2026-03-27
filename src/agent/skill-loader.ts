@@ -3,6 +3,17 @@ const skillFiles = import.meta.glob('/src/knowledge/**/*.md', {
   import: 'default',
 });
 
+/**
+ * Convert PascalCase to kebab-case.
+ * EnemyAI → enemy-ai, WaveSpawner → wave-spawner, IFrames → i-frames
+ */
+export function toKebabCase(name: string): string {
+  return name
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1-$2')
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .toLowerCase();
+}
+
 export class SkillLoader {
   private cache = new Map<string, string>();
 
@@ -32,7 +43,7 @@ export class SkillLoader {
 
   async loadForModuleAdd(moduleType: string): Promise<string> {
     const category = this.findCategory(moduleType);
-    const filename = this.toKebabCase(moduleType);
+    const filename = toKebabCase(moduleType);
     const modSkill = await this.load(
       `modules/${category}/${filename}.md`,
     ).catch(() => '');
@@ -58,7 +69,7 @@ export class SkillLoader {
    */
   async loadModuleDoc(moduleType: string): Promise<string> {
     const category = this.findCategory(moduleType);
-    const filename = this.toKebabCase(moduleType);
+    const filename = toKebabCase(moduleType);
     return this.load(`modules/${category}/${filename}.md`).catch(() => '');
   }
 
@@ -95,17 +106,6 @@ export class SkillLoader {
     }
 
     return sections.filter(Boolean).join('\n\n---\n\n');
-  }
-
-  /**
-   * Convert PascalCase to kebab-case.
-   * EnemyAI → enemy-ai, WaveSpawner → wave-spawner, IFrames → i-frames
-   */
-  private toKebabCase(name: string): string {
-    return name
-      .replace(/([A-Z]+)([A-Z][a-z])/g, '$1-$2')
-      .replace(/([a-z])([A-Z])/g, '$1-$2')
-      .toLowerCase();
   }
 
   /**
