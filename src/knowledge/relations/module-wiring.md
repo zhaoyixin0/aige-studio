@@ -563,3 +563,168 @@ PlayerMovement 添加墙跳反弹速度
 | `dressup:complete` | DressUpEngine | GameFlow |
 | `plane:detected` | PlaneDetection | Spawner |
 | `plane:anchor` | PlaneDetection | Collision |
+| `projectile:fire` | Projectile | Collision(注册弹丸碰撞体), ParticleVFX, SoundFX |
+| `projectile:destroyed` | Projectile | Collision(移除碰撞体) |
+| `aim:update` | Aim | Projectile(更新射击方向) |
+| `wave:start` | WaveSpawner | UIOverlay, SoundFX |
+| `wave:spawn` | WaveSpawner | Collision(注册敌人碰撞体), EnemyAI(初始化) |
+| `wave:complete` | WaveSpawner | UIOverlay, SoundFX, DifficultyRamp |
+| `wave:allComplete` | WaveSpawner | GameFlow(全波次结束) |
+| `enemy:death` | EnemyAI/Health | EnemyDrop, LevelUp, Scorer, Collision(移除), ParticleVFX, SoundFX |
+| `enemy:attack` | EnemyAI | Health(玩家受伤), SoundFX |
+| `health:change` | Health | UIOverlay |
+| `health:zero` | Health | Lives(敌人→enemy:death, 玩家→lives:decrease) |
+| `levelup:xp` | LevelUp | UIOverlay(经验条) |
+| `levelup:levelup` | LevelUp | UIOverlay(升级提示), ParticleVFX(升级特效), SoundFX |
+| `drop:spawn` | EnemyDrop | Collision(注册掉落物碰撞体), 渲染层 |
+| `shield:absorbed` | Shield | Health(取消伤害事件) |
+| `shield:damage:passthrough` | Shield | Health(护盾未吸收的伤害穿透) |
+| `shield:block` | Shield | ParticleVFX(护盾格挡特效), SoundFX |
+| `shield:break` | Shield | UIOverlay(护盾耗尽提示) |
+| `shield:recharge` | Shield | UIOverlay(护盾恢复提示) |
+| `status:apply` | StatusEffect | UIOverlay(状态图标), 渲染层(视觉效果) |
+| `status:expire` | StatusEffect | UIOverlay(移除图标) |
+| `status:tick` | StatusEffect | Health(持续伤害) |
+| `skill:unlock` | SkillTree | UIOverlay(技能解锁提示), SoundFX |
+| `skill:activate` | SkillTree | 目标模块(应用技能效果) |
+| `equipment:equip` | EquipmentSlot | UIOverlay(装备更新), 属性计算 |
+| `equipment:unequip` | EquipmentSlot | UIOverlay, 属性计算 |
+| `dialogue:start` | DialogueSystem | GameFlow(暂停游戏), UIOverlay(显示对话框) |
+| `dialogue:choice` | DialogueSystem | 自身(推进对话) |
+| `dialogue:end` | DialogueSystem | GameFlow(恢复游戏) |
+
+---
+
+## 射击/战斗事件流
+
+### 33. Projectile 事件流：射击 → 碰撞 → 销毁
+
+```
+input:touch:tap / fireEvent (可配置)
+    ↓
+Projectile.fire()
+    ↓ 检查射速冷却 + 最大弹丸数
+    ↓ projectile:fire { id, x, y, dx, dy, speed, damage }
+    ↓
+AutoWirer → Collision.registerObject(id, 'projectiles', { x, y, radius: collisionRadius })
+    ↓
+Projectile.update(dt)
+    ↓ 每帧更新位置 → AutoWirer pre-update hook → Collision.updateObject(id, { x, y })
+    ↓
+Collision 检测 projectiles 层 vs enemies 层
+    ↓ collision:hit { objectA, objectB, targetId }
+    ↓
+Collision.destroy('a') → 移除弹丸碰撞体
+    ↓
+projectile:destroyed { id } (超时销毁)
+    ↓ AutoWirer → Collision.unregisterObject(id)
+```
+
+### 34. EnemyAI 事件流：生成 → 行为 → 死亡
+
+```
+WaveSpawner → wave:spawn { id, x, y, wave }
+    ↓
+AutoWirer → Collision.registerObject(id, 'enemies', { x, y, radius: enemyCollisionRadius })
+    ↓
+EnemyAI.update(dt)
+    ↓ 根据 behavior 执行行为:
+    │   patrol: 在路径点间巡逻
+    │   chase: 检测到玩家后追击
+    │   flee: 血量低于阈值时逃跑
+    ↓
+    ├── 接近玩家 → enemy:attack { damage }
+    │   ↓ Collision (player vs enemies) → collision:damage
+    │
+    └── 被弹丸命中 → collision:hit
+        ↓ Health 扣血
+        ↓ hp <= 0 → enemy:death { id, x, y }
+        ↓
+        ├── EnemyDrop → 掉落战利品
+        ├── LevelUp → +XP
+        ├── Scorer → +分数
+        └── Collision.unregisterObject(id)
+```
+
+### 35. WaveSpawner 事件流：波次循环
+
+```
+gameflow:resume (游戏开始)
+    ↓
+WaveSpawner.startNextWave()
+    ↓ wave:start { wave, enemyCount }
+    ↓
+    ↓ 按 spawnDelay 间隔逐个生成敌人
+    ↓ wave:spawn { id, x, y, wave } (每个敌人)
+    ↓
+    ↓ 监听 enemy:death → enemiesRemaining--
+    ↓ 全部击杀 → WaveSpawner.completeWave()
+    ↓ wave:complete { wave }
+    ↓
+    ├── maxWaves > 0 && currentWave >= maxWaves
+    │   ↓ wave:allComplete { totalWaves }
+    │   ↓ GameFlow → finished
+    │
+    └── 否则 → 进入冷却期 (waveCooldown ms)
+        ↓ 冷却结束 → startNextWave()
+        ↓ (enemyCount *= scalingFactor)
+```
+
+### 36. Health 事件流：伤害 → 死亡
+
+```
+collision:damage { objectA, objectB }
+    ↓
+Shield 检查 (如果存在)
+    ├── 有充能 → shield:block, 消耗1充能, 不传递伤害
+    └── 无充能 →
+        ↓
+        Health.takeDamage(amount)
+        ↓ health:change { current, max }
+        ↓
+        ├── current > 0 → IFrames 激活无敌
+        └── current <= 0 → health:zero
+            ↓
+            ├── 敌人 Health → enemy:death
+            └── 玩家 Health → Lives.decrease()
+```
+
+### 37. LevelUp 事件流：经验 → 升级 → 属性成长
+
+```
+enemy:death (或配置的 xpSource 事件)
+    ↓
+LevelUp.addXP(xpAmount)
+    ↓ levelup:xp { current, required, level }
+    ↓
+    ├── current < required → 继续累积
+    └── current >= required →
+        ↓ level++, current -= required
+        ↓ levelup:levelup { level, stats }
+        ↓
+        statGrowth 应用:
+            Health.maxHp += statGrowth.hp
+            Projectile.damage += statGrowth.attack
+            Shield.defense += statGrowth.defense
+```
+
+### 38. EnemyDrop 事件流：击杀 → 掉落 → 拾取
+
+```
+enemy:death { id, x, y }
+    ↓
+EnemyDrop.rollLoot()
+    ↓ 按 dropChance 概率决定是否掉落
+    ↓ 遍历 lootTable，按 weight 加权随机选择物品
+    ↓
+    ├── 未掉落 → 不触发事件
+    └── 掉落 → drop:spawn { id, item, type, x, y, count }
+        ↓
+        Collision.registerObject(dropId, 'items', { x, y, radius })
+        ↓
+        玩家碰触掉落物 → collision:hit
+        ↓
+        ├── type: 'health' → Health 回复
+        ├── type: 'collectible' → Scorer 加分
+        └── type: 'equipment' → EquipmentSlot 装备
+```

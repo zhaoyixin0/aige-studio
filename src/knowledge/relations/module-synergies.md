@@ -348,6 +348,128 @@ PowerUp('shield') → IFrames 延长无敌
 
 ---
 
+## 射击/RPG 协同组合
+
+### 24. Projectile + Aim + Collision（射击核心）
+
+**效果**: 构成射击类游戏的核心循环——弹丸发射、瞄准目标、碰撞检测。Aim 模块自动锁定最近敌人，Projectile 按方向发射弹丸，Collision 检测命中。
+
+```
+Aim(auto) → 锁定最近 enemies 层目标 → aim:update { dx, dy }
+    ↓
+Projectile → 按方向发射弹丸 → projectile:fire → Collision(projectiles层)
+    ↓
+Collision 检测 projectiles vs enemies
+    ↓ collision:hit → Scorer 加分 + 弹丸销毁
+```
+
+**配置要点**: Aim.autoRange 控制自动瞄准距离。Projectile.speed 和 fireRate 决定输出节奏。Collision 规则中 destroy:['a'] 销毁弹丸（非穿透），piercing=true 则弹丸穿透。
+
+**适用**: shooting、action-rpg
+
+---
+
+### 25. EnemyAI + WaveSpawner + Collision（敌人系统）
+
+**效果**: 构成波次制敌人生成系统——WaveSpawner 按波次生成敌人，EnemyAI 控制行为，Collision 处理碰撞。
+
+```
+WaveSpawner → wave:spawn → EnemyAI(patrol/chase/flee)
+    ↓
+EnemyAI 追击玩家 → Collision(player vs enemies) → collision:damage
+EnemyAI 被弹丸击中 → Collision(projectiles vs enemies) → collision:hit
+    ↓ enemy:death → wave enemiesRemaining--
+    ↓ 全部击杀 → wave:complete → 冷却 → 下一波
+```
+
+**配置要点**: WaveSpawner.scalingFactor 控制每波敌人数量递增。EnemyAI.behavior 决定敌人策略。
+
+**适用**: shooting、action-rpg
+
+---
+
+### 26. LevelUp + EnemyDrop + Health（RPG 成长核心）
+
+**效果**: 击杀敌人获得经验和战利品，升级提升属性，形成 RPG 核心成长循环。
+
+```
+enemy:death → LevelUp(+XP) → 升级 → 属性成长(hp, attack, defense)
+           → EnemyDrop → 掉落物(药水/金币/装备)
+           → 拾取药水 → Health 回复
+```
+
+**配置要点**: LevelUp.xpPerLevel 和 scalingCurve 控制升级节奏。EnemyDrop.dropChance 和 lootTable 控制掉落丰富度。两者配合决定成长体感。
+
+**适用**: action-rpg
+
+---
+
+### 27. Health + Shield + IFrames + Knockback（防御四件套）
+
+**效果**: 完整的防御系统——护盾先吸收伤害，穿透后扣血，触发无敌帧+击退，提供安全恢复窗口。
+
+```
+collision:damage → Shield(消耗充能) → Health(扣血) → IFrames(无敌) + Knockback(击退)
+    ↓
+玩家获得安全窗口，不会被连续击杀
+```
+
+**配置要点**: Shield.maxCharges 和 rechargeCooldown 控制护盾循环。IFrames.duration 控制安全窗口。Knockback.force 推离危险但不宜过大。
+
+**适用**: shooting、action-rpg、platformer
+
+---
+
+### 28. WaveSpawner + DifficultyRamp（波次难度递增）
+
+**效果**: 波次推进的同时自动增加难度——更多敌人、更快速度、更强攻击。
+
+```
+WaveSpawner → wave:complete → DifficultyRamp
+    ↓ 调整 WaveSpawner 参数: enemiesPerWave +2, scalingFactor +0.1
+    ↓ 调整 EnemyAI 参数: speed +10, attackDamage +5
+```
+
+**配置要点**: DifficultyRamp.mode 设为 'wave' 或 'time'。rules 中可同时调多个模块的多个参数。
+
+**适用**: shooting、action-rpg
+
+---
+
+### 29. SkillTree + LevelUp + StatusEffect（深度成长）
+
+**效果**: 升级获得技能点→解锁主动/被动技能→技能可施加状态效果，形成深度构建多样性。
+
+```
+LevelUp → levelup:levelup → SkillTree(+技能点)
+    ↓ 解锁技能: 弹幕扩散、生命偷取、元素弹药
+    ↓ 元素弹药 → Projectile 附加 StatusEffect(burn/poison)
+    ↓ StatusEffect → 持续伤害/减速/冻结
+```
+
+**配置要点**: SkillTree.pointsPerLevel 控制技能解锁速度。StatusEffect.maxEffects 限制同时生效的效果数。
+
+**适用**: action-rpg
+
+---
+
+### 30. EquipmentSlot + EnemyDrop（装备循环）
+
+**效果**: 敌人掉落装备→玩家拾取装备→属性提升→更强战斗力→挑战更难敌人。经典 RPG 装备循环。
+
+```
+EnemyDrop → drop:spawn { type: 'equipment' }
+    ↓ 玩家拾取 → EquipmentSlot.equip()
+    ↓ equipment:equip { slot, item, stats }
+    ↓ 属性加成: +damage, +defense, +speed
+```
+
+**配置要点**: EquipmentSlot.slots 定义可装备槽位。lootTable 中 equipment 类型的 weight 不宜过高，保持装备稀缺感。
+
+**适用**: action-rpg
+
+---
+
 ## 协同强度评级
 
 | 组合 | 强度 | 说明 |
@@ -366,6 +488,13 @@ PowerUp('shield') → IFrames 延长无敌
 | MatchEngine + Timer + Scorer | ★★★★☆ | 配对类核心循环 |
 | ExpressionDetector + Scorer + ComboSystem | ★★★★☆ | 表情游戏特色组合 |
 | QuizEngine + UIOverlay | ★★★★☆ | 答题类必备 |
+| Projectile + Aim + Collision | ★★★★★ | 射击核心循环 |
+| EnemyAI + WaveSpawner + Collision | ★★★★★ | 敌人系统核心 |
+| LevelUp + EnemyDrop + Health | ★★★★★ | RPG 成长核心循环 |
+| Health + Shield + IFrames + Knockback | ★★★★☆ | 防御四件套 |
+| WaveSpawner + DifficultyRamp | ★★★★☆ | 波次难度递增 |
+| SkillTree + LevelUp + StatusEffect | ★★★★☆ | 深度成长系统 |
+| EquipmentSlot + EnemyDrop | ★★★☆☆ | 装备循环 |
 | PowerUp + Lives + Timer | ★★★☆☆ | 增益系统，增加弹性 |
 | Timer + Lives | ★★★☆☆ | 双条件适合硬核玩法 |
 | Jump + Gravity + 非平台游戏 | ★★★☆☆ | 实验性，增加游戏维度 |
