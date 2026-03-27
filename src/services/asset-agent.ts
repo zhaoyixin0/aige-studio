@@ -154,8 +154,9 @@ export class AssetAgent {
           assetDescriptions,
         });
 
-        // Use generateImageRaw — PromptBuilder already includes style
-        let dataUrl = await gemini.generateImageRaw(prompt);
+        // Pass role-specific image config (aspectRatio, imageSize) to Nano Banana Pro
+        const imageConfig = PromptBuilder.getImageConfig(role);
+        let dataUrl = await gemini.generateImageRaw(prompt, imageConfig);
 
         if (signal.aborted) return result;
 
@@ -179,7 +180,8 @@ export class AssetAgent {
 
         if (signal.aborted) return result;
 
-        // Resize sprite images to 128x128 (backgrounds to 540x960)
+        // Resize from 1024x1024 generation to game target sizes
+        // Sprites: 128x128, Backgrounds: 540x960 (already native 9:16 from API)
         const targetSize = assetType === 'background' ? { w: 540, h: 960 } : { w: 128, h: 128 };
         dataUrl = await this.resizeImage(dataUrl, targetSize.w, targetSize.h);
 

@@ -36,7 +36,7 @@ describe('PromptBuilder', () => {
       style: 'cartoon',
     });
     expect(prompt).toContain('character');
-    expect(prompt).toContain('cartoon fish');
+    expect(prompt).toContain('tropical fish');
     expect(prompt).toContain('#00FF00');
   });
 
