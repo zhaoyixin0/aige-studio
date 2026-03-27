@@ -32,8 +32,9 @@ export class SkillLoader {
 
   async loadForModuleAdd(moduleType: string): Promise<string> {
     const category = this.findCategory(moduleType);
+    const filename = this.toKebabCase(moduleType);
     const modSkill = await this.load(
-      `modules/${category}/${moduleType.toLowerCase()}.md`,
+      `modules/${category}/${filename}.md`,
     ).catch(() => '');
     const synergies = await this.load('relations/module-synergies.md').catch(
       () => '',
@@ -49,6 +50,87 @@ export class SkillLoader {
       () => '',
     );
     return [synergies, conflicts].filter(Boolean).join('\n---\n');
+  }
+
+  /**
+   * Load a single module's knowledge document.
+   * Converts PascalCase module name to kebab-case filename.
+   */
+  async loadModuleDoc(moduleType: string): Promise<string> {
+    const category = this.findCategory(moduleType);
+    const filename = this.toKebabCase(moduleType);
+    return this.load(`modules/${category}/${filename}.md`).catch(() => '');
+  }
+
+  /**
+   * Load contextually relevant knowledge for ConversationAgent.
+   * Returns game-type doc + filtered wiring + filtered synergies.
+   */
+  async loadForConversation(
+    gameType: string | null,
+    currentModules: string[],
+  ): Promise<string> {
+    const sections: string[] = [];
+
+    // 1. Game type document
+    if (gameType) {
+      const gameDoc = await this.load(`game-types/${gameType}.md`).catch(() => '');
+      if (gameDoc) sections.push(gameDoc);
+    }
+
+    // 2. Module wiring filtered to relevant modules
+    if (currentModules.length > 0) {
+      const wiring = await this.load('relations/module-wiring.md').catch(() => '');
+      if (wiring) {
+        const filtered = this.filterSectionsByModules(wiring, currentModules);
+        if (filtered) sections.push(filtered);
+      }
+
+      // 3. Module synergies filtered to relevant modules
+      const synergies = await this.load('relations/module-synergies.md').catch(() => '');
+      if (synergies) {
+        const filtered = this.filterSectionsByModules(synergies, currentModules);
+        if (filtered) sections.push(filtered);
+      }
+    }
+
+    return sections.filter(Boolean).join('\n\n---\n\n');
+  }
+
+  /**
+   * Convert PascalCase to kebab-case.
+   * EnemyAI → enemy-ai, WaveSpawner → wave-spawner, IFrames → i-frames
+   */
+  private toKebabCase(name: string): string {
+    return name
+      .replace(/([A-Z]+)([A-Z][a-z])/g, '$1-$2')
+      .replace(/([a-z])([A-Z])/g, '$1-$2')
+      .toLowerCase();
+  }
+
+  /**
+   * Filter markdown content to only include ### sections that mention
+   * at least one module from the given list.
+   * Splits on ### headings, keeps only sections with matching module names.
+   */
+  private filterSectionsByModules(
+    content: string,
+    modules: string[],
+  ): string {
+    // Split on both ## and ### headings to isolate sections
+    const parts = content.split(/(?=^#{2,3} )/m);
+
+    // Keep only ### sections mentioning at least one module (word-boundary match)
+    const relevant = parts.filter((part) => {
+      if (!part.startsWith('### ')) return false;
+      return modules.some((mod) =>
+        new RegExp(`\\b${mod}\\b`).test(part),
+      );
+    });
+
+    if (relevant.length === 0) return '';
+
+    return relevant.join('\n').trim();
   }
 
   private parseRequiredModules(skillContent: string): string[] {
@@ -74,6 +156,7 @@ export class SkillLoader {
       'ResultScreen',
       'ParticleVFX',
       'SoundFX',
+      'CameraFollow',
     ];
     if (input.includes(moduleType)) return 'input';
     if (feedback.includes(moduleType)) return 'feedback';
