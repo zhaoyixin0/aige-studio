@@ -1,7 +1,7 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import type { Engine } from '@/engine/core/engine';
-import type { Projectile, ProjectileInstance } from '@/engine/modules/mechanic/projectile';
-import type { EnemyAI, EnemyInstance } from '@/engine/modules/mechanic/enemy-ai';
+import type { Projectile } from '@/engine/modules/mechanic/projectile';
+import type { EnemyAI } from '@/engine/modules/mechanic/enemy-ai';
 import type { Aim } from '@/engine/modules/mechanic/aim';
 import type { Shield } from '@/engine/modules/mechanic/shield';
 import type { Collision } from '@/engine/modules/mechanic/collision';
@@ -324,9 +324,9 @@ export class ShooterRenderer {
 
     const dir = aim.getAimDirection();
     const playerPos = resolvePlayerPosition(
-      engine.getModulesByType('FaceInput')[0] as PositionProvider | undefined,
-      engine.getModulesByType('HandInput')[0] as PositionProvider | undefined,
-      engine.getModulesByType('TouchInput')[0] as PositionProvider | undefined,
+      engine.getModulesByType('FaceInput')[0] as unknown as PositionProvider | undefined,
+      engine.getModulesByType('HandInput')[0] as unknown as PositionProvider | undefined,
+      engine.getModulesByType('TouchInput')[0] as unknown as PositionProvider | undefined,
     );
 
     const pos = computeAimIndicatorPos(
@@ -375,9 +375,9 @@ export class ShooterRenderer {
     const flashBoost = this.shieldFlashTimer > 0 ? 0.4 : 0;
 
     const playerPos = resolvePlayerPosition(
-      engine.getModulesByType('FaceInput')[0] as PositionProvider | undefined,
-      engine.getModulesByType('HandInput')[0] as PositionProvider | undefined,
-      engine.getModulesByType('TouchInput')[0] as PositionProvider | undefined,
+      engine.getModulesByType('FaceInput')[0] as unknown as PositionProvider | undefined,
+      engine.getModulesByType('HandInput')[0] as unknown as PositionProvider | undefined,
+      engine.getModulesByType('TouchInput')[0] as unknown as PositionProvider | undefined,
     );
 
     this.shieldCircle.clear();

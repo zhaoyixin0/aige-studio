@@ -9,7 +9,7 @@ import type { Health } from '@/engine/modules/mechanic/health';
 import type { Shield } from '@/engine/modules/mechanic/shield';
 import type { LevelUp } from '@/engine/modules/mechanic/level-up';
 import type { SkillTree } from '@/engine/modules/mechanic/skill-tree';
-import { computeHealthBarWidth, getHealthBarColor, computeShieldAlpha } from './shooter-renderer';
+import { computeHealthBarWidth, getHealthBarColor } from './shooter-renderer';
 import { computeXpBarWidth } from './rpg-overlay-renderer';
 import { ChallengeHudRenderer } from './challenge-hud-renderer';
 import { ActivityHudRenderer } from './activity-hud-renderer';

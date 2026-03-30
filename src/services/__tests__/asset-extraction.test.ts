@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { extractAssetKeys } from '../asset-agent';
-import type { GameConfig } from '@/engine/core';
+import type { GameConfig, ModuleConfig } from '@/engine/core';
+
+/** Helper to build a minimal ModuleConfig with defaults for id/enabled. */
+function mod(overrides: Partial<ModuleConfig> & { type: string }): ModuleConfig {
+  return { id: overrides.type, enabled: true, params: {}, ...overrides };
+}
 
 /** Helper to build a minimal GameConfig for testing extraction. */
 function makeConfig(overrides: Partial<GameConfig> = {}): GameConfig {
@@ -23,7 +28,7 @@ describe('extractAssetKeys', () => {
   });
 
   it('should extract player key when Spawner module exists', () => {
-    const config = makeConfig({ modules: [{ type: 'Spawner', params: { items: [{ asset: 'good_1' }] } }] });
+    const config = makeConfig({ modules: [mod({ type: 'Spawner', params: { items: [{ asset: 'good_1' }] } })] });
     const keys = extractAssetKeys(config);
     expect(keys).toContain('player');
     expect(keys).toContain('good_1');
@@ -33,7 +38,7 @@ describe('extractAssetKeys', () => {
 
   it('should extract enemy asset key from EnemyAI module', () => {
     const config = makeConfig({
-      modules: [{ type: 'EnemyAI', params: { asset: 'enemy_1' } }],
+      modules: [mod({ type: 'EnemyAI', params: { asset: 'enemy_1' } })],
     });
     const keys = extractAssetKeys(config);
     expect(keys).toContain('enemy_1');
@@ -41,7 +46,7 @@ describe('extractAssetKeys', () => {
 
   it('should add default enemy_1 key when EnemyAI has no asset param', () => {
     const config = makeConfig({
-      modules: [{ type: 'EnemyAI', params: {} }],
+      modules: [mod({ type: 'EnemyAI' })],
     });
     const keys = extractAssetKeys(config);
     expect(keys).toContain('enemy_1');
@@ -51,7 +56,7 @@ describe('extractAssetKeys', () => {
 
   it('should extract bullet asset key from Projectile module', () => {
     const config = makeConfig({
-      modules: [{ type: 'Projectile', params: { asset: 'plasma_bolt' } }],
+      modules: [mod({ type: 'Projectile', params: { asset: 'plasma_bolt' } })],
     });
     const keys = extractAssetKeys(config);
     expect(keys).toContain('plasma_bolt');
@@ -59,7 +64,7 @@ describe('extractAssetKeys', () => {
 
   it('should add default bullet key when Projectile has no asset param', () => {
     const config = makeConfig({
-      modules: [{ type: 'Projectile', params: {} }],
+      modules: [mod({ type: 'Projectile' })],
     });
     const keys = extractAssetKeys(config);
     expect(keys).toContain('bullet');
@@ -69,7 +74,7 @@ describe('extractAssetKeys', () => {
 
   it('should extract asset keys from EnemyDrop lootTable entries', () => {
     const config = makeConfig({
-      modules: [{
+      modules: [mod({
         type: 'EnemyDrop',
         params: {
           lootTable: [
@@ -77,7 +82,7 @@ describe('extractAssetKeys', () => {
             { item: 'gold', asset: 'drop_gold', weight: 2, minCount: 1, maxCount: 3, type: 'collectible' },
           ],
         },
-      }],
+      })],
     });
     const keys = extractAssetKeys(config);
     expect(keys).toContain('drop_health');
@@ -86,14 +91,14 @@ describe('extractAssetKeys', () => {
 
   it('should use item name as asset key when lootTable entry has no asset field', () => {
     const config = makeConfig({
-      modules: [{
+      modules: [mod({
         type: 'EnemyDrop',
         params: {
           lootTable: [
             { item: 'gem', weight: 1, minCount: 1, maxCount: 1, type: 'collectible' },
           ],
         },
-      }],
+      })],
     });
     const keys = extractAssetKeys(config);
     expect(keys).toContain('gem');
@@ -103,7 +108,7 @@ describe('extractAssetKeys', () => {
 
   it('should extract portrait asset keys from DialogueSystem dialogues', () => {
     const config = makeConfig({
-      modules: [{
+      modules: [mod({
         type: 'DialogueSystem',
         params: {
           dialogues: {
@@ -117,7 +122,7 @@ describe('extractAssetKeys', () => {
             },
           },
         },
-      }],
+      })],
     });
     const keys = extractAssetKeys(config);
     expect(keys).toContain('npc_elder');
@@ -126,7 +131,7 @@ describe('extractAssetKeys', () => {
 
   it('should not crash when DialogueSystem has no dialogues', () => {
     const config = makeConfig({
-      modules: [{ type: 'DialogueSystem', params: {} }],
+      modules: [mod({ type: 'DialogueSystem' })],
     });
     const keys = extractAssetKeys(config);
     expect(keys).not.toContain('undefined');
@@ -134,7 +139,7 @@ describe('extractAssetKeys', () => {
 
   it('should not crash when DialogueSystem has malformed dialogue trees', () => {
     const config = makeConfig({
-      modules: [{
+      modules: [mod({
         type: 'DialogueSystem',
         params: {
           dialogues: {
@@ -146,7 +151,7 @@ describe('extractAssetKeys', () => {
             broken6: { nodes: { n1: { portrait: 42 } } },
           },
         },
-      }],
+      })],
     });
     // Should not throw, just skip malformed entries
     const keys = extractAssetKeys(config);
@@ -159,11 +164,11 @@ describe('extractAssetKeys', () => {
     const config = makeConfig({
       assets: { player: { type: 'sprite', src: '' }, background: { type: 'background', src: '' } },
       modules: [
-        { type: 'PlayerMovement', params: {} },
-        { type: 'Projectile', params: { asset: 'laser' } },
-        { type: 'EnemyAI', params: { asset: 'zombie' } },
-        { type: 'EnemyDrop', params: { lootTable: [{ item: 'coin', asset: 'drop_coin', weight: 1, minCount: 1, maxCount: 1, type: 'collectible' }] } },
-        { type: 'DialogueSystem', params: { dialogues: { d1: { id: 'd1', startNode: 'n1', nodes: { n1: { id: 'n1', speaker: 'NPC', text: 'Hi', portrait: 'npc_guide' } } } } } },
+        mod({ type: 'PlayerMovement' }),
+        mod({ type: 'Projectile', params: { asset: 'laser' } }),
+        mod({ type: 'EnemyAI', params: { asset: 'zombie' } }),
+        mod({ type: 'EnemyDrop', params: { lootTable: [{ item: 'coin', asset: 'drop_coin', weight: 1, minCount: 1, maxCount: 1, type: 'collectible' }] } }),
+        mod({ type: 'DialogueSystem', params: { dialogues: { d1: { id: 'd1', startNode: 'n1', nodes: { n1: { id: 'n1', speaker: 'NPC', text: 'Hi', portrait: 'npc_guide' } } } } } }),
       ],
     });
     const keys = extractAssetKeys(config);

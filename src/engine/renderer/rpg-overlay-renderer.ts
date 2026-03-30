@@ -1,8 +1,7 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import type { Engine } from '@/engine/core/engine';
 import type { DialogueSystem, DialogueNode } from '@/engine/modules/mechanic/dialogue-system';
-import type { StatusEffect, ActiveEffect } from '@/engine/modules/mechanic/status-effect';
-import type { GameFlow } from '@/engine/modules/feedback/game-flow';
+import type { StatusEffect } from '@/engine/modules/mechanic/status-effect';
 import { loadDataUrlIntoContainer } from './image-utils';
 
 // ── Pure helper functions (exported for testing) ────────────────
