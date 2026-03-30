@@ -110,4 +110,58 @@ describe('PromptBuilder', () => {
       expect(prompt.length).toBeGreaterThan(50);
     }
   });
+
+  // ── Enemy role ────────────────────────────────────────────────
+
+  it('should build enemy prompt with menacing hints', () => {
+    const prompt = PromptBuilder.build('enemy_1', {
+      gameType: 'shooting', theme: 'space', role: 'enemy', style: 'cartoon',
+    });
+    expect(prompt).toContain('enemy');
+    expect(prompt).toContain('menacing');
+    expect(prompt).toContain('#00FF00');
+    expect(prompt).toContain('hostile');
+  });
+
+  it('should infer enemy role from enemy_ prefix', () => {
+    expect(PromptBuilder.inferRole('enemy_1')).toBe('enemy');
+    expect(PromptBuilder.inferRole('boss_dragon')).toBe('enemy');
+    expect(PromptBuilder.inferRole('zombie')).toBe('enemy');
+    expect(PromptBuilder.inferRole('skeleton_warrior')).toBe('enemy');
+  });
+
+  // ── NPC role ──────────────────────────────────────────────────
+
+  it('should build npc prompt with portrait composition', () => {
+    const prompt = PromptBuilder.build('npc_elder', {
+      gameType: 'action-rpg', theme: 'halloween', role: 'npc', style: 'cartoon',
+    });
+    expect(prompt).toContain('portrait');
+    expect(prompt).toContain('NPC');
+    expect(prompt).toContain('#00FF00');
+    expect(prompt).toContain('dialogue');
+  });
+
+  it('should infer npc role from npc_ prefix', () => {
+    expect(PromptBuilder.inferRole('npc_elder')).toBe('npc');
+    expect(PromptBuilder.inferRole('npc_merchant')).toBe('npc');
+    expect(PromptBuilder.inferRole('portrait_hero')).toBe('npc');
+  });
+
+  // ── Drop role ─────────────────────────────────────────────────
+
+  it('should build drop prompt with loot hints', () => {
+    const prompt = PromptBuilder.build('drop_health', {
+      gameType: 'action-rpg', theme: 'fruit', role: 'drop', style: 'cartoon',
+    });
+    expect(prompt).toContain('loot');
+    expect(prompt).toContain('sparkle');
+    expect(prompt).toContain('#00FF00');
+  });
+
+  it('should infer drop role from drop_ prefix', () => {
+    expect(PromptBuilder.inferRole('drop_gold')).toBe('drop');
+    expect(PromptBuilder.inferRole('loot_box')).toBe('drop');
+    expect(PromptBuilder.inferRole('potion')).toBe('drop');
+  });
 });

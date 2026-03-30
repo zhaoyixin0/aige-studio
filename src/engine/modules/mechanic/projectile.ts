@@ -83,6 +83,7 @@ export class Projectile extends BaseModule {
         min: 2,
         max: 50,
       },
+      asset: { type: 'string', label: 'Projectile Asset Key', default: 'bullet' },
     };
   }
 

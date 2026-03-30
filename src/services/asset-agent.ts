@@ -54,6 +54,49 @@ export function extractAssetKeys(config: GameConfig): string[] {
     if (mod.type === 'Hazard' && Array.isArray(hazards)) {
       keys.add('hazard');
     }
+
+    // EnemyAI: enemy sprite asset
+    if (mod.type === 'EnemyAI') {
+      const asset = mod.params?.asset;
+      keys.add(typeof asset === 'string' ? asset : 'enemy_1');
+    }
+
+    // Projectile: bullet sprite asset
+    if (mod.type === 'Projectile') {
+      const asset = mod.params?.asset;
+      keys.add(typeof asset === 'string' ? asset : 'bullet');
+    }
+
+    // EnemyDrop: loot table item assets
+    if (mod.type === 'EnemyDrop') {
+      const lootTable = mod.params?.lootTable;
+      if (Array.isArray(lootTable)) {
+        for (const entry of lootTable) {
+          if (entry && typeof entry.asset === 'string') {
+            keys.add(entry.asset);
+          } else if (entry && typeof entry.item === 'string') {
+            keys.add(entry.item);
+          }
+        }
+      }
+    }
+
+    // DialogueSystem: speaker portrait assets
+    if (mod.type === 'DialogueSystem') {
+      const dialogues = mod.params?.dialogues;
+      if (dialogues && typeof dialogues === 'object') {
+        for (const tree of Object.values(dialogues as Record<string, unknown>)) {
+          if (!tree || typeof tree !== 'object') continue;
+          const nodes = (tree as Record<string, unknown>).nodes;
+          if (!nodes || typeof nodes !== 'object') continue;
+          for (const node of Object.values(nodes as Record<string, unknown>)) {
+            if (node && typeof node === 'object' && typeof (node as Record<string, unknown>).portrait === 'string') {
+              keys.add((node as Record<string, unknown>).portrait as string);
+            }
+          }
+        }
+      }
+    }
   }
 
   // 3. Include player character if game has a visual player
@@ -92,8 +135,6 @@ export class AssetAgent {
     const keys = extractAssetKeys(config);
     const result: Record<string, AssetEntry> = {};
 
-    console.log('[AssetAgent] Extracted asset keys:', keys);
-
     // Determine which keys actually need generation
     const keysToProcess = keys.filter((key) => {
       const existing = config.assets[key];
@@ -106,16 +147,12 @@ export class AssetAgent {
     });
 
     const total = keysToProcess.length;
-    console.log('[AssetAgent] All extracted keys:', keys);
-    console.log('[AssetAgent] Keys to process (after filter):', keysToProcess, `(${total} total)`);
-    console.log('[AssetAgent] Config assets:', Object.keys(config.assets), config.assets);
     if (total === 0) return result;
 
     // Try to obtain Gemini service — may throw if no API key
     let gemini: GeminiImageService | null = null;
     try {
       gemini = getGeminiImageService();
-      console.log('[AssetAgent] Gemini service obtained successfully');
     } catch (err) {
       console.warn('[AssetAgent] No Gemini API key:', err);
     }
@@ -213,7 +250,8 @@ export class AssetAgent {
       const img = new window.Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        // Maintain aspect ratio, fit within maxW x maxH
+        // Maintain aspect ratio, fit within maxW x maxH; the trailing `, 1` caps scale
+        // at 1.0 so images smaller than the target are never upscaled.
         const scale = Math.min(maxW / img.width, maxH / img.height, 1);
         canvas.width = Math.round(img.width * scale);
         canvas.height = Math.round(img.height * scale);

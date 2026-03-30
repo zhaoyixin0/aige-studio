@@ -73,11 +73,54 @@ Must read clearly at 32x32 pixels on a mobile screen.
 No text, no additional objects.
 ```
 
+## Drop Item Template
+
+```
+Generate a single loot drop item sprite: {DESCRIPTION}.
+This is a collectible drop item for a {GAME_TYPE} mobile game.
+The item should look valuable, desirable, and clearly identifiable as a pickup reward.
+Add a subtle sparkle or glow effect to make it stand out on the game screen.
+{STYLE_DESCRIPTOR}.
+Theme aesthetic: {AESTHETIC}.
+
+This asset is part of a cohesive set of mobile game sprites.
+All assets in this set share the same art style, line weight, color saturation, and rendering technique.
+
+CRITICAL BACKGROUND REQUIREMENT:
+The ENTIRE background MUST be solid flat chroma-key green, EXACT hex color #00FF00 (RGB 0,255,0).
+NO gradients, NO noise, NO texture, NO shadows, NO reflections on the background.
+Every single background pixel must be PURE UNIFORM #00FF00 green.
+
+CRITICAL EDGE REQUIREMENT:
+Add a clean white outline border (2-3 pixels wide) around the entire item silhouette.
+This white border acts as an anti-aliasing buffer zone between the sprite and the green background.
+
+CRITICAL COLOR REQUIREMENT:
+Do NOT use any pure #00FF00 green inside the item sprite.
+If the item is naturally green, use #006400 or #32CD32 instead.
+
+Composition: single object, centered on canvas, facing the camera, slight 3/4 angle for depth,
+occupying roughly 65-75% of the canvas area, fully visible with no cropping.
+The item should have a sparkle, shimmer, or golden glow to signal "loot reward".
+Design must be clearly recognizable when scaled to 32x32 pixels on a mobile screen.
+No text, no labels, no watermarks, no additional objects, no shadows on background.
+```
+
+### Drop Design Principles
+
+- Drops should visually signal "reward" — golden shimmer, sparkle particles, warm glow
+- Distinct from regular collectibles: drops are rarer, more ornate, more detailed
+- Common drops: coins, gems, potions — simple silhouettes with high-value visual cues
+- Rare drops: equipment, scrolls, crystals — more complex shapes with brighter glow
+- Size: slightly smaller than collectibles (32x32 readability) since they appear mid-combat
+- Color: gold, purple, blue tints to signal rarity tiers
+
 ## Item Design Principles
 
 - Collectibles: warm colors, sparkle effects, rounded shapes, desirable look
 - Obstacles: cool/dark colors, spiky shapes, warning feel, angular silhouettes
 - Projectiles: elongated horizontally, motion trails, energy glow, dynamic feel
 - Power-ups: bright, glowing, pulsing feel, larger than normal collectibles
+- Drop items: golden/jewel tones, sparkle/glow, valuable appearance, compact size
 - All items: simple single-object silhouettes, high contrast against any background
-- Size hierarchy: collectibles 70-80%, obstacles 65-75%, projectiles 60-70%
+- Size hierarchy: collectibles 70-80%, obstacles 65-75%, projectiles 60-70%, drops 65-75%

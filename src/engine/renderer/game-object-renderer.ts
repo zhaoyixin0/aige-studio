@@ -34,7 +34,7 @@ export class GameObjectRenderer {
     const assets = engine.getConfig().assets ?? {};
     const keys = Object.keys(assets);
     let assetHash = keys.length;
-    for (const k of keys) { if ((assets as any)[k]?.src) assetHash += k.length; }
+    for (const k of keys) { if ((assets as Record<string, { src?: string }>)[k]?.src) assetHash += k.length; }
     if (assetHash !== this.lastAssetKeys) {
       if (this.lastAssetKeys !== 0) {
         // Assets changed since last frame — clear cached sprites so they re-create with new assets

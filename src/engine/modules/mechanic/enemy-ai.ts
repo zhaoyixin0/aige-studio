@@ -61,6 +61,7 @@ export class EnemyAI extends BaseModule {
       hp: { type: 'range', label: 'HP', default: 50, min: 1, max: 9999 },
       fleeHpThreshold: { type: 'range', label: 'Flee HP Threshold', default: 0.2, min: 0, max: 1, step: 0.05 },
       waypoints: { type: 'object', label: 'Waypoints', default: [] },
+      asset: { type: 'string', label: 'Enemy Asset Key', default: 'enemy_1' },
     };
   }
 

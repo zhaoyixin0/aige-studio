@@ -13,7 +13,7 @@
 export interface PromptContext {
   gameType: string;
   theme: string;
-  role: 'good' | 'bad' | 'player' | 'bullet' | 'background';
+  role: 'good' | 'bad' | 'player' | 'bullet' | 'background' | 'enemy' | 'npc' | 'drop';
   style: string;
   assetDescriptions?: Record<string, string>;
 }
@@ -243,6 +243,75 @@ Must read clearly at 32x32 pixels on a mobile screen.
 ${EXCLUSION_BLOCK}`;
 }
 
+function buildEnemyPrompt(
+  itemDesc: string,
+  style: string,
+  aesthetic: string,
+  gameType: string,
+): string {
+  return `Generate a single enemy character sprite: ${itemDesc}.
+This is a hostile enemy NPC for a ${gameType} mobile game.
+The character should look menacing, aggressive, and clearly antagonistic — but still stylized for a game.
+Art style: ${style}.
+Theme aesthetic: ${aesthetic}.
+
+${CONSISTENCY_BLOCK}
+
+${CHROMA_KEY_BLOCK}
+
+Composition: single enemy character, centered on canvas, front-facing or slight 3/4 angle,
+occupying roughly 60-70% of the canvas height, fully visible within frame with no cropping.
+Character should be in an aggressive ready-stance or battle pose, conveying threat.
+The design must remain readable and recognizable when scaled down to 48x48 pixels on a mobile screen.
+No text, no UI elements, no duplicate characters.`;
+}
+
+function buildNpcPrompt(
+  itemDesc: string,
+  style: string,
+  aesthetic: string,
+  gameType: string,
+): string {
+  return `Generate a portrait bust shot of a game NPC character: ${itemDesc}.
+This is a non-player character portrait for a ${gameType} mobile game dialogue system.
+The character should have a clear, expressive face with distinctive features.
+Art style: ${style}.
+Theme aesthetic: ${aesthetic}.
+
+${CONSISTENCY_BLOCK}
+
+${CHROMA_KEY_BLOCK}
+
+Composition: head and upper chest portrait (bust shot), centered, front-facing or slight 3/4 angle,
+occupying roughly 70-80% of canvas height, shoulders visible at bottom edge.
+Expression should be neutral-friendly, suitable for conversation scenes.
+The design must remain readable and recognizable when scaled down to 64x64 pixels on a mobile screen.
+No text, no speech bubbles, no UI elements.`;
+}
+
+function buildDropPrompt(
+  itemDesc: string,
+  style: string,
+  aesthetic: string,
+  gameType: string,
+): string {
+  return `Generate a single loot drop item sprite: ${itemDesc}.
+This is a collectible drop item for a ${gameType} mobile game.
+The item should look valuable, desirable, and clearly identifiable as a pickup reward.
+Add a subtle sparkle or glow effect to make it stand out on the game screen.
+Art style: ${style}.
+Theme aesthetic: ${aesthetic}.
+
+${CONSISTENCY_BLOCK}
+
+${CHROMA_KEY_BLOCK}
+
+Composition: single item, centered on canvas, facing the camera,
+occupying roughly 60-70% of the canvas area, fully visible within frame with no cropping.
+The design must remain clearly readable and recognizable when scaled down to 32x32 pixels on a mobile screen.
+${EXCLUSION_BLOCK}`;
+}
+
 function buildBackgroundPrompt(
   itemDesc: string,
   style: string,
@@ -297,6 +366,18 @@ export class PromptBuilder {
       return buildBulletPrompt(itemDesc, styleInst, aesthetic, ctx.gameType);
     }
 
+    if (ctx.role === 'enemy') {
+      return buildEnemyPrompt(itemDesc, styleInst, aesthetic, ctx.gameType);
+    }
+
+    if (ctx.role === 'npc') {
+      return buildNpcPrompt(itemDesc, styleInst, aesthetic, ctx.gameType);
+    }
+
+    if (ctx.role === 'drop') {
+      return buildDropPrompt(itemDesc, styleInst, aesthetic, ctx.gameType);
+    }
+
     const roleHint = ctx.role === 'good'
       ? 'This is a POSITIVE collectible reward item that players eagerly want to catch. It should look appealing, desirable, and valuable.'
       : 'This is a DANGEROUS obstacle that players must avoid. It should look menacing, harmful, and clearly threatening.';
@@ -308,12 +389,21 @@ export class PromptBuilder {
   static inferRole(assetKey: string): PromptContext['role'] {
     if (assetKey.startsWith('good_')) return 'good';
     if (assetKey.startsWith('bad_')) return 'bad';
+    if (assetKey.startsWith('enemy_') || assetKey.startsWith('boss_')) return 'enemy';
+    if (assetKey.startsWith('npc_') || assetKey.startsWith('portrait_')) return 'npc';
+    if (assetKey.startsWith('drop_') || assetKey.startsWith('loot_')) return 'drop';
 
-    const badKeys = ['bomb', 'meteor', 'ghost', 'obstacle', 'enemy', 'hazard'];
+    const enemyKeys = ['enemy', 'zombie', 'skeleton', 'goblin', 'slime', 'boss'];
+    const npcKeys = ['npc', 'portrait', 'elder', 'merchant', 'villager'];
+    const dropKeys = ['drop', 'loot', 'potion', 'gem'];
+    const badKeys = ['bomb', 'meteor', 'ghost', 'obstacle', 'hazard'];
     const playerKeys = ['player', 'character', 'hero', 'avatar'];
     const bgKeys = ['sky', 'space_bg', 'ocean_bg', 'background'];
-    const bulletKeys = ['bullet', 'projectile', 'shot'];
+    const bulletKeys = ['bullet', 'projectile', 'shot', 'laser', 'plasma'];
 
+    if (enemyKeys.some(k => assetKey.includes(k))) return 'enemy';
+    if (npcKeys.some(k => assetKey.includes(k))) return 'npc';
+    if (dropKeys.some(k => assetKey.includes(k))) return 'drop';
     if (badKeys.some(k => assetKey.includes(k))) return 'bad';
     if (playerKeys.some(k => assetKey.includes(k))) return 'player';
     if (bgKeys.some(k => assetKey.includes(k))) return 'background';
