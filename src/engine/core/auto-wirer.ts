@@ -3,6 +3,7 @@ import type { Collision } from '@/engine/modules/mechanic/collision';
 import type { Spawner } from '@/engine/modules/mechanic/spawner';
 import type { Gravity } from '@/engine/modules/mechanic/gravity';
 import type { PlayerMovement } from '@/engine/modules/mechanic/player-movement';
+import type { EnemyAI } from '@/engine/modules/mechanic/enemy-ai';
 
 interface WiringRule {
   requires: string[];
@@ -251,6 +252,26 @@ const WIRING_RULES: WiringRule[] = [
       engine.eventBus.on('enemy:death', (data?: any) => {
         if (data?.id != null) {
           collision.unregisterObject(data.id);
+        }
+      });
+    },
+  },
+  {
+    // WaveSpawner + EnemyAI: spawn enemies into AI system, track deaths for wave progression
+    requires: ['WaveSpawner', 'EnemyAI'],
+    setup: (engine, modules) => {
+      const enemyAI = modules.get('EnemyAI') as unknown as EnemyAI;
+
+      engine.eventBus.on('wave:spawn', (data?: any) => {
+        if (data?.id != null) {
+          enemyAI.addEnemy(data.id, data.x ?? 0, data.y ?? 0);
+        }
+      });
+
+      engine.eventBus.on('enemy:death', (data?: any) => {
+        if (data?.id != null) {
+          enemyAI.removeEnemy(data.id);
+          // WaveSpawner handles death counting internally via its own enemy:death listener
         }
       });
     },

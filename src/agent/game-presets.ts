@@ -49,7 +49,7 @@ const PRESETS: Record<GameType, GamePreset> = {
     // input sensitivity so the wizard can apply them when the user picks that input.
     FaceInput:    { smoothing: 0.3, sensitivity: 1.0 },
     HandInput:    { smoothing: 0.3 },
-    TouchInput:   {},
+    TouchInput:   { playerSize: 64 },
     // Optional modules
     DifficultyRamp: {
       target: 'spawner_1', mode: 'time',
@@ -93,7 +93,7 @@ const PRESETS: Record<GameType, GamePreset> = {
     // Input-specific presets (intentional — for per-game-type tuning of input sensitivity)
     FaceInput:    { smoothing: 0.25, sensitivity: 1.2 },
     HandInput:    { smoothing: 0.25 },
-    TouchInput:   {},
+    TouchInput:   { playerSize: 64 },
     DifficultyRamp: {
       target: 'spawner_1', mode: 'time',
       rules: [
@@ -133,7 +133,7 @@ const PRESETS: Record<GameType, GamePreset> = {
     Lives:        { count: 3 },
     UIOverlay:    {},
     ResultScreen: { show: ['score', 'combo_max'], rating: { '3star': 250, '2star': 120, '1star': 40 } },
-    TouchInput:   {},
+    TouchInput:   { playerSize: 64 },
     DifficultyRamp: {
       target: 'spawner_1', mode: 'time',
       rules: [
@@ -156,12 +156,12 @@ const PRESETS: Record<GameType, GamePreset> = {
   shooting: {
     GameFlow:       { countdown: 3, onFinish: 'show_result' },
     // Player movement (horizontal control for dodging)
-    PlayerMovement: { speed: 250, acceleration: 800, deceleration: 600 },
-    // Projectile system — player fires bullets upward
-    Projectile:     { speed: 600, damage: 10, lifetime: 3000, fireRate: 200, fireEvent: 'input:touch:tap', layer: 'projectiles', maxProjectiles: 50 },
+    PlayerMovement: { speed: 250, acceleration: 800, deceleration: 600, defaultY: 0.85 },
+    // Projectile system — auto-fires upward
+    Projectile:     { speed: 600, damage: 10, lifetime: 3000, fireRate: 200, autoFire: true, layer: 'projectiles', maxProjectiles: 50 },
     Aim:            { mode: 'auto', autoTargetLayer: 'enemies', autoRange: 500 },
-    // Enemy system — waves of enemies spawn from the top
-    EnemyAI:        { behavior: 'patrol', speed: 100, detectionRange: 300, attackRange: 150, attackCooldown: 2000, attackDamage: 10, hp: 30, fleeHpThreshold: 0, waypoints: [] },
+    // Enemy system — waves chase player from the top
+    EnemyAI:        { behavior: 'chase', speed: 80, detectionRange: 2000, attackRange: 150, attackCooldown: 2000, attackDamage: 10, hp: 30, fleeHpThreshold: 0, waypoints: [] },
     WaveSpawner:    { enemiesPerWave: 3, waveCooldown: 3000, spawnDelay: 500, scalingFactor: 1.15, maxWaves: 10, spawnAreaX: 100, spawnAreaWidth: 880, spawnY: 100 },
     // Collision — projectiles hit enemies (score), enemies damage player (health)
     Collision:      { rules: [{ a: 'projectiles', b: 'enemies', event: 'hit', destroy: ['a'] }, { a: 'player', b: 'enemies', event: 'damage' }] },
@@ -174,7 +174,7 @@ const PRESETS: Record<GameType, GamePreset> = {
     ResultScreen:   { show: ['score', 'accuracy', 'waves_cleared'], rating: { '3star': 300, '2star': 150, '1star': 50 } },
     // Input-specific presets
     FaceInput:      { smoothing: 0.2, sensitivity: 1.0 },
-    TouchInput:     {},
+    TouchInput:     { playerSize: 64 },
     // Optional enhancements
     Shield:         { maxCharges: 3, rechargeCooldown: 5000, damageEvent: 'collision:damage' },
     DifficultyRamp: { target: 'wavespawner_1', mode: 'time', rules: [{ field: 'enemiesPerWave', increase: 1, max: 8, every: 15 }] },
@@ -204,7 +204,7 @@ const PRESETS: Record<GameType, GamePreset> = {
     Timer:        { duration: 60, mode: 'countdown' },
     UIOverlay:    {},
     ResultScreen: { show: ['score', 'accuracy'], rating: { '3star': 80, '2star': 50, '1star': 20 } },
-    TouchInput:   {},
+    TouchInput:   { playerSize: 64 },
     SoundFX:      { events: { 'collision:hit': 'ding', 'collision:damage': 'buzz' } },
     ParticleVFX:  { events: {} },
   },
@@ -230,7 +230,7 @@ const PRESETS: Record<GameType, GamePreset> = {
     },
     UIOverlay:    {},
     ResultScreen: { show: ['score'], rating: {} },
-    TouchInput:   {},
+    TouchInput:   { playerSize: 64 },
     SoundFX:      { events: { 'gameflow:state': 'cheer' } },
     ParticleVFX:  {
       events: {
@@ -290,7 +290,7 @@ const PRESETS: Record<GameType, GamePreset> = {
     ResultScreen: { show: ['score', 'time'], rating: { '3star': 500, '2star': 250, '1star': 80 } },
     // Input-specific presets (intentional — for per-game-type tuning of input sensitivity)
     FaceInput:    { smoothing: 0.3, sensitivity: 1.0 },
-    TouchInput:   {},
+    TouchInput:   { playerSize: 64 },
     DifficultyRamp: {
       target: 'spawner_1', mode: 'time',
       rules: [
@@ -366,7 +366,7 @@ const PRESETS: Record<GameType, GamePreset> = {
     UIOverlay:    {},
     ResultScreen: { show: ['score', 'accuracy', 'combo_max'], rating: { '3star': 300, '2star': 150, '1star': 50 } },
     // Input-specific presets (touch or face)
-    TouchInput:   {},
+    TouchInput:   { playerSize: 64 },
     FaceInput:    { smoothing: 0.2, sensitivity: 1.0 },
     // Optional modules
     DifficultyRamp: {
@@ -400,7 +400,7 @@ const PRESETS: Record<GameType, GamePreset> = {
     Timer:        { duration: 60, mode: 'countdown' },
     UIOverlay:    {},
     ResultScreen: { show: ['score', 'time'], rating: { '3star': 200, '2star': 100, '1star': 40 } },
-    TouchInput:   {},
+    TouchInput:   { playerSize: 64 },
     // Optional modules
     SoundFX:      { events: { 'match:found': 'ding', 'match:fail': 'buzz', 'match:complete': 'cheer' } },
     ParticleVFX:  {
@@ -425,7 +425,7 @@ const PRESETS: Record<GameType, GamePreset> = {
     ResultScreen: { show: ['score'], rating: {} },
     // Input-specific presets (face for AR overlay, touch for selection)
     FaceInput:    { smoothing: 0.2, sensitivity: 1.0 },
-    TouchInput:   {},
+    TouchInput:   { playerSize: 64 },
     // Optional modules
     SoundFX:      { events: { 'dressup:equip': 'pop', 'dressup:snapshot': 'cheer' } },
     ParticleVFX:  {
@@ -460,7 +460,7 @@ const PRESETS: Record<GameType, GamePreset> = {
     Lives:        { count: 3 },
     UIOverlay:    {},
     ResultScreen: { show: ['score', 'time'], rating: { '3star': 200, '2star': 100, '1star': 30 } },
-    TouchInput:   {},
+    TouchInput:   { playerSize: 64 },
     // Optional modules
     ParticleVFX:  {
       events: {
@@ -509,7 +509,7 @@ const PRESETS: Record<GameType, GamePreset> = {
     },
     UIOverlay:    {},
     ResultScreen: { show: ['score'], rating: {} },
-    TouchInput:   {},
+    TouchInput:   { playerSize: 64 },
     // Optional modules
     SoundFX:      { events: { 'branch:stateChange': 'pop', 'branch:end': 'cheer' } },
     ParticleVFX:  {
@@ -557,7 +557,7 @@ const PRESETS: Record<GameType, GamePreset> = {
     IFrames:         { duration: 1000 },
     Knockback:       { force: 300, duration: 200 },
     CameraFollow:    { mode: 'center', smoothing: 0.1 },
-    TouchInput:      {},
+    TouchInput:      { playerSize: 64 },
     ParticleVFX:     {
       events: {
         'collectible:pickup': { effect: 'sparkle', at: 'target', duration: 400, color: '#ffdd00' },
@@ -575,13 +575,13 @@ const PRESETS: Record<GameType, GamePreset> = {
   // ──────────────────────────────────────────
   'action-rpg': {
     GameFlow:       { countdown: 0, onFinish: 'show_result' },
-    PlayerMovement: { speed: 200, acceleration: 800, deceleration: 600 },
+    PlayerMovement: { speed: 200, acceleration: 800, deceleration: 600, defaultY: 0.85 },
     Gravity:        { strength: 980, terminalVelocity: 800 },
     Jump:           { jumpForce: 500, gravity: 980, groundY: 0.8, triggerEvent: 'input:touch:tap' },
     Health:         { maxHp: 100, damageEvent: 'collision:damage' },
-    Projectile:     { speed: 500, damage: 15, lifetime: 2000, fireRate: 300, fireEvent: 'input:touch:doubleTap', layer: 'projectiles', maxProjectiles: 30 },
+    Projectile:     { speed: 500, damage: 15, lifetime: 2000, fireRate: 300, autoFire: true, layer: 'projectiles', maxProjectiles: 30 },
     Aim:            { mode: 'auto', autoTargetLayer: 'enemies', autoRange: 400 },
-    EnemyAI:        { behavior: 'patrol', speed: 80, detectionRange: 200, attackRange: 50, attackCooldown: 1500, attackDamage: 10, hp: 50, fleeHpThreshold: 0.2, waypoints: [] },
+    EnemyAI:        { behavior: 'chase', speed: 80, detectionRange: 2000, attackRange: 50, attackCooldown: 1500, attackDamage: 10, hp: 50, fleeHpThreshold: 0.2, waypoints: [] },
     WaveSpawner:    { enemiesPerWave: 3, waveCooldown: 3000, spawnDelay: 500, scalingFactor: 1.2, maxWaves: 10, spawnAreaX: 100, spawnAreaWidth: 880, spawnY: 100 },
     EnemyDrop:      { lootTable: [{ item: 'potion', weight: 3, minCount: 1, maxCount: 1, type: 'health' }, { item: 'coin', weight: 5, minCount: 1, maxCount: 3, type: 'collectible' }], dropChance: 0.6, xpAmount: 15 },
     LevelUp:        { xpPerLevel: 50, scalingCurve: 'quadratic', maxLevel: 20, xpSource: 'enemy:death', xpAmount: 15, statGrowth: { hp: 10, attack: 2, defense: 1 } },
@@ -597,7 +597,7 @@ const PRESETS: Record<GameType, GamePreset> = {
     Knockback:      { force: 200, duration: 150 },
     UIOverlay:      { elements: ['score', 'lives', 'level'] },
     ResultScreen:   { show: ['score', 'level', 'waves_cleared'], rating: { '3star': 500, '2star': 250, '1star': 100 } },
-    TouchInput:     {},
+    TouchInput:     { playerSize: 64 },
     ParticleVFX:    { events: { 'collision:hit': { effect: 'sparkle', at: 'target', duration: 400, color: '#ffaa00' }, 'enemy:death': { effect: 'burst', at: 'target', duration: 500, color: '#ff0000' }, 'levelup:levelup': { effect: 'burst', at: 'player', duration: 800, color: '#00ff88' } } },
     SoundFX:        { events: { 'collision:hit': 'pop', 'enemy:death': 'boom', 'levelup:levelup': 'cheer', 'wave:complete': 'ding' } },
   },
@@ -611,7 +611,7 @@ const INPUT_FALLBACKS: Record<string, Record<string, unknown>> = {
   DeviceInput: { sensitivity: 1.0 },
   HandInput: { smoothing: 0.3 },
   FaceInput: { smoothing: 0.3, sensitivity: 1.0 },
-  TouchInput: {},
+  TouchInput: { playerSize: 64 },
 };
 
 /**

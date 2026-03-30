@@ -169,4 +169,29 @@ describe('Projectile', () => {
     expect(proj.x).toBe(100);
     expect(proj.y).toBe(300);
   });
+
+  // ── Auto-fire ──────────────────────────────────────────────────
+
+  it('should auto-fire on every update when autoFire is enabled', () => {
+    const { mod } = setup({ autoFire: true, fireRate: 200, speed: 600 });
+
+    // First update: should fire immediately (fireTimer starts at 0)
+    mod.update(16);
+    expect(mod.getActiveProjectiles()).toHaveLength(1);
+
+    // Within cooldown: no new projectile
+    mod.update(100);
+    expect(mod.getActiveProjectiles()).toHaveLength(1);
+
+    // After cooldown: new projectile
+    mod.update(200);
+    expect(mod.getActiveProjectiles()).toHaveLength(2);
+  });
+
+  it('should not auto-fire when autoFire is false', () => {
+    const { mod } = setup({ autoFire: false, fireRate: 200 });
+
+    mod.update(300);
+    expect(mod.getActiveProjectiles()).toHaveLength(0);
+  });
 });

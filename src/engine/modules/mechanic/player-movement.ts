@@ -5,6 +5,7 @@ export class PlayerMovement extends BaseModule {
   readonly type = 'PlayerMovement';
 
   private x = 0;
+  private y = 0;
   private velocityX = 0;
   private direction: -1 | 0 | 1 = 0;
   private inputActive = false;
@@ -61,11 +62,25 @@ export class PlayerMovement extends BaseModule {
         step: 10,
         unit: 'ms',
       },
+      defaultY: {
+        type: 'range',
+        label: 'Default Y (fraction)',
+        default: 0.85,
+        min: 0,
+        max: 1,
+        step: 0.05,
+      },
     };
   }
 
   init(engine: GameEngine): void {
     super.init(engine);
+
+    // Initialize position to canvas center
+    const canvas = engine.getCanvas();
+    this.x = canvas.width / 2;
+    const defaultY = (this.params.defaultY as number) ?? 0.85;
+    this.y = Math.round(defaultY * canvas.height);
 
     // Touch hold: left half → move left, right half → move right
     this.on('input:touch:hold', (data?: any) => {
@@ -189,17 +204,22 @@ export class PlayerMovement extends BaseModule {
       this.wasStopped = false;
       this.emit('player:move', {
         x: this.x,
+        y: this.y,
         direction: this.direction,
         speed: Math.abs(this.velocityX),
       });
     } else if (!this.wasStopped) {
       this.wasStopped = true;
-      this.emit('player:stop', { x: this.x });
+      this.emit('player:stop', { x: this.x, y: this.y });
     }
   }
 
   getX(): number {
     return this.x;
+  }
+
+  getY(): number {
+    return this.y;
   }
 
   getVelocityX(): number {
@@ -220,7 +240,10 @@ export class PlayerMovement extends BaseModule {
   }
 
   reset(): void {
-    this.x = 0;
+    const canvas = this.engine?.getCanvas();
+    this.x = (canvas?.width ?? 1080) / 2;
+    const defaultY = (this.params.defaultY as number) ?? 0.85;
+    this.y = Math.round(defaultY * (canvas?.height ?? 1920));
     this.velocityX = 0;
     this.direction = 0;
     this.inputActive = false;

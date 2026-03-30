@@ -216,4 +216,49 @@ describe('WaveSpawner', () => {
     expect(mod1).toBeDefined();
     expect(mod2).toBeDefined();
   });
+
+  // ── enemyKilled() ────────────────────────────────────────────────
+
+  it('should decrement enemiesRemaining on enemyKilled()', () => {
+    const { engine, mod } = setup({ enemiesPerWave: 3, spawnDelay: 100 });
+    engine.eventBus.emit('gameflow:resume');
+    // Spawn all 3 enemies
+    engine.tick(100);
+    engine.tick(100);
+    engine.tick(100);
+    expect(mod.getEnemiesRemaining()).toBe(3);
+
+    mod.enemyKilled();
+    expect(mod.getEnemiesRemaining()).toBe(2);
+
+    mod.enemyKilled();
+    expect(mod.getEnemiesRemaining()).toBe(1);
+  });
+
+  it('should complete wave when all enemies killed via enemyKilled()', () => {
+    const { engine, mod } = setup({ enemiesPerWave: 2, spawnDelay: 100, waveCooldown: 1000 });
+    const completeHandler = vi.fn();
+    engine.eventBus.on('wave:complete', completeHandler);
+
+    engine.eventBus.emit('gameflow:resume');
+    engine.tick(100);
+    engine.tick(100);
+    expect(mod.getEnemiesRemaining()).toBe(2);
+
+    mod.enemyKilled();
+    mod.enemyKilled();
+
+    expect(completeHandler).toHaveBeenCalledOnce();
+    expect(mod.getEnemiesRemaining()).toBe(0);
+  });
+
+  it('should not go below zero on extra enemyKilled() calls', () => {
+    const { engine, mod } = setup({ enemiesPerWave: 1, spawnDelay: 100 });
+    engine.eventBus.emit('gameflow:resume');
+    engine.tick(100);
+
+    mod.enemyKilled();
+    mod.enemyKilled(); // extra call
+    expect(mod.getEnemiesRemaining()).toBe(0);
+  });
 });

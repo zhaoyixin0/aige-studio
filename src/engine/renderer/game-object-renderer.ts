@@ -15,6 +15,7 @@ import type { Collectible } from '@/engine/modules/mechanic/collectible';
 import type { Hazard } from '@/engine/modules/mechanic/hazard';
 import type { Checkpoint } from '@/engine/modules/mechanic/checkpoint';
 import type { CameraFollow } from '@/engine/modules/feedback/camera-follow';
+import type { Runner } from '@/engine/modules/mechanic/runner';
 import { assetToEmoji, getTheme } from './theme-registry';
 
 export class GameObjectRenderer {
@@ -55,14 +56,22 @@ export class GameObjectRenderer {
     const gameFlow = engine.getModulesByType('GameFlow')[0] as GameFlow | undefined;
     const state = gameFlow?.getState() ?? 'playing';
 
-    // Check if this is a platformer game (has PlayerMovement)
+    // Route rendering by game pattern
     const playerMovement = engine.getModulesByType('PlayerMovement')[0] as PlayerMovement | undefined;
-    if (playerMovement) {
-      // Platformer: always show platforms/collectibles/hazards (even in edit/ready mode)
+    const hasPlatforms = engine.getModulesByType('StaticPlatform').length > 0
+      || engine.getModulesByType('MovingPlatform').length > 0;
+
+    if (playerMovement && hasPlatforms) {
+      // Platformer path: platforms, collectibles, hazards, camera follow
       this.container.visible = true;
       this.syncPlatformerScene(engine, playerMovement);
+    } else if (playerMovement) {
+      // Shooter/RPG path: player rendered from PlayerMovement position, no platforms
+      this.container.visible = (state === 'playing' || state === 'finished');
+      if (!this.container.visible) return;
+      this.syncShooterPlayer(engine, playerMovement);
     } else {
-      // Spawner games: hide during ready/countdown
+      // Spawner path: catch/dodge/tap/runner
       this.container.visible = (state === 'playing' || state === 'finished');
       if (!this.container.visible) return;
       this.syncSpawnedObjects(engine);
@@ -142,7 +151,15 @@ export class GameObjectRenderer {
 
     let pos: { x: number; y: number } | null = null;
 
-    if (faceInput) {
+    // Runner games: compute position from lane
+    const runner = engine.getModulesByType('Runner')[0] as Runner | undefined;
+    if (runner && runner.isStarted()) {
+      const laneCount = (runner.getParams().laneCount as number) ?? 3;
+      const lane = runner.getCurrentLane();
+      const canvas = engine.getCanvas();
+      const laneWidth = canvas.width / laneCount;
+      pos = { x: laneWidth * (lane + 0.5), y: canvas.height * 0.8 };
+    } else if (faceInput) {
       pos = faceInput.getPosition();
     } else if (handInput) {
       pos = handInput.getPosition();
@@ -257,6 +274,59 @@ export class GameObjectRenderer {
     img.src = dataUrl;
 
     return wrapper;
+  }
+
+  // ── Shooter/RPG player rendering ──────────────────────────────────
+
+  private syncShooterPlayer(engine: Engine, playerMovement: PlayerMovement): void {
+    const px = playerMovement.getX();
+    const py = playerMovement.getY();
+    const touchInput = engine.getModulesByType('TouchInput')[0] as TouchInput | undefined;
+    const playerSize = (touchInput?.getParams()?.playerSize as number) ?? 64;
+    const playerRadius = playerSize / 2;
+
+    if (!this.playerSprite) {
+      const playerContainer = new Container();
+      const configAssets = engine.getConfig().assets ?? {};
+      const playerAsset = configAssets['player'];
+      const hasPlayerImage = playerAsset?.src?.startsWith('data:');
+
+      if (hasPlayerImage) {
+        const shadow = new Graphics();
+        shadow.ellipse(0, playerSize * 0.3, playerSize * 0.4, 8).fill({ color: 0x000000, alpha: 0.3 });
+        playerContainer.addChild(shadow);
+        const imgSprite = this.createSpriteFromDataUrl(playerAsset.src, playerSize);
+        playerContainer.addChild(imgSprite);
+      } else {
+        const shadow = new Graphics();
+        shadow.ellipse(0, playerSize * 0.3, playerSize * 0.4, 8).fill({ color: 0x000000, alpha: 0.3 });
+        playerContainer.addChild(shadow);
+        const themeName = engine.getConfig().meta.theme ?? 'fruit';
+        const theme = getTheme(themeName);
+        const emojiText = new Text({
+          text: theme.playerEmoji,
+          style: new TextStyle({ fontSize: playerSize }),
+        });
+        emojiText.anchor.set(0.5);
+        playerContainer.addChild(emojiText);
+      }
+      this.container.addChild(playerContainer);
+      this.playerSprite = playerContainer;
+
+      // Register player in collision system
+      const collision = engine.getModulesByType('Collision')[0] as Collision | undefined;
+      if (collision) {
+        collision.registerObject('player_1', 'player', { x: px, y: py, radius: playerRadius });
+      }
+    }
+    this.playerSprite.x = px;
+    this.playerSprite.y = py;
+
+    // Sync collision position
+    const collision = engine.getModulesByType('Collision')[0] as Collision | undefined;
+    if (collision) {
+      collision.updateObject('player_1', { x: px, y: py, radius: playerRadius });
+    }
   }
 
   // ── Platformer rendering ──────────────────────────────────────────

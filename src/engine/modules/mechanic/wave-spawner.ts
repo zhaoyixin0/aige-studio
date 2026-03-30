@@ -40,10 +40,7 @@ export class WaveSpawner extends BaseModule {
 
     this.on('enemy:death', () => {
       if (!this.waveActive) return;
-      this.enemiesRemaining = Math.max(0, this.enemiesRemaining - 1);
-      if (this.enemiesRemaining === 0 && this.spawnedInWave >= this.currentWaveEnemyCount) {
-        this.completeWave();
-      }
+      this.enemyKilled();
     });
   }
 
@@ -126,6 +123,14 @@ export class WaveSpawner extends BaseModule {
 
   getEnemiesRemaining(): number {
     return this.enemiesRemaining;
+  }
+
+  enemyKilled(): void {
+    if (this.enemiesRemaining <= 0) return;
+    this.enemiesRemaining -= 1;
+    if (this.enemiesRemaining === 0 && this.spawnedInWave >= this.currentWaveEnemyCount) {
+      this.completeWave();
+    }
   }
 
   reset(): void {

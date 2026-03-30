@@ -53,6 +53,9 @@ export class TouchInput extends BaseModule {
 
   init(engine: GameEngine): void {
     super.init(engine);
+    // Default position: center-bottom so player is visible before first touch
+    const canvas = engine.getCanvas();
+    this.currentPosition = { x: canvas.width / 2, y: canvas.height * 0.85 };
   }
 
   setCanvas(canvas: HTMLElement): void {
@@ -208,7 +211,12 @@ export class TouchInput extends BaseModule {
     this.clearLongPressTimer();
     this.pointerState = null;
     this.lastTapTime = 0;
-    this.currentPosition = null;
+    // Restore default center-bottom position (same as init)
+    const canvas = this.engine?.getCanvas();
+    this.currentPosition = {
+      x: (canvas?.width ?? 1080) / 2,
+      y: (canvas?.height ?? 1920) * 0.85,
+    };
   }
 
   update(_dt: number): void {

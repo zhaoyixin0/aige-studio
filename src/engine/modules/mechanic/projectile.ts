@@ -84,6 +84,7 @@ export class Projectile extends BaseModule {
         max: 50,
       },
       asset: { type: 'string', label: 'Projectile Asset Key', default: 'bullet' },
+      autoFire: { type: 'boolean', label: 'Auto Fire', default: false },
     };
   }
 
@@ -141,6 +142,11 @@ export class Projectile extends BaseModule {
     // Decrement cooldown timer
     if (this.fireTimer > 0) {
       this.fireTimer = Math.max(0, this.fireTimer - dt);
+    }
+
+    // Auto-fire: fire every cooldown cycle
+    if (this.params.autoFire) {
+      this.fire();
     }
 
     const lifetime = this.params.lifetime ?? 3000;
