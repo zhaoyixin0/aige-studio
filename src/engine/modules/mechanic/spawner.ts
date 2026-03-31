@@ -92,8 +92,8 @@ export class Spawner extends BaseModule {
   getContracts(): ModuleContracts {
     const spriteSize = (this.params.spriteSize as number) ?? 48;
     const itemConfigs: Array<{ asset: string; layer?: string }> = this.params.items ?? [];
-    // Default layer from first item, but getLayerForObject provides per-asset routing
-    const defaultLayer = itemConfigs.find((i) => i.layer)?.layer ?? 'items';
+    // Default layer for items without an explicit layer assignment
+    const defaultLayer = 'items';
 
     // Build asset→layer lookup for per-item routing (runner: coins→items, obstacles→obstacles)
     const assetLayerMap = new Map<string, string>();
