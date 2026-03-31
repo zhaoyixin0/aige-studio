@@ -99,4 +99,46 @@ describe('QuizEngine', () => {
     expect(wrongHandler).not.toHaveBeenCalled();
     expect(correctHandler).not.toHaveBeenCalled();
   });
+
+  it('should auto-start when gameflow resumes (gameflowPaused becomes false)', () => {
+    const { engine, quiz } = setup();
+
+    // Before resume, quiz should not be started
+    expect(quiz.getCurrentQuestion()).toBeNull();
+
+    // Simulate gameflow:resume
+    engine.eventBus.emit('gameflow:resume');
+
+    // Quiz should now be started with a current question
+    expect(quiz.getCurrentQuestion()).not.toBeNull();
+    expect(quiz.getCurrentQuestion()?.text).toBe('What is 1+1?');
+  });
+
+  it('should handle quiz:answer event from HUD clicks', () => {
+    const { engine, quiz } = setup();
+
+    engine.eventBus.emit('gameflow:resume');
+    expect(quiz.getCurrentQuestion()?.text).toBe('What is 1+1?');
+
+    // Simulate clicking answer via event
+    engine.eventBus.emit('quiz:answer', { index: 1 });
+
+    // Should advance to next question
+    expect(quiz.getCurrentQuestion()?.text).toBe('What is 2+2?');
+  });
+
+  it('should finish after all questions answered via quiz:answer events', () => {
+    const { engine, quiz } = setup();
+    const finishedHandler = vi.fn();
+    engine.eventBus.on('quiz:finished', finishedHandler);
+
+    engine.eventBus.emit('gameflow:resume');
+
+    engine.eventBus.emit('quiz:answer', { index: 1 }); // Q1 correct
+    engine.eventBus.emit('quiz:answer', { index: 1 }); // Q2 correct
+    engine.eventBus.emit('quiz:answer', { index: 1 }); // Q3 correct
+
+    expect(quiz.isFinished()).toBe(true);
+    expect(finishedHandler).toHaveBeenCalledOnce();
+  });
 });

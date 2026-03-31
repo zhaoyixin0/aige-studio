@@ -660,12 +660,12 @@ describe('Deep QA: Rhythm', () => {
     engine.restart();
   });
 
-  it('Spawner should exist for beat notes', () => {
+  it('Rhythm should be pure timing-based (no Spawner)', () => {
     const config = createGameAllYes('rhythm');
     const engine = createEngine(config);
 
-    const spawner = engine.getModulesByType('Spawner')[0] as Spawner;
-    expect(spawner).toBeDefined();
+    const spawner = engine.getModulesByType('Spawner')[0];
+    expect(spawner).toBeUndefined();
     engine.restart();
   });
 

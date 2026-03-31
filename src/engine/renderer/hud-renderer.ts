@@ -27,6 +27,7 @@ export class HudRenderer {
   private optionTexts: Text[] = [];
   private optionBgs: Graphics[] = [];
   private progressText: Text;
+  private quizClicksWired = false;
 
   // Wheel UI elements
   private wheelContainer: Container;
@@ -35,6 +36,7 @@ export class HudRenderer {
   private wheelResultText: Text;
   private wheelHintText: Text;
   private wheelAngle = 0;
+  private wheelLabels: Text[] = [];
 
   // Shooter HUD elements
   private shooterContainer: Container | null = null;
@@ -139,6 +141,10 @@ export class HudRenderer {
       bg.roundRect(60, y, width - 120, 90, 16);
       bg.fill({ color: 0x1e3a5f, alpha: 0.8 });
       bg.stroke({ color: 0x3b82f6, width: 2, alpha: 0.5 });
+
+      // Make interactive for quiz answer clicks
+      bg.eventMode = 'static';
+      bg.cursor = 'pointer';
 
       const text = new Text({ text: '', style: optionStyle });
       text.anchor.set(0, 0.5);
@@ -289,13 +295,24 @@ export class HudRenderer {
     const quizEngine = engine.getModulesByType('QuizEngine')[0] as QuizEngine | undefined;
     if (quizEngine) {
       this.quizContainer.visible = true;
+
+      // Wire click handlers once when engine is available
+      if (!this.quizClicksWired) {
+        this.quizClicksWired = true;
+        for (let i = 0; i < this.optionBgs.length; i++) {
+          const idx = i;
+          this.optionBgs[i].on('pointerdown', () => {
+            engine.eventBus.emit('quiz:answer', { index: idx });
+          });
+        }
+      }
       const question = quizEngine.getCurrentQuestion();
       const progress = quizEngine.getProgress();
 
       if (question) {
         this.progressText.text = `${progress.current + 1} / ${progress.total}`;
-        const q = question as { question?: string; options?: string[] };
-        this.questionText.text = String(q.question ?? '');
+        const q = question as { text?: string; options?: string[] };
+        this.questionText.text = String(q.text ?? '');
         const options: string[] = q.options ?? [];
         for (let i = 0; i < 4; i++) {
           if (i < options.length) {
@@ -383,6 +400,40 @@ export class HudRenderer {
 
     g.circle(cx, cy, 30).fill({ color: 0x1f2937 });
     g.circle(cx, cy, 28).stroke({ color: 0xffffff, width: 2 });
+
+    // Render segment labels
+    // Ensure we have enough Text objects (create once, reuse)
+    while (this.wheelLabels.length < items.length) {
+      const label = new Text({
+        text: '',
+        style: new TextStyle({
+          fill: '#ffffff',
+          fontSize: 18,
+          fontFamily: 'Arial',
+          fontWeight: 'bold',
+        }),
+      });
+      label.anchor.set(0.5);
+      this.wheelContainer.addChild(label);
+      this.wheelLabels.push(label);
+    }
+
+    // Update label positions and text
+    for (let i = 0; i < this.wheelLabels.length; i++) {
+      if (i < items.length) {
+        const midAngle = angle + (i + 0.5) * segAngle;
+        const labelRadius = radius * 0.65;
+        this.wheelLabels[i].text = items[i].label ?? items[i].asset;
+        this.wheelLabels[i].position.set(
+          cx + Math.cos(midAngle) * labelRadius,
+          cy + Math.sin(midAngle) * labelRadius,
+        );
+        this.wheelLabels[i].rotation = midAngle;
+        this.wheelLabels[i].visible = true;
+      } else {
+        this.wheelLabels[i].visible = false;
+      }
+    }
 
     this.wheelPointer.clear();
     this.wheelPointer.moveTo(cx, cy - radius - 5);
@@ -552,6 +603,7 @@ export class HudRenderer {
     this.livesText.text = '';
     this.comboText.alpha = 0;
     this.quizContainer.visible = false;
+    this.quizClicksWired = false;
     this.wheelContainer.visible = false;
     this.wheelAngle = 0;
     if (this.shooterContainer) this.shooterContainer.visible = false;

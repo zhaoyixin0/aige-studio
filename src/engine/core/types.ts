@@ -55,6 +55,7 @@ export interface GameMeta {
   artStyle?: string;
   assetDescriptions?: Record<string, string>;
   playerEmoji?: string;
+  spriteSize?: number;
 }
 
 export interface GameConfig {

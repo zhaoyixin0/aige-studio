@@ -48,6 +48,20 @@ export class QuizEngine extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
     this.currentIndex = 0;
+
+    // Auto-start when gameflow transitions to 'playing'
+    this.on('gameflow:resume', () => {
+      if (!this.started) {
+        this.start();
+      }
+    });
+
+    // Listen for answer clicks from HUD
+    this.on('quiz:answer', (data?: any) => {
+      if (data && typeof data.index === 'number') {
+        this.answer(data.index);
+      }
+    });
   }
 
   start(): void {
@@ -150,6 +164,7 @@ export class QuizEngine extends BaseModule {
   }
 
   getCurrentQuestion(): QuizQuestion | null {
+    if (!this.started || this.finished) return null;
     const questions: QuizQuestion[] = this.params.questions ?? [];
     if (this.currentIndex >= questions.length) return null;
     return questions[this.currentIndex];

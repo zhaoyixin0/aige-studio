@@ -48,6 +48,7 @@ const PRESETS: Record<GameType, GamePreset> = {
     // Input-specific presets per game type. These are intentionally included even
     // when a given input may not be selected — they allow per-game-type tuning of
     // input sensitivity so the wizard can apply them when the user picks that input.
+    PlayerMovement: { mode: 'follow', followSpeed: 0.15, defaultY: 0.85 },
     FaceInput:    { smoothing: 0.3, sensitivity: 1.0 },
     HandInput:    { smoothing: 0.3 },
     TouchInput:   { playerSize: 64 },
@@ -92,6 +93,7 @@ const PRESETS: Record<GameType, GamePreset> = {
     Lives:        { count: 3 },
     UIOverlay:    {},
     ResultScreen: { show: ['score', 'time'], rating: { '3star': 200, '2star': 100, '1star': 30 } },
+    PlayerMovement: { mode: 'follow', followSpeed: 0.15, defaultY: 0.85 },
     // Input-specific presets (intentional — for per-game-type tuning of input sensitivity)
     FaceInput:    { smoothing: 0.25, sensitivity: 1.2 },
     HandInput:    { smoothing: 0.25 },
@@ -130,6 +132,7 @@ const PRESETS: Record<GameType, GamePreset> = {
       spawnArea: { x: 80, y: 150, width: 920, height: 1500 },
     },
     Collision:    { rules: [{ a: 'player', b: 'items', event: 'hit', destroy: ['b'] }] },
+    PlayerMovement: { mode: 'follow', followSpeed: 0.15, defaultY: 0.85 },
     Scorer:       { perHit: 10, combo: { enabled: true, window: 800, multiplier: [1, 1.5, 2, 3] } },
     Timer:        { duration: 30, mode: 'countdown' },
     Lives:        { count: 3 },
@@ -365,17 +368,7 @@ const PRESETS: Record<GameType, GamePreset> = {
         return result.sort((a, b) => a - b);
       })(),
     },
-    Spawner:      {
-      frequency: 0.5, maxCount: 10,
-      speed: { min: 300, max: 300 },
-      direction: 'down',
-      items: [
-        { asset: 'beat_note', weight: 1 },
-      ],
-      spawnArea: { x: 200, y: 0, width: 680, height: 0 },
-    },
-    Collision:    { rules: [{ a: 'player', b: 'items', event: 'hit', destroy: ['b'] }] },
-    Scorer:       { perHit: 10, combo: { enabled: true, window: 1000, multiplier: [1, 1.5, 2, 3] } },
+    Scorer:       { perHit: 10, hitEvent: 'beat:hit', combo: { enabled: true, window: 1000, multiplier: [1, 1.5, 2, 3] } },
     Timer:        { duration: 60, mode: 'countdown' },
     UIOverlay:    {},
     ResultScreen: { show: ['score', 'accuracy', 'combo_max'], rating: { '3star': 300, '2star': 150, '1star': 50 } },
@@ -383,12 +376,6 @@ const PRESETS: Record<GameType, GamePreset> = {
     TouchInput:   { playerSize: 64 },
     FaceInput:    { smoothing: 0.2, sensitivity: 1.0 },
     // Optional modules
-    DifficultyRamp: {
-      target: 'spawner_1', mode: 'time',
-      rules: [
-        { field: 'frequency', decrease: 0.05, min: 0.2, every: 15 },
-      ],
-    },
     ComboSystem:  { comboWindow: 1000, multiplierStep: 0.5, maxMultiplier: 4 },
     ParticleVFX:  {
       events: {

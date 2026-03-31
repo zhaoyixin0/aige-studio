@@ -107,6 +107,12 @@ export function extractAssetKeys(config: GameConfig): string[] {
     keys.add('player');
   }
 
+  // 4. Skip background for expression game type (camera feed is the background)
+  const hasExpression = config.modules.some(m => m.type === 'ExpressionDetector');
+  if (hasExpression) {
+    keys.delete('background');
+  }
+
   return [...keys];
 }
 
@@ -165,6 +171,9 @@ export class AssetAgent {
     // Build a combined cache key from theme + artStyle so style changes bypass cache
     const cacheTheme = theme ? `${theme}__${style}` : style;
 
+    // Sprite target size: configurable via config.meta.spriteSize, default 256, max 512
+    const spriteSize = Math.min(config.meta?.spriteSize ?? 256, 512);
+
     for (let i = 0; i < keysToProcess.length; i++) {
       if (signal.aborted) return result;
 
@@ -178,7 +187,7 @@ export class AssetAgent {
       if (cached && cached.src && cached.src.startsWith('data:')) {
         let src = cached.src;
         if (cached.type !== 'background') {
-          try { src = await this.resizeImage(src, 128, 128); } catch { /* keep original */ }
+          try { src = await this.resizeImage(src, spriteSize, spriteSize); } catch { /* keep original */ }
         }
         result[key] = { type: cached.type, src };
         onProgress?.({ current: i + 1, total, key, status: 'done' });
@@ -222,8 +231,8 @@ export class AssetAgent {
         if (signal.aborted) return result;
 
         // Resize from 1024x1024 generation to game target sizes
-        // Sprites: 128x128, Backgrounds: 540x960 (already native 9:16 from API)
-        const targetSize = assetType === 'background' ? { w: 540, h: 960 } : { w: 128, h: 128 };
+        // Sprites: configurable (default 256, max 512), Backgrounds: 540x960
+        const targetSize = assetType === 'background' ? { w: 540, h: 960 } : { w: spriteSize, h: spriteSize };
         dataUrl = await this.resizeImage(dataUrl, targetSize.w, targetSize.h);
 
         // Save to library with combined theme+style key for proper cache invalidation

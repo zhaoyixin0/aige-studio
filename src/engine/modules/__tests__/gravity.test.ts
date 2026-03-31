@@ -366,6 +366,41 @@ describe('Gravity', () => {
       expect(gravity.getSurfaces().length).toBe(0);
     });
 
+    it('should not tunnel through thin platforms at high velocity', () => {
+      const { gravity } = setup({ strength: 980, terminalVelocity: 2000 });
+
+      // Platform at y=500, object starts at y=100 with extreme velocity
+      gravity.addSurface({ id: 'thin', x: 100, y: 500, width: 200, oneWay: false, active: true });
+      gravity.addObject('p', { x: 150, y: 100, floorY: 9999, airborne: true, velocityY: 2000 });
+
+      // Single large dt step — at 2000 px/s with dt=50ms, displacement = 100px
+      // Object should still land on surface at y=500 even with large step
+      gravity.update(50);
+
+      const obj = gravity.getObject('p')!;
+      // The object should either be landed on the surface or past it but caught
+      expect(obj.y).toBeLessThanOrEqual(500);
+    });
+
+    it('should use actual dt instead of hardcoded 0.016 in resolveFloorY', () => {
+      const { gravity } = setup({ strength: 980 });
+
+      // Platform at y=500
+      gravity.addSurface({ id: 'plat', x: 100, y: 500, width: 200, oneWay: false, active: true });
+      // Object starts just above platform with high velocity — will pass through in one frame
+      // At velocityY=800 and dt=33ms, displacement = 800*0.033 = 26.4px
+      // Object at y=490 will move to ~516 in one step, passing platform at 500
+      gravity.addObject('p', { x: 150, y: 490, floorY: 9999, airborne: true, velocityY: 800 });
+
+      // With hardcoded 0.016: prevY = newY - vel*0.016 = too small window
+      // With actual dt=0.033: prevY = newY - vel*0.033 = correct window
+      gravity.update(33);
+
+      const obj = gravity.getObject('p')!;
+      expect(obj.airborne).toBe(false);
+      expect(obj.y).toBe(500);
+    });
+
     it('should deactivate surface and object falls through', () => {
       const { gravity } = setup({ strength: 980 });
 
