@@ -125,8 +125,6 @@ describe('AutoWirer Phase A — Registration', () => {
     engine.addModule(collision);
     AutoWirer.wire(engine);
 
-    const registerSpy = vi.spyOn(collision, 'registerObject');
-
     // Player registration should happen immediately at wire() time
     // (the spy was set up after wire(), so we need to check via pre-update hook)
     // Instead, let's verify by checking collision has the player registered

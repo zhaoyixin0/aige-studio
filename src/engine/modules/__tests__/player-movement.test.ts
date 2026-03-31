@@ -288,23 +288,19 @@ describe('PlayerMovement', () => {
       engine.eventBus.emit('input:touch:position', { x: 300, y: 1500 });
       pm.update(16);
 
-      // Position should have moved toward touch
-      const pos = pm.getContracts().playerPosition!.getPosition();
       // With lerp 0.15, after 1 frame it should be partway there
       expect(moveHandler).toHaveBeenCalled();
     });
 
     it('should lerp toward touch position, not teleport', () => {
       const { engine, pm } = setupFollow({ followSpeed: 0.5 });
-      const initX = pm.getX();
-      const initY = pm.getY();
 
       engine.eventBus.emit('input:touch:position', { x: 100, y: 100 });
       pm.update(16);
 
       // Should be between initial and target, not at target
-      expect(pm.getX()).not.toBe(initX);
-      expect(pm.getX()).not.toBe(100);
+      expect(pm.getX()).not.toBe(540); // not at initial center
+      expect(pm.getX()).not.toBe(100); // not teleported to target
     });
 
     it('should NOT use velocity-based movement in follow mode', () => {

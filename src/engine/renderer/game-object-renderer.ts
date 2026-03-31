@@ -179,7 +179,6 @@ export class GameObjectRenderer {
       // Read playerSize from input module params
       const inputMod = (faceInput ?? handInput ?? touchInput) as { getParams: () => Record<string, unknown> } | undefined;
       const playerSize = (inputMod?.getParams()?.playerSize as number) ?? 64;
-      const playerRadius = isTapStyle ? 30 : playerSize / 2;
 
       if (!this.playerSprite) {
         const configAssets = engine.getConfig().assets ?? {};
@@ -273,7 +272,6 @@ export class GameObjectRenderer {
     const py = playerMovement.getY();
     const touchInput = engine.getModulesByType('TouchInput')[0] as TouchInput | undefined;
     const playerSize = (touchInput?.getParams()?.playerSize as number) ?? 64;
-    const playerRadius = playerSize / 2;
 
     if (!this.playerSprite) {
       const playerContainer = new Container();
