@@ -81,18 +81,25 @@ export class GameObjectRenderer {
     const playerMovement = engine.getModulesByType('PlayerMovement')[0] as PlayerMovement | undefined;
     const hasPlatforms = engine.getModulesByType('StaticPlatform').length > 0
       || engine.getModulesByType('MovingPlatform').length > 0;
+    const hasSpawner = engine.getModulesByType('Spawner').length > 0;
 
     if (playerMovement && hasPlatforms) {
       // Platformer path: platforms, collectibles, hazards, camera follow
       this.container.visible = true;
       this.syncPlatformerScene(engine, playerMovement);
+    } else if (playerMovement && hasSpawner) {
+      // Catch/dodge/tap path: spawned objects + player from PlayerMovement
+      this.container.visible = (state === 'playing' || state === 'finished');
+      if (!this.container.visible) return;
+      this.syncSpawnedObjects(engine);
+      this.syncShooterPlayer(engine, playerMovement);
     } else if (playerMovement) {
-      // Shooter/RPG path: player rendered from PlayerMovement position, no platforms
+      // Shooter/RPG path: player rendered from PlayerMovement position, no spawner
       this.container.visible = (state === 'playing' || state === 'finished');
       if (!this.container.visible) return;
       this.syncShooterPlayer(engine, playerMovement);
     } else {
-      // Spawner path: catch/dodge/tap/runner
+      // Spawner-only path: runner or legacy
       this.container.visible = (state === 'playing' || state === 'finished');
       if (!this.container.visible) return;
       this.syncSpawnedObjects(engine);

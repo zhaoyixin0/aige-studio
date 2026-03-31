@@ -44,7 +44,7 @@ export class TouchInput extends BaseModule {
         label: '角色大小',
         default: 64,
         min: 24,
-        max: 128,
+        max: 512,
         step: 4,
         unit: 'px',
       },
