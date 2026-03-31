@@ -162,6 +162,9 @@ export class AssetAgent {
     const style = (config.meta?.artStyle as PromptContext['style']) || 'cartoon';
     const assetDescriptions = config.meta?.assetDescriptions;
 
+    // Build a combined cache key from theme + artStyle so style changes bypass cache
+    const cacheTheme = theme ? `${theme}__${style}` : style;
+
     for (let i = 0; i < keysToProcess.length; i++) {
       if (signal.aborted) return result;
 
@@ -170,7 +173,8 @@ export class AssetAgent {
       onProgress?.({ current: i + 1, total, key, status: 'generating' });
 
       // Check library for a cached version first (must have valid data URL)
-      const cached = this.library.findByKeyAndTheme(key, theme || undefined);
+      // Use combined theme+style key so artStyle changes force regeneration
+      const cached = this.library.findByKeyAndTheme(key, cacheTheme || undefined);
       if (cached && cached.src && cached.src.startsWith('data:')) {
         let src = cached.src;
         if (cached.type !== 'background') {
@@ -222,7 +226,7 @@ export class AssetAgent {
         const targetSize = assetType === 'background' ? { w: 540, h: 960 } : { w: 128, h: 128 };
         dataUrl = await this.resizeImage(dataUrl, targetSize.w, targetSize.h);
 
-        // Save to library
+        // Save to library with combined theme+style key for proper cache invalidation
         const name = this.library.generateName(key, theme || undefined);
         await this.library.save({
           name,
@@ -230,7 +234,7 @@ export class AssetAgent {
           type: assetType,
           src: dataUrl,
           gameType: config.meta?.name,
-          theme: theme || undefined,
+          theme: cacheTheme || undefined,
         });
 
         result[key] = { type: assetType, src: dataUrl };

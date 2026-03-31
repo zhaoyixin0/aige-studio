@@ -248,6 +248,11 @@ const TOOLS: Anthropic.Messages.Tool[] = [
           },
           description: '要应用的修改列表',
         },
+        asset_descriptions: {
+          type: 'object',
+          description: '更新素材描述（set_theme/set_art_style 时必须提供）。key 是素材 ID（good_1, bad_1, player, background 等），value 是该素材在新主题/画风下应该是什么的英文描述。',
+          additionalProperties: { type: 'string' },
+        },
       },
       required: ['changes'],
     },
@@ -503,9 +508,20 @@ export class ConversationAgent {
                   param_key?: string;
                   param_value?: unknown;
                 }>;
+                asset_descriptions?: Record<string, string>;
               };
               if (currentConfig) {
                 config = this.applyChanges(currentConfig, input.changes);
+                // Apply asset_descriptions if provided (needed for style/theme changes)
+                if (input.asset_descriptions && config) {
+                  config = {
+                    ...config,
+                    meta: {
+                      ...config.meta,
+                      assetDescriptions: input.asset_descriptions,
+                    },
+                  };
+                }
                 if (!reply) {
                   reply = `已完成修改！共应用了 ${input.changes.length} 项更改。`;
                 }

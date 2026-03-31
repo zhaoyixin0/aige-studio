@@ -39,14 +39,22 @@ export class GameObjectRenderer {
   }
 
   sync(engine: Engine): void {
-    // Detect asset changes — use count + has-data check (cheap, no allocations)
+    // Detect asset changes — hash key names + first 32 chars of each src
     const assets = engine.getConfig().assets ?? {};
     const keys = Object.keys(assets);
-    let assetHash = keys.length;
-    for (const k of keys) { if ((assets as Record<string, { src?: string }>)[k]?.src) assetHash += k.length; }
+    let assetHashStr = '';
+    for (const k of keys) {
+      const src = (assets as Record<string, { src?: string }>)[k]?.src ?? '';
+      assetHashStr += `${k}:${src.slice(0, 32)};`;
+    }
+    // Simple string hash to number
+    let assetHash = 0;
+    for (let i = 0; i < assetHashStr.length; i++) {
+      assetHash = ((assetHash << 5) - assetHash + assetHashStr.charCodeAt(i)) | 0;
+    }
     if (assetHash !== this.lastAssetKeys) {
       if (this.lastAssetKeys !== 0) {
-        // Assets changed since last frame — clear cached sprites so they re-create with new assets
+        // Assets changed since last frame — clear cached sprites and textures
         for (const sprite of this.sprites.values()) {
           this.container.removeChild(sprite);
           sprite.destroy();
@@ -57,6 +65,11 @@ export class GameObjectRenderer {
           this.playerSprite.destroy();
           this.playerSprite = null;
         }
+        // Clear texture cache so new asset images are loaded fresh
+        for (const tex of this.textureCache.values()) {
+          tex.destroy();
+        }
+        this.textureCache.clear();
       }
       this.lastAssetKeys = assetHash;
     }
@@ -491,5 +504,11 @@ export class GameObjectRenderer {
       this.platformGraphics.destroy();
       this.platformGraphics = null;
     }
+    // Clear texture cache so new assets are loaded fresh on re-init
+    for (const tex of this.textureCache.values()) {
+      tex.destroy();
+    }
+    this.textureCache.clear();
+    this.lastAssetKeys = 0;
   }
 }
