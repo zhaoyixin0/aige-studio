@@ -256,6 +256,94 @@ describe('PlayerMovement', () => {
     });
   });
 
+  // ── Follow Mode (for shooter/RPG touch-following) ──
+
+  describe('follow mode', () => {
+    function setupFollow(params: Record<string, any> = {}) {
+      const engine = new Engine();
+      engine.loadConfig({
+        version: '1.0.0',
+        meta: { name: '', description: '', thumbnail: null, createdAt: '' },
+        canvas: { width: 1080, height: 1920 },
+        modules: [],
+        assets: {},
+      });
+      const pm = new PlayerMovement('pm-1', {
+        mode: 'follow',
+        followSpeed: 0.15,
+        defaultY: 0.85,
+        ...params,
+      });
+      engine.addModule(pm);
+      engine.eventBus.emit('gameflow:resume');
+      return { engine, pm };
+    }
+
+    it('should track touch position in follow mode', () => {
+      const { engine, pm } = setupFollow();
+      const moveHandler = vi.fn();
+      engine.eventBus.on('player:move', moveHandler);
+
+      // Simulate touch at (300, 1500)
+      engine.eventBus.emit('input:touch:position', { x: 300, y: 1500 });
+      pm.update(16);
+
+      // Position should have moved toward touch
+      const pos = pm.getContracts().playerPosition!.getPosition();
+      // With lerp 0.15, after 1 frame it should be partway there
+      expect(moveHandler).toHaveBeenCalled();
+    });
+
+    it('should lerp toward touch position, not teleport', () => {
+      const { engine, pm } = setupFollow({ followSpeed: 0.5 });
+      const initX = pm.getX();
+      const initY = pm.getY();
+
+      engine.eventBus.emit('input:touch:position', { x: 100, y: 100 });
+      pm.update(16);
+
+      // Should be between initial and target, not at target
+      expect(pm.getX()).not.toBe(initX);
+      expect(pm.getX()).not.toBe(100);
+    });
+
+    it('should NOT use velocity-based movement in follow mode', () => {
+      const { engine, pm } = setupFollow();
+
+      // Touch hold should not affect follow mode
+      engine.eventBus.emit('input:touch:hold', { side: 'right' });
+      pm.update(16);
+
+      // Velocity should be 0 — follow mode doesn't use velocity
+      expect(pm.getVelocityX()).toBe(0);
+    });
+
+    it('should emit player:move with x,y in follow mode', () => {
+      const { engine, pm } = setupFollow();
+      const moveHandler = vi.fn();
+      engine.eventBus.on('player:move', moveHandler);
+
+      engine.eventBus.emit('input:touch:position', { x: 500, y: 1000 });
+      pm.update(16);
+
+      expect(moveHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          x: expect.any(Number),
+          y: expect.any(Number),
+        }),
+      );
+    });
+
+    it('should use default velocity mode when mode param is not set', () => {
+      const { engine, pm } = setup({ speed: 300, acceleration: 1000 });
+
+      engine.eventBus.emit('input:touch:hold', { side: 'right' });
+      pm.update(100);
+
+      expect(pm.getVelocityX()).toBeGreaterThan(0);
+    });
+  });
+
   // ── External Delta (for Moving Platform carry) ──
 
   describe('external delta', () => {

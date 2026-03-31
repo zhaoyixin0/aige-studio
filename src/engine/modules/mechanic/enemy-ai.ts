@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export type AIState = 'idle' | 'patrol' | 'chase' | 'attack' | 'flee' | 'dead';
@@ -62,6 +63,30 @@ export class EnemyAI extends BaseModule {
       fleeHpThreshold: { type: 'range', label: 'Flee HP Threshold', default: 0.2, min: 0, max: 1, step: 0.05 },
       waypoints: { type: 'object', label: 'Waypoints', default: [] },
       asset: { type: 'string', label: 'Enemy Asset Key', default: 'enemy_1' },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    const attackDamage = (this.params.attackDamage as number) ?? 10;
+
+    return {
+      collisionProvider: {
+        layer: 'enemies',
+        radius: 24,
+        spawnEvent: 'wave:spawn',
+        destroyEvent: 'enemy:death',
+        moveEvent: 'enemy:move',
+        getActiveObjects: () =>
+          Array.from(this.enemies.values())
+            .filter((e) => e.state !== 'dead')
+            .map((e) => ({ id: e.id, x: e.x, y: e.y })),
+      },
+      damageReceiver: {
+        handle: (targetId, amount) => this.damageEnemy(targetId, amount),
+      },
+      damageSource: {
+        amount: attackDamage,
+      },
     };
   }
 

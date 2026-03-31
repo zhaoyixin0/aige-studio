@@ -4,7 +4,6 @@ import type { Spawner } from '@/engine/modules/mechanic/spawner';
 import type { FaceInput } from '@/engine/modules/input/face-input';
 import type { HandInput } from '@/engine/modules/input/hand-input';
 import type { TouchInput } from '@/engine/modules/input/touch-input';
-import type { Collision } from '@/engine/modules/mechanic/collision';
 import type { GameFlow } from '@/engine/modules/feedback/game-flow';
 import type { PlayerMovement } from '@/engine/modules/mechanic/player-movement';
 import type { Jump } from '@/engine/modules/mechanic/jump';
@@ -25,9 +24,18 @@ export class GameObjectRenderer {
   private playerSprite: Container | null = null;
   private lastAssetKeys = 0;
   private platformGraphics: Graphics | null = null;
+  /** IFrames visual flicker state */
+  private iframesActive = false;
+  private iframesStartTime = 0;
 
   constructor(container: Container) {
     this.container = container;
+  }
+
+  /** Wire iframes events using pixi-renderer's tracked listener helper */
+  wireIFramesEvents(listen: (event: string, handler: (data?: any) => void) => void): void {
+    listen('iframes:start', () => { this.iframesActive = true; this.iframesStartTime = performance.now(); });
+    listen('iframes:end', () => { this.iframesActive = false; });
   }
 
   sync(engine: Engine): void {
@@ -81,7 +89,6 @@ export class GameObjectRenderer {
 
   private syncSpawnedObjects(engine: Engine): void {
     const spawners = engine.getModulesByType('Spawner');
-    const collision = engine.getModulesByType('Collision')[0] as Collision | undefined;
     const activeIds = new Set<string>();
 
     const themeName = engine.getConfig().meta.theme ?? 'fruit';
@@ -120,11 +127,6 @@ export class GameObjectRenderer {
         wrapper.x = obj.x;
         wrapper.y = obj.y;
         wrapper.rotation = obj.rotation ?? 0;
-
-        // Sync collision position for spawned objects
-        if (collision) {
-          collision.updateObject(obj.id, { x: obj.x, y: obj.y });
-        }
       }
     }
 
@@ -217,12 +219,6 @@ export class GameObjectRenderer {
           this.playerSprite = playerContainer;
         }
         this.container.addChild(this.playerSprite);
-
-        // Register player in collision system
-        const collision = engine.getModulesByType('Collision')[0] as Collision | undefined;
-        if (collision) {
-          collision.registerObject('player_1', 'player', { x: pos.x, y: pos.y, radius: playerRadius });
-        }
       }
       this.playerSprite.x = pos.x;
       this.playerSprite.y = pos.y;
@@ -231,12 +227,6 @@ export class GameObjectRenderer {
       const baseSize = 64; // default creation size
       const scale = playerSize / baseSize;
       this.playerSprite.scale.set(scale);
-
-      // Sync collision position + radius
-      const collision = engine.getModulesByType('Collision')[0] as Collision | undefined;
-      if (collision) {
-        collision.updateObject('player_1', { ...pos, radius: playerRadius });
-      }
     }
   }
 
@@ -312,20 +302,16 @@ export class GameObjectRenderer {
       }
       this.container.addChild(playerContainer);
       this.playerSprite = playerContainer;
-
-      // Register player in collision system
-      const collision = engine.getModulesByType('Collision')[0] as Collision | undefined;
-      if (collision) {
-        collision.registerObject('player_1', 'player', { x: px, y: py, radius: playerRadius });
-      }
     }
     this.playerSprite.x = px;
     this.playerSprite.y = py;
 
-    // Sync collision position
-    const collision = engine.getModulesByType('Collision')[0] as Collision | undefined;
-    if (collision) {
-      collision.updateObject('player_1', { x: px, y: py, radius: playerRadius });
+    // IFrames visual feedback: alpha flicker every 100ms
+    if (this.iframesActive) {
+      const elapsed = performance.now() - this.iframesStartTime;
+      this.playerSprite.alpha = Math.floor(elapsed / 100) % 2 === 0 ? 0.3 : 1.0;
+    } else {
+      this.playerSprite.alpha = 1.0;
     }
   }
 
@@ -393,6 +379,14 @@ export class GameObjectRenderer {
     }
     this.playerSprite.x = screenX;
     this.playerSprite.y = screenY;
+
+    // IFrames visual feedback: alpha flicker every 100ms
+    if (this.iframesActive) {
+      const elapsed = performance.now() - this.iframesStartTime;
+      this.playerSprite.alpha = Math.floor(elapsed / 100) % 2 === 0 ? 0.3 : 1.0;
+    } else {
+      this.playerSprite.alpha = 1.0;
+    }
 
     collectible?.checkCollision(px, py, playerSize / 2);
     hazard?.checkCollision(px, py);
@@ -482,6 +476,8 @@ export class GameObjectRenderer {
   }
 
   reset(): void {
+    this.iframesActive = false;
+    this.iframesStartTime = 0;
     for (const sprite of this.sprites.values()) {
       this.container.removeChild(sprite);
       sprite.destroy();

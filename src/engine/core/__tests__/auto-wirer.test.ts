@@ -167,13 +167,13 @@ describe('AutoWirer', () => {
     });
   });
 
-  it('should use WaveSpawner enemyCollisionRadius param for enemy registration', () => {
+  it('should register enemies via EnemyAI contract on wave:spawn', () => {
     const engine = new Engine();
 
-    const waveSpawner = new WaveSpawner('wavespawner-1', { enemyCollisionRadius: 32 });
+    const enemyAI = new EnemyAI('enemyai-1', { hp: 50 });
     const collision = new Collision('collision-1', { rules: [] });
 
-    engine.addModule(waveSpawner);
+    engine.addModule(enemyAI);
     engine.addModule(collision);
 
     AutoWirer.wire(engine);
@@ -182,34 +182,30 @@ describe('AutoWirer', () => {
 
     engine.eventBus.emit('wave:spawn', { id: 'enemy-1', x: 200, y: 100 });
 
-    expect(registerSpy).toHaveBeenCalledWith('enemy-1', 'enemies', {
-      x: 200,
-      y: 100,
-      radius: 32,
-    });
-  });
-
-  it('should use default enemyCollisionRadius when not specified', () => {
-    const engine = new Engine();
-
-    const waveSpawner = new WaveSpawner('wavespawner-1', {});
-    const collision = new Collision('collision-1', { rules: [] });
-
-    engine.addModule(waveSpawner);
-    engine.addModule(collision);
-
-    AutoWirer.wire(engine);
-
-    const registerSpy = vi.spyOn(collision, 'registerObject');
-
-    engine.eventBus.emit('wave:spawn', { id: 'enemy-1', x: 200, y: 100 });
-
-    // Default radius = 24
+    // EnemyAI contract uses radius 24
     expect(registerSpy).toHaveBeenCalledWith('enemy-1', 'enemies', {
       x: 200,
       y: 100,
       radius: 24,
     });
+  });
+
+  it('should unregister enemies via EnemyAI contract on enemy:death', () => {
+    const engine = new Engine();
+
+    const enemyAI = new EnemyAI('enemyai-1', { hp: 50 });
+    const collision = new Collision('collision-1', { rules: [] });
+
+    engine.addModule(enemyAI);
+    engine.addModule(collision);
+
+    AutoWirer.wire(engine);
+
+    const unregisterSpy = vi.spyOn(collision, 'unregisterObject');
+
+    engine.eventBus.emit('enemy:death', { id: 'enemy-1' });
+
+    expect(unregisterSpy).toHaveBeenCalledWith('enemy-1');
   });
 
   // ── WaveSpawner + EnemyAI wiring ──────────────────────────────────

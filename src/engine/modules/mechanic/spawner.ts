@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export interface SpawnedObject {
@@ -84,6 +85,32 @@ export class Spawner extends BaseModule {
         max: 128,
         step: 4,
         unit: 'px',
+      },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    const spriteSize = (this.params.spriteSize as number) ?? 48;
+    const itemConfigs: Array<{ asset: string; layer?: string }> = this.params.items ?? [];
+    // Default layer from first item, but getLayerForObject provides per-asset routing
+    const defaultLayer = itemConfigs.find((i) => i.layer)?.layer ?? 'items';
+
+    // Build asset→layer lookup for per-item routing (runner: coins→items, obstacles→obstacles)
+    const assetLayerMap = new Map<string, string>();
+    for (const item of itemConfigs) {
+      if (item.layer) assetLayerMap.set(item.asset, item.layer);
+    }
+
+    return {
+      collisionProvider: {
+        layer: defaultLayer,
+        radius: spriteSize / 2,
+        spawnEvent: 'spawner:created',
+        destroyEvent: 'spawner:destroyed',
+        getActiveObjects: () =>
+          this.objects.map((o) => ({ id: o.id, x: o.x, y: o.y })),
+        getLayerForObject: (data) =>
+          (data.asset ? assetLayerMap.get(data.asset) : undefined) ?? defaultLayer,
       },
     };
   }

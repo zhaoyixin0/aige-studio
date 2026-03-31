@@ -78,6 +78,7 @@ export interface GameModule {
   destroy(): void;
   getSchema(): ModuleSchema;
   getDependencies(): ModuleDependencies;
+  getContracts(): import('./contracts').ModuleContracts;
   configure(params: Record<string, any>): void;
   getParams(): Record<string, any>;
   onAttach(engine: GameEngine): void;

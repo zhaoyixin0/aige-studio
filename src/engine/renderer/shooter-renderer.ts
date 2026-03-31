@@ -4,7 +4,6 @@ import type { Projectile } from '@/engine/modules/mechanic/projectile';
 import type { EnemyAI } from '@/engine/modules/mechanic/enemy-ai';
 import type { Aim } from '@/engine/modules/mechanic/aim';
 import type { Shield } from '@/engine/modules/mechanic/shield';
-import type { Collision } from '@/engine/modules/mechanic/collision';
 import type { GameFlow } from '@/engine/modules/feedback/game-flow';
 import { getTheme } from './theme-registry';
 import { loadDataUrlIntoContainer } from './image-utils';
@@ -133,7 +132,6 @@ export class ShooterRenderer {
       return;
     }
 
-    const collision = engine.getModulesByType('Collision')[0] as Collision | undefined;
     const themeName = engine.getConfig().meta.theme ?? 'fruit';
     const theme = getTheme(themeName);
     const configAssets = engine.getConfig().assets ?? {};
@@ -141,12 +139,12 @@ export class ShooterRenderer {
     if (projectile) {
       const bulletAssetKey = (projectile.getParams().asset ?? 'bullet') as string;
       const bulletSrc = configAssets[bulletAssetKey]?.src;
-      this.syncProjectiles(projectile, collision, theme.bulletEmoji, bulletSrc);
+      this.syncProjectiles(projectile, theme.bulletEmoji, bulletSrc);
     }
     if (enemyAI) {
       const enemyAssetKey = (enemyAI.getParams().asset ?? 'enemy_1') as string;
       const enemySrc = configAssets[enemyAssetKey]?.src;
-      this.syncEnemies(enemyAI, collision, theme.badEmojis[0] ?? '👾', enemySrc);
+      this.syncEnemies(enemyAI, theme.badEmojis[0] ?? '👾', enemySrc);
     }
 
     // Aim crosshair
@@ -165,7 +163,6 @@ export class ShooterRenderer {
 
   private syncProjectiles(
     projectile: Projectile,
-    collision: Collision | undefined,
     bulletEmoji: string,
     imageSrc?: string,
   ): void {
@@ -211,16 +208,12 @@ export class ShooterRenderer {
         sprite.y = proj.y;
         sprite.rotation = computeProjectileRotation(proj.dx, proj.dy);
       }
-      // Sync collision
-      if (collision) {
-        collision.updateObject(proj.id, { x: proj.x, y: proj.y });
-      }
+      // Collision sync now handled by AutoWirer via Projectile contract
     }
   }
 
   private syncEnemies(
     enemyAI: EnemyAI,
-    collision: Collision | undefined,
     enemyEmoji: string,
     imageSrc?: string,
   ): void {
@@ -301,11 +294,7 @@ export class ShooterRenderer {
         }
       }
 
-      // Sync collision
-      if (collision) {
-        const radius = (enemyAI.getParams().collisionRadius as number) ?? 24;
-        collision.updateObject(enemy.id, { x: enemy.x, y: enemy.y, radius });
-      }
+      // Collision sync now handled by AutoWirer via EnemyAI contract
     }
   }
 

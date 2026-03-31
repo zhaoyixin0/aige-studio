@@ -90,6 +90,7 @@ export class Dash extends BaseModule {
     this.emit('dash:start', {
       direction: { ...this.currentDirection },
     });
+    this.emit('iframes:start', { source: 'dash' });
   }
 
   update(dt: number): void {
@@ -120,6 +121,7 @@ export class Dash extends BaseModule {
       this.emit('dash:end', {
         displacement: { ...this.displacement },
       });
+      this.emit('iframes:end', { source: 'dash' });
     }
   }
 

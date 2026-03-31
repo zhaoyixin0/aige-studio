@@ -5,6 +5,7 @@ import type {
   ModuleDependencies,
   EventHandler,
 } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 
 export abstract class BaseModule implements GameModule {
   readonly id: string;
@@ -78,6 +79,10 @@ export abstract class BaseModule implements GameModule {
 
   getDependencies(): ModuleDependencies {
     return { requires: [], optional: [] };
+  }
+
+  getContracts(): ModuleContracts {
+    return {};
   }
 
   // --- Helpers ---

@@ -115,12 +115,16 @@ export class TouchInput extends BaseModule {
 
   private onPointerDown(e: PointerEvent): void {
     const pos = this.getRelativePos(e);
+    this.currentPosition = pos;
     this.pointerState = {
       startX: pos.x,
       startY: pos.y,
       startTime: performance.now(),
       moved: false,
     };
+
+    // Emit absolute position for follow-mode tracking (shooting/RPG)
+    this.emit('input:touch:position', { x: pos.x, y: pos.y });
 
     // Emit directional hold event based on touch position (left/right half of screen)
     const canvasWidth = (this.canvas as HTMLCanvasElement)?.width ?? 800;
@@ -141,6 +145,10 @@ export class TouchInput extends BaseModule {
     this.currentPosition = pos;
 
     if (!this.pointerState) return;
+
+    // Emit absolute position while pointer is down (for follow-mode tracking)
+    this.emit('input:touch:position', { x: pos.x, y: pos.y });
+
     const dx = pos.x - this.pointerState.startX;
     const dy = pos.y - this.pointerState.startY;
     const distance = Math.sqrt(dx * dx + dy * dy);
@@ -220,11 +228,12 @@ export class TouchInput extends BaseModule {
   }
 
   update(_dt: number): void {
-    // Re-emit hold event every frame while pointer is down (for continuous movement)
+    // Re-emit hold + position events every frame while pointer is down
     if (this.pointerState && this.currentPosition && this.canvas) {
       const canvasWidth = (this.canvas as HTMLCanvasElement)?.width ?? 800;
       const side = this.currentPosition.x < canvasWidth / 2 ? 'left' : 'right';
       this.emit('input:touch:hold', { x: this.currentPosition.x, y: this.currentPosition.y, side });
+      this.emit('input:touch:position', { x: this.currentPosition.x, y: this.currentPosition.y });
     }
   }
 

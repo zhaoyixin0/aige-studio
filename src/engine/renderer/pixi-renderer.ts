@@ -216,6 +216,9 @@ export class PixiRenderer {
       this.engineEventHandlers.push({ event, handler });
     };
 
+    // Wire iframes visual feedback to game object renderer (tracked for cleanup)
+    this.gameObjectRenderer?.wireIFramesEvents(listen);
+
     listen('collision:hit', (data?: any) => {
       const x = data?.x ?? 540;
       const y = data?.y ?? 960;

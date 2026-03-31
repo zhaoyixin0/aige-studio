@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export interface CollectibleDef {
@@ -59,6 +60,28 @@ export class Collectible extends BaseModule {
         min: 100,
         max: 2000,
         step: 50,
+      },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    const layer = (this.params.layer as string) ?? 'collectibles';
+    const magnetRadius = (this.params.magnetRadius as number) ?? 16;
+
+    return {
+      collisionProvider: {
+        layer,
+        radius: magnetRadius,
+        getActiveObjects: () => {
+          const allItems = this.getItems();
+          const result: Array<{ id: string; x: number; y: number }> = [];
+          for (let i = 0; i < allItems.length; i++) {
+            if (!this.collected.has(i)) {
+              result.push({ id: `collectible-${i}`, x: allItems[i].x, y: allItems[i].y });
+            }
+          }
+          return result;
+        },
       },
     };
   }
