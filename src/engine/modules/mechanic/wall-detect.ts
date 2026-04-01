@@ -7,6 +7,14 @@ export class WallDetect extends BaseModule {
   private touching = false;
   private side: 'left' | 'right' | null = null;
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    const wallJumpEvent = (this.params.wallJumpEvent as string) ?? 'input:touch:tap';
+    return {
+      emits: ['wall:contact', 'wall:jump', 'wall:slide'],
+      consumes: this.params.wallJump !== false ? [wallJumpEvent] : [],
+    };
+  }
+
   getSchema(): ModuleSchema {
     return {
       wallSlide: {

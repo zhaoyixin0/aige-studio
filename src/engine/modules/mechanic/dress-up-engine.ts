@@ -11,6 +11,13 @@ export class DressUpEngine extends BaseModule {
 
   private equipped = new Map<string, string[]>(); // layer -> itemIds
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    return {
+      emits: ['dressup:equip', 'dressup:unequip', 'dressup:snapshot'],
+      consumes: ['input:touch:tap'],
+    };
+  }
+
   getSchema(): ModuleSchema {
     return {
       layers: {

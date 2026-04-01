@@ -7,20 +7,10 @@ import { useGameStore } from '@/store/game-store.ts';
 import { useEditorStore } from '@/store/editor-store.ts';
 import { CameraLayer } from '@/engine/renderer/camera-layer.ts';
 import type { PreviewMode } from '@/store/editor-store.ts';
-import type { GameConfig } from '@/engine/core';
 
 /** Stable selectors — extracted to module scope so function references never change. */
 const selectPreviewMode = (s: { previewMode: PreviewMode }) => s.previewMode;
 const selectSetPreviewMode = (s: { setPreviewMode: (mode: PreviewMode) => void }) => s.setPreviewMode;
-const selectConfigStructureKey = (s: { config: GameConfig | null }) => {
-  if (!s.config) return '';
-  const modKey = s.config.modules.map((m) => `${m.id}:${m.type}:${m.enabled}`).join('|');
-  // Track asset count AND content changes (e.g., background src updated by AssetAgent)
-  const assetKey = Object.entries(s.config.assets)
-    .map(([k, v]) => `${k}:${v.src ? v.src.slice(0, 20) : 'empty'}`)
-    .join(',');
-  return `${modKey}#${assetKey}`;
-};
 
 export function PreviewCanvas() {
   const { engineRef, rendererRef, setMountEl, loadConfig, ready: engineReady } = useEngineContext();
@@ -67,9 +57,9 @@ export function PreviewCanvas() {
     // before cameraReady becomes true (use-camera.ts sets dimensions before setReady).
   }, [engineReady, cameraReady, rendererRef, videoRef]);
 
-  // Subscribe to structural config changes only (add/remove/toggle modules).
-  // Param-only changes are handled directly by PropertiesPanel via mod.configure().
-  const configStructureKey = useGameStore(selectConfigStructureKey);
+  // Subscribe to configVersion — incremented on every config mutation
+  // (structural changes AND param changes, including AI modify_game).
+  const configVersion = useGameStore((s) => s.configVersion);
 
   useEffect(() => {
     const cfg = useGameStore.getState().config;
@@ -87,7 +77,7 @@ export function PreviewCanvas() {
         }
       }
     }
-  }, [engineReady, configStructureKey, loadConfig, engineRef, rendererRef]);
+  }, [engineReady, configVersion, loadConfig, engineRef, rendererRef]);
 
   const isPlayOrFullscreen = previewMode === 'play' || previewMode === 'fullscreen';
 

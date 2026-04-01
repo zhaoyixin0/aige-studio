@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export class Timer extends BaseModule {
@@ -31,6 +32,15 @@ export class Timer extends BaseModule {
         default: 'finish',
         options: ['finish', 'none'],
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: [
+        'timer:tick',
+        'timer:end',
+      ],
     };
   }
 

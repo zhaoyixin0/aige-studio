@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 type Direction = { dx: number; dy: number };
@@ -74,6 +75,13 @@ export class BulletPattern extends BaseModule {
         max: 500,
         unit: 'ms',
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: ['bulletpattern:fire'],
+      consumes: ['projectile:fire'],
     };
   }
 

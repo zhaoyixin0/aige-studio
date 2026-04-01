@@ -35,6 +35,14 @@ export class CoyoteTime extends BaseModule {
     };
   }
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    const jumpEvent = (this.params.jumpEvent as string) ?? 'input:touch:tap';
+    return {
+      emits: ['coyote:jump'],
+      consumes: ['gravity:falling', 'gravity:landed', jumpEvent],
+    };
+  }
+
   getDependencies() { return { requires: ['Jump', 'Gravity'], optional: [] }; }
 
   init(engine: GameEngine): void {

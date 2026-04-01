@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export interface ParticleConfig {
@@ -28,6 +29,12 @@ export class ParticleVFX extends BaseModule {
         label: '事件→特效映射',
         default: {},
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      consumes: Object.keys(this.params.events ?? {}),
     };
   }
 

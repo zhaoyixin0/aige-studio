@@ -17,6 +17,13 @@ export class PlaneDetection extends BaseModule {
   private scanTimer = 0;
   private planeCounter = 0;
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    return {
+      emits: ['plane:detected'],
+      consumes: ['camera:frame'],
+    };
+  }
+
   getSchema(): ModuleSchema {
     return {
       enabled: {

@@ -38,7 +38,13 @@ export class EventBus {
     const exact = this.listeners.get(event);
     if (exact) {
       for (const handler of exact) {
-        handler(data);
+        try {
+          handler(data);
+        } catch (err) {
+          if (this.debug) {
+            console.error(`[EventBus] Handler error on "${event}":`, err);
+          }
+        }
       }
     }
 
@@ -49,7 +55,13 @@ export class EventBus {
         const prefix = pattern.slice(0, -1); // e.g. "collision:" from "collision:*"
         if (event.startsWith(prefix)) {
           for (const handler of handlers) {
-            handler(data);
+            try {
+              handler(data);
+            } catch (err) {
+              if (this.debug) {
+                console.error(`[EventBus] Handler error on "${event}" (wildcard "${pattern}"):`, err);
+              }
+            }
           }
         }
       }

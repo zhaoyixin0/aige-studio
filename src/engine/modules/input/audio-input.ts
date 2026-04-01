@@ -1,4 +1,5 @@
 import type { ModuleSchema, GameEngine } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '@/engine/modules/base-module';
 
 export class AudioInput extends BaseModule {
@@ -26,6 +27,16 @@ export class AudioInput extends BaseModule {
         max: 1,
         step: 0.05,
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: [
+        'input:audio:volume',
+        'input:audio:blow',
+        'input:audio:frequency',
+      ],
     };
   }
 

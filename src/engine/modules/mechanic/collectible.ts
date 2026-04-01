@@ -83,6 +83,7 @@ export class Collectible extends BaseModule {
           return result;
         },
       },
+      emits: ['collectible:pickup', 'collectible:allCollected'],
     };
   }
 

@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export interface DialogueChoice {
@@ -46,6 +47,22 @@ export class DialogueSystem extends BaseModule {
         label: 'Advance Event',
         default: 'input:touch:tap',
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    const triggerEvent: string = this.params.triggerEvent ?? 'collision:hit';
+    const advanceEvent: string = this.params.advanceEvent ?? 'input:touch:tap';
+    return {
+      emits: [
+        'gameflow:pause',
+        'gameflow:resume',
+        'dialogue:start',
+        'dialogue:node',
+        'dialogue:choice',
+        'dialogue:end',
+      ],
+      consumes: [triggerEvent, advanceEvent],
     };
   }
 

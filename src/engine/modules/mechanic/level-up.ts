@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 type ScalingCurve = 'linear' | 'quadratic' | 'exponential';
@@ -53,6 +54,14 @@ export class LevelUp extends BaseModule {
         label: 'Stat Growth Per Level',
         default: { hp: 10, attack: 2, defense: 1 },
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    const xpSource: string = this.params.xpSource ?? 'enemy:death';
+    return {
+      emits: ['levelup:xp', 'levelup:levelup'],
+      consumes: [xpSource],
     };
   }
 

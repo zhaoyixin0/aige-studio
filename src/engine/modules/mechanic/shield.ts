@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export class Shield extends BaseModule {
@@ -28,6 +29,20 @@ export class Shield extends BaseModule {
         label: 'Damage Event',
         default: 'collision:damage',
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    const damageEvent: string = (this.params.damageEvent as string) ?? 'collision:damage';
+    return {
+      emits: [
+        'shield:absorbed',
+        'shield:damage:passthrough',
+        'shield:block',
+        'shield:break',
+        'shield:recharge',
+      ],
+      consumes: [damageEvent],
     };
   }
 

@@ -10,6 +10,14 @@ export class Dash extends BaseModule {
   private currentDirection: { x: number; y: number } = { x: 0, y: 0 };
   private displacement: { x: number; y: number } = { x: 0, y: 0 };
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    const trigger = (this.params.triggerEvent as string) ?? 'input:touch:doubleTap';
+    return {
+      emits: ['dash:start', 'dash:end', 'iframes:start', 'iframes:end'],
+      consumes: [trigger],
+    };
+  }
+
   getSchema(): ModuleSchema {
     return {
       distance: {

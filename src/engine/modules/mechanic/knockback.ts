@@ -41,6 +41,14 @@ export class Knockback extends BaseModule {
     };
   }
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    const trigger = (this.params.triggerEvent as string) ?? 'collision:damage';
+    return {
+      emits: ['knockback:start', 'knockback:end'],
+      consumes: [trigger],
+    };
+  }
+
   getDependencies() { return { requires: ['Collision'], optional: [] }; }
 
   init(engine: GameEngine): void {

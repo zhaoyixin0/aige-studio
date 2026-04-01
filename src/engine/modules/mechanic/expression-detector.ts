@@ -8,6 +8,13 @@ export class ExpressionDetector extends BaseModule {
   private matched = false;
   private matchFadeTimer = 0;
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    return {
+      emits: ['expression:detected'],
+      consumes: ['input:face:*'],
+    };
+  }
+
   getSchema(): ModuleSchema {
     return {
       expressionType: {

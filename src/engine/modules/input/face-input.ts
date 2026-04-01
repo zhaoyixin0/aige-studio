@@ -1,4 +1,5 @@
 import type { ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '@/engine/modules/base-module';
 import type { FaceTracker } from '@/engine/tracking/face-tracker';
 import { computeCoverLayout } from '@/engine/renderer/camera-layer';
@@ -50,6 +51,17 @@ export class FaceInput extends BaseModule {
         step: 4,
         unit: 'px',
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: [
+        'input:face:move',
+        'input:face:mouthOpen',
+        'input:face:blink',
+        'input:face:smile',
+      ],
     };
   }
 

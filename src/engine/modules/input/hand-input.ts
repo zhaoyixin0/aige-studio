@@ -1,4 +1,5 @@
 import type { ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '@/engine/modules/base-module';
 import type { HandTracker } from '@/engine/tracking/hand-tracker';
 
@@ -29,6 +30,15 @@ export class HandInput extends BaseModule {
         label: 'Output To',
         default: 'player',
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: [
+        'input:hand:move',
+        'input:hand:gesture',
+      ],
     };
   }
 

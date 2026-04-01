@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export class SoundFX extends BaseModule {
@@ -26,6 +27,12 @@ export class SoundFX extends BaseModule {
         label: 'Muted',
         default: false,
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      consumes: Object.keys(this.params.events ?? {}),
     };
   }
 

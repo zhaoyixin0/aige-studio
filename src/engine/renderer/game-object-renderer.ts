@@ -22,7 +22,7 @@ export class GameObjectRenderer {
   private sprites = new Map<string, Container>();
   private textureCache = new Map<string, Texture>();
   private playerSprite: Container | null = null;
-  private lastAssetKeys = 0;
+  private lastAssetsRef: Record<string, any> | null = null;
   private platformGraphics: Graphics | null = null;
   /** IFrames visual flicker state */
   private iframesActive = false;
@@ -32,6 +32,24 @@ export class GameObjectRenderer {
     this.container = container;
   }
 
+  destroy(): void {
+    for (const tex of this.textureCache.values()) {
+      tex.destroy(true);
+    }
+    this.textureCache.clear();
+    for (const sprite of this.sprites.values()) {
+      sprite.destroy({ children: true });
+    }
+    this.sprites.clear();
+    if (this.playerSprite) {
+      this.playerSprite.destroy({ children: true });
+      this.playerSprite = null;
+    }
+    this.platformGraphics?.destroy();
+    this.platformGraphics = null;
+    this.lastAssetsRef = null;
+  }
+
   /** Wire iframes events using pixi-renderer's tracked listener helper */
   wireIFramesEvents(listen: (event: string, handler: (data?: any) => void) => void): void {
     listen('iframes:start', () => { this.iframesActive = true; this.iframesStartTime = performance.now(); });
@@ -39,21 +57,10 @@ export class GameObjectRenderer {
   }
 
   sync(engine: Engine): void {
-    // Detect asset changes — hash key names + first 32 chars of each src
+    // Detect asset changes via reference equality (O(1) — Zustand produces new objects on mutation)
     const assets = engine.getConfig().assets ?? {};
-    const keys = Object.keys(assets);
-    let assetHashStr = '';
-    for (const k of keys) {
-      const src = (assets as Record<string, { src?: string }>)[k]?.src ?? '';
-      assetHashStr += `${k}:${src.slice(0, 32)};`;
-    }
-    // Simple string hash to number
-    let assetHash = 0;
-    for (let i = 0; i < assetHashStr.length; i++) {
-      assetHash = ((assetHash << 5) - assetHash + assetHashStr.charCodeAt(i)) | 0;
-    }
-    if (assetHash !== this.lastAssetKeys) {
-      if (this.lastAssetKeys !== 0) {
+    if (assets !== this.lastAssetsRef) {
+      if (this.lastAssetsRef !== null) {
         // Assets changed since last frame — clear cached sprites and textures
         for (const sprite of this.sprites.values()) {
           this.container.removeChild(sprite);
@@ -71,7 +78,7 @@ export class GameObjectRenderer {
         }
         this.textureCache.clear();
       }
-      this.lastAssetKeys = assetHash;
+      this.lastAssetsRef = assets;
     }
 
     const gameFlow = engine.getModulesByType('GameFlow')[0] as GameFlow | undefined;
@@ -516,6 +523,6 @@ export class GameObjectRenderer {
       tex.destroy();
     }
     this.textureCache.clear();
-    this.lastAssetKeys = 0;
+    this.lastAssetsRef = null;
   }
 }

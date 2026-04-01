@@ -1,4 +1,5 @@
 import type { GameEngine, GameModule, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export type GameState = 'ready' | 'countdown' | 'playing' | 'finished';
@@ -28,6 +29,20 @@ export class GameFlow extends BaseModule {
   }
 
   getDependencies() { return { requires: [], optional: ['Timer', 'Lives'] }; }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: [
+        'gameflow:state',
+        'gameflow:resume',
+        'gameflow:pause',
+      ],
+      consumes: [
+        'timer:end',
+        'lives:zero',
+      ],
+    };
+  }
 
   init(engine: GameEngine): void {
     super.init(engine);

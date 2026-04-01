@@ -13,6 +13,12 @@ export class CrumblingPlatform extends BaseModule {
 
   private states: CrumbleState[] = [];
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    return {
+      emits: ['platform:crumble', 'platform:respawn'],
+    };
+  }
+
   getSchema(): ModuleSchema {
     return {
       platforms: {

@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export type CameraMode = 'center' | 'look-ahead' | 'dead-zone';
@@ -69,6 +70,17 @@ export class CameraFollow extends BaseModule {
         step: 1,
         default: 5,
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    const shakeEvent: string = this.params.shakeEvent ?? '';
+    return {
+      emits: [
+        'camera:shake',
+        'camera:move',
+      ],
+      consumes: shakeEvent ? ['player:move', shakeEvent] : ['player:move'],
     };
   }
 

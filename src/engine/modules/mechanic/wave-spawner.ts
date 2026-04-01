@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export class WaveSpawner extends BaseModule {
@@ -26,6 +27,13 @@ export class WaveSpawner extends BaseModule {
       spawnY: { type: 'range', label: 'Spawn Y', default: 0, min: 0, max: 2000 },
       enemyCollisionRadius: { type: 'range', label: 'Enemy Collision Radius', default: 24, min: 8, max: 100 },
       maxEnemiesPerWave: { type: 'range', label: 'Max Enemies Per Wave', default: 15, min: 1, max: 50 },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: ['wave:start', 'wave:spawn', 'wave:complete', 'wave:allComplete'],
+      consumes: ['enemy:death'],
     };
   }
 

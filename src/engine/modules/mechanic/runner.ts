@@ -9,6 +9,13 @@ export class Runner extends BaseModule {
   private currentSpeed = 0;
   private started = false;
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    return {
+      emits: ['runner:laneChange', 'runner:distance'],
+      consumes: ['input:touch:swipe'],
+    };
+  }
+
   getSchema(): ModuleSchema {
     return {
       laneCount: {

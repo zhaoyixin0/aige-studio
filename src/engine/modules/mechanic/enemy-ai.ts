@@ -87,6 +87,8 @@ export class EnemyAI extends BaseModule {
       damageSource: {
         amount: attackDamage,
       },
+      emits: ['enemy:move', 'enemy:attack', 'enemy:death'],
+      consumes: ['player:move', 'projectile:hit'],
     };
   }
 

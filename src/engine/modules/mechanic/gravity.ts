@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export interface GravityObject {
@@ -61,6 +62,19 @@ export class Gravity extends BaseModule {
         label: 'Toggle Event',
         default: '',
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    const toggleEvent: string = this.params.toggleEvent ?? '';
+    return {
+      emits: [
+        'gravity:falling',
+        'gravity:landed',
+      ],
+      consumes: toggleEvent
+        ? ['jump:start', 'dash:start', 'dash:end', toggleEvent]
+        : ['jump:start', 'dash:start', 'dash:end'],
     };
   }
 

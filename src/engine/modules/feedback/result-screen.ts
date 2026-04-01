@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export interface GameResults {
@@ -36,6 +37,14 @@ export class ResultScreen extends BaseModule {
   }
 
   getDependencies() { return { requires: ['GameFlow'], optional: ['Scorer', 'Timer'] }; }
+
+  getContracts(): ModuleContracts {
+    return {
+      consumes: [
+        'gameflow:state',
+      ],
+    };
+  }
 
   init(engine: GameEngine): void {
     super.init(engine);

@@ -43,6 +43,13 @@ export class Checkpoint extends BaseModule {
     };
   }
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    return {
+      emits: ['checkpoint:activate', 'checkpoint:respawn'],
+      consumes: ['lives:zero'],
+    };
+  }
+
   getDependencies() { return { requires: [], optional: ['Lives'] }; }
 
   init(engine: GameEngine): void {

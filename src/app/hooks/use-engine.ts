@@ -116,6 +116,7 @@ export function useEngine() {
     canvas.style.maxHeight = '100%';
     canvas.style.objectFit = 'contain';
     canvas.style.display = 'block';
+    canvas.style.touchAction = 'none';
     el.appendChild(canvas);
     canvasElRef.current = canvas;
 
@@ -137,7 +138,9 @@ export function useEngine() {
     // Register cleanup for when mount element is removed or changed
     cleanupRef.current = () => {
       disposed = true;
-      engineRef.current?.stop();
+
+      // Restart engine to ensure all modules run destroy() and EventBus is cleared
+      engineRef.current?.restart();
 
       // If init is still pending, wait for it to complete before destroying.
       // This prevents leaking a WebGL context when destroy() is a no-op
@@ -153,7 +156,7 @@ export function useEngine() {
       canvasElRef.current = null;
       setReady(false);
 
-      // Recreate engine for potential re-mount
+      // Lazily recreate engine on next mount
       engineRef.current = new Engine();
       (window as any).__engine = engineRef.current;
       exposeDiagnostics();

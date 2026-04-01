@@ -114,4 +114,61 @@ describe('EventBus', () => {
     expect(events).toContain('beta');
     expect(events).toContain('gamma');
   });
+
+  // ── Fault Isolation (Step 1.2) ──
+
+  describe('handler error isolation', () => {
+    it('emit() should not throw when a handler throws', () => {
+      const bus = new EventBus();
+      bus.on('test', () => { throw new Error('handler broke'); });
+
+      expect(() => bus.emit('test', { v: 1 })).not.toThrow();
+    });
+
+    it('emit() should still call remaining handlers after one throws', () => {
+      const bus = new EventBus();
+      const before = vi.fn();
+      const bad = () => { throw new Error('oops'); };
+      const after = vi.fn();
+
+      bus.on('test', before);
+      bus.on('test', bad);
+      bus.on('test', after);
+      bus.emit('test');
+
+      expect(before).toHaveBeenCalledOnce();
+      expect(after).toHaveBeenCalledOnce();
+    });
+
+    it('emit() should isolate errors in wildcard handlers too', () => {
+      const bus = new EventBus();
+      const exactHandler = vi.fn();
+      bus.on('collision:*', () => { throw new Error('wildcard fail'); });
+      bus.on('collision:hit', exactHandler);
+
+      expect(() => bus.emit('collision:hit', {})).not.toThrow();
+      expect(exactHandler).toHaveBeenCalledOnce();
+    });
+
+    it('emit() should not call console.error when debug is off', () => {
+      const bus = new EventBus();
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      bus.on('test', () => { throw new Error('boom'); });
+      bus.emit('test');
+
+      expect(spy).not.toHaveBeenCalled();
+      spy.mockRestore();
+    });
+
+    it('emit() should call console.error when debug is on', () => {
+      const bus = new EventBus();
+      bus.setDebug(true);
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      bus.on('test', () => { throw new Error('boom'); });
+      bus.emit('test');
+
+      expect(spy).toHaveBeenCalled();
+      spy.mockRestore();
+    });
+  });
 });

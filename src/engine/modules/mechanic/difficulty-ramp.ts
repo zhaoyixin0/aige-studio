@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export interface DifficultyRule {
@@ -40,6 +41,17 @@ export class DifficultyRamp extends BaseModule {
   }
 
   getDependencies() { return { requires: [], optional: ['Scorer'] }; }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: [
+        'difficulty:update',
+      ],
+      consumes: [
+        'scorer:update',
+      ],
+    };
+  }
 
   init(engine: GameEngine): void {
     super.init(engine);

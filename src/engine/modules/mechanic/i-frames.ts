@@ -31,6 +31,14 @@ export class IFrames extends BaseModule {
     };
   }
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    const trigger = (this.params.triggerEvent as string) ?? 'collision:damage';
+    return {
+      emits: ['iframes:start', 'iframes:end'],
+      consumes: [trigger],
+    };
+  }
+
   getDependencies() { return { requires: ['Collision'], optional: [] }; }
 
   init(engine: GameEngine): void {

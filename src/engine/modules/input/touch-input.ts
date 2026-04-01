@@ -1,4 +1,5 @@
 import type { ModuleSchema, GameEngine } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '@/engine/modules/base-module';
 
 interface PointerState {
@@ -48,6 +49,20 @@ export class TouchInput extends BaseModule {
         step: 4,
         unit: 'px',
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: [
+        'input:touch:position',
+        'input:touch:hold',
+        'input:touch:longPress',
+        'input:touch:release',
+        'input:touch:swipe',
+        'input:touch:doubleTap',
+        'input:touch:tap',
+      ],
     };
   }
 

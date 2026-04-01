@@ -1,4 +1,5 @@
 import type { ModuleSchema, GameEngine } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '@/engine/modules/base-module';
 
 export class DeviceInput extends BaseModule {
@@ -37,6 +38,15 @@ export class DeviceInput extends BaseModule {
         max: 0.3,
         step: 0.01,
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: [
+        'input:device:shake',
+        'input:device:tilt',
+      ],
     };
   }
 

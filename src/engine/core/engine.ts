@@ -18,6 +18,7 @@ export class Engine implements GameEngine {
   readonly eventBus = new EventBus();
 
   private modules = new Map<string, GameModule>();
+  private disabledModules = new Set<string>();
   private config: GameConfig = { ...DEFAULT_CONFIG };
   private running = false;
   private rafId: number | null = null;
@@ -26,17 +27,34 @@ export class Engine implements GameEngine {
   // --- Module management ---
 
   addModule(module: GameModule): void {
-    this.modules.set(module.id, module);
-    module.init(this);
-    module.onAttach(this);
+    try {
+      module.init(this);
+      module.onAttach(this);
+      this.modules.set(module.id, module);
+    } catch (err) {
+      try { module.destroy(); } catch { /* best-effort cleanup */ }
+      throw err;
+    }
   }
 
   removeModule(id: string): void {
     const module = this.modules.get(id);
     if (!module) return;
-    module.onDetach(this);
-    module.destroy();
     this.modules.delete(id);
+    try {
+      module.onDetach(this);
+    } catch (err) {
+      this.eventBus.emit('engine:module-error', {
+        moduleId: module.id, moduleType: module.type, error: err,
+      });
+    }
+    try {
+      module.destroy();
+    } catch (err) {
+      this.eventBus.emit('engine:module-error', {
+        moduleId: module.id, moduleType: module.type, error: err,
+      });
+    }
   }
 
   getModule(id: string): GameModule | undefined {
@@ -79,10 +97,15 @@ export class Engine implements GameEngine {
     this.lastTime = performance.now();
     const loop = (now: number) => {
       if (!this.running) return;
-      const dt = now - this.lastTime;
-      this.lastTime = now;
-      this.tick(dt);
-      this.rafId = requestAnimationFrame(loop);
+      try {
+        const dt = now - this.lastTime;
+        this.lastTime = now;
+        this.tick(dt);
+      } finally {
+        if (this.running) {
+          this.rafId = requestAnimationFrame(loop);
+        }
+      }
     };
     this.rafId = requestAnimationFrame(loop);
   }
@@ -97,7 +120,17 @@ export class Engine implements GameEngine {
 
   tick(dt: number): void {
     for (const mod of this.modules.values()) {
-      mod.update(dt);
+      if (this.disabledModules.has(mod.id)) continue;
+      try {
+        mod.update(dt);
+      } catch (err) {
+        this.disabledModules.add(mod.id);
+        this.eventBus.emit('engine:module-error', {
+          moduleId: mod.id,
+          moduleType: mod.type,
+          error: err,
+        });
+      }
     }
   }
 
@@ -108,6 +141,7 @@ export class Engine implements GameEngine {
       mod.destroy();
     }
     this.modules.clear();
+    this.disabledModules.clear();
     this.eventBus.clearAll();
   }
 }

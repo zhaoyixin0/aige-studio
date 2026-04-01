@@ -1,4 +1,5 @@
 import type { GameEngine, GameModule, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 function hasIsActive(m: GameModule): m is GameModule & { isActive(type?: string): boolean } {
@@ -41,6 +42,18 @@ export class Lives extends BaseModule {
   }
 
   getDependencies() { return { requires: ['Collision'], optional: [] }; }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: [
+        'lives:change',
+        'lives:zero',
+      ],
+      consumes: [
+        'collision:damage',
+      ],
+    };
+  }
 
   init(engine: GameEngine): void {
     super.init(engine);

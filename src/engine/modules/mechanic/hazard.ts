@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export interface HazardDef {
@@ -67,6 +68,13 @@ export class Hazard extends BaseModule {
         max: 300,
         step: 1,
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    const damageEvent: string = this.params.damageEvent ?? 'collision:damage';
+    return {
+      emits: [damageEvent],
     };
   }
 

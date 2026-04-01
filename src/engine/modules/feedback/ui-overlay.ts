@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export interface HudState {
@@ -28,6 +29,17 @@ export class UIOverlay extends BaseModule {
         label: 'HUD元素',
         default: [],
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      consumes: [
+        'scorer:update',
+        'timer:tick',
+        'lives:change',
+        'scorer:combo:*',
+      ],
     };
   }
 

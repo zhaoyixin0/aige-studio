@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import type { Gravity } from './gravity';
 import { BaseModule } from '../base-module';
 
@@ -48,6 +49,22 @@ export class Jump extends BaseModule {
         default: 'input:touch:tap',
         options: ['input:touch:tap', 'input:face:mouthOpen'],
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: [
+        'jump:start',
+        'jump:peak',
+        'jump:land',
+        'jump:release',
+      ],
+      consumes: [
+        'gravity:landed',
+        'jump:release',
+        'input:touch:release',
+      ],
     };
   }
 

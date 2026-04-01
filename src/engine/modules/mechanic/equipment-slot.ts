@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export type SlotType = 'weapon' | 'armor' | 'accessory' | 'helmet' | 'boots';
@@ -29,6 +30,14 @@ export class EquipmentSlot extends BaseModule {
         label: 'Equip Event',
         default: 'collectible:pickup',
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    const equipEvent: string = this.params.equipEvent ?? 'collectible:pickup';
+    return {
+      emits: ['equipment:equip', 'equipment:unequip', 'equipment:stats'],
+      consumes: [equipEvent],
     };
   }
 

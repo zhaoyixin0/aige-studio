@@ -13,6 +13,13 @@ export class PowerUp extends BaseModule {
 
   private activePowerUps: ActivePowerUp[] = [];
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    return {
+      emits: ['powerup:activate', 'powerup:expire'],
+      consumes: ['collision:hit'],
+    };
+  }
+
   getSchema(): ModuleSchema {
     return {
       powerUpTypes: {

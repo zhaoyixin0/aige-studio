@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export interface SkillDef {
@@ -50,6 +51,15 @@ export class SkillTree extends BaseModule {
         max: 10,
         step: 1,
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    // NOTE: skill effect events (entry.def.effect) are dynamic — not statically declarable
+    const activateEvent: string = this.params.activateEvent ?? 'input:touch:doubleTap';
+    return {
+      emits: ['skill:unlock', 'skill:activate', 'skill:cooldown'],
+      consumes: ['levelup:levelup', activateEvent],
     };
   }
 

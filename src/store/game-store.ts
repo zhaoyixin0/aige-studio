@@ -3,6 +3,8 @@ import type { AssetEntry, GameConfig, ModuleConfig } from '@/engine/core';
 
 interface GameStore {
   config: GameConfig | null;
+  /** Monotonically increasing version — incremented on every config mutation */
+  configVersion: number;
 
   setConfig: (config: GameConfig) => void;
 
@@ -21,10 +23,11 @@ interface GameStore {
   batchUpdateAssets: (assets: Record<string, AssetEntry>) => void;
 }
 
-export const useGameStore = create<GameStore>((set) => ({
+export const useGameStore = create<GameStore>((set, get) => ({
   config: null,
+  configVersion: 0,
 
-  setConfig: (config) => set({ config }),
+  setConfig: (config) => set({ config, configVersion: get().configVersion + 1 }),
 
   updateModuleParam: (moduleId, param, value) =>
     set((state) => {
@@ -38,6 +41,7 @@ export const useGameStore = create<GameStore>((set) => ({
               : m,
           ),
         },
+        configVersion: state.configVersion + 1,
       };
     }),
 
@@ -49,6 +53,7 @@ export const useGameStore = create<GameStore>((set) => ({
           ...state.config,
           modules: [...state.config.modules, module],
         },
+        configVersion: state.configVersion + 1,
       };
     }),
 
@@ -62,6 +67,7 @@ export const useGameStore = create<GameStore>((set) => ({
             m.id === moduleId ? { ...m, enabled: false } : m,
           ),
         },
+        configVersion: state.configVersion + 1,
       };
     }),
 
@@ -75,6 +81,7 @@ export const useGameStore = create<GameStore>((set) => ({
             m.id === moduleId ? { ...m, enabled: !m.enabled } : m,
           ),
         },
+        configVersion: state.configVersion + 1,
       };
     }),
 

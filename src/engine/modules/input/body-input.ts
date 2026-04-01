@@ -1,4 +1,5 @@
 import type { ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '@/engine/modules/base-module';
 import type { BodyTracker } from '@/engine/tracking/body-tracker';
 import type { BodyLandmark } from '@/engine/tracking/body-tracker';
@@ -28,6 +29,15 @@ export class BodyInput extends BaseModule {
         max: 0.5,
         step: 0.05,
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: [
+        'input:body:move',
+        'input:body:pose',
+      ],
     };
   }
 

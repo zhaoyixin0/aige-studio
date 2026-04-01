@@ -10,6 +10,13 @@ export class GestureMatch extends BaseModule {
   private matchCount = 0;
   private totalTargets = 0;
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    return {
+      emits: ['gesture:show', 'gesture:match', 'gesture:fail'],
+      consumes: ['input:hand:gesture'],
+    };
+  }
+
   getSchema(): ModuleSchema {
     return {
       targetGestures: {

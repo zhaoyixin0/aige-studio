@@ -18,6 +18,12 @@ const FRICTION_MAP: Record<string, number> = {
 export class StaticPlatform extends BaseModule {
   readonly type = 'StaticPlatform';
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    return {
+      emits: ['platform:contact'],
+    };
+  }
+
   getSchema(): ModuleSchema {
     return {
       platforms: {

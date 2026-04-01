@@ -11,6 +11,13 @@ export class BeatMap extends BaseModule {
   private pendingInputTime = 0;
   private started = false;
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    return {
+      emits: ['beat:hit', 'beat:miss'],
+      consumes: ['input:touch:tap', 'input:face:*'],
+    };
+  }
+
   getSchema(): ModuleSchema {
     return {
       bpm: {

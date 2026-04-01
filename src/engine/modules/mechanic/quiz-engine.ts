@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export interface QuizQuestion {
@@ -42,6 +43,21 @@ export class QuizEngine extends BaseModule {
         label: '评分规则',
         default: { correct: 10, wrong: 0, timeBonus: true },
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: [
+        'quiz:question',
+        'quiz:correct',
+        'quiz:wrong',
+        'quiz:finished',
+        'scorer:update',
+      ],
+      consumes: [
+        'quiz:answer',
+      ],
     };
   }
 

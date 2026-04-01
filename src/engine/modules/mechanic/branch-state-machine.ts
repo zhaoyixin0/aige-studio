@@ -17,6 +17,13 @@ export class BranchStateMachine extends BaseModule {
   private currentState: string | null = null;
   private started = false;
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    return {
+      emits: ['branch:stateChange', 'branch:end', 'branch:choice'],
+      consumes: ['input:touch:tap'],
+    };
+  }
+
   getSchema(): ModuleSchema {
     return {
       states: {

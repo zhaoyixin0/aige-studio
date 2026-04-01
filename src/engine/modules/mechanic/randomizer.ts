@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export interface RandomizerItem {
@@ -47,6 +48,19 @@ export class Randomizer extends BaseModule {
         options: ['tap', 'auto', 'mouthOpen'],
         default: 'tap',
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: [
+        'randomizer:spinning',
+        'randomizer:result',
+      ],
+      consumes: [
+        'input:touch:tap',
+        'input:face:mouthOpen',
+      ],
     };
   }
 

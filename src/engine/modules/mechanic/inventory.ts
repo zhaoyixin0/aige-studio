@@ -27,6 +27,14 @@ export class Inventory extends BaseModule {
     };
   }
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    const trackEvent = (this.params.trackEvent as string) ?? 'collectible:pickup';
+    return {
+      emits: ['inventory:change', 'inventory:full'],
+      consumes: [trackEvent],
+    };
+  }
+
   getDependencies() { return { requires: [], optional: ['Collectible'] }; }
 
   init(engine: GameEngine): void {

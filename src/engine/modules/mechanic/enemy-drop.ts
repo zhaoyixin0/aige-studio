@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export interface LootEntry {
@@ -40,6 +41,14 @@ export class EnemyDrop extends BaseModule {
         max: 1000,
         default: 10,
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    const triggerEvent: string = this.params.triggerEvent ?? 'enemy:death';
+    return {
+      emits: ['levelup:xp', 'drop:spawn'],
+      consumes: [triggerEvent],
     };
   }
 

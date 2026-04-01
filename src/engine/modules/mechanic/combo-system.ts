@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 /**
@@ -47,6 +48,18 @@ export class ComboSystem extends BaseModule {
   }
 
   getDependencies() { return { requires: ['Scorer'], optional: [] }; }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: [
+        'combo:hit',
+        'combo:break',
+      ],
+      consumes: [
+        'scorer:update',
+      ],
+    };
+  }
 
   init(engine: GameEngine): void {
     super.init(engine);

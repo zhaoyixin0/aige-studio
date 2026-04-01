@@ -19,6 +19,14 @@ export class OneWayPlatform extends BaseModule {
   private dropping = false;
   private dropTimer = 0;
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    const dropEvent = this.params.dropThroughEvent as string | undefined;
+    return {
+      emits: ['platform:drop', 'platform:land'],
+      consumes: dropEvent ? [dropEvent] : [],
+    };
+  }
+
   getSchema(): ModuleSchema {
     return {
       platforms: {

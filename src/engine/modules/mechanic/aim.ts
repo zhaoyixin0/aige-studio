@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 interface AimDirection {
@@ -47,6 +48,13 @@ export class Aim extends BaseModule {
         label: 'Manual Event',
         default: 'input:touch:hold',
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: ['aim:update', 'aim:queryTargets'],
+      consumes: ['player:move', 'input:face:move', 'input:hand:move'],
     };
   }
 

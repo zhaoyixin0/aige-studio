@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export interface ActiveEffect {
@@ -46,6 +47,12 @@ export class StatusEffect extends BaseModule {
         label: 'Immunities',
         default: [],
       },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      emits: ['status:immunity', 'status:stack', 'status:apply', 'status:tick', 'status:expire'],
     };
   }
 

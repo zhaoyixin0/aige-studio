@@ -48,6 +48,8 @@ export class PixiRenderer {
       height,
       backgroundColor: 0x111827,
       antialias: true,
+      resolution: window.devicePixelRatio || 1,
+      autoDensity: true,
     });
     this.initialized = true;
 
@@ -114,9 +116,6 @@ export class PixiRenderer {
         const storeConfig = (window as any).__gameStore?.getState?.()?.config;
         if (storeConfig?.assets?.background?.src?.startsWith('data:')) {
           bgAsset = storeConfig.assets.background;
-          // Also update engine config so it stays in sync
-          const engineConfig = engine.getConfig();
-          engineConfig.assets = { ...engineConfig.assets, background: bgAsset };
         }
       } catch { /* ignore */ }
     }
@@ -369,11 +368,11 @@ export class PixiRenderer {
         if (state === 'ready') {
           gf.transition('countdown');
         } else if (state === 'finished') {
+          // Emit pause to set gameflowPaused=true via event (respects BaseModule encapsulation)
+          engine.eventBus.emit('gameflow:pause');
           for (const mod of engine.getAllModules()) {
-            // Reset gameflowPaused to true before module-specific reset
-            const baseModule = mod as { gameflowPaused?: boolean; reset?: () => void };
-            baseModule.gameflowPaused = true;
-            baseModule.reset?.();
+            const resettable = mod as { reset?: () => void };
+            resettable.reset?.();
           }
           // Reset renderer so player gets re-registered with collision
           this.gameObjectRenderer?.reset();
@@ -421,6 +420,7 @@ export class PixiRenderer {
       this.app.canvas?.removeEventListener('click', this.canvasClickHandler);
       this.canvasClickHandler = null;
     }
+    this.gameObjectRenderer?.destroy();
     this.gameObjectRenderer = null;
     this.hudRenderer = null;
     this.shooterRenderer?.destroy();

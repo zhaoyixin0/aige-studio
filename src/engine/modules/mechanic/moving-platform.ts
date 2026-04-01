@@ -24,6 +24,12 @@ export class MovingPlatform extends BaseModule {
 
   private states: PlatformState[] = [];
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    return {
+      emits: ['platform:move'],
+    };
+  }
+
   getSchema(): ModuleSchema {
     return {
       platforms: {

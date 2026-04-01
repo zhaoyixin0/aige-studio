@@ -17,6 +17,13 @@ export class MatchEngine extends BaseModule {
   private totalPairs = 0;
   private started = false;
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    return {
+      emits: ['match:found', 'match:complete', 'match:fail'],
+      consumes: ['gameflow:state', 'input:touch:tap'],
+    };
+  }
+
   getSchema(): ModuleSchema {
     return {
       gridCols: {
