@@ -30,6 +30,7 @@ export class Gravity extends BaseModule {
   private surfaces = new Map<string, PlatformSurface>();
   private enabled = true;
   private frozen = false;
+  private lastDt = 0.016;
 
   getSchema(): ModuleSchema {
     return {
@@ -188,6 +189,7 @@ export class Gravity extends BaseModule {
     const strength = this.params.strength ?? 980;
     const terminalVelocity = this.params.terminalVelocity ?? 800;
     const dtSec = dt / 1000;
+    this.lastDt = dtSec;
 
     for (const obj of this.objects.values()) {
       if (!obj.airborne) continue;
@@ -249,6 +251,12 @@ export class Gravity extends BaseModule {
     let bestY = obj.floorY;
     let bestSurfaceId: string | undefined;
 
+    // Use actual dt for previous-frame position estimate instead of hardcoded 0.016
+    const dt = this.lastDt;
+    const displacement = Math.abs(obj.velocityY * dt);
+    // Landing tolerance: accounts for velocity-based displacement to prevent tunneling
+    const tolerance = Math.max(2, displacement);
+
     for (const surface of this.surfaces.values()) {
       if (!surface.active) continue;
 
@@ -258,9 +266,12 @@ export class Gravity extends BaseModule {
       // Object X must overlap surface horizontally
       if (!this.isXOverlapping(obj, surface)) continue;
 
-      // Surface must be at or below current Y (we're falling toward it)
-      // and must be the highest (smallest Y value that's >= object start of frame)
-      if (surface.y >= obj.y - obj.velocityY * 0.016 - 1 && surface.y < bestY) {
+      // Sweep check: surface.y must be between previous-frame Y and current Y
+      // Previous Y estimate: obj.y - velocityY * dt
+      const prevY = obj.y - obj.velocityY * dt;
+      const surfaceReachable = surface.y >= prevY - tolerance && surface.y < bestY;
+
+      if (surfaceReachable) {
         bestY = surface.y;
         bestSurfaceId = surface.id;
       }

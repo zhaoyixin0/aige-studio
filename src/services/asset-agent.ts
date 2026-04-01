@@ -54,6 +54,49 @@ export function extractAssetKeys(config: GameConfig): string[] {
     if (mod.type === 'Hazard' && Array.isArray(hazards)) {
       keys.add('hazard');
     }
+
+    // EnemyAI: enemy sprite asset
+    if (mod.type === 'EnemyAI') {
+      const asset = mod.params?.asset;
+      keys.add(typeof asset === 'string' ? asset : 'enemy_1');
+    }
+
+    // Projectile: bullet sprite asset
+    if (mod.type === 'Projectile') {
+      const asset = mod.params?.asset;
+      keys.add(typeof asset === 'string' ? asset : 'bullet');
+    }
+
+    // EnemyDrop: loot table item assets
+    if (mod.type === 'EnemyDrop') {
+      const lootTable = mod.params?.lootTable;
+      if (Array.isArray(lootTable)) {
+        for (const entry of lootTable) {
+          if (entry && typeof entry.asset === 'string') {
+            keys.add(entry.asset);
+          } else if (entry && typeof entry.item === 'string') {
+            keys.add(entry.item);
+          }
+        }
+      }
+    }
+
+    // DialogueSystem: speaker portrait assets
+    if (mod.type === 'DialogueSystem') {
+      const dialogues = mod.params?.dialogues;
+      if (dialogues && typeof dialogues === 'object') {
+        for (const tree of Object.values(dialogues as Record<string, unknown>)) {
+          if (!tree || typeof tree !== 'object') continue;
+          const nodes = (tree as Record<string, unknown>).nodes;
+          if (!nodes || typeof nodes !== 'object') continue;
+          for (const node of Object.values(nodes as Record<string, unknown>)) {
+            if (node && typeof node === 'object' && typeof (node as Record<string, unknown>).portrait === 'string') {
+              keys.add((node as Record<string, unknown>).portrait as string);
+            }
+          }
+        }
+      }
+    }
   }
 
   // 3. Include player character if game has a visual player
@@ -62,6 +105,12 @@ export function extractAssetKeys(config: GameConfig): string[] {
   );
   if (needsPlayer) {
     keys.add('player');
+  }
+
+  // 4. Skip background for expression game type (camera feed is the background)
+  const hasExpression = config.modules.some(m => m.type === 'ExpressionDetector');
+  if (hasExpression) {
+    keys.delete('background');
   }
 
   return [...keys];
@@ -92,8 +141,6 @@ export class AssetAgent {
     const keys = extractAssetKeys(config);
     const result: Record<string, AssetEntry> = {};
 
-    console.log('[AssetAgent] Extracted asset keys:', keys);
-
     // Determine which keys actually need generation
     const keysToProcess = keys.filter((key) => {
       const existing = config.assets[key];
@@ -106,16 +153,12 @@ export class AssetAgent {
     });
 
     const total = keysToProcess.length;
-    console.log('[AssetAgent] All extracted keys:', keys);
-    console.log('[AssetAgent] Keys to process (after filter):', keysToProcess, `(${total} total)`);
-    console.log('[AssetAgent] Config assets:', Object.keys(config.assets), config.assets);
     if (total === 0) return result;
 
     // Try to obtain Gemini service — may throw if no API key
     let gemini: GeminiImageService | null = null;
     try {
       gemini = getGeminiImageService();
-      console.log('[AssetAgent] Gemini service obtained successfully');
     } catch (err) {
       console.warn('[AssetAgent] No Gemini API key:', err);
     }
@@ -125,6 +168,12 @@ export class AssetAgent {
     const style = (config.meta?.artStyle as PromptContext['style']) || 'cartoon';
     const assetDescriptions = config.meta?.assetDescriptions;
 
+    // Build a combined cache key from theme + artStyle so style changes bypass cache
+    const cacheTheme = theme ? `${theme}__${style}` : style;
+
+    // Sprite target size: configurable via config.meta.spriteSize, default 256, max 512
+    const spriteSize = Math.min(config.meta?.spriteSize ?? 256, 512);
+
     for (let i = 0; i < keysToProcess.length; i++) {
       if (signal.aborted) return result;
 
@@ -133,11 +182,12 @@ export class AssetAgent {
       onProgress?.({ current: i + 1, total, key, status: 'generating' });
 
       // Check library for a cached version first (must have valid data URL)
-      const cached = this.library.findByKeyAndTheme(key, theme || undefined);
+      // Use combined theme+style key so artStyle changes force regeneration
+      const cached = this.library.findByKeyAndTheme(key, cacheTheme || undefined);
       if (cached && cached.src && cached.src.startsWith('data:')) {
         let src = cached.src;
         if (cached.type !== 'background') {
-          try { src = await this.resizeImage(src, 128, 128); } catch { /* keep original */ }
+          try { src = await this.resizeImage(src, spriteSize, spriteSize); } catch { /* keep original */ }
         }
         result[key] = { type: cached.type, src };
         onProgress?.({ current: i + 1, total, key, status: 'done' });
@@ -154,8 +204,9 @@ export class AssetAgent {
           assetDescriptions,
         });
 
-        // Use generateImageRaw — PromptBuilder already includes style
-        let dataUrl = await gemini.generateImageRaw(prompt);
+        // Pass role-specific image config (aspectRatio, imageSize) to Nano Banana Pro
+        const imageConfig = PromptBuilder.getImageConfig(role);
+        let dataUrl = await gemini.generateImageRaw(prompt, imageConfig);
 
         if (signal.aborted) return result;
 
@@ -179,11 +230,12 @@ export class AssetAgent {
 
         if (signal.aborted) return result;
 
-        // Resize sprite images to 128x128 (backgrounds to 540x960)
-        const targetSize = assetType === 'background' ? { w: 540, h: 960 } : { w: 128, h: 128 };
+        // Resize from 1024x1024 generation to game target sizes
+        // Sprites: configurable (default 256, max 512), Backgrounds: 540x960
+        const targetSize = assetType === 'background' ? { w: 540, h: 960 } : { w: spriteSize, h: spriteSize };
         dataUrl = await this.resizeImage(dataUrl, targetSize.w, targetSize.h);
 
-        // Save to library
+        // Save to library with combined theme+style key for proper cache invalidation
         const name = this.library.generateName(key, theme || undefined);
         await this.library.save({
           name,
@@ -191,7 +243,7 @@ export class AssetAgent {
           type: assetType,
           src: dataUrl,
           gameType: config.meta?.name,
-          theme: theme || undefined,
+          theme: cacheTheme || undefined,
         });
 
         result[key] = { type: assetType, src: dataUrl };
@@ -211,7 +263,8 @@ export class AssetAgent {
       const img = new window.Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        // Maintain aspect ratio, fit within maxW x maxH
+        // Maintain aspect ratio, fit within maxW x maxH; the trailing `, 1` caps scale
+        // at 1.0 so images smaller than the target are never upscaled.
         const scale = Math.min(maxW / img.width, maxH / img.height, 1);
         canvas.width = Math.round(img.width * scale);
         canvas.height = Math.round(img.height * scale);

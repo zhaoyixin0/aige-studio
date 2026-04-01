@@ -3,48 +3,17 @@ import type { Engine } from '@/engine/core/engine';
 import type { UIOverlay } from '@/engine/modules/feedback/ui-overlay';
 import type { QuizEngine } from '@/engine/modules/mechanic/quiz-engine';
 import type { Randomizer } from '@/engine/modules/mechanic/randomizer';
-import type { GestureMatch } from '@/engine/modules/mechanic/gesture-match';
-import type { ExpressionDetector } from '@/engine/modules/mechanic/expression-detector';
-import type { MatchEngine } from '@/engine/modules/mechanic/match-engine';
-import type { DressUpEngine } from '@/engine/modules/mechanic/dress-up-engine';
-import type { BranchStateMachine } from '@/engine/modules/mechanic/branch-state-machine';
-import type { Runner } from '@/engine/modules/mechanic/runner';
-import type { BeatMap } from '@/engine/modules/mechanic/beat-map';
-import type { PlaneDetection } from '@/engine/modules/mechanic/plane-detection';
 import type { GameFlow } from '@/engine/modules/feedback/game-flow';
-import type { ResultScreen } from '@/engine/modules/feedback/result-screen';
-
-const GESTURE_EMOJI: Record<string, string> = {
-  thumbs_up: '\uD83D\uDC4D',
-  peace: '\u270C\uFE0F',
-  fist: '\u270A',
-  open_palm: '\uD83D\uDD90\uFE0F',
-};
-
-const EXPRESSION_EMOJI: Record<string, { emoji: string; label: string }> = {
-  smile: { emoji: '\uD83D\uDE0A', label: '\u5FAE\u7B11' },
-  surprise: { emoji: '\uD83D\uDE2E', label: '\u60CA\u8BB6' },
-  wink: { emoji: '\uD83D\uDE09', label: '\u7728\u773C' },
-  'open-mouth': { emoji: '\uD83D\uDE2E', label: '\u5F20\u5634' },
-};
-
-const LAYER_EMOJI: Record<string, string> = {
-  hat: '\uD83C\uDFA9',
-  glasses: '\uD83D\uDC53',
-  shirt: '\uD83D\uDC54',
-  pants: '\uD83D\uDC56',
-  shoes: '\uD83D\uDC5F',
-};
-
-const LAYER_LABEL: Record<string, string> = {
-  hat: '\u5E3D\u5B50',
-  glasses: '\u773C\u955C',
-  shirt: '\u4E0A\u8863',
-  pants: '\u88E4\u5B50',
-  shoes: '\u978B\u5B50',
-};
-
-const CARD_COLORS = [0x3b82f6, 0xef4444, 0x22c55e, 0xf59e0b, 0x8b5cf6, 0xec4899, 0x06b6d4, 0xf97316];
+import type { WaveSpawner } from '@/engine/modules/mechanic/wave-spawner';
+import type { Health } from '@/engine/modules/mechanic/health';
+import type { Shield } from '@/engine/modules/mechanic/shield';
+import type { LevelUp } from '@/engine/modules/mechanic/level-up';
+import type { SkillTree } from '@/engine/modules/mechanic/skill-tree';
+import { computeHealthBarWidth, getHealthBarColor } from './shooter-renderer';
+import { computeXpBarWidth } from './rpg-overlay-renderer';
+import { ChallengeHudRenderer } from './challenge-hud-renderer';
+import { ActivityHudRenderer } from './activity-hud-renderer';
+import { GameFlowOverlayRenderer } from './game-flow-overlay-renderer';
 
 export class HudRenderer {
   private scoreText: Text;
@@ -58,6 +27,7 @@ export class HudRenderer {
   private optionTexts: Text[] = [];
   private optionBgs: Graphics[] = [];
   private progressText: Text;
+  private quizClicksWired = false;
 
   // Wheel UI elements
   private wheelContainer: Container;
@@ -66,78 +36,27 @@ export class HudRenderer {
   private wheelResultText: Text;
   private wheelHintText: Text;
   private wheelAngle = 0;
+  private wheelLabels: Text[] = [];
 
-  // Expression UI elements
-  private expressionContainer: Container;
-  private expressionEmojiText!: Text;
-  private expressionHintText!: Text;
-  private expressionCheckText!: Text;
+  // Shooter HUD elements
+  private shooterContainer: Container | null = null;
+  private waveText!: Text;
+  private enemyCountText!: Text;
+  private playerHealthBarBg!: Graphics;
+  private playerHealthBarFill!: Graphics;
+  private shieldDotsContainer!: Container;
 
-  // Gesture UI elements
-  private gestureContainer: Container;
-  private gestureEmojiText!: Text;
-  private gestureLabelText!: Text;
-  private gestureHintText!: Text;
-  private gestureProgressText!: Text;
+  // RPG HUD elements
+  private rpgContainer: Container | null = null;
+  private levelText!: Text;
+  private xpBarBg!: Graphics;
+  private xpBarFill!: Graphics;
+  private skillPointText!: Text;
 
-  // Puzzle UI elements
-  private puzzleContainer: Container;
-  private puzzleGraphics!: Graphics;
-  private puzzleCardTexts: Text[] = [];
-  private puzzleProgressText!: Text;
-
-  // Dress-Up UI elements
-  private dressUpContainer: Container;
-  private dressUpSilhouette!: Graphics;
-  private dressUpLayerTexts: Text[] = [];
-  private dressUpEquipTexts: Text[] = [];
-  private dressUpHintText!: Text;
-
-  // Narrative UI elements
-  private narrativeContainer: Container;
-  private narrativeStoryText!: Text;
-  private narrativeChoiceTexts: Text[] = [];
-  private narrativeChoiceBgs: Graphics[] = [];
-  private narrativeEndText!: Text;
-
-  // Runner UI elements
-  private runnerContainer: Container;
-  private runnerLaneGraphics!: Graphics;
-  private runnerDistanceText!: Text;
-  private runnerSpeedText!: Text;
-
-  // Rhythm UI elements
-  private rhythmContainer: Container;
-  private rhythmGraphics!: Graphics;
-  private rhythmFeedbackText!: Text;
-  private rhythmLastFeedback = '';
-  private rhythmFeedbackTimer = 0;
-
-  // World-AR UI elements
-  private arContainer: Container;
-  private arGraphics!: Graphics;
-  private arPlaneCountText!: Text;
-
-  // Countdown overlay
-  private countdownContainer: Container;
-  private countdownBg!: Graphics;
-  private countdownText!: Text;
-
-  // Start screen overlay
-  private startContainer: Container;
-  private startBg!: Graphics;
-  private startTitleText!: Text;
-  private startHintText!: Text;
-  private startGameNameText!: Text;
-
-  // Result screen overlay
-  private resultContainer: Container;
-  private resultBg!: Graphics;
-  private resultTitleText!: Text;
-  private resultScoreText!: Text;
-  private resultStarsText!: Text;
-  private resultTimeText!: Text;
-  private resultHintText!: Text;
+  // Sub-renderers
+  private challengeHud: ChallengeHudRenderer;
+  private activityHud: ActivityHudRenderer;
+  private gameFlowOverlay: GameFlowOverlayRenderer;
 
   private width: number;
   private height: number;
@@ -223,6 +142,10 @@ export class HudRenderer {
       bg.fill({ color: 0x1e3a5f, alpha: 0.8 });
       bg.stroke({ color: 0x3b82f6, width: 2, alpha: 0.5 });
 
+      // Make interactive for quiz answer clicks
+      bg.eventMode = 'static';
+      bg.cursor = 'pointer';
+
       const text = new Text({ text: '', style: optionStyle });
       text.anchor.set(0, 0.5);
       text.position.set(100, y + 45);
@@ -264,39 +187,17 @@ export class HudRenderer {
     this.wheelHintText.position.set(width / 2, height * 0.88);
     this.wheelContainer.addChild(this.wheelHintText);
 
-    // Expression container
-    this.expressionContainer = this.buildExpressionContainer();
+    // Shooter HUD
+    this.shooterContainer = this.buildShooterHudContainer();
 
-    // Gesture container
-    this.gestureContainer = this.buildGestureContainer();
+    // RPG HUD
+    this.rpgContainer = this.buildRpgHudContainer();
 
-    // Puzzle container
-    this.puzzleContainer = this.buildPuzzleContainer();
+    // Sub-renderers (each adds its own children to the container)
+    this.challengeHud = new ChallengeHudRenderer(container, width, height);
+    this.activityHud = new ActivityHudRenderer(container, width, height);
 
-    // Dress-Up container
-    this.dressUpContainer = this.buildDressUpContainer();
-
-    // Narrative container
-    this.narrativeContainer = this.buildNarrativeContainer();
-
-    // Runner container
-    this.runnerContainer = this.buildRunnerContainer();
-
-    // Rhythm container
-    this.rhythmContainer = this.buildRhythmContainer();
-
-    // World-AR container
-    this.arContainer = this.buildARContainer();
-
-    // Countdown overlay
-    this.countdownContainer = this.buildCountdownContainer();
-
-    // Start screen overlay
-    this.startContainer = this.buildStartContainer();
-
-    // Result screen overlay
-    this.resultContainer = this.buildResultContainer();
-
+    // Add core HUD elements to container (before game flow overlay so overlays render on top)
     container.addChild(
       this.scoreText,
       this.timerText,
@@ -304,279 +205,12 @@ export class HudRenderer {
       this.comboText,
       this.quizContainer,
       this.wheelContainer,
-      this.expressionContainer,
-      this.gestureContainer,
-      this.puzzleContainer,
-      this.dressUpContainer,
-      this.narrativeContainer,
-      this.runnerContainer,
-      this.rhythmContainer,
-      this.arContainer,
-      this.countdownContainer,
-      this.startContainer,
-      this.resultContainer,
+      this.shooterContainer,
+      this.rpgContainer,
     );
-  }
 
-  // ── Expression (表情挑战) ────────────────────────────────────
-
-  private buildExpressionContainer(): Container {
-    const c = new Container();
-    c.visible = false;
-
-    this.expressionEmojiText = new Text({
-      text: '',
-      style: new TextStyle({
-        fill: '#ffffff',
-        fontSize: 80,
-        fontFamily: 'Arial',
-        fontWeight: 'bold',
-        align: 'center',
-      }),
-    });
-    this.expressionEmojiText.anchor.set(0.5);
-    this.expressionEmojiText.position.set(this.width / 2, this.height * 0.4);
-
-    this.expressionHintText = new Text({
-      text: '\u505A\u51FA\u8868\u60C5\u6765\u5339\u914D\uFF01',
-      style: new TextStyle({
-        fill: '#aaaaaa',
-        fontSize: 28,
-        fontFamily: 'Arial',
-        align: 'center',
-      }),
-    });
-    this.expressionHintText.anchor.set(0.5);
-    this.expressionHintText.position.set(this.width / 2, this.height * 0.55);
-
-    this.expressionCheckText = new Text({
-      text: '\u2705',
-      style: new TextStyle({
-        fill: '#22c55e',
-        fontSize: 96,
-        fontWeight: 'bold',
-      }),
-    });
-    this.expressionCheckText.anchor.set(0.5);
-    this.expressionCheckText.position.set(this.width / 2, this.height * 0.65);
-    this.expressionCheckText.alpha = 0;
-
-    c.addChild(this.expressionEmojiText, this.expressionHintText, this.expressionCheckText);
-    return c;
-  }
-
-  // ── Gesture (手势互动) ────────────────────────────────────
-
-  private buildGestureContainer(): Container {
-    const c = new Container();
-    c.visible = false;
-
-    this.gestureEmojiText = new Text({
-      text: '',
-      style: new TextStyle({
-        fill: '#ffffff',
-        fontSize: 80,
-        fontFamily: 'Arial',
-        fontWeight: 'bold',
-        align: 'center',
-      }),
-    });
-    this.gestureEmojiText.anchor.set(0.5);
-    this.gestureEmojiText.position.set(this.width / 2, this.height * 0.35);
-
-    this.gestureLabelText = new Text({
-      text: '',
-      style: new TextStyle({
-        fill: '#ffffff',
-        fontSize: 36,
-        fontFamily: 'Arial',
-        fontWeight: 'bold',
-        align: 'center',
-      }),
-    });
-    this.gestureLabelText.anchor.set(0.5);
-    this.gestureLabelText.position.set(this.width / 2, this.height * 0.48);
-
-    this.gestureHintText = new Text({
-      text: '\u505A\u51FA\u624B\u52BF\u6765\u5339\u914D\uFF01',
-      style: new TextStyle({
-        fill: '#aaaaaa',
-        fontSize: 28,
-        fontFamily: 'Arial',
-        align: 'center',
-      }),
-    });
-    this.gestureHintText.anchor.set(0.5);
-    this.gestureHintText.position.set(this.width / 2, this.height * 0.58);
-
-    this.gestureProgressText = new Text({
-      text: '',
-      style: new TextStyle({
-        fill: '#888888',
-        fontSize: 24,
-        fontFamily: 'Arial',
-        align: 'center',
-      }),
-    });
-    this.gestureProgressText.anchor.set(0.5);
-    this.gestureProgressText.position.set(this.width / 2, this.height * 0.28);
-
-    c.addChild(
-      this.gestureProgressText,
-      this.gestureEmojiText,
-      this.gestureLabelText,
-      this.gestureHintText,
-    );
-    return c;
-  }
-
-  // ── Puzzle (拼图配对) ────────────────────────────────────
-
-  private buildPuzzleContainer(): Container {
-    const c = new Container();
-    c.visible = false;
-
-    this.puzzleGraphics = new Graphics();
-    c.addChild(this.puzzleGraphics);
-
-    this.puzzleProgressText = new Text({
-      text: '',
-      style: new TextStyle({
-        fill: '#888888',
-        fontSize: 24,
-        fontFamily: 'Arial',
-        align: 'center',
-      }),
-    });
-    this.puzzleProgressText.anchor.set(0.5, 0);
-    this.puzzleProgressText.position.set(this.width / 2, this.height * 0.12);
-    c.addChild(this.puzzleProgressText);
-
-    return c;
-  }
-
-  // ── Dress-Up (换装贴纸) ────────────────────────────────────
-
-  private buildDressUpContainer(): Container {
-    const c = new Container();
-    c.visible = false;
-
-    // Silhouette placeholder on left
-    this.dressUpSilhouette = new Graphics();
-    c.addChild(this.dressUpSilhouette);
-
-    // Layer slots on right — create up to 5
-    const layerStyle = new TextStyle({
-      fill: '#ffffff',
-      fontSize: 28,
-      fontFamily: 'Arial',
-      fontWeight: 'bold',
-    });
-    const equipStyle = new TextStyle({
-      fill: '#aaaaaa',
-      fontSize: 24,
-      fontFamily: 'Arial',
-    });
-
-    for (let i = 0; i < 5; i++) {
-      const yPos = this.height * 0.22 + i * 80;
-
-      const layerText = new Text({ text: '', style: layerStyle });
-      layerText.position.set(this.width * 0.52, yPos);
-      layerText.visible = false;
-
-      const equipText = new Text({ text: '', style: equipStyle });
-      equipText.position.set(this.width * 0.52, yPos + 32);
-      equipText.visible = false;
-
-      this.dressUpLayerTexts.push(layerText);
-      this.dressUpEquipTexts.push(equipText);
-      c.addChild(layerText, equipText);
-    }
-
-    this.dressUpHintText = new Text({
-      text: '\u70B9\u51FB\u9009\u62E9\u88C5\u5907',
-      style: new TextStyle({
-        fill: '#888888',
-        fontSize: 24,
-        fontFamily: 'Arial',
-        align: 'center',
-      }),
-    });
-    this.dressUpHintText.anchor.set(0.5);
-    this.dressUpHintText.position.set(this.width / 2, this.height * 0.88);
-    c.addChild(this.dressUpHintText);
-
-    return c;
-  }
-
-  // ── Narrative (分支叙事) ────────────────────────────────────
-
-  private buildNarrativeContainer(): Container {
-    const c = new Container();
-    c.visible = false;
-
-    this.narrativeStoryText = new Text({
-      text: '',
-      style: new TextStyle({
-        fill: '#ffffff',
-        fontSize: 36,
-        fontFamily: 'Arial',
-        fontWeight: 'bold',
-        wordWrap: true,
-        wordWrapWidth: this.width - 120,
-        align: 'center',
-      }),
-    });
-    this.narrativeStoryText.anchor.set(0.5, 0);
-    this.narrativeStoryText.position.set(this.width / 2, this.height * 0.15);
-
-    c.addChild(this.narrativeStoryText);
-
-    // Choice buttons — up to 4
-    const choiceStyle = new TextStyle({
-      fill: '#ffffff',
-      fontSize: 30,
-      fontFamily: 'Arial',
-      wordWrap: true,
-      wordWrapWidth: this.width - 200,
-    });
-
-    for (let i = 0; i < 4; i++) {
-      const y = this.height * 0.5 + i * 100;
-      const bg = new Graphics();
-      bg.roundRect(80, y, this.width - 160, 80, 12);
-      bg.fill({ color: 0x2d1b4e, alpha: 0.85 });
-      bg.stroke({ color: 0x8b5cf6, width: 2, alpha: 0.6 });
-
-      const text = new Text({ text: '', style: choiceStyle });
-      text.anchor.set(0, 0.5);
-      text.position.set(120, y + 40);
-
-      bg.visible = false;
-      text.visible = false;
-
-      this.narrativeChoiceBgs.push(bg);
-      this.narrativeChoiceTexts.push(text);
-      c.addChild(bg, text);
-    }
-
-    this.narrativeEndText = new Text({
-      text: '',
-      style: new TextStyle({
-        fill: '#f59e0b',
-        fontSize: 40,
-        fontFamily: 'Arial',
-        fontWeight: 'bold',
-        align: 'center',
-      }),
-    });
-    this.narrativeEndText.anchor.set(0.5);
-    this.narrativeEndText.position.set(this.width / 2, this.height * 0.6);
-    this.narrativeEndText.visible = false;
-    c.addChild(this.narrativeEndText);
-
-    return c;
+    // Game flow overlay must be last — renders on top of everything
+    this.gameFlowOverlay = new GameFlowOverlayRenderer(container, width, height);
   }
 
   // ── sync ────────────────────────────────────────────────────
@@ -605,16 +239,17 @@ export class HudRenderer {
       const ceil = Math.ceil(remaining);
       this.timerText.text = `\u23f1 ${ceil}`;
       if (ratio < 0.2) {
-        (this.timerText.style as TextStyle).fill = '#ff4757'; // red
+        (this.timerText.style as TextStyle).fill = '#ff4757';
       } else if (ratio < 0.4) {
-        (this.timerText.style as TextStyle).fill = '#ffa500'; // orange
+        (this.timerText.style as TextStyle).fill = '#ffa500';
       } else {
-        (this.timerText.style as TextStyle).fill = '#00d4ff'; // cyan
+        (this.timerText.style as TextStyle).fill = '#00d4ff';
       }
 
-      // V1-style lives: ❤️ filled + 🖤 empty
+      // V1-style lives: filled + empty
       const currentLives = hud.lives ?? 0;
-      const maxLives = 3; // default max
+      const livesModule = engine.getModulesByType('Lives')[0] as { getParams: () => Record<string, unknown> } | undefined;
+      const maxLives = (livesModule?.getParams()?.maxLives as number | undefined) ?? 3;
       const filled = '\u2764\ufe0f'.repeat(currentLives);
       const empty = '\uD83D\uDDA4'.repeat(Math.max(0, maxLives - currentLives));
       this.livesText.text = filled + empty;
@@ -631,16 +266,54 @@ export class HudRenderer {
     }
 
     // Quiz rendering
+    this.syncQuiz(engine);
+
+    // Wheel rendering
+    this.syncWheel(engine);
+
+    // Sub-renderer sync
+    this.challengeHud.sync(engine);
+    this.activityHud.sync(engine, dt);
+
+    // Shooter HUD rendering
+    this.syncShooterHud(engine);
+
+    // RPG HUD rendering
+    this.syncRpgHud(engine);
+
+    // Game flow overlay (must be last — renders on top)
+    this.gameFlowOverlay.sync(engine);
+  }
+
+  showRhythmFeedback(accuracy: number): void {
+    this.activityHud.showRhythmFeedback(accuracy);
+  }
+
+  // ── Quiz sync ───────────────────────────────────────────────
+
+  private syncQuiz(engine: Engine): void {
     const quizEngine = engine.getModulesByType('QuizEngine')[0] as QuizEngine | undefined;
     if (quizEngine) {
       this.quizContainer.visible = true;
+
+      // Wire click handlers once when engine is available
+      if (!this.quizClicksWired) {
+        this.quizClicksWired = true;
+        for (let i = 0; i < this.optionBgs.length; i++) {
+          const idx = i;
+          this.optionBgs[i].on('pointerdown', () => {
+            engine.eventBus.emit('quiz:answer', { index: idx });
+          });
+        }
+      }
       const question = quizEngine.getCurrentQuestion();
       const progress = quizEngine.getProgress();
 
       if (question) {
         this.progressText.text = `${progress.current + 1} / ${progress.total}`;
-        this.questionText.text = String((question as any).question ?? '');
-        const options: string[] = (question as any).options ?? [];
+        const q = question as { text?: string; options?: string[] };
+        this.questionText.text = String(q.text ?? '');
+        const options: string[] = q.options ?? [];
         for (let i = 0; i < 4; i++) {
           if (i < options.length) {
             this.optionTexts[i].text = `${String.fromCharCode(65 + i)}. ${options[i]}`;
@@ -662,25 +335,29 @@ export class HudRenderer {
     } else {
       this.quizContainer.visible = false;
     }
+  }
 
-    // Wheel rendering
+  // ── Wheel sync ──────────────────────────────────────────────
+
+  private syncWheel(engine: Engine): void {
     const randomizer = engine.getModulesByType('Randomizer')[0] as Randomizer | undefined;
     if (randomizer) {
       this.wheelContainer.visible = true;
+
       const items = randomizer.getItems();
       const spinning = randomizer.isSpinning();
       const progress = randomizer.getSpinProgress();
       const result = randomizer.getResult();
 
       if (spinning) {
-        // Ease-out spin: fast at start, slow at end
         const eased = 1 - Math.pow(1 - progress, 3);
         this.wheelAngle += (1 - eased) * 0.4 + 0.02;
         this.wheelHintText.text = '';
       }
 
       if (result && !spinning) {
-        this.wheelResultText.text = String((result as any).item?.label ?? (result as any).item?.asset ?? '');
+        const r = result as { item?: { label?: string; asset?: string } };
+        this.wheelResultText.text = String(r.item?.label ?? r.item?.asset ?? '');
         this.wheelResultText.alpha = 1;
         this.wheelHintText.text = '\u70B9\u51FB\u518D\u8F6C\u4E00\u6B21';
       } else if (!spinning && !result) {
@@ -688,699 +365,9 @@ export class HudRenderer {
         this.wheelHintText.text = '\u70B9\u51FB\u5C4F\u5E55\u5F00\u59CB\u65CB\u8F6C';
       }
 
-      // Draw wheel
       this.drawWheel(items, this.wheelAngle);
     } else {
       this.wheelContainer.visible = false;
-    }
-
-    // Expression rendering
-    this.syncExpression(engine);
-
-    // Gesture rendering
-    this.syncGesture(engine);
-
-    // Puzzle rendering
-    this.syncPuzzle(engine);
-
-    // Dress-Up rendering
-    this.syncDressUp(engine);
-
-    // Narrative rendering
-    this.syncNarrative(engine);
-
-    // Runner rendering
-    this.syncRunner(engine);
-
-    // Rhythm rendering
-    this.syncRhythm(engine, dt);
-
-    // World-AR rendering
-    this.syncAR(engine);
-
-    // Countdown overlay
-    this.syncCountdown(engine);
-
-    // Start screen overlay
-    this.syncStart(engine);
-
-    // Result screen overlay (must be last — renders on top)
-    this.syncResult(engine);
-  }
-
-  // ── Expression sync ─────────────────────────────────────────
-
-  private syncExpression(engine: Engine): void {
-    const detector = engine.getModulesByType('ExpressionDetector')[0] as ExpressionDetector | undefined;
-    if (detector) {
-      this.expressionContainer.visible = true;
-
-      const exprType = detector.getExpressionType();
-      const info = EXPRESSION_EMOJI[exprType] ?? { emoji: '\uD83D\uDE10', label: exprType };
-
-      this.expressionEmojiText.text = `${info.emoji} ${info.label}`;
-
-      if (detector.isMatched()) {
-        this.expressionCheckText.alpha = Math.min(1, detector.getMatchFadeTimer() / 500);
-        this.expressionHintText.text = '\u5339\u914D\u6210\u529F\uFF01';
-      } else {
-        this.expressionCheckText.alpha = 0;
-        this.expressionHintText.text = '\u505A\u51FA\u8868\u60C5\u6765\u5339\u914D\uFF01';
-      }
-    } else {
-      this.expressionContainer.visible = false;
-    }
-  }
-
-  // ── Gesture sync ────────────────────────────────────────────
-
-  private syncGesture(engine: Engine): void {
-    const gestureMatch = engine.getModulesByType('GestureMatch')[0] as GestureMatch | undefined;
-    if (gestureMatch) {
-      this.gestureContainer.visible = true;
-
-      const target = gestureMatch.getCurrentTarget();
-      const progress = gestureMatch.getProgress();
-
-      if (target) {
-        const emoji = GESTURE_EMOJI[target] ?? '\u270B';
-        this.gestureEmojiText.text = emoji;
-        this.gestureLabelText.text = target.replace(/_/g, ' ');
-        this.gestureHintText.text = '\u505A\u51FA\u624B\u52BF\u6765\u5339\u914D\uFF01';
-        this.gestureProgressText.text = `${progress.matched + 1}/${progress.total}`;
-      } else if (!gestureMatch.isActive()) {
-        this.gestureEmojiText.text = '\u2705';
-        this.gestureLabelText.text = '\u5168\u90E8\u5B8C\u6210\uFF01';
-        this.gestureHintText.text = '';
-        this.gestureProgressText.text = `${progress.matched}/${progress.total}`;
-      } else {
-        this.gestureEmojiText.text = '\u270B';
-        this.gestureLabelText.text = '\u51C6\u5907...';
-        this.gestureHintText.text = '';
-        this.gestureProgressText.text = '';
-      }
-    } else {
-      this.gestureContainer.visible = false;
-    }
-  }
-
-  // ── Puzzle sync ─────────────────────────────────────────────
-
-  private syncPuzzle(engine: Engine): void {
-    const matchEngine = engine.getModulesByType('MatchEngine')[0] as MatchEngine | undefined;
-    if (matchEngine) {
-      this.puzzleContainer.visible = true;
-
-      const grid = matchEngine.getGrid();
-      const cols = matchEngine.getGridCols();
-      const rows = matchEngine.getGridRows();
-      const found = matchEngine.getMatchesFound();
-      const total = matchEngine.getTotalPairs();
-
-      this.puzzleProgressText.text = `\u5339\u914D: ${found} / ${total}`;
-
-      this.drawPuzzleGrid(grid, cols, rows);
-    } else {
-      this.puzzleContainer.visible = false;
-    }
-  }
-
-  private drawPuzzleGrid(
-    grid: Array<{ id: number; value: number; revealed: boolean; matched: boolean }>,
-    cols: number,
-    rows: number,
-  ): void {
-    const g = this.puzzleGraphics;
-    g.clear();
-
-    // Remove old card texts
-    for (const t of this.puzzleCardTexts) {
-      t.destroy();
-    }
-    this.puzzleCardTexts = [];
-
-    if (grid.length === 0) return;
-
-    const padding = 40;
-    const gap = 10;
-    const availW = this.width - padding * 2;
-    const availH = this.height * 0.72;
-    const cardW = Math.min(120, (availW - gap * (cols - 1)) / cols);
-    const cardH = Math.min(120, (availH - gap * (rows - 1)) / rows);
-    const totalW = cols * cardW + (cols - 1) * gap;
-    const totalH = rows * cardH + (rows - 1) * gap;
-    const startX = (this.width - totalW) / 2;
-    const startY = this.height * 0.18 + (availH - totalH) / 2;
-
-    const textStyle = new TextStyle({
-      fill: '#ffffff',
-      fontSize: Math.min(32, cardH * 0.4),
-      fontFamily: 'Arial',
-      fontWeight: 'bold',
-      align: 'center',
-    });
-
-    for (let i = 0; i < grid.length; i++) {
-      const cell = grid[i];
-      const col = i % cols;
-      const row = Math.floor(i / cols);
-      const x = startX + col * (cardW + gap);
-      const y = startY + row * (cardH + gap);
-
-      if (cell.matched) {
-        // Matched card — green border, colored fill
-        g.roundRect(x, y, cardW, cardH, 8);
-        g.fill({ color: CARD_COLORS[cell.value % CARD_COLORS.length], alpha: 0.6 });
-        g.stroke({ color: 0x22c55e, width: 3 });
-      } else if (cell.revealed) {
-        // Revealed card — colored
-        g.roundRect(x, y, cardW, cardH, 8);
-        g.fill({ color: CARD_COLORS[cell.value % CARD_COLORS.length], alpha: 0.85 });
-        g.stroke({ color: 0xffffff, width: 2, alpha: 0.5 });
-      } else {
-        // Face-down card — dark gray
-        g.roundRect(x, y, cardW, cardH, 8);
-        g.fill({ color: 0x374151, alpha: 0.9 });
-        g.stroke({ color: 0x6b7280, width: 2, alpha: 0.5 });
-      }
-
-      // Card text
-      const label = cell.revealed || cell.matched ? String(cell.value + 1) : '?';
-      const txt = new Text({ text: label, style: textStyle });
-      txt.anchor.set(0.5);
-      txt.position.set(x + cardW / 2, y + cardH / 2);
-      this.puzzleContainer.addChild(txt);
-      this.puzzleCardTexts.push(txt);
-    }
-  }
-
-  // ── Dress-Up sync ───────────────────────────────────────────
-
-  private syncDressUp(engine: Engine): void {
-    const dressUp = engine.getModulesByType('DressUpEngine')[0] as DressUpEngine | undefined;
-    if (dressUp) {
-      this.dressUpContainer.visible = true;
-
-      const layers = dressUp.getLayers();
-      const equipped = dressUp.getEquipped();
-
-      // Draw silhouette placeholder on the left
-      this.drawSilhouette();
-
-      // Update layer slots
-      for (let i = 0; i < 5; i++) {
-        if (i < layers.length) {
-          const layer = layers[i];
-          const emoji = LAYER_EMOJI[layer] ?? '\uD83D\uDCE6';
-          const label = LAYER_LABEL[layer] ?? layer;
-          this.dressUpLayerTexts[i].text = `${emoji} ${label}`;
-          this.dressUpLayerTexts[i].visible = true;
-
-          // Find equipped item for this layer
-          const layerItems = equipped.filter((e) => e.layer === layer);
-          if (layerItems.length > 0) {
-            this.dressUpEquipTexts[i].text = layerItems.map((e) => e.itemId).join(', ');
-            this.dressUpEquipTexts[i].style.fill = '#22c55e';
-          } else {
-            this.dressUpEquipTexts[i].text = '\u672A\u88C5\u5907';
-            this.dressUpEquipTexts[i].style.fill = '#666666';
-          }
-          this.dressUpEquipTexts[i].visible = true;
-        } else {
-          this.dressUpLayerTexts[i].visible = false;
-          this.dressUpEquipTexts[i].visible = false;
-        }
-      }
-    } else {
-      this.dressUpContainer.visible = false;
-    }
-  }
-
-  private drawSilhouette(): void {
-    const g = this.dressUpSilhouette;
-    g.clear();
-
-    const cx = this.width * 0.25;
-    const cy = this.height * 0.45;
-    const w = this.width * 0.3;
-    const h = this.height * 0.55;
-
-    // Simple character silhouette
-    g.roundRect(cx - w / 2, cy - h / 2, w, h, 20);
-    g.fill({ color: 0x1f2937, alpha: 0.7 });
-    g.stroke({ color: 0x4b5563, width: 2, alpha: 0.6 });
-
-    // Head circle
-    g.circle(cx, cy - h * 0.28, w * 0.2);
-    g.fill({ color: 0x374151, alpha: 0.8 });
-    g.stroke({ color: 0x6b7280, width: 2 });
-
-    // Body rectangle
-    g.roundRect(cx - w * 0.22, cy - h * 0.08, w * 0.44, h * 0.35, 8);
-    g.fill({ color: 0x374151, alpha: 0.8 });
-    g.stroke({ color: 0x6b7280, width: 2 });
-  }
-
-  // ── Narrative sync ──────────────────────────────────────────
-
-  private syncNarrative(engine: Engine): void {
-    const bsm = engine.getModulesByType('BranchStateMachine')[0] as BranchStateMachine | undefined;
-    if (bsm) {
-      this.narrativeContainer.visible = true;
-
-      const stateData = bsm.getCurrentStateData();
-      const isActive = bsm.isStarted();
-
-      if (stateData) {
-        this.narrativeStoryText.text = `\uD83D\uDCD6 ${stateData.text}`;
-        this.narrativeStoryText.visible = true;
-
-        const choices = stateData.choices ?? [];
-
-        if (choices.length > 0 && isActive) {
-          // Show choice buttons
-          this.narrativeEndText.visible = false;
-          for (let i = 0; i < 4; i++) {
-            if (i < choices.length) {
-              this.narrativeChoiceTexts[i].text = `${i + 1}. ${choices[i].label}`;
-              this.narrativeChoiceTexts[i].visible = true;
-              this.narrativeChoiceBgs[i].visible = true;
-            } else {
-              this.narrativeChoiceTexts[i].visible = false;
-              this.narrativeChoiceBgs[i].visible = false;
-            }
-          }
-        } else {
-          // End state — no choices
-          for (let i = 0; i < 4; i++) {
-            this.narrativeChoiceTexts[i].visible = false;
-            this.narrativeChoiceBgs[i].visible = false;
-          }
-          this.narrativeEndText.text = '\u6545\u4E8B\u7ED3\u675F';
-          this.narrativeEndText.visible = true;
-        }
-      } else {
-        this.narrativeStoryText.text = '\u6545\u4E8B\u5373\u5C06\u5F00\u59CB...';
-        this.narrativeStoryText.visible = true;
-        this.narrativeEndText.visible = false;
-        for (let i = 0; i < 4; i++) {
-          this.narrativeChoiceTexts[i].visible = false;
-          this.narrativeChoiceBgs[i].visible = false;
-        }
-      }
-    } else {
-      this.narrativeContainer.visible = false;
-    }
-  }
-
-  // ── Runner (跑酷) ──────────────────────────────────────────
-
-  private buildRunnerContainer(): Container {
-    const c = new Container();
-    c.visible = false;
-
-    this.runnerLaneGraphics = new Graphics();
-    c.addChild(this.runnerLaneGraphics);
-
-    this.runnerDistanceText = new Text({
-      text: '',
-      style: new TextStyle({ fill: '#ffffff', fontSize: 28, fontFamily: 'Arial', fontWeight: 'bold' }),
-    });
-    this.runnerDistanceText.anchor.set(0.5, 0);
-    this.runnerDistanceText.position.set(this.width / 2, 60);
-    c.addChild(this.runnerDistanceText);
-
-    this.runnerSpeedText = new Text({
-      text: '',
-      style: new TextStyle({ fill: '#aaaaaa', fontSize: 20, fontFamily: 'Arial' }),
-    });
-    this.runnerSpeedText.anchor.set(0.5, 0);
-    this.runnerSpeedText.position.set(this.width / 2, 92);
-    c.addChild(this.runnerSpeedText);
-
-    return c;
-  }
-
-  private syncRunner(engine: Engine): void {
-    const runner = engine.getModulesByType('Runner')[0] as Runner | undefined;
-    if (!runner) {
-      this.runnerContainer.visible = false;
-      return;
-    }
-    this.runnerContainer.visible = true;
-
-    const distance = runner.getDistance();
-    const speed = runner.getCurrentSpeed();
-    const lane = runner.getCurrentLane();
-    const laneCount = (runner.getParams() as any).laneCount ?? 3;
-
-    this.runnerDistanceText.text = `\u{1F3C3} ${Math.floor(distance)}m`;
-    this.runnerSpeedText.text = `\u26A1 ${Math.floor(speed)} px/s`;
-
-    // Draw lane indicators at bottom
-    const g = this.runnerLaneGraphics;
-    g.clear();
-    const laneWidth = this.width / laneCount;
-    const laneY = this.height - 80;
-
-    for (let i = 0; i < laneCount; i++) {
-      const x = i * laneWidth;
-      const isActive = i === lane;
-      g.rect(x + 4, laneY, laneWidth - 8, 6)
-        .fill({ color: isActive ? 0x00ff88 : 0x444444, alpha: isActive ? 0.8 : 0.3 });
-    }
-
-    // Player lane marker
-    const markerX = lane * laneWidth + laneWidth / 2;
-    g.circle(markerX, laneY - 10, 8).fill({ color: 0x00ff88 });
-  }
-
-  // ── Rhythm (节奏) ─────────────────────────────────────────
-
-  private buildRhythmContainer(): Container {
-    const c = new Container();
-    c.visible = false;
-
-    this.rhythmGraphics = new Graphics();
-    c.addChild(this.rhythmGraphics);
-
-    this.rhythmFeedbackText = new Text({
-      text: '',
-      style: new TextStyle({ fill: '#ffffff', fontSize: 48, fontFamily: 'Arial', fontWeight: 'bold' }),
-    });
-    this.rhythmFeedbackText.anchor.set(0.5);
-    this.rhythmFeedbackText.position.set(this.width / 2, this.height * 0.4);
-    c.addChild(this.rhythmFeedbackText);
-
-    return c;
-  }
-
-  private syncRhythm(engine: Engine, dt: number): void {
-    const beatMap = engine.getModulesByType('BeatMap')[0] as BeatMap | undefined;
-    if (!beatMap) {
-      this.rhythmContainer.visible = false;
-      return;
-    }
-    this.rhythmContainer.visible = true;
-
-    const beats = beatMap.getBeats();
-    const elapsed = beatMap.getElapsed();
-    const currentIndex = beatMap.getCurrentBeatIndex();
-    const tolerance = (beatMap.getParams() as any).tolerance ?? 200;
-
-    const g = this.rhythmGraphics;
-    g.clear();
-
-    // Hit zone line
-    const hitLineY = this.height * 0.75;
-    g.rect(0, hitLineY - 3, this.width, 6).fill({ color: 0x00ff88, alpha: 0.6 });
-    g.rect(0, hitLineY - tolerance / 4, this.width, tolerance / 2).fill({ color: 0x00ff88, alpha: 0.1 });
-
-    // Draw upcoming beats as falling notes
-    const visibleWindow = 2000; // show 2 seconds ahead
-    for (let i = currentIndex; i < beats.length && i < currentIndex + 10; i++) {
-      const beatTime = beats[i];
-      const timeUntil = beatTime - elapsed;
-      if (timeUntil < -tolerance) continue;
-      if (timeUntil > visibleWindow) break;
-
-      const progress = 1 - timeUntil / visibleWindow;
-      const noteY = progress * hitLineY;
-      const noteX = this.width / 2;
-
-      const alpha = Math.max(0.3, Math.min(1, progress));
-      g.circle(noteX, noteY, 16).fill({ color: 0xff6b9d, alpha });
-      g.circle(noteX, noteY, 12).fill({ color: 0xff99bb, alpha });
-    }
-
-    // Feedback text fade
-    if (this.rhythmFeedbackTimer > 0) {
-      this.rhythmFeedbackTimer -= dt;
-      this.rhythmFeedbackText.text = this.rhythmLastFeedback;
-      this.rhythmFeedbackText.alpha = Math.min(1, this.rhythmFeedbackTimer / 300);
-    } else {
-      this.rhythmFeedbackText.alpha = 0;
-    }
-  }
-
-  showRhythmFeedback(accuracy: number): void {
-    if (accuracy > 0.8) {
-      this.rhythmLastFeedback = '\u2728 PERFECT!';
-      (this.rhythmFeedbackText.style as TextStyle).fill = '#00ff88';
-    } else if (accuracy > 0.5) {
-      this.rhythmLastFeedback = '\u{1F44D} GOOD';
-      (this.rhythmFeedbackText.style as TextStyle).fill = '#ffd700';
-    } else {
-      this.rhythmLastFeedback = 'MISS';
-      (this.rhythmFeedbackText.style as TextStyle).fill = '#ff4444';
-    }
-    this.rhythmFeedbackTimer = 600;
-  }
-
-  // ── World-AR (世界AR) ─────────────────────────────────────
-
-  private buildARContainer(): Container {
-    const c = new Container();
-    c.visible = false;
-
-    this.arGraphics = new Graphics();
-    c.addChild(this.arGraphics);
-
-    this.arPlaneCountText = new Text({
-      text: '',
-      style: new TextStyle({ fill: '#00d4ff', fontSize: 24, fontFamily: 'Arial' }),
-    });
-    this.arPlaneCountText.anchor.set(0.5, 0);
-    this.arPlaneCountText.position.set(this.width / 2, 60);
-    c.addChild(this.arPlaneCountText);
-
-    return c;
-  }
-
-  private syncAR(engine: Engine): void {
-    const planeDetection = engine.getModulesByType('PlaneDetection')[0] as PlaneDetection | undefined;
-    if (!planeDetection) {
-      this.arContainer.visible = false;
-      return;
-    }
-    this.arContainer.visible = true;
-
-    const planes = planeDetection.getPlanes();
-    this.arPlaneCountText.text = `\u{1F4CD} ${planes.length} \u5E73\u9762\u68C0\u6D4B\u5230`;
-
-    const g = this.arGraphics;
-    g.clear();
-
-    for (const plane of planes) {
-      // PlaneDetection uses normalized 0-1 coordinates
-      const x = plane.x * this.width;
-      const y = plane.y * this.height;
-      const w = plane.width * this.width;
-      const h = plane.height * this.height;
-      const alpha = 0.15 + plane.confidence * 0.25;
-
-      // Plane outline
-      g.rect(x - w / 2, y - h / 2, w, h)
-        .fill({ color: 0x00d4ff, alpha })
-        .stroke({ color: 0x00d4ff, width: 2, alpha: alpha + 0.2 });
-
-      // Corner markers
-      const cornerSize = 10;
-      const corners = [
-        [x - w / 2, y - h / 2], [x + w / 2 - cornerSize, y - h / 2],
-        [x - w / 2, y + h / 2 - cornerSize], [x + w / 2 - cornerSize, y + h / 2 - cornerSize],
-      ];
-      for (const [cx, cy] of corners) {
-        g.rect(cx, cy, cornerSize, cornerSize).fill({ color: 0x00ff88, alpha: 0.6 });
-      }
-    }
-  }
-
-  // ── Countdown overlay ──────────────────────────────────────
-
-  private buildCountdownContainer(): Container {
-    const c = new Container();
-    c.visible = false;
-
-    this.countdownBg = new Graphics();
-    this.countdownBg.rect(0, 0, this.width, this.height);
-    this.countdownBg.fill({ color: 0x000000, alpha: 0.6 });
-
-    this.countdownText = new Text({
-      text: '3',
-      style: new TextStyle({
-        fill: '#ffffff', fontSize: 160, fontFamily: 'Arial', fontWeight: 'bold', align: 'center',
-      }),
-    });
-    this.countdownText.anchor.set(0.5);
-    this.countdownText.position.set(this.width / 2, this.height * 0.4);
-
-    c.addChild(this.countdownBg, this.countdownText);
-    return c;
-  }
-
-  private syncCountdown(engine: Engine): void {
-    const gameFlow = engine.getModulesByType('GameFlow')[0] as GameFlow | undefined;
-    if (!gameFlow || gameFlow.getState() !== 'countdown') {
-      this.countdownContainer.visible = false;
-      return;
-    }
-
-    this.countdownContainer.visible = true;
-    const remaining = gameFlow.getCountdownRemaining();
-    const displayNum = Math.ceil(remaining);
-    this.countdownText.text = displayNum > 0 ? String(displayNum) : 'GO!';
-  }
-
-  // ── Start screen ───────────────────────────────────────────
-
-  private buildStartContainer(): Container {
-    const c = new Container();
-    c.visible = true;
-
-    this.startBg = new Graphics();
-    this.startBg.rect(0, 0, this.width, this.height);
-    this.startBg.fill({ color: 0x000000, alpha: 0.7 });
-
-    this.startTitleText = new Text({
-      text: '\u{1F3AE}',
-      style: new TextStyle({
-        fontSize: 120, fontFamily: 'Arial', align: 'center',
-      }),
-    });
-    this.startTitleText.anchor.set(0.5);
-    this.startTitleText.position.set(this.width / 2, this.height * 0.3);
-
-    this.startGameNameText = new Text({
-      text: '',
-      style: new TextStyle({
-        fill: '#ffffff', fontSize: 48, fontFamily: 'Arial', fontWeight: 'bold',
-        align: 'center', wordWrap: true, wordWrapWidth: this.width - 100,
-      }),
-    });
-    this.startGameNameText.anchor.set(0.5);
-    this.startGameNameText.position.set(this.width / 2, this.height * 0.45);
-
-    this.startHintText = new Text({
-      text: '\u{1F449} \u70B9\u51FB\u5C4F\u5E55\u5F00\u59CB\u6E38\u620F',
-      style: new TextStyle({
-        fill: '#aaaaaa', fontSize: 32, fontFamily: 'Arial', align: 'center',
-      }),
-    });
-    this.startHintText.anchor.set(0.5);
-    this.startHintText.position.set(this.width / 2, this.height * 0.6);
-
-    c.addChild(this.startBg, this.startTitleText, this.startGameNameText, this.startHintText);
-    return c;
-  }
-
-  private syncStart(engine: Engine): void {
-    const gameFlow = engine.getModulesByType('GameFlow')[0] as GameFlow | undefined;
-    if (!gameFlow) {
-      this.startContainer.visible = false;
-      return;
-    }
-
-    const state = gameFlow.getState();
-    if (state === 'ready') {
-      this.startContainer.visible = true;
-
-      // Show game name from config
-      const config = engine.getConfig();
-      this.startGameNameText.text = config.meta?.name || '\u65B0\u6E38\u620F';
-    } else {
-      this.startContainer.visible = false;
-    }
-  }
-
-  // ── Result screen ──────────────────────────────────────────
-
-  private buildResultContainer(): Container {
-    const c = new Container();
-    c.visible = false;
-
-    this.resultBg = new Graphics();
-    this.resultBg.rect(0, 0, this.width, this.height);
-    this.resultBg.fill({ color: 0x000000, alpha: 0.75 });
-
-    this.resultTitleText = new Text({
-      text: '\u{1F3AE} \u6E38\u620F\u7ED3\u675F',
-      style: new TextStyle({
-        fill: '#ffffff', fontSize: 52, fontFamily: 'Arial', fontWeight: 'bold', align: 'center',
-      }),
-    });
-    this.resultTitleText.anchor.set(0.5);
-    this.resultTitleText.position.set(this.width / 2, this.height * 0.25);
-
-    this.resultStarsText = new Text({
-      text: '',
-      style: new TextStyle({
-        fill: '#FFD700', fontSize: 64, fontFamily: 'Arial', align: 'center',
-      }),
-    });
-    this.resultStarsText.anchor.set(0.5);
-    this.resultStarsText.position.set(this.width / 2, this.height * 0.35);
-
-    this.resultScoreText = new Text({
-      text: '',
-      style: new TextStyle({
-        fill: '#ffffff', fontSize: 44, fontFamily: 'Arial', fontWeight: 'bold', align: 'center',
-      }),
-    });
-    this.resultScoreText.anchor.set(0.5);
-    this.resultScoreText.position.set(this.width / 2, this.height * 0.48);
-
-    this.resultTimeText = new Text({
-      text: '',
-      style: new TextStyle({
-        fill: '#00d4ff', fontSize: 32, fontFamily: 'Arial', align: 'center',
-      }),
-    });
-    this.resultTimeText.anchor.set(0.5);
-    this.resultTimeText.position.set(this.width / 2, this.height * 0.57);
-
-    this.resultHintText = new Text({
-      text: '\u70B9\u51FB\u5C4F\u5E55\u91CD\u65B0\u5F00\u59CB',
-      style: new TextStyle({
-        fill: '#aaaaaa', fontSize: 24, fontFamily: 'Arial', align: 'center',
-      }),
-    });
-    this.resultHintText.anchor.set(0.5);
-    this.resultHintText.position.set(this.width / 2, this.height * 0.72);
-
-    c.addChild(this.resultBg, this.resultTitleText, this.resultStarsText, this.resultScoreText, this.resultTimeText, this.resultHintText);
-    return c;
-  }
-
-  private syncResult(engine: Engine): void {
-    const gameFlow = engine.getModulesByType('GameFlow')[0] as GameFlow | undefined;
-    if (!gameFlow || gameFlow.getState() !== 'finished') {
-      this.resultContainer.visible = false;
-      return;
-    }
-
-    this.resultContainer.visible = true;
-
-    const resultScreen = engine.getModulesByType('ResultScreen')[0] as ResultScreen | undefined;
-    if (resultScreen) {
-      const results = resultScreen.getResults();
-      const score = results.stats.score ?? 0;
-      const time = results.stats.time;
-      const stars = results.starRating;
-
-      this.resultScoreText.text = `\u2b50 \u5F97\u5206: ${score}`;
-      this.resultStarsText.text = '\u2B50'.repeat(stars) + '\u2606'.repeat(Math.max(0, 3 - stars));
-      this.resultTimeText.text = time != null ? `\u23f1 \u7528\u65f6: ${Math.ceil(time)}s` : '';
-    } else {
-      // Fallback: read score directly from Scorer module
-      const scorers = engine.getModulesByType('Scorer');
-      if (scorers.length > 0) {
-        const scorer = scorers[0] as any;
-        const score = scorer.getScore?.() ?? 0;
-        this.resultScoreText.text = `\u2b50 \u5F97\u5206: ${score}`;
-      }
-      this.resultStarsText.text = '';
-      this.resultTimeText.text = '';
     }
   }
 
@@ -1404,7 +391,6 @@ export class HudRenderer {
       const endA = startA + segAngle;
       const color = COLORS[i % COLORS.length];
 
-      // Draw segment
       g.moveTo(cx, cy);
       g.arc(cx, cy, radius, startA, endA);
       g.closePath();
@@ -1412,11 +398,43 @@ export class HudRenderer {
       g.stroke({ color: 0xffffff, width: 2, alpha: 0.3 });
     }
 
-    // Draw center circle
     g.circle(cx, cy, 30).fill({ color: 0x1f2937 });
     g.circle(cx, cy, 28).stroke({ color: 0xffffff, width: 2 });
 
-    // Draw pointer triangle at top
+    // Render segment labels
+    // Ensure we have enough Text objects (create once, reuse)
+    while (this.wheelLabels.length < items.length) {
+      const label = new Text({
+        text: '',
+        style: new TextStyle({
+          fill: '#ffffff',
+          fontSize: 18,
+          fontFamily: 'Arial',
+          fontWeight: 'bold',
+        }),
+      });
+      label.anchor.set(0.5);
+      this.wheelContainer.addChild(label);
+      this.wheelLabels.push(label);
+    }
+
+    // Update label positions and text
+    for (let i = 0; i < this.wheelLabels.length; i++) {
+      if (i < items.length) {
+        const midAngle = angle + (i + 0.5) * segAngle;
+        const labelRadius = radius * 0.65;
+        this.wheelLabels[i].text = items[i].label ?? items[i].asset;
+        this.wheelLabels[i].position.set(
+          cx + Math.cos(midAngle) * labelRadius,
+          cy + Math.sin(midAngle) * labelRadius,
+        );
+        this.wheelLabels[i].rotation = midAngle;
+        this.wheelLabels[i].visible = true;
+      } else {
+        this.wheelLabels[i].visible = false;
+      }
+    }
+
     this.wheelPointer.clear();
     this.wheelPointer.moveTo(cx, cy - radius - 5);
     this.wheelPointer.lineTo(cx - 18, cy - radius - 40);
@@ -1425,18 +443,173 @@ export class HudRenderer {
     this.wheelPointer.fill({ color: 0xff4444 });
   }
 
+  // ── Shooter HUD ───────────────────────────────────────────────
+
+  private buildShooterHudContainer(): Container {
+    const c = new Container();
+    c.visible = false;
+
+    this.waveText = new Text({
+      text: '',
+      style: new TextStyle({ fill: '#ffffff', fontSize: 24, fontFamily: 'Arial', fontWeight: 'bold' }),
+    });
+    this.waveText.position.set(20, 60);
+
+    this.enemyCountText = new Text({
+      text: '',
+      style: new TextStyle({ fill: '#aaaaaa', fontSize: 20, fontFamily: 'Arial' }),
+    });
+    this.enemyCountText.position.set(20, 88);
+
+    this.playerHealthBarBg = new Graphics();
+    this.playerHealthBarBg.rect(20, 115, 150, 8).fill({ color: 0x333333 });
+
+    this.playerHealthBarFill = new Graphics();
+
+    this.shieldDotsContainer = new Container();
+    this.shieldDotsContainer.position.set(20, 130);
+
+    c.addChild(
+      this.waveText,
+      this.enemyCountText,
+      this.playerHealthBarBg,
+      this.playerHealthBarFill,
+      this.shieldDotsContainer,
+    );
+    return c;
+  }
+
+  private syncShooterHud(engine: Engine): void {
+    const waveSpawner = engine.getModulesByType('WaveSpawner')[0] as WaveSpawner | undefined;
+    const health = engine.getModulesByType('Health')[0] as Health | undefined;
+    const shield = engine.getModulesByType('Shield')[0] as Shield | undefined;
+
+    if (!waveSpawner && !health && !shield) {
+      if (this.shooterContainer) this.shooterContainer.visible = false;
+      return;
+    }
+    if (this.shooterContainer) this.shooterContainer.visible = true;
+
+    if (waveSpawner) {
+      const wave = waveSpawner.getCurrentWave();
+      const remaining = waveSpawner.getEnemiesRemaining();
+      this.waveText.text = wave > 0 ? `Wave ${wave}` : '';
+      this.enemyCountText.text = wave > 0 ? `Enemies: ${remaining}` : '';
+    } else {
+      this.waveText.text = '';
+      this.enemyCountText.text = '';
+    }
+
+    if (health) {
+      const entity = health.getEntity('player_1');
+      if (entity) {
+        const ratio = entity.maxHp > 0 ? Math.max(0, Math.min(entity.hp / entity.maxHp, 1)) : 0;
+        const fillWidth = computeHealthBarWidth(entity.hp, entity.maxHp, 150);
+        const color = getHealthBarColor(ratio);
+        this.playerHealthBarFill.clear();
+        if (fillWidth > 0) {
+          this.playerHealthBarFill.rect(20, 115, fillWidth, 8).fill({ color });
+        }
+        this.playerHealthBarBg.visible = true;
+        this.playerHealthBarFill.visible = true;
+      } else {
+        this.playerHealthBarBg.visible = false;
+        this.playerHealthBarFill.visible = false;
+      }
+    } else {
+      this.playerHealthBarBg.visible = false;
+      this.playerHealthBarFill.visible = false;
+    }
+
+    if (shield) {
+      const charges = shield.getCharges();
+      const maxCharges = (shield.getParams().maxCharges as number | undefined) ?? 3;
+      this.shieldDotsContainer.removeChildren();
+      for (let i = 0; i < maxCharges; i++) {
+        const dot = new Graphics();
+        const isFilled = i < charges;
+        dot.circle(i * 18, 0, 6).fill({ color: isFilled ? 0x4488FF : 0x333333 });
+        this.shieldDotsContainer.addChild(dot);
+      }
+      this.shieldDotsContainer.visible = true;
+    } else {
+      this.shieldDotsContainer.visible = false;
+    }
+  }
+
+  // ── RPG HUD ──────────────────────────────────────────────────
+
+  private buildRpgHudContainer(): Container {
+    const c = new Container();
+    c.visible = false;
+
+    this.levelText = new Text({
+      text: '',
+      style: new TextStyle({ fill: '#BB86FC', fontSize: 22, fontFamily: 'Arial', fontWeight: 'bold' }),
+    });
+    this.levelText.position.set(20, 60);
+
+    this.xpBarBg = new Graphics();
+    this.xpBarBg.rect(80, 65, 120, 6).fill({ color: 0x333333 });
+
+    this.xpBarFill = new Graphics();
+
+    this.skillPointText = new Text({
+      text: '',
+      style: new TextStyle({ fill: '#FFD700', fontSize: 18, fontFamily: 'Arial', fontWeight: 'bold' }),
+    });
+    this.skillPointText.position.set(210, 60);
+
+    c.addChild(this.levelText, this.xpBarBg, this.xpBarFill, this.skillPointText);
+    return c;
+  }
+
+  private syncRpgHud(engine: Engine): void {
+    const levelUp = engine.getModulesByType('LevelUp')[0] as LevelUp | undefined;
+    const skillTree = engine.getModulesByType('SkillTree')[0] as SkillTree | undefined;
+
+    if (!levelUp && !skillTree) {
+      if (this.rpgContainer) this.rpgContainer.visible = false;
+      return;
+    }
+    if (this.rpgContainer) this.rpgContainer.visible = true;
+
+    if (levelUp) {
+      const level = levelUp.getLevel();
+      const currentXp = levelUp.getXp();
+      const xpToNext = levelUp.getXpToNextLevel();
+      this.levelText.text = `Lv.${level}`;
+      const fillWidth = computeXpBarWidth(currentXp, xpToNext, 120);
+      this.xpBarFill.clear();
+      if (fillWidth > 0) {
+        this.xpBarFill.rect(80, 65, fillWidth, 6).fill({ color: 0xBB86FC });
+      }
+    } else {
+      this.levelText.text = '';
+      this.xpBarFill.clear();
+    }
+
+    if (skillTree) {
+      const points = skillTree.getAvailablePoints();
+      this.skillPointText.text = points > 0 ? `SP: ${points}` : '';
+    } else {
+      this.skillPointText.text = '';
+    }
+  }
+
   reset(): void {
     this.scoreText.text = '0';
     this.timerText.text = '';
     this.livesText.text = '';
     this.comboText.alpha = 0;
     this.quizContainer.visible = false;
+    this.quizClicksWired = false;
     this.wheelContainer.visible = false;
     this.wheelAngle = 0;
-    this.expressionContainer.visible = false;
-    this.gestureContainer.visible = false;
-    this.puzzleContainer.visible = false;
-    this.dressUpContainer.visible = false;
-    this.narrativeContainer.visible = false;
+    if (this.shooterContainer) this.shooterContainer.visible = false;
+    if (this.rpgContainer) this.rpgContainer.visible = false;
+    this.challengeHud.reset();
+    this.activityHud.reset();
+    this.gameFlowOverlay.reset();
   }
 }

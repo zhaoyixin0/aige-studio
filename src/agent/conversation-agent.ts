@@ -361,9 +361,20 @@ export class ConversationAgent {
                   param_key?: string;
                   param_value?: unknown;
                 }>;
+                asset_descriptions?: Record<string, string>;
               };
               if (currentConfig) {
                 config = this.applyChanges(currentConfig, input.changes);
+                // Apply asset_descriptions if provided (needed for style/theme changes)
+                if (input.asset_descriptions && config) {
+                  config = {
+                    ...config,
+                    meta: {
+                      ...config.meta,
+                      assetDescriptions: input.asset_descriptions,
+                    },
+                  };
+                }
                 if (!reply) {
                   reply = `已完成修改！共应用了 ${input.changes.length} 项更改。`;
                 }

@@ -66,8 +66,8 @@ function exposeDiagnostics(): void {
 }
 
 // --- Canvas dimensions (portrait mobile) ---
-const CANVAS_WIDTH = 1080;
-const CANVAS_HEIGHT = 1920;
+export const CANVAS_WIDTH = 1080;
+export const CANVAS_HEIGHT = 1920;
 
 /**
  * Hook that creates and manages the Engine, PixiRenderer, ModuleRegistry, and ConfigLoader.

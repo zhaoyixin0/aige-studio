@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export interface HealthEntity {
@@ -35,6 +36,14 @@ export class Health extends BaseModule {
         type: 'boolean',
         label: 'Show Health Bar',
         default: true,
+      },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      damageReceiver: {
+        handle: (targetId, amount) => this.damage(targetId, amount),
       },
     };
   }

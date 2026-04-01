@@ -211,6 +211,47 @@ Previous prototype at `C:\Users\yixin\Downloads\secret demo\index.html` — sing
 69. Knowledge base: shooting.md rewritten for combat shooter, new platformer.md and action-rpg.md skill files (16/16 game types documented)
 70. 1175 tests passing (+55 from 1120)
 
+### 2026-03-30
+71. Systemic game quality fix — shooting/action-rpg now playable
+72. AutoWirer: WaveSpawner+EnemyAI rule (wave:spawn → addEnemy, enemy:death → removeEnemy)
+73. PlayerMovement: Y coordinate tracking, init X to canvas center, defaultY param, emit {x, y} in player:move
+74. Projectile: autoFire param for continuous fire without manual taps
+75. Renderer: 3-path routing (platformer/shooter/spawner) replacing 2-path, new syncShooterPlayer method
+76. TouchInput: default center-bottom position on init + reset (catch/dodge player visible at start)
+77. Runner: lane-based player rendering from Runner.getCurrentLane()
+78. Presets: shooting uses chase behavior (detectionRange: 2000), autoFire: true; all presets playerSize: 64
+79. 1349 tests passing (+174 from 1175)
+
+### 2026-03-31
+80. Contract-based auto-wiring system — modules self-declare capabilities via getContracts() (collisionProvider, damageReceiver, damageSource, playerPosition)
+81. AutoWirer rewritten: 4-phase algorithm (Registration, Damage Routing, Queries, Bridges) replaces 10 hardcoded WIRING_RULES
+82. Damage routing convention: collision:hit = A damages B, collision:damage = B damages A — automatic amount resolution from contracts
+83. PlayerMovement follow mode (mode:'follow' + lerp) for shooter/RPG touch-following
+84. Renderer collision decoupling — game-object-renderer and shooter-renderer no longer touch Collision module
+85. health:zero → lives:zero bridge in AutoWirer for GameFlow integration
+86. aim:queryTargets handler for Aim module enemy position queries
+87. Shooting/action-rpg presets updated: follow mode, attackRange:40
+88. 6 modules with contracts: Spawner, Projectile, EnemyAI, PlayerMovement, Collectible, Health
+89. 1409 tests passing (+60 from 1349), 11 contract wiring integration tests
+
+### 2026-03-31 (continued) — Game Quality Audit
+90. TouchInput: emit `input:touch:position` on pointerDown/pointerMove for follow-mode player control
+91. Shooting/action-rpg presets: add `continuousEvent: 'input:face:move'` to PlayerMovement — fixes face/touch control
+92. Platformer: remove swipe-based movement, use hold-based continuous input instead
+93. Jump + Gravity integration: Jump registers player in Gravity system, uses surface landing instead of fixed groundY
+94. Variable jump height: `jump:release` event cuts velocity 50% for short hops vs full jumps
+95. Dash invulnerability: emits `iframes:start/end` during dash for damage immunity
+96. IFrames visual feedback: player sprite alpha flickers (0.3/1.0 per 100ms) during invulnerability
+97. Platformer preset expanded: 12 platforms (static+moving+one-way), 8 collectibles, 3 hazards, 2 checkpoints
+98. WaveSpawner: `maxEnemiesPerWave` param caps exponential scaling (default: 15)
+99. Catch preset: mixed good+bad items with dual collision rules (hit+damage)
+100. Dodge preset: mixed bad+good items with scoring on pickup
+101. Rhythm preset: 150 pre-generated beats at 120 BPM covering 60s with syncopation
+102. Action-RPG: SkillTree populated with 3 skills (power_strike, heal, speed_burst) + EquipmentSlot module
+103. Quiz: varied correctIndex across questions (was all 0, now 1/2/0/3/1)
+104. Runner: speed 400→900 with acceleration 15 (was 250 with acceleration 10)
+105. 1448 tests passing (+39 from 1409), 3 new test files (preset-quality, game-feel, touch-input expanded)
+
 ## Game Flow
 ```
 Start Screen ("click to start")
@@ -235,10 +276,22 @@ Restart → Countdown...
 - **Browser console:** `__diagnostics.start()` → play → `__diagnostics.stop()` — event flow analysis
 - **EventBus debug:** `__engine.eventBus.setDebug(true)` — real-time event logging
 
+## New Module Integration Checklist (CRITICAL)
+When adding new collision-based modules:
+1. **getContracts()**: Implement collisionProvider/damageReceiver/damageSource/playerPosition contracts — AutoWirer reads these to auto-wire everything
+2. **Renderer routing**: If new game pattern, add a routing path in `game-object-renderer.ts` (currently: platformer/shooter/spawner)
+3. **Event contracts**: Verify all event payloads match consumer expectations (e.g., `player:move` must include `{x, y}`)
+4. **Integration test with real preset**: Test end-to-end flow using actual preset config, not hand-crafted test configs
+5. **getDependencies()**: New modules must declare requires/optional dependencies
+
+No auto-wirer code changes needed for collision-based modules — just implement getContracts().
+Platform→Gravity bridges remain as BRIDGE_RULES in auto-wirer.ts (5 rules).
+
+Lesson: Batch 2/3 modules passed unit tests but failed in real games because the integration layer was not updated. Contract system prevents this by making wiring self-declaring.
+
 ## Known Issues / Next Steps
 - Gemini API key exposed in frontend (fine for internal use, need proxy for public)
 - Comprehensive mobile touch testing needed
-- Platformer physics: platform-gravity surface wiring complete, renderer integration pending
-- Shooter/RPG module rendering in PixiJS not yet implemented (modules work, visual rendering pending)
 - Knowledge skill files need updating for 13 new modules
 - GuidedCreator conversation could benefit from streaming responses
+- Code duplication in game-object-renderer (syncShooterPlayer vs syncPlayer) — extract shared createPlayerContainer method

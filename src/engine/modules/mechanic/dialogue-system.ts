@@ -10,6 +10,7 @@ export interface DialogueNode {
   id: string;
   speaker: string;
   text: string;
+  portrait?: string;
   choices?: DialogueChoice[];
   next?: string;
   effects?: { event: string; data: any }[];

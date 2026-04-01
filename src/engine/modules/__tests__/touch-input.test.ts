@@ -69,6 +69,90 @@ describe('TouchInput', () => {
     );
   });
 
+  it('should emit input:touch:position on pointerdown', () => {
+    const { engine, touch } = setup();
+    const handler = vi.fn();
+    engine.eventBus.on('input:touch:position', handler);
+
+    const canvas = document.createElement('canvas');
+    Object.defineProperty(canvas, 'width', { value: 800 });
+    Object.defineProperty(canvas, 'height', { value: 600 });
+    canvas.getBoundingClientRect = () => ({
+      left: 0, top: 0, right: 800, bottom: 600,
+      width: 800, height: 600, x: 0, y: 0, toJSON: () => '',
+    });
+    touch.setCanvas(canvas);
+
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', { clientX: 200, clientY: 300 }),
+    );
+
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({ x: 200, y: 300 }),
+    );
+  });
+
+  it('should emit input:touch:position on pointermove while pointer is down', () => {
+    const { engine, touch } = setup();
+    const handler = vi.fn();
+    engine.eventBus.on('input:touch:position', handler);
+
+    const canvas = document.createElement('canvas');
+    Object.defineProperty(canvas, 'width', { value: 800 });
+    Object.defineProperty(canvas, 'height', { value: 600 });
+    canvas.getBoundingClientRect = () => ({
+      left: 0, top: 0, right: 800, bottom: 600,
+      width: 800, height: 600, x: 0, y: 0, toJSON: () => '',
+    });
+    touch.setCanvas(canvas);
+
+    // Move without pointer down — should NOT emit position
+    canvas.dispatchEvent(
+      new PointerEvent('pointermove', { clientX: 100, clientY: 100 }),
+    );
+    expect(handler).not.toHaveBeenCalled();
+
+    // Pointer down + move — should emit position
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', { clientX: 200, clientY: 200 }),
+    );
+    handler.mockClear();
+
+    canvas.dispatchEvent(
+      new PointerEvent('pointermove', { clientX: 400, clientY: 350 }),
+    );
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({ x: 400, y: 350 }),
+    );
+  });
+
+  it('should emit input:touch:position per frame via update() while held', () => {
+    const { engine, touch } = setup();
+    const handler = vi.fn();
+    engine.eventBus.on('input:touch:position', handler);
+
+    const canvas = document.createElement('canvas');
+    Object.defineProperty(canvas, 'width', { value: 800 });
+    Object.defineProperty(canvas, 'height', { value: 600 });
+    canvas.getBoundingClientRect = () => ({
+      left: 0, top: 0, right: 800, bottom: 600,
+      width: 800, height: 600, x: 0, y: 0, toJSON: () => '',
+    });
+    touch.setCanvas(canvas);
+
+    // Pointer down sets position
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', { clientX: 300, clientY: 400 }),
+    );
+    handler.mockClear();
+
+    // update() should re-emit position each frame
+    touch.update(16);
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({ x: 300, y: 400 }),
+    );
+  });
+
   it('should clean up event listeners on destroy', () => {
     const { touch } = setup();
 

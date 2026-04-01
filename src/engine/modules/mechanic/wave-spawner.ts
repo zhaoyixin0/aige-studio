@@ -25,6 +25,7 @@ export class WaveSpawner extends BaseModule {
       spawnAreaWidth: { type: 'range', label: 'Spawn Area Width', default: 800, min: 100, max: 2000 },
       spawnY: { type: 'range', label: 'Spawn Y', default: 0, min: 0, max: 2000 },
       enemyCollisionRadius: { type: 'range', label: 'Enemy Collision Radius', default: 24, min: 8, max: 100 },
+      maxEnemiesPerWave: { type: 'range', label: 'Max Enemies Per Wave', default: 15, min: 1, max: 50 },
     };
   }
 
@@ -40,10 +41,7 @@ export class WaveSpawner extends BaseModule {
 
     this.on('enemy:death', () => {
       if (!this.waveActive) return;
-      this.enemiesRemaining = Math.max(0, this.enemiesRemaining - 1);
-      if (this.enemiesRemaining === 0 && this.spawnedInWave >= this.currentWaveEnemyCount) {
-        this.completeWave();
-      }
+      this.enemyKilled();
     });
   }
 
@@ -86,10 +84,12 @@ export class WaveSpawner extends BaseModule {
 
     const baseCount = (this.params.enemiesPerWave as number) ?? 5;
     const scaling = (this.params.scalingFactor as number) ?? 1.2;
-    this.currentWaveEnemyCount =
+    const maxPerWave = (this.params.maxEnemiesPerWave as number) ?? 15;
+    const scaled =
       this.currentWave === 1
         ? baseCount
         : Math.ceil(baseCount * Math.pow(scaling, this.currentWave - 1));
+    this.currentWaveEnemyCount = Math.min(scaled, maxPerWave);
     this.enemiesRemaining = this.currentWaveEnemyCount;
 
     this.emit('wave:start', { wave: this.currentWave, enemyCount: this.currentWaveEnemyCount });
@@ -126,6 +126,14 @@ export class WaveSpawner extends BaseModule {
 
   getEnemiesRemaining(): number {
     return this.enemiesRemaining;
+  }
+
+  enemyKilled(): void {
+    if (this.enemiesRemaining <= 0) return;
+    this.enemiesRemaining -= 1;
+    if (this.enemiesRemaining === 0 && this.spawnedInWave >= this.currentWaveEnemyCount) {
+      this.completeWave();
+    }
   }
 
   reset(): void {

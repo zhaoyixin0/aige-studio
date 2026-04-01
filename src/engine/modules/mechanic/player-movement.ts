@@ -1,16 +1,19 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export class PlayerMovement extends BaseModule {
   readonly type = 'PlayerMovement';
 
   private x = 0;
+  private y = 0;
   private velocityX = 0;
   private direction: -1 | 0 | 1 = 0;
   private inputActive = false;
   private wasStopped = true;
   private holdTimer = 0;
   private inputLocked = false;
+  private touchTarget: { x: number; y: number } | null = null;
 
   getSchema(): ModuleSchema {
     return {
@@ -61,11 +64,61 @@ export class PlayerMovement extends BaseModule {
         step: 10,
         unit: 'ms',
       },
+      defaultY: {
+        type: 'range',
+        label: 'Default Y (fraction)',
+        default: 0.85,
+        min: 0,
+        max: 1,
+        step: 0.05,
+      },
+      mode: {
+        type: 'select',
+        label: 'Mode',
+        default: 'velocity',
+        options: ['velocity', 'follow'],
+      },
+      followSpeed: {
+        type: 'range',
+        label: 'Follow Speed (lerp)',
+        default: 0.15,
+        min: 0.01,
+        max: 1,
+        step: 0.01,
+      },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    return {
+      playerPosition: {
+        getPosition: () => ({ x: this.x, y: this.y }),
+        setPosition: (x, y) => {
+          this.x = x;
+          this.y = y;
+        },
+        radius: 32,
+      },
     };
   }
 
   init(engine: GameEngine): void {
     super.init(engine);
+
+    // Initialize position to canvas center
+    const canvas = engine.getCanvas();
+    this.x = canvas.width / 2;
+    const defaultY = (this.params.defaultY as number) ?? 0.85;
+    this.y = Math.round(defaultY * canvas.height);
+
+    // Follow mode: track absolute touch position (only needed in follow mode)
+    if (this.params.mode === 'follow') {
+      this.on('input:touch:position', (data?: any) => {
+        if (data && typeof data.x === 'number' && typeof data.y === 'number') {
+          this.touchTarget = { x: data.x, y: data.y };
+        }
+      });
+    }
 
     // Touch hold: left half → move left, right half → move right
     this.on('input:touch:hold', (data?: any) => {
@@ -140,6 +193,13 @@ export class PlayerMovement extends BaseModule {
 
   update(dt: number): void {
     if (this.gameflowPaused) return;
+
+    // Follow mode: lerp toward touch position
+    if (this.params.mode === 'follow') {
+      this.updateFollowMode();
+      return;
+    }
+
     const speed = this.params.speed ?? 300;
     const acceleration = this.params.acceleration ?? 1000;
     const deceleration = this.params.deceleration ?? 800;
@@ -189,17 +249,37 @@ export class PlayerMovement extends BaseModule {
       this.wasStopped = false;
       this.emit('player:move', {
         x: this.x,
+        y: this.y,
         direction: this.direction,
         speed: Math.abs(this.velocityX),
       });
     } else if (!this.wasStopped) {
       this.wasStopped = true;
-      this.emit('player:stop', { x: this.x });
+      this.emit('player:stop', { x: this.x, y: this.y });
+    }
+  }
+
+  private updateFollowMode(): void {
+    if (!this.touchTarget) return;
+
+    const lerp = (this.params.followSpeed as number) ?? 0.15;
+    const prevX = this.x;
+    const prevY = this.y;
+
+    this.x += (this.touchTarget.x - this.x) * lerp;
+    this.y += (this.touchTarget.y - this.y) * lerp;
+
+    if (Math.abs(this.x - prevX) > 0.01 || Math.abs(this.y - prevY) > 0.01) {
+      this.emit('player:move', { x: this.x, y: this.y, direction: 0, speed: 0 });
     }
   }
 
   getX(): number {
     return this.x;
+  }
+
+  getY(): number {
+    return this.y;
   }
 
   getVelocityX(): number {
@@ -220,12 +300,16 @@ export class PlayerMovement extends BaseModule {
   }
 
   reset(): void {
-    this.x = 0;
+    const canvas = this.engine?.getCanvas();
+    this.x = (canvas?.width ?? 1080) / 2;
+    const defaultY = (this.params.defaultY as number) ?? 0.85;
+    this.y = Math.round(defaultY * (canvas?.height ?? 1920));
     this.velocityX = 0;
     this.direction = 0;
     this.inputActive = false;
     this.wasStopped = true;
     this.holdTimer = 0;
     this.inputLocked = false;
+    this.touchTarget = null;
   }
 }

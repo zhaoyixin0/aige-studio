@@ -3,6 +3,7 @@ import { BaseModule } from '../base-module';
 
 export interface LootEntry {
   item: string;
+  asset?: string;
   weight: number;
   minCount: number;
   maxCount: number;
@@ -67,7 +68,7 @@ export class EnemyDrop extends BaseModule {
     if (!entry) return;
 
     const count = this.rollCount(entry.minCount, entry.maxCount);
-    this.emit('drop:spawn', { x, y, item: entry.item, count, type: entry.type });
+    this.emit('drop:spawn', { x, y, item: entry.item, asset: entry.asset ?? entry.item, count, type: entry.type });
   }
 
   reset(): void {

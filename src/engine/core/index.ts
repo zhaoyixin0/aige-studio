@@ -1,4 +1,5 @@
 export * from './types';
+export * from './contracts';
 export { EventBus } from './event-bus';
 export { Engine } from './engine';
 export { ModuleRegistry } from './module-registry';

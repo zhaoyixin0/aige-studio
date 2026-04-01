@@ -1,10 +1,13 @@
 import { Application, Container, Graphics, Sprite, Texture } from 'pixi.js';
 import type { Engine } from '@/engine/core/engine';
+import type { GameFlow } from '@/engine/modules/feedback/game-flow';
 import { GameObjectRenderer } from './game-object-renderer';
 import { HudRenderer } from './hud-renderer';
 import { ParticleRenderer } from './particle-renderer';
 import { FloatTextRenderer } from './float-text-renderer';
 import { SoundSynth } from './sound-synth';
+import { ShooterRenderer } from './shooter-renderer';
+import { RPGOverlayRenderer } from './rpg-overlay-renderer';
 import { getTheme, type GameTheme } from './theme-registry';
 
 export class PixiRenderer {
@@ -18,6 +21,8 @@ export class PixiRenderer {
   private particleRenderer: ParticleRenderer | null = null;
   private floatTextRenderer: FloatTextRenderer | null = null;
   private soundSynth: SoundSynth | null = null;
+  private shooterRenderer: ShooterRenderer | null = null;
+  private rpgOverlayRenderer: RPGOverlayRenderer | null = null;
   private initialized = false;
   private currentThemeId: string | null = null;
   private connectedEngine: Engine | null = null;
@@ -47,6 +52,8 @@ export class PixiRenderer {
     this.app.stage.addChild(this.cameraLayer, this.gameLayer, this.hudLayer);
 
     this.gameObjectRenderer = new GameObjectRenderer(this.gameLayer);
+    this.shooterRenderer = new ShooterRenderer(this.gameLayer);
+    this.rpgOverlayRenderer = new RPGOverlayRenderer(this.hudLayer, width, height);
     this.hudRenderer = new HudRenderer(this.hudLayer, width, height);
     this.particleRenderer = new ParticleRenderer(this.gameLayer);
     this.floatTextRenderer = new FloatTextRenderer(this.gameLayer);
@@ -169,7 +176,9 @@ export class PixiRenderer {
     this.syncBackgroundImage(engine);
 
     this.gameObjectRenderer?.sync(engine);
+    this.shooterRenderer?.sync(engine, dt);
     this.hudRenderer?.sync(engine, dt ?? 16);
+    this.rpgOverlayRenderer?.sync(engine, dt ?? 16);
 
     // Update particle and float text systems
     if (dt != null) {
@@ -193,6 +202,8 @@ export class PixiRenderer {
 
     // Reset game object renderer so player gets re-registered with collision
     this.gameObjectRenderer?.reset();
+    this.shooterRenderer?.reset();
+    this.rpgOverlayRenderer?.reset();
 
     // Create sound synth
     if (!this.soundSynth) {
@@ -204,6 +215,9 @@ export class PixiRenderer {
       engine.eventBus.on(event, handler);
       this.engineEventHandlers.push({ event, handler });
     };
+
+    // Wire iframes visual feedback to game object renderer (tracked for cleanup)
+    this.gameObjectRenderer?.wireIFramesEvents(listen);
 
     listen('collision:hit', (data?: any) => {
       const x = data?.x ?? 540;
@@ -242,6 +256,47 @@ export class PixiRenderer {
       this.hudRenderer?.showRhythmFeedback(0);
     });
 
+    // Shooter events
+    listen('enemy:death', (data?: any) => {
+      const x = data?.x ?? 540;
+      const y = data?.y ?? 960;
+      this.particleRenderer?.burst(x, y, 0xFF6B6B, 12);
+      this.floatTextRenderer?.spawn(x, y - 30, 'KILL!', 0xFF4500);
+      this.soundSynth?.playScore();
+    });
+
+    listen('shield:block', () => {
+      this.shooterRenderer?.flashShield();
+    });
+
+    listen('shield:break', () => {
+      this.particleRenderer?.burst(540, 1600, 0x4488FF, 15);
+    });
+
+    listen('wave:start', (data?: any) => {
+      const wave = data?.wave ?? 1;
+      this.floatTextRenderer?.spawn(540, 400, `WAVE ${wave}`, 0xFFFFFF);
+    });
+
+    // RPG events
+    listen('levelup:levelup', (data?: any) => {
+      const level = data?.level ?? 1;
+      this.floatTextRenderer?.spawn(540, 600, `LEVEL UP! Lv.${level}`, 0xFFD700);
+      this.particleRenderer?.burst(540, 800, 0xFFD700, 20);
+    });
+
+    listen('skill:activate', (data?: any) => {
+      const name = data?.name ?? 'Skill';
+      this.floatTextRenderer?.spawn(540, 700, name, 0x00BFFF);
+    });
+
+    listen('drop:spawn', (data?: any) => {
+      if (data) {
+        const configAssets = engine.getConfig().assets ?? {};
+        this.rpgOverlayRenderer?.addDrop(data, configAssets as Record<string, { src: string }>);
+      }
+    });
+
     // Canvas click handler for start/restart game flow
     const canvas = this.app.canvas;
     if (canvas) {
@@ -252,15 +307,16 @@ export class PixiRenderer {
       this.canvasClickHandler = () => {
         const gameFlows = engine.getModulesByType('GameFlow');
         if (gameFlows.length === 0) return;
-        const gf = gameFlows[0] as any;
+        const gf = gameFlows[0] as GameFlow;
         const state = gf.getState();
         if (state === 'ready') {
           gf.transition('countdown');
         } else if (state === 'finished') {
           for (const mod of engine.getAllModules()) {
             // Reset gameflowPaused to true before module-specific reset
-            (mod as any).gameflowPaused = true;
-            (mod as any).reset?.();
+            const baseModule = mod as { gameflowPaused?: boolean; reset?: () => void };
+            baseModule.gameflowPaused = true;
+            baseModule.reset?.();
           }
           // Reset renderer so player gets re-registered with collision
           this.gameObjectRenderer?.reset();
@@ -310,6 +366,10 @@ export class PixiRenderer {
     }
     this.gameObjectRenderer = null;
     this.hudRenderer = null;
+    this.shooterRenderer?.destroy();
+    this.shooterRenderer = null;
+    this.rpgOverlayRenderer?.destroy();
+    this.rpgOverlayRenderer = null;
     this.particleRenderer?.destroy();
     this.particleRenderer = null;
     this.floatTextRenderer?.destroy();

@@ -1,4 +1,5 @@
 import type { GameEngine, ModuleSchema } from '@/engine/core';
+import type { ModuleContracts } from '@/engine/core/contracts';
 import { BaseModule } from '../base-module';
 
 export interface ProjectileInstance {
@@ -83,6 +84,30 @@ export class Projectile extends BaseModule {
         min: 2,
         max: 50,
       },
+      asset: { type: 'string', label: 'Projectile Asset Key', default: 'bullet' },
+      autoFire: { type: 'boolean', label: 'Auto Fire', default: false },
+    };
+  }
+
+  getContracts(): ModuleContracts {
+    const layer = (this.params.layer as string) ?? 'projectiles';
+    const radius = (this.params.collisionRadius as number) ?? 8;
+    const damage = (this.params.damage as number) ?? 10;
+
+    return {
+      collisionProvider: {
+        layer,
+        radius,
+        spawnEvent: 'projectile:fire',
+        destroyEvent: 'projectile:destroyed',
+        getActiveObjects: () =>
+          this.projectiles
+            .filter((p) => p.active)
+            .map((p) => ({ id: p.id, x: p.x, y: p.y })),
+      },
+      damageSource: {
+        amount: damage,
+      },
     };
   }
 
@@ -140,6 +165,11 @@ export class Projectile extends BaseModule {
     // Decrement cooldown timer
     if (this.fireTimer > 0) {
       this.fireTimer = Math.max(0, this.fireTimer - dt);
+    }
+
+    // Auto-fire: fire every cooldown cycle
+    if (this.params.autoFire) {
+      this.fire();
     }
 
     const lifetime = this.params.lifetime ?? 3000;

@@ -11,9 +11,16 @@ describe('PlayerMovement', () => {
     return { engine, pm };
   }
 
-  it('should have correct default values', () => {
+  it('should initialize X to canvas center', () => {
+    const engine = new Engine();
+    engine.loadConfig({ version: '1.0.0', meta: { name: '', description: '', thumbnail: null, createdAt: '' }, canvas: { width: 1080, height: 1920 }, modules: [], assets: {} });
+    const pm = new PlayerMovement('pm-1', {});
+    engine.addModule(pm);
+    expect(pm.getX()).toBe(540); // 1080/2
+  });
+
+  it('should have zero velocity on init', () => {
     const { pm } = setup();
-    expect(pm.getX()).toBe(0);
     expect(pm.getVelocityX()).toBe(0);
   });
 
@@ -41,7 +48,9 @@ describe('PlayerMovement', () => {
     pm.update(100);
 
     expect(pm.getVelocityX()).toBeLessThan(0);
-    expect(pm.getX()).toBeLessThan(0);
+    // Initial X is canvas center (400 for 800-wide default), so left movement should decrease
+    const initX = 800 / 2; // default canvas width / 2
+    expect(pm.getX()).toBeLessThan(initX);
     expect(moveHandler).toHaveBeenCalledWith(
       expect.objectContaining({ direction: -1 }),
     );
@@ -119,14 +128,15 @@ describe('PlayerMovement', () => {
 
   it('should reset state correctly', () => {
     const { engine, pm } = setup({ speed: 300, acceleration: 1000 });
+    const initX = pm.getX(); // canvas center
 
     engine.eventBus.emit('input:touch:hold', { side: 'right' });
     pm.update(100);
-    expect(pm.getX()).not.toBe(0);
+    expect(pm.getX()).not.toBe(initX);
     expect(pm.getVelocityX()).not.toBe(0);
 
     pm.reset();
-    expect(pm.getX()).toBe(0);
+    expect(pm.getX()).toBe(initX); // resets to canvas center
     expect(pm.getVelocityX()).toBe(0);
   });
 
@@ -164,6 +174,44 @@ describe('PlayerMovement', () => {
     const velAfterHold = pm.getVelocityX();
     pm.update(100);
     expect(pm.getVelocityX()).toBeLessThan(velAfterHold);
+  });
+
+  // ── Y coordinate in player:move ──
+
+  it('should emit y coordinate in player:move event', () => {
+    const engine = new Engine();
+    engine.loadConfig({ version: '1.0.0', meta: { name: '', description: '', thumbnail: null, createdAt: '' }, canvas: { width: 1080, height: 1920 }, modules: [], assets: {} });
+    const pm = new PlayerMovement('pm-1', { speed: 300, acceleration: 1000 });
+    engine.addModule(pm);
+    engine.eventBus.emit('gameflow:resume');
+
+    const moveHandler = vi.fn();
+    engine.eventBus.on('player:move', moveHandler);
+
+    engine.eventBus.emit('input:touch:hold', { side: 'right' });
+    pm.update(100);
+
+    expect(moveHandler).toHaveBeenCalled();
+    const payload = moveHandler.mock.calls[0][0];
+    expect(typeof payload.y).toBe('number');
+    expect(payload.y).toBeGreaterThan(0);
+  });
+
+  it('should use defaultY param for Y position (fraction of canvas height)', () => {
+    const engine = new Engine();
+    engine.loadConfig({ version: '1.0.0', meta: { name: '', description: '', thumbnail: null, createdAt: '' }, canvas: { width: 1080, height: 1920 }, modules: [], assets: {} });
+    const pm = new PlayerMovement('pm-1', { speed: 300, acceleration: 1000, defaultY: 0.85 });
+    engine.addModule(pm);
+    engine.eventBus.emit('gameflow:resume');
+
+    const moveHandler = vi.fn();
+    engine.eventBus.on('player:move', moveHandler);
+
+    engine.eventBus.emit('input:touch:hold', { side: 'right' });
+    pm.update(100);
+
+    const payload = moveHandler.mock.calls[0][0];
+    expect(payload.y).toBe(Math.round(1920 * 0.85));
   });
 
   // ── Input Lock (for Knockback) ──
@@ -208,15 +256,100 @@ describe('PlayerMovement', () => {
     });
   });
 
+  // ── Follow Mode (for shooter/RPG touch-following) ──
+
+  describe('follow mode', () => {
+    function setupFollow(params: Record<string, any> = {}) {
+      const engine = new Engine();
+      engine.loadConfig({
+        version: '1.0.0',
+        meta: { name: '', description: '', thumbnail: null, createdAt: '' },
+        canvas: { width: 1080, height: 1920 },
+        modules: [],
+        assets: {},
+      });
+      const pm = new PlayerMovement('pm-1', {
+        mode: 'follow',
+        followSpeed: 0.15,
+        defaultY: 0.85,
+        ...params,
+      });
+      engine.addModule(pm);
+      engine.eventBus.emit('gameflow:resume');
+      return { engine, pm };
+    }
+
+    it('should track touch position in follow mode', () => {
+      const { engine, pm } = setupFollow();
+      const moveHandler = vi.fn();
+      engine.eventBus.on('player:move', moveHandler);
+
+      // Simulate touch at (300, 1500)
+      engine.eventBus.emit('input:touch:position', { x: 300, y: 1500 });
+      pm.update(16);
+
+      // With lerp 0.15, after 1 frame it should be partway there
+      expect(moveHandler).toHaveBeenCalled();
+    });
+
+    it('should lerp toward touch position, not teleport', () => {
+      const { engine, pm } = setupFollow({ followSpeed: 0.5 });
+
+      engine.eventBus.emit('input:touch:position', { x: 100, y: 100 });
+      pm.update(16);
+
+      // Should be between initial and target, not at target
+      expect(pm.getX()).not.toBe(540); // not at initial center
+      expect(pm.getX()).not.toBe(100); // not teleported to target
+    });
+
+    it('should NOT use velocity-based movement in follow mode', () => {
+      const { engine, pm } = setupFollow();
+
+      // Touch hold should not affect follow mode
+      engine.eventBus.emit('input:touch:hold', { side: 'right' });
+      pm.update(16);
+
+      // Velocity should be 0 — follow mode doesn't use velocity
+      expect(pm.getVelocityX()).toBe(0);
+    });
+
+    it('should emit player:move with x,y in follow mode', () => {
+      const { engine, pm } = setupFollow();
+      const moveHandler = vi.fn();
+      engine.eventBus.on('player:move', moveHandler);
+
+      engine.eventBus.emit('input:touch:position', { x: 500, y: 1000 });
+      pm.update(16);
+
+      expect(moveHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          x: expect.any(Number),
+          y: expect.any(Number),
+        }),
+      );
+    });
+
+    it('should use default velocity mode when mode param is not set', () => {
+      const { engine, pm } = setup({ speed: 300, acceleration: 1000 });
+
+      engine.eventBus.emit('input:touch:hold', { side: 'right' });
+      pm.update(100);
+
+      expect(pm.getVelocityX()).toBeGreaterThan(0);
+    });
+  });
+
   // ── External Delta (for Moving Platform carry) ──
 
   describe('external delta', () => {
     it('should apply external delta to position', () => {
       const { pm } = setup();
+      const initX = pm.getX();
 
       pm.applyExternalDelta(10);
 
-      expect(pm.getX()).toBe(10);
+      expect(pm.getX()).toBe(initX + 10);
     });
 
     it('should accumulate with normal movement', () => {

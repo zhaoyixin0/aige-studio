@@ -232,12 +232,11 @@ const GAME_TYPES: GameTypeDef[] = [
     label: '节奏类',
     emoji: '\u{1F3B5}',
     description: '像 TikTok "音乐节拍" — 跟随节奏点击屏幕',
-    requiredModules: ['GameFlow', 'BeatMap', 'Spawner', 'Collision', 'Scorer', 'UIOverlay', 'ResultScreen'],
+    requiredModules: ['GameFlow', 'BeatMap', 'Scorer', 'UIOverlay', 'ResultScreen'],
     inputOptions: ['TouchInput', 'FaceInput'],
     optionalModules: [
       { type: 'Timer', label: '倒计时', description: '限定游戏时长' },
       { type: 'ComboSystem', label: '连击系统', description: '连续命中获得分数加成' },
-      { type: 'DifficultyRamp', label: '难度递增', description: '随时间增加节拍速度' },
       { type: 'ParticleVFX', label: '粒子特效', description: '命中节拍时的视觉效果' },
       { type: 'SoundFX', label: '音效', description: '节拍命中/失败音效' },
     ],

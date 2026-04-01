@@ -4,7 +4,6 @@ import type { Spawner } from '@/engine/modules/mechanic/spawner';
 import type { FaceInput } from '@/engine/modules/input/face-input';
 import type { HandInput } from '@/engine/modules/input/hand-input';
 import type { TouchInput } from '@/engine/modules/input/touch-input';
-import type { Collision } from '@/engine/modules/mechanic/collision';
 import type { GameFlow } from '@/engine/modules/feedback/game-flow';
 import type { PlayerMovement } from '@/engine/modules/mechanic/player-movement';
 import type { Jump } from '@/engine/modules/mechanic/jump';
@@ -15,6 +14,7 @@ import type { Collectible } from '@/engine/modules/mechanic/collectible';
 import type { Hazard } from '@/engine/modules/mechanic/hazard';
 import type { Checkpoint } from '@/engine/modules/mechanic/checkpoint';
 import type { CameraFollow } from '@/engine/modules/feedback/camera-follow';
+import type { Runner } from '@/engine/modules/mechanic/runner';
 import { assetToEmoji, getTheme } from './theme-registry';
 
 export class GameObjectRenderer {
@@ -24,20 +24,37 @@ export class GameObjectRenderer {
   private playerSprite: Container | null = null;
   private lastAssetKeys = 0;
   private platformGraphics: Graphics | null = null;
+  /** IFrames visual flicker state */
+  private iframesActive = false;
+  private iframesStartTime = 0;
 
   constructor(container: Container) {
     this.container = container;
   }
 
+  /** Wire iframes events using pixi-renderer's tracked listener helper */
+  wireIFramesEvents(listen: (event: string, handler: (data?: any) => void) => void): void {
+    listen('iframes:start', () => { this.iframesActive = true; this.iframesStartTime = performance.now(); });
+    listen('iframes:end', () => { this.iframesActive = false; });
+  }
+
   sync(engine: Engine): void {
-    // Detect asset changes — use count + has-data check (cheap, no allocations)
+    // Detect asset changes — hash key names + first 32 chars of each src
     const assets = engine.getConfig().assets ?? {};
     const keys = Object.keys(assets);
-    let assetHash = keys.length;
-    for (const k of keys) { if ((assets as any)[k]?.src) assetHash += k.length; }
+    let assetHashStr = '';
+    for (const k of keys) {
+      const src = (assets as Record<string, { src?: string }>)[k]?.src ?? '';
+      assetHashStr += `${k}:${src.slice(0, 32)};`;
+    }
+    // Simple string hash to number
+    let assetHash = 0;
+    for (let i = 0; i < assetHashStr.length; i++) {
+      assetHash = ((assetHash << 5) - assetHash + assetHashStr.charCodeAt(i)) | 0;
+    }
     if (assetHash !== this.lastAssetKeys) {
       if (this.lastAssetKeys !== 0) {
-        // Assets changed since last frame — clear cached sprites so they re-create with new assets
+        // Assets changed since last frame — clear cached sprites and textures
         for (const sprite of this.sprites.values()) {
           this.container.removeChild(sprite);
           sprite.destroy();
@@ -48,6 +65,11 @@ export class GameObjectRenderer {
           this.playerSprite.destroy();
           this.playerSprite = null;
         }
+        // Clear texture cache so new asset images are loaded fresh
+        for (const tex of this.textureCache.values()) {
+          tex.destroy();
+        }
+        this.textureCache.clear();
       }
       this.lastAssetKeys = assetHash;
     }
@@ -55,14 +77,29 @@ export class GameObjectRenderer {
     const gameFlow = engine.getModulesByType('GameFlow')[0] as GameFlow | undefined;
     const state = gameFlow?.getState() ?? 'playing';
 
-    // Check if this is a platformer game (has PlayerMovement)
+    // Route rendering by game pattern
     const playerMovement = engine.getModulesByType('PlayerMovement')[0] as PlayerMovement | undefined;
-    if (playerMovement) {
-      // Platformer: always show platforms/collectibles/hazards (even in edit/ready mode)
+    const hasPlatforms = engine.getModulesByType('StaticPlatform').length > 0
+      || engine.getModulesByType('MovingPlatform').length > 0;
+    const hasSpawner = engine.getModulesByType('Spawner').length > 0;
+
+    if (playerMovement && hasPlatforms) {
+      // Platformer path: platforms, collectibles, hazards, camera follow
       this.container.visible = true;
       this.syncPlatformerScene(engine, playerMovement);
+    } else if (playerMovement && hasSpawner) {
+      // Catch/dodge/tap path: spawned objects + player from PlayerMovement
+      this.container.visible = (state === 'playing' || state === 'finished');
+      if (!this.container.visible) return;
+      this.syncSpawnedObjects(engine);
+      this.syncShooterPlayer(engine, playerMovement);
+    } else if (playerMovement) {
+      // Shooter/RPG path: player rendered from PlayerMovement position, no spawner
+      this.container.visible = (state === 'playing' || state === 'finished');
+      if (!this.container.visible) return;
+      this.syncShooterPlayer(engine, playerMovement);
     } else {
-      // Spawner games: hide during ready/countdown
+      // Spawner-only path: runner or legacy
       this.container.visible = (state === 'playing' || state === 'finished');
       if (!this.container.visible) return;
       this.syncSpawnedObjects(engine);
@@ -72,7 +109,6 @@ export class GameObjectRenderer {
 
   private syncSpawnedObjects(engine: Engine): void {
     const spawners = engine.getModulesByType('Spawner');
-    const collision = engine.getModulesByType('Collision')[0] as Collision | undefined;
     const activeIds = new Set<string>();
 
     const themeName = engine.getConfig().meta.theme ?? 'fruit';
@@ -111,11 +147,6 @@ export class GameObjectRenderer {
         wrapper.x = obj.x;
         wrapper.y = obj.y;
         wrapper.rotation = obj.rotation ?? 0;
-
-        // Sync collision position for spawned objects
-        if (collision) {
-          collision.updateObject(obj.id, { x: obj.x, y: obj.y });
-        }
       }
     }
 
@@ -142,7 +173,15 @@ export class GameObjectRenderer {
 
     let pos: { x: number; y: number } | null = null;
 
-    if (faceInput) {
+    // Runner games: compute position from lane
+    const runner = engine.getModulesByType('Runner')[0] as Runner | undefined;
+    if (runner && runner.isStarted()) {
+      const laneCount = (runner.getParams().laneCount as number) ?? 3;
+      const lane = runner.getCurrentLane();
+      const canvas = engine.getCanvas();
+      const laneWidth = canvas.width / laneCount;
+      pos = { x: laneWidth * (lane + 0.5), y: canvas.height * 0.8 };
+    } else if (faceInput) {
       pos = faceInput.getPosition();
     } else if (handInput) {
       pos = handInput.getPosition();
@@ -160,7 +199,6 @@ export class GameObjectRenderer {
       // Read playerSize from input module params
       const inputMod = (faceInput ?? handInput ?? touchInput) as { getParams: () => Record<string, unknown> } | undefined;
       const playerSize = (inputMod?.getParams()?.playerSize as number) ?? 64;
-      const playerRadius = isTapStyle ? 30 : playerSize / 2;
 
       if (!this.playerSprite) {
         const configAssets = engine.getConfig().assets ?? {};
@@ -200,12 +238,6 @@ export class GameObjectRenderer {
           this.playerSprite = playerContainer;
         }
         this.container.addChild(this.playerSprite);
-
-        // Register player in collision system
-        const collision = engine.getModulesByType('Collision')[0] as Collision | undefined;
-        if (collision) {
-          collision.registerObject('player_1', 'player', { x: pos.x, y: pos.y, radius: playerRadius });
-        }
       }
       this.playerSprite.x = pos.x;
       this.playerSprite.y = pos.y;
@@ -214,12 +246,6 @@ export class GameObjectRenderer {
       const baseSize = 64; // default creation size
       const scale = playerSize / baseSize;
       this.playerSprite.scale.set(scale);
-
-      // Sync collision position + radius
-      const collision = engine.getModulesByType('Collision')[0] as Collision | undefined;
-      if (collision) {
-        collision.updateObject('player_1', { ...pos, radius: playerRadius });
-      }
     }
   }
 
@@ -257,6 +283,54 @@ export class GameObjectRenderer {
     img.src = dataUrl;
 
     return wrapper;
+  }
+
+  // ── Shooter/RPG player rendering ──────────────────────────────────
+
+  private syncShooterPlayer(engine: Engine, playerMovement: PlayerMovement): void {
+    const px = playerMovement.getX();
+    const py = playerMovement.getY();
+    const touchInput = engine.getModulesByType('TouchInput')[0] as TouchInput | undefined;
+    const playerSize = (touchInput?.getParams()?.playerSize as number) ?? 64;
+
+    if (!this.playerSprite) {
+      const playerContainer = new Container();
+      const configAssets = engine.getConfig().assets ?? {};
+      const playerAsset = configAssets['player'];
+      const hasPlayerImage = playerAsset?.src?.startsWith('data:');
+
+      if (hasPlayerImage) {
+        const shadow = new Graphics();
+        shadow.ellipse(0, playerSize * 0.3, playerSize * 0.4, 8).fill({ color: 0x000000, alpha: 0.3 });
+        playerContainer.addChild(shadow);
+        const imgSprite = this.createSpriteFromDataUrl(playerAsset.src, playerSize);
+        playerContainer.addChild(imgSprite);
+      } else {
+        const shadow = new Graphics();
+        shadow.ellipse(0, playerSize * 0.3, playerSize * 0.4, 8).fill({ color: 0x000000, alpha: 0.3 });
+        playerContainer.addChild(shadow);
+        const themeName = engine.getConfig().meta.theme ?? 'fruit';
+        const theme = getTheme(themeName);
+        const emojiText = new Text({
+          text: theme.playerEmoji,
+          style: new TextStyle({ fontSize: playerSize }),
+        });
+        emojiText.anchor.set(0.5);
+        playerContainer.addChild(emojiText);
+      }
+      this.container.addChild(playerContainer);
+      this.playerSprite = playerContainer;
+    }
+    this.playerSprite.x = px;
+    this.playerSprite.y = py;
+
+    // IFrames visual feedback: alpha flicker every 100ms
+    if (this.iframesActive) {
+      const elapsed = performance.now() - this.iframesStartTime;
+      this.playerSprite.alpha = Math.floor(elapsed / 100) % 2 === 0 ? 0.3 : 1.0;
+    } else {
+      this.playerSprite.alpha = 1.0;
+    }
   }
 
   // ── Platformer rendering ──────────────────────────────────────────
@@ -323,6 +397,14 @@ export class GameObjectRenderer {
     }
     this.playerSprite.x = screenX;
     this.playerSprite.y = screenY;
+
+    // IFrames visual feedback: alpha flicker every 100ms
+    if (this.iframesActive) {
+      const elapsed = performance.now() - this.iframesStartTime;
+      this.playerSprite.alpha = Math.floor(elapsed / 100) % 2 === 0 ? 0.3 : 1.0;
+    } else {
+      this.playerSprite.alpha = 1.0;
+    }
 
     collectible?.checkCollision(px, py, playerSize / 2);
     hazard?.checkCollision(px, py);
@@ -412,6 +494,8 @@ export class GameObjectRenderer {
   }
 
   reset(): void {
+    this.iframesActive = false;
+    this.iframesStartTime = 0;
     for (const sprite of this.sprites.values()) {
       this.container.removeChild(sprite);
       sprite.destroy();
@@ -427,5 +511,11 @@ export class GameObjectRenderer {
       this.platformGraphics.destroy();
       this.platformGraphics = null;
     }
+    // Clear texture cache so new assets are loaded fresh on re-init
+    for (const tex of this.textureCache.values()) {
+      tex.destroy();
+    }
+    this.textureCache.clear();
+    this.lastAssetKeys = 0;
   }
 }
