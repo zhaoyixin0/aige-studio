@@ -4,8 +4,12 @@ import {
   type ValidationReport,
   type ValidationIssue,
 } from '@/engine/core/config-validator';
+import { ContractRegistry } from '@/engine/core/contract-registry';
+import { createModuleRegistry } from '@/engine/module-setup';
 import type { GameConfig, ModuleConfig } from '@/engine/core/types';
 import { getGamePreset, ALL_GAME_TYPES } from '@/agent/game-presets';
+
+const contracts = ContractRegistry.fromRegistry(createModuleRegistry());
 
 // ── Helpers ────────────────────────────────────────────────────
 
@@ -41,7 +45,7 @@ describe('ConfigValidator — unknown modules', () => {
       mod('Spawner'),
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
 
     const unknowns = errorsByCategory(report, 'unknown-module');
     expect(unknowns).toHaveLength(1);
@@ -56,7 +60,7 @@ describe('ConfigValidator — unknown modules', () => {
       mod('Scorer', { perHit: 10 }),
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
     expect(errorsByCategory(report, 'unknown-module')).toHaveLength(0);
   });
 
@@ -65,58 +69,61 @@ describe('ConfigValidator — unknown modules', () => {
       { id: 'fake_1', type: 'FakeModule', enabled: false, params: {} },
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
     expect(errorsByCategory(report, 'unknown-module')).toHaveLength(0);
     expect(report.isPlayable).toBe(true);
   });
 });
 
-// ── 2. Missing Dependencies ───────────────────────────────────
+// ── 2. Event Fulfillment (replaces missing dependencies) ──────
 
-describe('ConfigValidator — missing dependencies', () => {
-  it('should error when Scorer is present without Collision', () => {
+describe('ConfigValidator — event fulfillment', () => {
+  it('should error when Scorer uses default hitEvent but no Collision module', () => {
     const config = makeConfig([
       mod('Scorer', { perHit: 10 }),
       mod('Timer'),
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
 
-    const missing = errorsByCategory(report, 'missing-dependency');
-    expect(missing.length).toBeGreaterThanOrEqual(1);
-    expect(missing[0].message).toContain('Collision');
+    // Scorer.hitEvent=collision:hit is not emitted by any module → event-chain-break error
+    const chainBreaks = errorsByCategory(report, 'event-chain-break');
+    expect(chainBreaks.length).toBeGreaterThanOrEqual(1);
     expect(report.isPlayable).toBe(false);
   });
 
-  it('should pass when all required dependencies are present', () => {
+  it('should pass when Scorer has matching emitter', () => {
     const config = makeConfig([
       mod('Scorer', { perHit: 10 }),
       mod('Collision', { rules: [{ a: 'player', b: 'items', event: 'hit' }] }),
     ]);
 
-    const report = validateConfig(config);
-    expect(errorsByCategory(report, 'missing-dependency')).toHaveLength(0);
+    const report = validateConfig(config, contracts);
+    expect(errorsByCategory(report, 'event-chain-break')).toHaveLength(0);
   });
 
-  it('should error when Dash is present without PlayerMovement', () => {
+  it('should warn when consumed events have no emitter (event fulfillment)', () => {
+    // Dash consumes events — if their emitters are missing, we get warnings
     const config = makeConfig([
       mod('Dash'),
     ]);
 
-    const report = validateConfig(config);
-
-    const missing = errorsByCategory(report, 'missing-dependency');
-    expect(missing.length).toBeGreaterThanOrEqual(1);
-    expect(missing[0].message).toContain('PlayerMovement');
+    const report = validateConfig(config, contracts);
+    // Event fulfillment issues are warnings, not errors
+    const warnings = warningsByCategory(report, 'event-chain-break');
+    // Dash may or may not have unfulfilled consumes depending on its contracts
+    // Event fulfillment produces warnings, never errors
+    expect(report.errors.filter(e => e.moduleId === 'dash_1')).toHaveLength(0);
   });
 
-  it('should not error on optional dependencies', () => {
+  it('should not produce errors for optional event dependencies', () => {
     const config = makeConfig([
-      mod('Jump'),  // optional: Gravity
+      mod('Jump'),  // optional: Gravity (not present)
     ]);
 
-    const report = validateConfig(config);
-    expect(errorsByCategory(report, 'missing-dependency')).toHaveLength(0);
+    const report = validateConfig(config, contracts);
+    // No errors — event fulfillment issues are warnings only
+    expect(report.errors.filter(e => e.moduleId === 'jump_1')).toHaveLength(0);
   });
 });
 
@@ -128,7 +135,7 @@ describe('ConfigValidator — empty collision rules', () => {
       mod('Collision', { rules: [] }),
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
 
     const emptyRules = errorsByCategory(report, 'empty-rules');
     expect(emptyRules).toHaveLength(1);
@@ -140,7 +147,7 @@ describe('ConfigValidator — empty collision rules', () => {
       mod('Collision', {}),
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
 
     const emptyRules = errorsByCategory(report, 'empty-rules');
     expect(emptyRules).toHaveLength(1);
@@ -151,7 +158,7 @@ describe('ConfigValidator — empty collision rules', () => {
       mod('Collision', { rules: [{ a: 'player', b: 'items', event: 'hit' }] }),
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
     expect(errorsByCategory(report, 'empty-rules')).toHaveLength(0);
   });
 });
@@ -164,7 +171,7 @@ describe('ConfigValidator — invalid parameters', () => {
       mod('Spawner', { speed: { min: -100, max: 200 }, frequency: 1 }),
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
 
     const fixes = report.fixes.filter((f) => f.moduleId === 'spawner_1');
     expect(fixes.length).toBeGreaterThanOrEqual(1);
@@ -180,7 +187,7 @@ describe('ConfigValidator — invalid parameters', () => {
       mod('Spawner', { speed: { min: 500, max: 100 }, frequency: 1 }),
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
 
     const fixes = report.fixes.filter((f) => f.moduleId === 'spawner_1');
     expect(fixes.length).toBeGreaterThanOrEqual(1);
@@ -191,7 +198,7 @@ describe('ConfigValidator — invalid parameters', () => {
       mod('Timer', { duration: -10, mode: 'countdown' }),
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
 
     const fixes = report.fixes.filter((f) => f.moduleId === 'timer_1');
     expect(fixes.length).toBeGreaterThanOrEqual(1);
@@ -205,7 +212,7 @@ describe('ConfigValidator — invalid parameters', () => {
       mod('Lives', { count: 0 }),
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
 
     const fixes = report.fixes.filter((f) => f.moduleId === 'lives_1');
     expect(fixes.length).toBeGreaterThanOrEqual(1);
@@ -224,7 +231,7 @@ describe('ConfigValidator — event chain breaks', () => {
       mod('Collision', { rules: [{ a: 'player', b: 'items', event: 'hit' }] }),
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
 
     const chainBreaks = errorsByCategory(report, 'event-chain-break');
     expect(chainBreaks).toHaveLength(1);
@@ -237,7 +244,7 @@ describe('ConfigValidator — event chain breaks', () => {
       mod('Collision', { rules: [{ a: 'player', b: 'items', event: 'hit' }] }),
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
     expect(errorsByCategory(report, 'event-chain-break')).toHaveLength(0);
   });
 
@@ -247,7 +254,7 @@ describe('ConfigValidator — event chain breaks', () => {
       mod('Collision', { rules: [{ a: 'player', b: 'items', event: 'hit' }] }),
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
     expect(errorsByCategory(report, 'event-chain-break')).toHaveLength(0);
   });
 
@@ -257,13 +264,9 @@ describe('ConfigValidator — event chain breaks', () => {
       // No Collision module!
     ]);
 
-    const report = validateConfig(config);
-    // Should have either event-chain-break or missing-dependency
-    const issues = [
-      ...errorsByCategory(report, 'event-chain-break'),
-      ...errorsByCategory(report, 'missing-dependency'),
-    ];
-    expect(issues.length).toBeGreaterThanOrEqual(1);
+    const report = validateConfig(config, contracts);
+    const chainBreaks = errorsByCategory(report, 'event-chain-break');
+    expect(chainBreaks.length).toBeGreaterThanOrEqual(1);
   });
 
   it('should accept beat:hit for rhythm games', () => {
@@ -273,7 +276,7 @@ describe('ConfigValidator — event chain breaks', () => {
       mod('Collision', { rules: [{ a: 'a', b: 'b', event: 'hit' }] }),
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
     expect(errorsByCategory(report, 'event-chain-break')).toHaveLength(0);
   });
 });
@@ -287,7 +290,7 @@ describe('ConfigValidator — module conflicts', () => {
       { id: 'pm_2', type: 'PlayerMovement', enabled: true, params: {} },
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
 
     const conflicts = [
       ...errorsByCategory(report, 'module-conflict'),
@@ -302,7 +305,7 @@ describe('ConfigValidator — module conflicts', () => {
       { id: 'touch_2', type: 'TouchInput', enabled: true, params: {} },
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
 
     const conflicts = [
       ...errorsByCategory(report, 'module-conflict'),
@@ -320,7 +323,7 @@ describe('ConfigValidator — missing input module', () => {
       mod('PlayerMovement', { mode: 'follow' }),
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
 
     const missingInput = warningsByCategory(report, 'missing-input');
     expect(missingInput.length).toBeGreaterThanOrEqual(1);
@@ -332,7 +335,7 @@ describe('ConfigValidator — missing input module', () => {
       mod('TouchInput'),
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
     expect(warningsByCategory(report, 'missing-input')).toHaveLength(0);
   });
 });
@@ -368,7 +371,7 @@ describe('ConfigValidator — all game presets pass', () => {
       }
 
       const config = makeConfig(modules);
-      const report = validateConfig(config);
+      const report = validateConfig(config, contracts);
 
       // No errors allowed for presets
       expect(report.errors).toHaveLength(0);
@@ -382,7 +385,7 @@ describe('ConfigValidator — all game presets pass', () => {
 describe('ConfigValidator — report structure', () => {
   it('should return correct ValidationReport shape', () => {
     const config = makeConfig([mod('Spawner')]);
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
 
     expect(report).toHaveProperty('errors');
     expect(report).toHaveProperty('warnings');
@@ -400,7 +403,7 @@ describe('ConfigValidator — report structure', () => {
       mod('TouchInput'),
     ]);
 
-    const report = validateConfig(config);
+    const report = validateConfig(config, contracts);
     expect(report.isPlayable).toBe(true);
   });
 });

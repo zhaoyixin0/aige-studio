@@ -27,12 +27,6 @@ describe('translateIssue', () => {
     expect(typeof result.title).toBe('string');
   });
 
-  it('should translate missing-dependency', () => {
-    const result = translateIssue(issue('missing-dependency', 'Module "Scorer" requires "Collision"'));
-    expect(result.title).toBeTruthy();
-    expect(result.description).toContain('Collision');
-  });
-
   it('should translate empty-rules', () => {
     const result = translateIssue(issue('empty-rules', 'Collision module has no rules'));
     expect(result.title).toBeTruthy();

@@ -14,6 +14,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { GameConfig, ModuleConfig } from '@/engine/core/index.ts';
 import type { AssetEntry } from '@/engine/core/types.ts';
 import { validateConfig, applyFixes, type ValidationReport } from '@/engine/core/config-validator.ts';
+import { ContractRegistry } from '@/engine/core/contract-registry.ts';
+import { createModuleRegistry } from '@/engine/module-setup.ts';
 import { resolveInputProfile } from '@/engine/core/profiles.ts';
 import { ALL_GAME_TYPES, getGamePreset, getModuleParams } from './game-presets.ts';
 import { SkillLoader } from './skill-loader.ts';
@@ -256,6 +258,14 @@ function applySingleChange(
 /* ------------------------------------------------------------------ */
 
 export class ConversationAgent {
+  private static _contracts: ContractRegistry | null = null;
+  private static get contracts(): ContractRegistry {
+    if (!ConversationAgent._contracts) {
+      ConversationAgent._contracts = ContractRegistry.fromRegistry(createModuleRegistry());
+    }
+    return ConversationAgent._contracts;
+  }
+
   private client: Anthropic | null;
   private history: ConversationMessage[] = [];
   private _lastValidationReport: ValidationReport | null = null;
@@ -577,7 +587,7 @@ export class ConversationAgent {
     };
 
     // Run pre-load validation and apply auto-fixes (immutable)
-    const report = validateConfig(config);
+    const report = validateConfig(config, ConversationAgent.contracts);
     this._lastValidationReport = report;
 
     return report.fixes.length > 0 ? applyFixes(config, report.fixes) : config;

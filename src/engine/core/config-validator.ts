@@ -5,6 +5,7 @@
 // BEFORE the engine loads — preventing "runs but broken" games.
 
 import type { GameConfig, ModuleConfig } from './types';
+import type { ContractRegistry } from './contract-registry';
 
 // ── Result types ───────────────────────────────────────────────
 
@@ -14,7 +15,6 @@ export interface ValidationIssue {
   readonly severity: IssueSeverity;
   readonly category:
     | 'unknown-module'
-    | 'missing-dependency'
     | 'invalid-param'
     | 'empty-rules'
     | 'event-chain-break'
@@ -39,62 +39,9 @@ export interface ValidationReport {
   readonly isPlayable: boolean;
 }
 
-// ── Known module types (derived from module-setup.ts registry) ─
-
-export const KNOWN_MODULE_TYPES: ReadonlySet<string> = new Set([
-  // Input
-  'FaceInput', 'HandInput', 'BodyInput', 'TouchInput', 'DeviceInput', 'AudioInput',
-  // Mechanic
-  'Spawner', 'Collision', 'Scorer', 'Timer', 'Lives', 'DifficultyRamp',
-  'Randomizer', 'QuizEngine',
-  // P1 extended
-  'ExpressionDetector', 'ComboSystem', 'Jump', 'PowerUp',
-  // P2 extended
-  'BeatMap', 'GestureMatch', 'MatchEngine', 'Runner',
-  // P3 extended
-  'PlaneDetection', 'BranchStateMachine', 'DressUpEngine',
-  // Platformer
-  'Gravity', 'PlayerMovement', 'StaticPlatform', 'MovingPlatform',
-  'CrumblingPlatform', 'OneWayPlatform', 'CoyoteTime', 'Dash',
-  'WallDetect', 'Knockback', 'IFrames', 'Collectible', 'Hazard',
-  'Checkpoint', 'Inventory', 'Health', 'Shield',
-  // RPG (Batch 3)
-  'EquipmentSlot', 'EnemyDrop', 'LevelUp', 'StatusEffect', 'SkillTree', 'DialogueSystem',
-  // Shooter (Batch 2)
-  'Projectile', 'BulletPattern', 'Aim', 'EnemyAI', 'WaveSpawner',
-  // Feedback
-  'GameFlow', 'ParticleVFX', 'SoundFX', 'UIOverlay', 'ResultScreen', 'CameraFollow',
-]);
-
-// Module dependency declarations (mirrors each module's getDependencies())
-const MODULE_DEPENDENCIES: Record<string, { requires: string[]; optional: string[] }> = {
-  Scorer: { requires: ['Collision'], optional: ['ComboSystem'] },
-  Lives: { requires: [], optional: [] },
-  Timer: { requires: [], optional: [] },
-  DifficultyRamp: { requires: [], optional: [] },
-  Jump: { requires: [], optional: ['Gravity'] },
-  CoyoteTime: { requires: ['Jump'], optional: [] },
-  Dash: { requires: ['PlayerMovement'], optional: [] },
-  Knockback: { requires: ['PlayerMovement'], optional: [] },
-  Projectile: { requires: ['Collision'], optional: ['Aim'] },
-  Aim: { requires: [], optional: ['EnemyAI'] },
-  WaveSpawner: { requires: [], optional: ['EnemyAI'] },
-  Health: { requires: [], optional: [] },
-  Shield: { requires: [], optional: ['Health'] },
-  Collectible: { requires: ['Collision'], optional: [] },
-  Hazard: { requires: ['Collision'], optional: [] },
-  EnemyDrop: { requires: [], optional: ['EnemyAI'] },
-  LevelUp: { requires: [], optional: [] },
-  SkillTree: { requires: [], optional: ['LevelUp'] },
-  Inventory: { requires: [], optional: [] },
-  IFrames: { requires: [], optional: [] },
-};
-
-// Events that scorer.hitEvent can validly reference
-const SCORER_VALID_HIT_EVENTS: ReadonlySet<string> = new Set([
-  'collision:hit', 'collision:damage',
-  'beat:hit', 'quiz:correct', 'expression:detected',
-  'gesture:match', 'match:found', 'collectible:pickup',
+// Universal events handled by BaseModule.init() — always available, never flagged
+const UNIVERSAL_EVENTS: ReadonlySet<string> = new Set([
+  'gameflow:resume', 'gameflow:pause',
 ]);
 
 // Input module types
@@ -133,36 +80,50 @@ function checkUnknownModules(
   return errors;
 }
 
-function checkDependencies(modules: readonly ModuleConfig[]): ValidationIssue[] {
-  const errors: ValidationIssue[] = [];
-  const presentTypes = new Set(modules.map((m) => m.type));
-
+function buildEmitsPool(
+  modules: readonly ModuleConfig[],
+  contracts: ContractRegistry,
+): ReadonlySet<string> {
+  const pool = new Set<string>();
   for (const m of modules) {
-    const deps = MODULE_DEPENDENCIES[m.type];
-    if (!deps) continue;
-
-    for (const req of deps.requires) {
-      // Scorer's dependency on Collision is conditional:
-      // Only required when hitEvent is collision-based (default or explicit)
-      if (m.type === 'Scorer' && req === 'Collision') {
-        const hitEvent = (m.params.hitEvent as string | undefined);
-        // If hitEvent is explicitly set to a non-collision event, Collision is not required
-        if (hitEvent && !hitEvent.startsWith('collision:')) {
-          continue;
-        }
-      }
-
-      if (!presentTypes.has(req)) {
-        errors.push({
-          severity: 'error',
-          category: 'missing-dependency',
-          moduleId: m.id,
-          message: `Module "${m.type}" requires "${req}" but it is not present. Add a ${req} module.`,
-        });
-      }
+    for (const event of contracts.getEmits(m.type)) {
+      pool.add(event);
     }
   }
-  return errors;
+  return pool;
+}
+
+function checkEventFulfillment(
+  modules: readonly ModuleConfig[],
+  contracts: ContractRegistry,
+  emitsPool: ReadonlySet<string>,
+): ValidationIssue[] {
+  const warnings: ValidationIssue[] = [];
+
+  for (const m of modules) {
+    for (const event of contracts.getConsumes(m.type)) {
+      if (UNIVERSAL_EVENTS.has(event)) continue;
+      if (emitsPool.has(event)) continue;
+
+      // Wildcard: consumes ending with :* matches any emitted event with that prefix
+      if (event.endsWith(':*')) {
+        const prefix = event.slice(0, -1);
+        let matched = false;
+        for (const e of emitsPool) {
+          if (e.startsWith(prefix)) { matched = true; break; }
+        }
+        if (matched) continue;
+      }
+
+      warnings.push({
+        severity: 'warning',
+        category: 'event-chain-break',
+        moduleId: m.id,
+        message: `Module "${m.type}" consumes "${event}" but no enabled module emits it.`,
+      });
+    }
+  }
+  return warnings;
 }
 
 function checkEmptyCollisionRules(modules: readonly ModuleConfig[]): ValidationIssue[] {
@@ -184,82 +145,24 @@ function checkEmptyCollisionRules(modules: readonly ModuleConfig[]): ValidationI
   return errors;
 }
 
-function checkEventChains(modules: readonly ModuleConfig[]): ValidationIssue[] {
+function checkEventChains(
+  modules: readonly ModuleConfig[],
+  emitsPool: ReadonlySet<string>,
+): ValidationIssue[] {
   const errors: ValidationIssue[] = [];
-  const presentTypes = new Set(modules.map((m) => m.type));
 
   for (const m of modules) {
     if (m.type !== 'Scorer') continue;
 
     const hitEvent = (m.params.hitEvent as string) ?? 'collision:hit';
 
-    // Check if the hitEvent is a known valid event
-    if (!SCORER_VALID_HIT_EVENTS.has(hitEvent)) {
+    if (!emitsPool.has(hitEvent)) {
       errors.push({
         severity: 'error',
         category: 'event-chain-break',
         moduleId: m.id,
-        message: `Scorer.hitEvent "${hitEvent}" is not a known scorable event. ` +
-          `Valid events: ${[...SCORER_VALID_HIT_EVENTS].join(', ')}.`,
-      });
-      continue;
-    }
-
-    // Check that the event source module exists
-    if (hitEvent.startsWith('collision:') && !presentTypes.has('Collision')) {
-      errors.push({
-        severity: 'error',
-        category: 'event-chain-break',
-        moduleId: m.id,
-        message: `Scorer listens to "${hitEvent}" but no Collision module is present to emit it.`,
-      });
-    }
-    if (hitEvent === 'beat:hit' && !presentTypes.has('BeatMap')) {
-      errors.push({
-        severity: 'error',
-        category: 'event-chain-break',
-        moduleId: m.id,
-        message: 'Scorer listens to "beat:hit" but no BeatMap module is present.',
-      });
-    }
-    if (hitEvent === 'quiz:correct' && !presentTypes.has('QuizEngine')) {
-      errors.push({
-        severity: 'error',
-        category: 'event-chain-break',
-        moduleId: m.id,
-        message: 'Scorer listens to "quiz:correct" but no QuizEngine module is present.',
-      });
-    }
-    if (hitEvent === 'expression:detected' && !presentTypes.has('ExpressionDetector')) {
-      errors.push({
-        severity: 'error',
-        category: 'event-chain-break',
-        moduleId: m.id,
-        message: 'Scorer listens to "expression:detected" but no ExpressionDetector module is present.',
-      });
-    }
-    if (hitEvent === 'gesture:match' && !presentTypes.has('GestureMatch')) {
-      errors.push({
-        severity: 'error',
-        category: 'event-chain-break',
-        moduleId: m.id,
-        message: 'Scorer listens to "gesture:match" but no GestureMatch module is present.',
-      });
-    }
-    if (hitEvent === 'match:found' && !presentTypes.has('MatchEngine')) {
-      errors.push({
-        severity: 'error',
-        category: 'event-chain-break',
-        moduleId: m.id,
-        message: 'Scorer listens to "match:found" but no MatchEngine module is present.',
-      });
-    }
-    if (hitEvent === 'collectible:pickup' && !presentTypes.has('Collectible')) {
-      errors.push({
-        severity: 'error',
-        category: 'event-chain-break',
-        moduleId: m.id,
-        message: 'Scorer listens to "collectible:pickup" but no Collectible module is present.',
+        message: `Scorer.hitEvent "${hitEvent}" is not emitted by any enabled module. ` +
+          `Ensure a module that emits "${hitEvent}" is present.`,
       });
     }
   }
@@ -372,24 +275,38 @@ function checkAndFixParams(modules: readonly ModuleConfig[]): {
 /**
  * Validate a GameConfig before loading into the engine.
  * Returns a report with errors (must fix), warnings (auto-fixed), and fixes applied.
+ *
+ * When a ContractRegistry is provided, validation uses module contracts for:
+ * - Unknown module type detection (via getKnownTypes)
+ * - Event fulfillment checks (consumes vs emits pool)
+ * - Scorer hitEvent chain validation (hitEvent vs emits pool)
  */
 export function validateConfig(
   config: GameConfig,
-  knownModules: ReadonlySet<string> = KNOWN_MODULE_TYPES,
+  contracts?: ContractRegistry,
 ): ValidationReport {
   const enabledModules = getEnabledModules(config);
 
-  // Run all validation passes
-  const unknownErrors = checkUnknownModules(enabledModules, knownModules);
-  const depErrors = checkDependencies(enabledModules);
+  // Contract-based checks (require ContractRegistry)
+  const emitsPool = contracts ? buildEmitsPool(enabledModules, contracts) : undefined;
+  const unknownErrors = contracts
+    ? checkUnknownModules(enabledModules, contracts.getKnownTypes())
+    : [];
+  const fulfillmentWarnings = contracts && emitsPool
+    ? checkEventFulfillment(enabledModules, contracts, emitsPool)
+    : [];
+  const chainErrors = emitsPool
+    ? checkEventChains(enabledModules, emitsPool)
+    : [];
+
+  // Non-contract checks (always run)
   const rulesErrors = checkEmptyCollisionRules(enabledModules);
-  const chainErrors = checkEventChains(enabledModules);
   const conflictWarnings = checkModuleConflicts(enabledModules);
   const inputWarnings = checkMissingInput(enabledModules);
   const { warnings: paramWarnings, fixes } = checkAndFixParams(enabledModules);
 
-  const errors = [...unknownErrors, ...depErrors, ...rulesErrors, ...chainErrors];
-  const warnings = [...conflictWarnings, ...inputWarnings, ...paramWarnings];
+  const errors = [...unknownErrors, ...rulesErrors, ...chainErrors];
+  const warnings = [...fulfillmentWarnings, ...conflictWarnings, ...inputWarnings, ...paramWarnings];
 
   return {
     errors,

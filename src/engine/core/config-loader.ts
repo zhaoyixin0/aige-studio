@@ -2,6 +2,7 @@ import type { GameConfig } from './types';
 import type { Engine } from './engine';
 import type { ModuleRegistry } from './module-registry';
 import { AutoWirer } from './auto-wirer';
+import { ContractRegistry } from './contract-registry';
 import { validateConfig, type ValidationReport } from './config-validator';
 
 export interface ConfigChange {
@@ -40,8 +41,9 @@ export class ConfigLoader {
    * 4. Runs AutoWirer
    */
   load(engine: Engine, config: GameConfig): void {
-    // Pre-load validation
-    const report = validateConfig(config);
+    // Pre-load validation (contract-aware)
+    const contracts = ContractRegistry.fromRegistry(this.registry);
+    const report = validateConfig(config, contracts);
     this._lastValidationReport = report;
 
     if (this.strict && !report.isPlayable) {

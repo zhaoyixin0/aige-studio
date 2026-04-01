@@ -54,12 +54,12 @@ describe('ConfigLoader — strict mode', () => {
     const loader = new ConfigLoader(registry, { strict: true });
     const engine = new Engine();
 
-    // Scorer requires Collision, but Collision is absent
+    // Scorer's hitEvent (collision:hit) is not emitted by any module
     const config = makeConfig([
       { id: 'scorer_1', type: 'Scorer', params: { perHit: 10 } },
     ]);
 
-    expect(() => loader.load(engine, config)).toThrow(/Collision/);
+    expect(() => loader.load(engine, config)).toThrow(/collision:hit/);
   });
 
   it('should throw when Collision has empty rules in strict mode', () => {
