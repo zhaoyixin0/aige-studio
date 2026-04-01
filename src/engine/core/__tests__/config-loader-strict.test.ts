@@ -1,6 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { Engine } from '../engine';
-import { ModuleRegistry } from '../module-registry';
 import { ConfigLoader } from '../config-loader';
 import type { GameConfig } from '../types';
 import { createModuleRegistry } from '@/engine/module-setup';

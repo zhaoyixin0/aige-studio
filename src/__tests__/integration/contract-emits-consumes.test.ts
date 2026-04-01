@@ -1,24 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { Engine } from '@/engine/core/engine';
-import { AutoWirer } from '@/engine/core/auto-wirer';
 import { Spawner } from '@/engine/modules/mechanic/spawner';
 import { Collision } from '@/engine/modules/mechanic/collision';
 import { Scorer } from '@/engine/modules/mechanic/scorer';
 import { PlayerMovement } from '@/engine/modules/mechanic/player-movement';
 import { Projectile } from '@/engine/modules/mechanic/projectile';
 import { Health } from '@/engine/modules/mechanic/health';
-
-function makeEngine(): Engine {
-  const engine = new Engine();
-  engine.loadConfig({
-    version: '1.0.0',
-    meta: { name: 'Test', description: '', thumbnail: null, createdAt: '' },
-    canvas: { width: 1080, height: 1920 },
-    modules: [],
-    assets: {},
-  });
-  return engine;
-}
 
 // ── Contract emits/consumes declarations ───────────────────────
 

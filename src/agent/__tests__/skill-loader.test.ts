@@ -220,7 +220,7 @@ describe('SkillLoader', () => {
       ];
       for (const gt of gameTypes) {
         const result = await loader.loadForConversation(gt, []);
-        expect(result.length).toBeGreaterThan(100, `game type ${gt} should have content`);
+        expect(result.length).toBeGreaterThan(100);
       }
     });
   });
