@@ -22,11 +22,16 @@ export class GameFlowOverlayRenderer {
   // Result screen overlay
   private resultContainer: Container;
   private resultBg!: Graphics;
+  private resultCard!: Graphics;
   private resultTitleText!: Text;
   private resultScoreText!: Text;
   private resultStarsText!: Text;
   private resultTimeText!: Text;
   private resultHintText!: Text;
+
+  // Count-up animation
+  private targetScore = 0;
+  private displayedScore = 0;
 
   constructor(parent: Container, width: number, height: number) {
     this.width = width;
@@ -47,12 +52,22 @@ export class GameFlowOverlayRenderer {
     this.syncCountdown(engine);
     this.syncStart(engine);
     this.syncResult(engine);
+
+    // Score count-up animation
+    if (this.resultContainer.visible && this.displayedScore < this.targetScore) {
+      const diff = this.targetScore - this.displayedScore;
+      const increment = Math.max(1, Math.ceil(diff * 0.1));
+      this.displayedScore += increment;
+      this.resultScoreText.text = `\u2b50 \u5F97\u5206: ${this.displayedScore}`;
+    }
   }
 
   reset(): void {
     this.countdownContainer.visible = false;
     this.startContainer.visible = true;
     this.resultContainer.visible = false;
+    this.targetScore = 0;
+    this.displayedScore = 0;
   }
 
   // ── Countdown overlay ──────────────────────────────────────
@@ -160,14 +175,24 @@ export class GameFlowOverlayRenderer {
     this.resultBg.rect(0, 0, this.width, this.height);
     this.resultBg.fill({ color: 0x000000, alpha: 0.75 });
 
+    const cardWidth = this.width * 0.85;
+    const cardHeight = this.height * 0.45;
+    const cx = this.width / 2;
+    const cy = this.height / 2;
+
+    this.resultCard = new Graphics();
+    this.resultCard.roundRect(cx - cardWidth / 2, cy - cardHeight / 2, cardWidth, cardHeight, 32);
+    this.resultCard.fill({ color: 0x1f2937, alpha: 0.95 });
+    this.resultCard.stroke({ color: 0x3b82f6, width: 2, alpha: 0.5 });
+
     this.resultTitleText = new Text({
-      text: '\u{1F3AE} \u6E38\u620F\u7ED3\u675F',
+      text: '\u6E38\u620F\u7ED3\u675F',
       style: new TextStyle({
         fill: '#ffffff', fontSize: 52, fontFamily: 'Arial', fontWeight: 'bold', align: 'center',
       }),
     });
     this.resultTitleText.anchor.set(0.5);
-    this.resultTitleText.position.set(this.width / 2, this.height * 0.25);
+    this.resultTitleText.position.set(cx, cy - cardHeight * 0.3);
 
     this.resultStarsText = new Text({
       text: '',
@@ -176,44 +201,50 @@ export class GameFlowOverlayRenderer {
       }),
     });
     this.resultStarsText.anchor.set(0.5);
-    this.resultStarsText.position.set(this.width / 2, this.height * 0.35);
+    this.resultStarsText.position.set(cx, cy - cardHeight * 0.12);
 
     this.resultScoreText = new Text({
       text: '',
       style: new TextStyle({
-        fill: '#ffffff', fontSize: 44, fontFamily: 'Arial', fontWeight: 'bold', align: 'center',
+        fill: '#ffffff', fontSize: 48, fontFamily: 'Arial', fontWeight: 'bold', align: 'center',
       }),
     });
     this.resultScoreText.anchor.set(0.5);
-    this.resultScoreText.position.set(this.width / 2, this.height * 0.48);
+    this.resultScoreText.position.set(cx, cy + cardHeight * 0.08);
 
     this.resultTimeText = new Text({
       text: '',
       style: new TextStyle({
-        fill: '#00d4ff', fontSize: 32, fontFamily: 'Arial', align: 'center',
+        fill: '#00d4ff', fontSize: 28, fontFamily: 'Arial', align: 'center',
       }),
     });
     this.resultTimeText.anchor.set(0.5);
-    this.resultTimeText.position.set(this.width / 2, this.height * 0.57);
+    this.resultTimeText.position.set(cx, cy + cardHeight * 0.22);
 
     this.resultHintText = new Text({
       text: '\u70B9\u51FB\u5C4F\u5E55\u91CD\u65B0\u5F00\u59CB',
       style: new TextStyle({
-        fill: '#aaaaaa', fontSize: 24, fontFamily: 'Arial', align: 'center',
+        fill: '#aaaaaa', fontSize: 28, fontFamily: 'Arial', align: 'center',
       }),
     });
     this.resultHintText.anchor.set(0.5);
-    this.resultHintText.position.set(this.width / 2, this.height * 0.72);
+    this.resultHintText.position.set(cx, cy + cardHeight * 0.38);
 
-    c.addChild(this.resultBg, this.resultTitleText, this.resultStarsText, this.resultScoreText, this.resultTimeText, this.resultHintText);
+    c.addChild(this.resultBg, this.resultCard, this.resultTitleText, this.resultStarsText, this.resultScoreText, this.resultTimeText, this.resultHintText);
     return c;
   }
+
 
   private syncResult(engine: Engine): void {
     const gameFlow = engine.getModulesByType('GameFlow')[0] as GameFlow | undefined;
     if (!gameFlow || gameFlow.getState() !== 'finished') {
       this.resultContainer.visible = false;
       return;
+    }
+
+    // Reset displayed score when first becoming visible
+    if (!this.resultContainer.visible) {
+      this.displayedScore = 0;
     }
 
     this.resultContainer.visible = true;
@@ -225,7 +256,8 @@ export class GameFlowOverlayRenderer {
       const time = results.stats.time;
       const stars = results.starRating;
 
-      this.resultScoreText.text = `\u2b50 \u5F97\u5206: ${score}`;
+      this.targetScore = score;
+      // resultScoreText will be updated in sync() during count-up
       this.resultStarsText.text = '\u2B50'.repeat(stars) + '\u2606'.repeat(Math.max(0, 3 - stars));
       this.resultTimeText.text = time != null ? `\u23f1 \u7528\u65f6: ${Math.ceil(time)}s` : '';
     } else {
@@ -234,7 +266,7 @@ export class GameFlowOverlayRenderer {
       if (scorers.length > 0) {
         const scorer = scorers[0] as { getScore?: () => number };
         const score = scorer.getScore?.() ?? 0;
-        this.resultScoreText.text = `\u2b50 \u5F97\u5206: ${score}`;
+        this.targetScore = score;
       }
       this.resultStarsText.text = '';
       this.resultTimeText.text = '';

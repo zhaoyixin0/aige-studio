@@ -21,6 +21,10 @@ export class HudRenderer {
   private livesText: Text;
   private comboText: Text;
 
+  private scoreBg: Graphics;
+  private timerBg: Graphics;
+  private livesBg: Graphics;
+
   // Quiz UI elements
   private quizContainer: Container;
   private questionText: Text;
@@ -65,26 +69,29 @@ export class HudRenderer {
     this.width = width;
     this.height = height;
 
+    // Backgrounds for HUD elements (Pill shapes)
+    this.scoreBg = new Graphics();
+    this.timerBg = new Graphics();
+    this.livesBg = new Graphics();
+
     // V1-style HUD with emoji icons and colored backgrounds
     this.scoreText = new Text({
       text: '\u2b50 0',
-      style: new TextStyle({ fill: '#FFD700', fontSize: 36, fontFamily: 'Arial', fontWeight: 'bold' }),
+      style: new TextStyle({ fill: '#FFD700', fontSize: 32, fontFamily: 'Arial', fontWeight: 'bold' }),
     });
-    this.scoreText.anchor.set(1, 0);
-    this.scoreText.position.set(width - 20, 16);
+    this.scoreText.anchor.set(1, 0.5);
 
     this.timerText = new Text({
       text: '\u23f1 30',
-      style: new TextStyle({ fill: '#00d4ff', fontSize: 36, fontFamily: 'Arial', fontWeight: 'bold' }),
+      style: new TextStyle({ fill: '#00d4ff', fontSize: 32, fontFamily: 'Arial', fontWeight: 'bold' }),
     });
-    this.timerText.anchor.set(0.5, 0);
-    this.timerText.position.set(width / 2, 16);
+    this.timerText.anchor.set(0.5, 0.5);
 
     this.livesText = new Text({
       text: '\u2764\ufe0f\u2764\ufe0f\u2764\ufe0f',
-      style: new TextStyle({ fill: '#ffffff', fontSize: 28, fontFamily: 'Arial' }),
+      style: new TextStyle({ fill: '#ffffff', fontSize: 24, fontFamily: 'Arial' }),
     });
-    this.livesText.position.set(20, 20);
+    this.livesText.anchor.set(0, 0.5);
 
     this.comboText = new Text({
       text: '',
@@ -93,6 +100,10 @@ export class HudRenderer {
     this.comboText.anchor.set(0.5);
     this.comboText.position.set(width / 2, height / 2 - 200);
     this.comboText.alpha = 0;
+
+    // ... (rest of the constructor remains the same, except for addChild)
+    // I need to be careful with replace, I'll provide the full constructor changes if needed.
+    // For now, I'll finish the addChild part in the same block.
 
     // Quiz container
     this.quizContainer = new Container();
@@ -199,8 +210,11 @@ export class HudRenderer {
 
     // Add core HUD elements to container (before game flow overlay so overlays render on top)
     container.addChild(
+      this.scoreBg,
       this.scoreText,
+      this.timerBg,
       this.timerText,
+      this.livesBg,
       this.livesText,
       this.comboText,
       this.quizContainer,
@@ -213,6 +227,7 @@ export class HudRenderer {
     this.gameFlowOverlay = new GameFlowOverlayRenderer(container, width, height);
   }
 
+
   // ── sync ────────────────────────────────────────────────────
 
   sync(engine: Engine, dt = 16): void {
@@ -224,37 +239,62 @@ export class HudRenderer {
     this.timerText.visible = hudVisible;
     this.livesText.visible = hudVisible;
     this.comboText.visible = hudVisible;
+    this.scoreBg.visible = hudVisible;
+    this.timerBg.visible = hudVisible;
+    this.livesBg.visible = hudVisible;
 
     const overlay = engine.getModulesByType('UIOverlay')[0] as UIOverlay | undefined;
     if (overlay) {
       const hud = overlay.getHudState();
 
-      // V1-style score with star emoji
+      // Score
       this.scoreText.text = `\u2b50 ${hud.score ?? 0}`;
+      this.scoreText.position.set(this.width - 40, 36);
+      this.scoreBg.clear()
+        .roundRect(this.width - this.scoreText.width - 60, 16, this.scoreText.width + 40, 40, 20)
+        .fill({ color: 0x000000, alpha: 0.4 })
+        .stroke({ color: 0xffffff, width: 1, alpha: 0.2 });
 
-      // V1-style timer with color coding
+      // Timer
       const remaining = hud.timer?.remaining ?? 0;
       const duration = hud.timer?.elapsed != null ? remaining + hud.timer.elapsed : 30;
       const ratio = duration > 0 ? remaining / duration : 1;
       const ceil = Math.ceil(remaining);
       this.timerText.text = `\u23f1 ${ceil}`;
+      this.timerText.position.set(this.width / 2, 36);
+
+      let timerColor = 0x00d4ff;
       if (ratio < 0.2) {
         (this.timerText.style as TextStyle).fill = '#ff4757';
+        timerColor = 0xff4757;
       } else if (ratio < 0.4) {
         (this.timerText.style as TextStyle).fill = '#ffa500';
+        timerColor = 0xffa500;
       } else {
         (this.timerText.style as TextStyle).fill = '#00d4ff';
+        timerColor = 0x00d4ff;
       }
 
-      // V1-style lives: filled + empty
+      this.timerBg.clear()
+        .roundRect(this.width / 2 - this.timerText.width / 2 - 20, 16, this.timerText.width + 40, 40, 20)
+        .fill({ color: 0x000000, alpha: 0.4 })
+        .stroke({ color: timerColor, width: 1, alpha: 0.4 });
+
+      // Lives
       const currentLives = hud.lives ?? 0;
       const livesModule = engine.getModulesByType('Lives')[0] as { getParams: () => Record<string, unknown> } | undefined;
       const maxLives = (livesModule?.getParams()?.maxLives as number | undefined) ?? 3;
       const filled = '\u2764\ufe0f'.repeat(currentLives);
       const empty = '\uD83D\uDDA4'.repeat(Math.max(0, maxLives - currentLives));
       this.livesText.text = filled + empty;
+      this.livesText.position.set(36, 36);
 
-      // V1-style combo with fire emoji
+      this.livesBg.clear()
+        .roundRect(16, 16, this.livesText.width + 40, 40, 20)
+        .fill({ color: 0x000000, alpha: 0.4 })
+        .stroke({ color: 0xffffff, width: 1, alpha: 0.2 });
+
+      // Combo
       const comboCount = hud.combo?.count ?? 0;
       const comboFade = hud.combo?.fadeTimer ?? 0;
       if (comboCount > 1 && comboFade > 0) {
@@ -264,6 +304,7 @@ export class HudRenderer {
         this.comboText.alpha = 0;
       }
     }
+
 
     // Quiz rendering
     this.syncQuiz(engine);
@@ -602,6 +643,9 @@ export class HudRenderer {
     this.timerText.text = '';
     this.livesText.text = '';
     this.comboText.alpha = 0;
+    this.scoreBg.visible = false;
+    this.timerBg.visible = false;
+    this.livesBg.visible = false;
     this.quizContainer.visible = false;
     this.quizClicksWired = false;
     this.wheelContainer.visible = false;

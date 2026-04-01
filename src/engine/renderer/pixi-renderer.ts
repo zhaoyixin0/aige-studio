@@ -31,6 +31,12 @@ export class PixiRenderer {
   private bgSrc: string | null = null;
   private engineEventHandlers: Array<{ event: string; handler: (data?: any) => void }> = [];
 
+  // Juice: Screen Shake & Impact Flash
+  private shakeAmount = 0;
+  private shakeDuration = 0;
+  private flashOverlay: Graphics | null = null;
+  private flashAlpha = 0;
+
   constructor() {
     this.app = new Application();
   }
@@ -50,6 +56,12 @@ export class PixiRenderer {
     this.app.stage.addChild(this.backgroundGraphics);
 
     this.app.stage.addChild(this.cameraLayer, this.gameLayer, this.hudLayer);
+
+    // Impact flash overlay (top of everything except maybe HUD if we want)
+    this.flashOverlay = new Graphics();
+    this.flashOverlay.rect(0, 0, width, height).fill({ color: 0xFFFFFF });
+    this.flashOverlay.alpha = 0;
+    this.app.stage.addChild(this.flashOverlay);
 
     this.gameObjectRenderer = new GameObjectRenderer(this.gameLayer);
     this.shooterRenderer = new ShooterRenderer(this.gameLayer);
@@ -165,6 +177,9 @@ export class PixiRenderer {
   render(engine: Engine, dt?: number): void {
     if (!this.initialized) return;
 
+    const dtMs = dt ?? 16;
+    const dtSec = dtMs / 1000;
+
     // Update theme if changed
     const themeId = engine.getConfig().meta.theme ?? 'fruit';
     if (themeId !== this.currentThemeId) {
@@ -175,17 +190,37 @@ export class PixiRenderer {
     // Render AI background image if available
     this.syncBackgroundImage(engine);
 
+    // Screen Shake logic
+    if (this.shakeDuration > 0) {
+      this.shakeDuration -= dtMs;
+      this.cameraLayer.x = (Math.random() - 0.5) * 2 * this.shakeAmount;
+      this.cameraLayer.y = (Math.random() - 0.5) * 2 * this.shakeAmount;
+      // Sync gameLayer to cameraLayer
+      this.gameLayer.x = this.cameraLayer.x;
+      this.gameLayer.y = this.cameraLayer.y;
+    } else {
+      this.cameraLayer.x = 0;
+      this.cameraLayer.y = 0;
+      this.gameLayer.x = 0;
+      this.gameLayer.y = 0;
+    }
+
+    // Impact Flash logic
+    if (this.flashAlpha > 0) {
+      this.flashAlpha = Math.max(0, this.flashAlpha - dtSec * 10); // Fade out quickly
+      if (this.flashOverlay) {
+        this.flashOverlay.alpha = this.flashAlpha;
+      }
+    }
+
     this.gameObjectRenderer?.sync(engine);
-    this.shooterRenderer?.sync(engine, dt);
-    this.hudRenderer?.sync(engine, dt ?? 16);
-    this.rpgOverlayRenderer?.sync(engine, dt ?? 16);
+    this.shooterRenderer?.sync(engine, dtMs);
+    this.hudRenderer?.sync(engine, dtMs);
+    this.rpgOverlayRenderer?.sync(engine, dtMs);
 
     // Update particle and float text systems
-    if (dt != null) {
-      const dtSec = dt / 1000; // convert ms to seconds
-      this.particleRenderer?.update(dtSec);
-      this.floatTextRenderer?.update(dtSec);
-    }
+    this.particleRenderer?.update(dtSec);
+    this.floatTextRenderer?.update(dtSec);
   }
 
   connectToEngine(engine: Engine): void {
@@ -225,6 +260,9 @@ export class PixiRenderer {
       this.particleRenderer?.burst(x, y, 0xFFD700, 8);
       this.floatTextRenderer?.spawn(x, y - 30, '+10', 0xFFD700);
       this.soundSynth?.playScore();
+      // Screen shake on hit
+      this.shakeAmount = 5;
+      this.shakeDuration = 100;
     });
 
     listen('collision:damage', (data?: any) => {
@@ -232,6 +270,10 @@ export class PixiRenderer {
       const y = data?.y ?? 960;
       this.particleRenderer?.burst(x, y, 0xFF4757, 10);
       this.soundSynth?.playHit();
+      // Heavy screen shake and impact flash on damage
+      this.shakeAmount = 15;
+      this.shakeDuration = 300;
+      this.flashAlpha = 0.4;
     });
 
     listen('scorer:update', (data?: any) => {
@@ -239,21 +281,33 @@ export class PixiRenderer {
       if (combo > 1) {
         this.floatTextRenderer?.spawn(540, 700, `\u{1F525} x${combo} COMBO!`, 0xff6b9d);
         this.soundSynth?.playCombo(combo);
+        // Small shake on combo
+        this.shakeAmount = 3;
+        this.shakeDuration = 50;
       }
     });
 
     listen('gameflow:state', (data?: any) => {
       if (data?.state === 'finished') {
         this.soundSynth?.playGameOver();
+        // Shake on game over
+        this.shakeAmount = 10;
+        this.shakeDuration = 500;
       }
     });
 
     listen('beat:hit', (data?: any) => {
       this.hudRenderer?.showRhythmFeedback(data?.accuracy ?? 0.5);
+      // Small shake on rhythm hit
+      this.shakeAmount = 4;
+      this.shakeDuration = 80;
     });
 
     listen('beat:miss', () => {
       this.hudRenderer?.showRhythmFeedback(0);
+      // Medium shake on miss
+      this.shakeAmount = 8;
+      this.shakeDuration = 150;
     });
 
     // Shooter events
@@ -263,6 +317,9 @@ export class PixiRenderer {
       this.particleRenderer?.burst(x, y, 0xFF6B6B, 12);
       this.floatTextRenderer?.spawn(x, y - 30, 'KILL!', 0xFF4500);
       this.soundSynth?.playScore();
+      // Shake on enemy death
+      this.shakeAmount = 10;
+      this.shakeDuration = 200;
     });
 
     listen('shield:block', () => {
