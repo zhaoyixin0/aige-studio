@@ -2,6 +2,7 @@ import type { GameConfig } from './types';
 import type { Engine } from './engine';
 import type { ModuleRegistry } from './module-registry';
 import { AutoWirer } from './auto-wirer';
+import { validateConfig, type ValidationReport } from './config-validator';
 
 export interface ConfigChange {
   op: 'add_module' | 'remove_module' | 'update_param' | 'enable_module' | 'disable_module';
@@ -11,22 +12,46 @@ export interface ConfigChange {
   params?: Record<string, any>;
 }
 
+export interface ConfigLoaderOptions {
+  /** When true, throw on validation errors instead of warning. Default: false */
+  strict?: boolean;
+}
+
 export class ConfigLoader {
   private registry: ModuleRegistry;
+  private strict: boolean;
+  private _lastValidationReport: ValidationReport | null = null;
 
-  constructor(registry: ModuleRegistry) {
+  constructor(registry: ModuleRegistry, options?: ConfigLoaderOptions) {
     this.registry = registry;
+    this.strict = options?.strict ?? false;
+  }
+
+  /** Get the validation report from the last load() call. */
+  getLastValidationReport(): ValidationReport | null {
+    return this._lastValidationReport;
   }
 
   /**
    * Load a full GameConfig into the engine.
-   * 1. Sets the config on the engine
-   * 2. Creates and adds enabled modules
-   * 3. Skips disabled modules
-   * 4. Warns on unknown types
-   * 5. Runs AutoWirer
+   * 1. Runs pre-load validation (strict mode throws on errors)
+   * 2. Sets the config on the engine
+   * 3. Creates and adds enabled modules
+   * 4. Runs AutoWirer
    */
   load(engine: Engine, config: GameConfig): void {
+    // Pre-load validation
+    const report = validateConfig(config);
+    this._lastValidationReport = report;
+
+    if (this.strict && !report.isPlayable) {
+      const firstError = report.errors[0];
+      throw new Error(
+        `[ConfigLoader] Validation failed: ${firstError.message} ` +
+        `(${report.errors.length} error(s) total)`
+      );
+    }
+
     engine.loadConfig(config);
 
     for (const moduleCfg of config.modules) {
@@ -35,9 +60,11 @@ export class ConfigLoader {
         continue;
       }
 
-      // Warn on unknown types
+      // Warn/skip on unknown types
       if (!this.registry.has(moduleCfg.type)) {
-        console.warn(`ConfigLoader: unknown module type "${moduleCfg.type}", skipping.`);
+        if (!this.strict) {
+          console.warn(`ConfigLoader: unknown module type "${moduleCfg.type}", skipping.`);
+        }
         continue;
       }
 
@@ -47,7 +74,7 @@ export class ConfigLoader {
 
     AutoWirer.wire(engine);
 
-    // Validate module dependencies
+    // Validate module dependencies post-load (catches runtime-only issues)
     this.validateDependencies(engine);
   }
 

@@ -112,6 +112,8 @@ export class Spawner extends BaseModule {
         getLayerForObject: (data) =>
           (data.asset ? assetLayerMap.get(data.asset) : undefined) ?? defaultLayer,
       },
+      emits: ['spawner:created', 'spawner:destroyed'],
+      consumes: ['collision:hit', 'gameflow:resume', 'gameflow:pause'],
     };
   }
 

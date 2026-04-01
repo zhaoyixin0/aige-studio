@@ -42,6 +42,13 @@ export class Collision extends BaseModule {
     };
   }
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    return {
+      emits: ['collision:hit', 'collision:damage'],
+      consumes: ['gameflow:resume', 'gameflow:pause'],
+    };
+  }
+
   init(engine: GameEngine): void {
     super.init(engine);
   }

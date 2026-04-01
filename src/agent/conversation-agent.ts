@@ -13,6 +13,8 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { GameConfig, ModuleConfig } from '@/engine/core/index.ts';
 import type { AssetEntry } from '@/engine/core/types.ts';
+import { validateConfig, applyFixes, type ValidationReport } from '@/engine/core/config-validator.ts';
+import { resolveInputProfile } from '@/engine/core/profiles.ts';
 import { ALL_GAME_TYPES, getGamePreset, getModuleParams } from './game-presets.ts';
 import { SkillLoader } from './skill-loader.ts';
 import {
@@ -256,6 +258,12 @@ function applySingleChange(
 export class ConversationAgent {
   private client: Anthropic | null;
   private history: ConversationMessage[] = [];
+  private _lastValidationReport: ValidationReport | null = null;
+
+  /** Get the validation report from the last config generation. */
+  getLastValidationReport(): ValidationReport | null {
+    return this._lastValidationReport;
+  }
 
   constructor(apiKey?: string) {
     this.client = apiKey
@@ -346,6 +354,15 @@ export class ConversationAgent {
               if (!reply) {
                 const desc = GAME_TYPE_DESCRIPTIONS[input.game_type] ?? input.game_type;
                 reply = `已为你创建「${desc.split(' — ')[0]}」游戏！`;
+              }
+              // Append validation feedback
+              const vReport = this._lastValidationReport;
+              if (vReport) {
+                if (vReport.errors.length > 0) {
+                  reply += `\n\n检测到 ${vReport.errors.length} 个配置问题，请查看预览工具栏的诊断提示。`;
+                } else if (vReport.fixes.length > 0) {
+                  reply += `\n\n已自动修正 ${vReport.fixes.length} 项配置参数。`;
+                }
               }
               break;
             }
@@ -524,8 +541,26 @@ export class ConversationAgent {
       assets['background'] = { type: 'background', src: '' };
     }
 
+    // Resolve InputProfile: ensure PlayerMovement has correct continuousEvent
+    const inputProfile = resolveInputProfile(inputMethod, gameType);
+    finalModules = finalModules.map((m) => {
+      if (m.type !== 'PlayerMovement') return m;
+      const pmParams = { ...m.params };
+      // Only set continuousEvent if not already explicitly specified
+      if (!pmParams.continuousEvent && inputProfile.continuousEvent) {
+        pmParams.continuousEvent = inputProfile.continuousEvent;
+      }
+      if (pmParams.mode === undefined) {
+        pmParams.mode = inputProfile.mode;
+      }
+      if (pmParams.defaultY === undefined && inputProfile.defaultY !== undefined) {
+        pmParams.defaultY = inputProfile.defaultY;
+      }
+      return { ...m, params: pmParams };
+    });
+
     const desc = GAME_TYPE_DESCRIPTIONS[gameType] ?? gameType;
-    return {
+    const config: GameConfig = {
       version: '1.0.0',
       meta: {
         name: desc.split(' — ')[0] + '游戏',
@@ -540,6 +575,12 @@ export class ConversationAgent {
       modules: finalModules,
       assets,
     };
+
+    // Run pre-load validation and apply auto-fixes (immutable)
+    const report = validateConfig(config);
+    this._lastValidationReport = report;
+
+    return report.fixes.length > 0 ? applyFixes(config, report.fixes) : config;
   }
 
   private applyChanges(

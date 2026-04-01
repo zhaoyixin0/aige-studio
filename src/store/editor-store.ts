@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { ValidationReport } from '@/engine/core/config-validator';
 
 export type PreviewMode = 'edit' | 'play' | 'fullscreen';
 
@@ -37,6 +38,7 @@ interface EditorStore {
   previewMode: PreviewMode;
   chatMessages: ChatMessage[];
   isChatLoading: boolean;
+  validationReport: ValidationReport | null;
 
   layoutPhase: 'landing' | 'studio';
   suggestionChips: Chip[];
@@ -51,6 +53,7 @@ interface EditorStore {
   setLayoutPhase: (phase: 'landing' | 'studio') => void;
   setSuggestionChips: (chips: Chip[]) => void;
   toggleEditor: () => void;
+  setValidationReport: (report: ValidationReport | null) => void;
 }
 
 export const useEditorStore = create<EditorStore>((set) => ({
@@ -58,6 +61,7 @@ export const useEditorStore = create<EditorStore>((set) => ({
   previewMode: 'edit',
   chatMessages: [],
   isChatLoading: false,
+  validationReport: null,
   layoutPhase: 'landing',
   suggestionChips: DEFAULT_CHIPS,
   editorExpanded: false,
@@ -85,4 +89,5 @@ export const useEditorStore = create<EditorStore>((set) => ({
   setLayoutPhase: (phase) => set({ layoutPhase: phase }),
   setSuggestionChips: (chips) => set({ suggestionChips: chips }),
   toggleEditor: () => set((state) => ({ editorExpanded: !state.editorExpanded })),
+  setValidationReport: (report) => set({ validationReport: report }),
 }));

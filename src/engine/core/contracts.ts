@@ -33,4 +33,10 @@ export interface ModuleContracts {
   readonly damageReceiver?: DamageReceiverContract;
   readonly damageSource?: DamageSourceContract;
   readonly playerPosition?: PlayerPositionContract;
+  /** Events this module emits (for event chain validation) */
+  readonly emits?: readonly string[];
+  /** Events this module listens to / consumes */
+  readonly consumes?: readonly string[];
+  /** Module capabilities for conflict detection (e.g., 'scoring-core', 'damage-receiver') */
+  readonly capabilities?: readonly string[];
 }

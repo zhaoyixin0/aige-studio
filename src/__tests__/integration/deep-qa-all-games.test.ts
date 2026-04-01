@@ -519,21 +519,17 @@ describe('Deep QA: Expression', () => {
     engine.restart();
   });
 
-  it('score should increase on expression:detected via collision:hit wiring', () => {
+  it('score should increase on expression:detected', () => {
     const config = createGameAllYes('expression');
     const engine = createEngine(config);
     startPlaying(engine);
 
-    // Expression game has a Scorer that listens to collision:hit.
-    // But ExpressionDetector emits expression:detected, not collision:hit.
-    // So we verify that the expression game's scorer responds to collision:hit
-    // (which would be emitted by a separate collision system if present),
-    // and that expression:detected fires correctly.
+    // Expression preset Scorer listens to expression:detected (not collision:hit)
     const scorer = engine.getModulesByType('Scorer')[0] as Scorer;
     expect(scorer).toBeDefined();
 
-    // Directly trigger scorer via collision:hit
-    engine.eventBus.emit('collision:hit', { targetId: 'test' });
+    // Trigger scorer via expression:detected (the correct event for this game type)
+    engine.eventBus.emit('expression:detected', { expression: 'smile', confidence: 0.9 });
     expect(scorer.getScore()).toBeGreaterThan(0);
     engine.restart();
   });

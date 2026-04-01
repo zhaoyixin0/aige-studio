@@ -74,6 +74,15 @@ export class Scorer extends BaseModule {
 
   getDependencies() { return { requires: ['Collision'], optional: ['ComboSystem'] }; }
 
+  getContracts(): import('@/engine/core/contracts').ModuleContracts {
+    const hitEvent = (this.params.hitEvent as string) ?? 'collision:hit';
+    return {
+      emits: ['scorer:update'],
+      consumes: [hitEvent, 'spawner:destroyed', 'gameflow:resume', 'gameflow:pause'],
+      capabilities: ['scoring-core'],
+    };
+  }
+
   init(engine: GameEngine): void {
     super.init(engine);
 

@@ -7,3 +7,7 @@ export type { ModuleConstructor } from './module-registry';
 export { AutoWirer } from './auto-wirer';
 export { ConfigLoader } from './config-loader';
 export type { ConfigChange } from './config-loader';
+export { validateConfig, applyFixes, KNOWN_MODULE_TYPES } from './config-validator';
+export type { ValidationReport, ValidationIssue, AutoFix, IssueSeverity } from './config-validator';
+export { resolveInputProfile, resolveCollisionRadius } from './profiles';
+export type { InputProfileResult } from './profiles';

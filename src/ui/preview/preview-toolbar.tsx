@@ -3,6 +3,7 @@ import { Pencil, Play, Maximize, Download } from 'lucide-react';
 import { useEditorStore } from '@/store/editor-store.ts';
 import type { PreviewMode } from '@/store/editor-store.ts';
 import { ExportDialog } from '@/ui/export/export-dialog.tsx';
+import { DiagnosticBadge } from './diagnostic-badge.tsx';
 
 const modes: Array<{ mode: PreviewMode; icon: typeof Pencil; label: string }> = [
   { mode: 'edit', icon: Pencil, label: 'Edit' },
@@ -42,7 +43,8 @@ export function PreviewToolbar() {
         ))}
       </div>
 
-      <div className="ml-auto">
+      <div className="ml-auto flex items-center gap-1">
+        <DiagnosticBadge />
         <button
           onClick={() => setExportOpen(true)}
           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-colors"

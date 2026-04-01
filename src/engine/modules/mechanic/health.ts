@@ -45,6 +45,12 @@ export class Health extends BaseModule {
       damageReceiver: {
         handle: (targetId, amount) => this.damage(targetId, amount),
       },
+      emits: ['health:change', 'health:zero'],
+      consumes: [
+        (this.params.damageEvent as string) || 'collision:damage',
+        'gameflow:resume', 'gameflow:pause',
+      ],
+      capabilities: ['damage-receiver'],
     };
   }
 

@@ -108,6 +108,8 @@ export class Projectile extends BaseModule {
       damageSource: {
         amount: damage,
       },
+      emits: ['projectile:fire', 'projectile:destroyed'],
+      consumes: ['player:move', 'aim:update', 'gameflow:resume', 'gameflow:pause'],
     };
   }
 

@@ -7,6 +7,7 @@ import { useEditorStore } from '@/store/editor-store.ts';
 import { FullscreenMode } from '@/ui/preview/fullscreen-mode.tsx';
 import type { PreviewMode } from '@/store/editor-store.ts';
 import { PanelRight, PanelRightClose } from 'lucide-react';
+import { useResizeDivider } from '@/app/hooks/use-resize-divider.ts';
 
 const selectPreviewMode = (s: { previewMode: PreviewMode }) => s.previewMode;
 const selectLayoutPhase = (s: { layoutPhase: 'landing' | 'studio' }) => s.layoutPhase;
@@ -19,6 +20,7 @@ export function MainLayout() {
   const layoutPhase = useEditorStore(selectLayoutPhase);
   const editorExpanded = useEditorStore(selectEditorExpanded);
   const toggleEditor = useEditorStore(selectToggleEditor);
+  const { width: chatWidth, onMouseDown: handleMouseDown } = useResizeDivider(480);
 
   return (
     <EngineContext.Provider value={engine}>
@@ -26,15 +28,27 @@ export function MainLayout() {
         <LandingPage />
       ) : (
         <div className="h-screen w-screen flex bg-gray-950 text-white overflow-hidden">
-          {/* Left: Chat Panel (40%) */}
+          {/* Left: Chat Panel */}
           {previewMode === 'edit' && (
-            <div className="w-[40%] shrink-0 border-r border-white/5">
-              <StudioChatPanel />
-            </div>
+            <>
+              <div
+                className="shrink-0 border-r border-white/5 bg-gray-950/50 backdrop-blur-xl"
+                style={{ width: chatWidth }}
+              >
+                <StudioChatPanel />
+              </div>
+
+              {/* Resizable Divider */}
+              <div
+                onMouseDown={handleMouseDown}
+                className="w-1.5 shrink-0 -mx-0.75 cursor-col-resize hover:bg-blue-600/50 active:bg-blue-600 transition-colors z-20"
+                title="拖动调整大小"
+              />
+            </>
           )}
 
           {/* Center: Preview Canvas */}
-          <div className="flex-1 min-w-0 relative">
+          <div className="flex-1 min-w-0 relative bg-black/20">
             <PreviewCanvas />
 
             {/* Editor toggle button */}

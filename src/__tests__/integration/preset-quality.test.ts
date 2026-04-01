@@ -119,3 +119,37 @@ describe('Dodge preset quality (H6)', () => {
     expect(hasDamage).toBe(true);
   });
 });
+
+// ── Scorer hitEvent correctness ────────────────────────────────
+// Non-collision game types MUST specify the correct hitEvent in
+// their Scorer preset so scoring actually works at runtime.
+
+describe('Scorer hitEvent correctness (H7)', () => {
+  const EXPECTED_HIT_EVENTS: Record<string, string> = {
+    quiz: 'quiz:correct',
+    expression: 'expression:detected',
+    gesture: 'gesture:match',
+    rhythm: 'beat:hit',
+    puzzle: 'match:found',
+  };
+
+  for (const [gameType, expectedEvent] of Object.entries(EXPECTED_HIT_EVENTS)) {
+    it(`${gameType} preset Scorer should use hitEvent="${expectedEvent}"`, () => {
+      const preset = getGamePreset(gameType as any)!;
+      const scorer = preset['Scorer'] as any;
+      expect(scorer).toBeDefined();
+      expect(scorer.hitEvent).toBe(expectedEvent);
+    });
+  }
+
+  it('collision-based games should use default collision:hit or not specify hitEvent', () => {
+    for (const gameType of ['catch', 'dodge', 'tap', 'runner'] as const) {
+      const preset = getGamePreset(gameType)!;
+      const scorer = preset['Scorer'] as any;
+      if (scorer) {
+        // Either not specified (defaults to collision:hit) or explicitly collision:hit
+        expect(scorer.hitEvent ?? 'collision:hit').toMatch(/^collision:/);
+      }
+    }
+  });
+});

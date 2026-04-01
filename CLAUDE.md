@@ -289,6 +289,26 @@ Platform→Gravity bridges remain as BRIDGE_RULES in auto-wirer.ts (5 rules).
 
 Lesson: Batch 2/3 modules passed unit tests but failed in real games because the integration layer was not updated. Contract system prevents this by making wiring self-declaring.
 
+## CCG Multi-Model Override
+
+When `/ccg:plan` or `/ccg:analyze` calls Gemini for **analysis** (Phase 2), do NOT use `codeagent-wrapper`. Instead call gemini CLI directly with the Policy Engine to enforce read-only mode:
+
+```bash
+GEMINI_API_KEY=$(powershell -Command "[Environment]::GetEnvironmentVariable('GEMINI_API_KEY', 'User')") \
+gemini -m gemini-3.1-pro-preview -y \
+  --policy "C:/Users/yixin/.claude/.ccg/policies/read-only-analyzer.toml" \
+  --include-directories "{{WORKDIR}}" \
+  -p "<ROLE_CONTENT + TASK prompt>"
+```
+
+**Why:** Gemini in YOLO mode ignores all prompt-level constraints (read-only, scope limits, output format). The Policy Engine is the only mechanism that actually blocks tool execution at the CLI level.
+
+**When to use codeagent-wrapper for Gemini:** Only for execution tasks (`/ccg:execute`) where Gemini needs write access.
+
+**Codex:** Always use codeagent-wrapper — Codex naturally follows prompt constraints. Default model is `gpt-5` (configured in `~/.codex/config.toml`).
+
+**Policy file:** `~/.claude/.ccg/policies/read-only-analyzer.toml` — denies write_file, replace, shell, all MCP tools; allows only read tools.
+
 ## Known Issues / Next Steps
 - Gemini API key exposed in frontend (fine for internal use, need proxy for public)
 - Comprehensive mobile touch testing needed

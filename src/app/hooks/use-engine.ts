@@ -6,6 +6,7 @@ import { PixiRenderer } from '@/engine/renderer/pixi-renderer.ts';
 import { createModuleRegistry } from '@/engine/module-setup.ts';
 import type { GameConfig, ModuleSchema } from '@/engine/core/types.ts';
 import { EventRecorder, ModuleDiagnostics } from '@/engine/diagnostics';
+import { useEditorStore } from '@/store/editor-store.ts';
 
 // --- Engine Context ---
 
@@ -168,6 +169,12 @@ export function useEngine() {
     engine.restart();
     loader.load(engine, config);
     engine.start();
+
+    // Publish validation report to editor store for UI feedback
+    const report = loader.getLastValidationReport();
+    if (report) {
+      useEditorStore.getState().setValidationReport(report);
+    }
 
     // Wire sub-renderers (particles, float text, sound) to engine events
     const renderer = rendererRef.current;

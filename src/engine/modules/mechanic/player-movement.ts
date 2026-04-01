@@ -99,6 +99,12 @@ export class PlayerMovement extends BaseModule {
         },
         radius: 32,
       },
+      emits: ['player:move'],
+      consumes: [
+        'input:touch:hold', 'input:touch:release', 'input:touch:position',
+        'input:face:move', 'input:hand:move', 'input:body:move',
+        'gameflow:resume', 'gameflow:pause',
+      ],
     };
   }
 
