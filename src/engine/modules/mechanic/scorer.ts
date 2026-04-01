@@ -72,7 +72,11 @@ export class Scorer extends BaseModule {
     };
   }
 
-  getDependencies() { return { requires: ['Collision'], optional: ['ComboSystem'] }; }
+  getDependencies() {
+    const hitEvent = (this.params.hitEvent as string) ?? 'collision:hit';
+    const requires = hitEvent.startsWith('collision:') ? ['Collision'] : [];
+    return { requires, optional: ['ComboSystem'] };
+  }
 
   getContracts(): import('@/engine/core/contracts').ModuleContracts {
     const hitEvent = (this.params.hitEvent as string) ?? 'collision:hit';
