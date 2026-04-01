@@ -109,9 +109,9 @@ describe('PlayerMovement', () => {
     expect(Math.abs(pm.getVelocityX())).toBeLessThanOrEqual(300);
   });
 
-  it('should support continuous event', () => {
+  it('should support continuous event (device tilt)', () => {
     const { engine, pm } = setup({
-      continuousEvent: 'input:face:position',
+      continuousEvent: 'input:device:tilt',
     });
 
     engine.loadConfig({
@@ -122,7 +122,8 @@ describe('PlayerMovement', () => {
       assets: {},
     });
 
-    engine.eventBus.emit('input:face:position', { x: 0.5 });
+    // tiltX = 0 → center (400), tiltX = 1 → right edge (800)
+    engine.eventBus.emit('input:device:tilt', { tiltX: 0 });
     expect(pm.getX()).toBe(400);
   });
 

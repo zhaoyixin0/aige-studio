@@ -117,8 +117,21 @@ export class PlayerMovement extends BaseModule {
     const defaultY = (this.params.defaultY as number) ?? 0.85;
     this.y = Math.round(defaultY * canvas.height);
 
-    // Follow mode: track absolute touch position (only needed in follow mode)
-    if (this.params.mode === 'follow') {
+    // Continuous position input (follow mode: lerp via touchTarget; velocity mode: direct x)
+    const continuousEvent = this.params.continuousEvent as string | undefined;
+    if (continuousEvent) {
+      this.on(continuousEvent, (data?: any) => {
+        if (!data) return;
+        const mapped = this.mapEventToCanvas(continuousEvent, data);
+        if (!mapped) return;
+        if (this.params.mode === 'follow') {
+          this.touchTarget = mapped;
+        } else {
+          this.x = mapped.x;
+        }
+      });
+    } else if (this.params.mode === 'follow') {
+      // Fallback: hardcoded touch listener when no continuousEvent configured
       this.on('input:touch:position', (data?: any) => {
         if (data && typeof data.x === 'number' && typeof data.y === 'number') {
           this.touchTarget = { x: data.x, y: data.y };
@@ -176,25 +189,6 @@ export class PlayerMovement extends BaseModule {
       });
     }
 
-    const continuousEvent = this.params.continuousEvent;
-    if (continuousEvent) {
-      this.on(continuousEvent, (data?: any) => {
-        if (!data) return;
-        const canvasWidth = this.engine?.getCanvas().width ?? 800;
-        if (typeof data.x === 'number') {
-          // Position-based input (face/hand: normalized 0-1)
-          this.x = data.x * canvasWidth;
-        } else if (typeof data.frequency === 'number') {
-          // Frequency-based input (audio: pitch maps to x position)
-          // Map 200-800 Hz range to canvas width
-          const normalized = Math.max(0, Math.min(1, (data.frequency - 200) / 600));
-          this.x = normalized * canvasWidth;
-        } else if (typeof data.tiltX === 'number') {
-          // Tilt-based input (device: -1 to 1)
-          this.x = (data.tiltX + 1) / 2 * canvasWidth;
-        }
-      });
-    }
   }
 
   update(dt: number): void {
@@ -263,6 +257,53 @@ export class PlayerMovement extends BaseModule {
       this.wasStopped = true;
       this.emit('player:stop', { x: this.x, y: this.y });
     }
+  }
+
+  private mapEventToCanvas(
+    eventName: string,
+    data: any,
+  ): { x: number; y: number } | null {
+    const canvas = this.engine?.getCanvas();
+    const cw = canvas?.width ?? 1080;
+    const ch = canvas?.height ?? 1920;
+
+    // Touch/Face/Hand/Body: emit canvas-space pixels — passthrough with clamping
+    if (eventName === 'input:touch:position' ||
+        eventName === 'input:face:move' ||
+        eventName === 'input:hand:move' ||
+        eventName === 'input:body:move') {
+      if (typeof data.x === 'number') {
+        return {
+          x: Math.max(0, Math.min(cw, data.x)),
+          y: typeof data.y === 'number' ? Math.max(0, Math.min(ch, data.y)) : this.y,
+        };
+      }
+      return null;
+    }
+
+    // Device tilt: -1 to 1 → canvas X
+    if (typeof data.tiltX === 'number') {
+      return {
+        x: Math.max(0, Math.min(cw, (data.tiltX + 1) / 2 * cw)),
+        y: this.y,
+      };
+    }
+
+    // Audio frequency: 200-800 Hz → canvas X
+    if (typeof data.frequency === 'number') {
+      const normalized = Math.max(0, Math.min(1, (data.frequency - 200) / 600));
+      return { x: normalized * cw, y: this.y };
+    }
+
+    // Unknown: if x present, treat as canvas pixels
+    if (typeof data.x === 'number') {
+      return {
+        x: Math.max(0, Math.min(cw, data.x)),
+        y: typeof data.y === 'number' ? Math.max(0, Math.min(ch, data.y)) : this.y,
+      };
+    }
+
+    return null;
   }
 
   private updateFollowMode(): void {
