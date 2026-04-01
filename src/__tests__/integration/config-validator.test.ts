@@ -109,9 +109,6 @@ describe('ConfigValidator — event fulfillment', () => {
     ]);
 
     const report = validateConfig(config, contracts);
-    // Event fulfillment issues are warnings, not errors
-    const warnings = warningsByCategory(report, 'event-chain-break');
-    // Dash may or may not have unfulfilled consumes depending on its contracts
     // Event fulfillment produces warnings, never errors
     expect(report.errors.filter(e => e.moduleId === 'dash_1')).toHaveLength(0);
   });
