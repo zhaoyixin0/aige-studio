@@ -289,32 +289,6 @@ Platform→Gravity bridges remain as BRIDGE_RULES in auto-wirer.ts (5 rules).
 
 Lesson: Batch 2/3 modules passed unit tests but failed in real games because the integration layer was not updated. Contract system prevents this by making wiring self-declaring.
 
-## CCG Multi-Model Override
-
-When ANY `/ccg:*` command calls Gemini for **analysis or review** (read-only tasks), do NOT use `codeagent-wrapper`. Instead call gemini CLI directly with the Policy Engine to enforce read-only mode:
-
-**Analysis commands (must use --policy):** plan, analyze, review, debug, optimize, spec-review, spec-research, spec-plan, spec-init, team-review, team-research, team-plan
-**Execution commands (use codeagent-wrapper):** execute, frontend, backend, feat, test, workflow, codex-exec, spec-impl
-
-```bash
-export SSL_CERT_FILE="/c/Program Files/Git/mingw64/etc/ssl/certs/ca-bundle.crt" && \
-export GEMINI_API_KEY=$(powershell -Command "[Environment]::GetEnvironmentVariable('GEMINI_API_KEY', 'User')") && \
-gemini -m gemini-3.1-pro-preview -y \
-  --policy "~/.claude/.ccg/policies/read-only-analyzer.toml" \
-  --include-directories "{{WORKDIR}}" \
-  -p "<ROLE_CONTENT + TASK prompt>"
-```
-
-**Why:** Gemini in YOLO mode ignores all prompt-level constraints (read-only, scope limits, output format). The Policy Engine is the only mechanism that actually blocks tool execution at the CLI level.
-
-**When to use codeagent-wrapper for Gemini:** Only for execution tasks where Gemini needs write access.
-
-**Codex:** Always use codeagent-wrapper with `export SSL_CERT_FILE="/c/Program Files/Git/mingw64/etc/ssl/certs/ca-bundle.crt"` — Codex naturally follows prompt constraints. Default model is `gpt-5` (configured in `~/.codex/config.toml`). Auth via `codex login --with-api-key`.
-
-**Policy file:** `~/.claude/.ccg/policies/read-only-analyzer.toml` — denies write_file, replace, shell, all MCP tools; allows only read tools.
-
-**SSL fix (Windows):** Codex CLI's Rust TLS needs `export SSL_CERT_FILE="/c/Program Files/Git/mingw64/etc/ssl/certs/ca-bundle.crt"`. Auth via `codex login --with-api-key` (not just env var).
-
 ## Known Issues / Next Steps
 - Gemini API key exposed in frontend (fine for internal use, need proxy for public)
 - Comprehensive mobile touch testing needed
