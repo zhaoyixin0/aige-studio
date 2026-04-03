@@ -215,6 +215,75 @@ describe('useConversationManager', () => {
     expect(useEditorStore.getState().suggestionChips).toEqual(mockChips);
   });
 
+  it('propagates parameterCard from agent result to assistant message', async () => {
+    const parameterCard = {
+      category: 'game_mechanics',
+      paramIds: ['spawn_rate', 'gravity'],
+      title: 'Adjust mechanics',
+    };
+
+    mockProcess.mockResolvedValue({
+      reply: 'Here is a parameter card',
+      config: undefined,
+      chips: undefined,
+      parameterCard,
+    });
+
+    const { result } = renderHook(() => useConversationManager());
+
+    await act(async () => {
+      await result.current.submitMessage('tune params');
+    });
+
+    const messages = useEditorStore.getState().chatMessages;
+    const assistantMsg = messages.find((m) => m.role === 'assistant');
+    expect(assistantMsg?.parameterCard).toEqual(parameterCard);
+  });
+
+  it('sets l1Controls on assistant message when agent returns config', async () => {
+    const mockConfig = {
+      version: '1.0.0',
+      meta: { name: 'Test Game', description: '', thumbnail: null, createdAt: '' },
+      canvas: { width: 1080, height: 1920 },
+      modules: [],
+      assets: {},
+    };
+
+    mockProcess.mockResolvedValue({
+      reply: 'Game created!',
+      config: mockConfig,
+      chips: undefined,
+    });
+
+    const { result } = renderHook(() => useConversationManager());
+
+    await act(async () => {
+      await result.current.submitMessage('create a game');
+    });
+
+    const messages = useEditorStore.getState().chatMessages;
+    const assistantMsg = messages.find((m) => m.role === 'assistant' && m.content === 'Game created!');
+    expect(assistantMsg?.l1Controls).toBe(true);
+  });
+
+  it('does not set l1Controls when agent returns no config', async () => {
+    mockProcess.mockResolvedValue({
+      reply: 'Just chatting',
+      config: undefined,
+      chips: undefined,
+    });
+
+    const { result } = renderHook(() => useConversationManager());
+
+    await act(async () => {
+      await result.current.submitMessage('hello');
+    });
+
+    const messages = useEditorStore.getState().chatMessages;
+    const assistantMsg = messages.find((m) => m.role === 'assistant');
+    expect(assistantMsg?.l1Controls).toBeUndefined();
+  });
+
   it('sets isLoading to false even on error', async () => {
     mockProcess.mockRejectedValue(new Error('network error'));
 

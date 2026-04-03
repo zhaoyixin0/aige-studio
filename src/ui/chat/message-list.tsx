@@ -1,6 +1,17 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { ChatMessage } from '@/store/editor-store';
+import type { GameConfig } from '@/engine/core';
+import { useEditorStore } from '@/store/editor-store';
+import { useGameStore } from '@/store/game-store';
+import { L1ExperienceCard } from './l1-experience-card';
+import { GuiParamCard } from './gui-param-card';
+import { GameTypeSelector } from './game-type-selector';
+import { applyL1Preset } from '@/engine/core/composite-mapper';
+import {
+  getLiveValuesForParams,
+  planUpdatesForParamChange,
+} from '@/data/registry-binding';
 
 /* ------------------------------------------------------------------ */
 /*  Props                                                              */
@@ -9,24 +20,73 @@ import type { ChatMessage } from '@/store/editor-store';
 interface MessageListProps {
   messages: readonly ChatMessage[];
   isLoading: boolean;
+  onSelectGameType?: (gameTypeId: string) => void;
 }
 
 /* ------------------------------------------------------------------ */
-/*  MessageList — pure rendering of ChatMessage[]                      */
+/*  MessageList                                                        */
 /* ------------------------------------------------------------------ */
 
-export function MessageList({ messages, isLoading }: MessageListProps) {
+export function MessageList({
+  messages,
+  isLoading,
+  onSelectGameType,
+}: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const l1State = useEditorStore((s) => s.l1State);
+  const setL1State = useEditorStore((s) => s.setL1State);
+  const config = useGameStore((s) => s.config);
+  const setConfig = useGameStore((s) => s.setConfig);
+  const batchUpdateParams = useGameStore((s) => s.batchUpdateParams);
 
   /* Auto-scroll to bottom on new messages */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  /* L1 experience change handler */
+  const handleL1Change = useCallback(
+    (partial: Record<string, string>) => {
+      setL1State(partial);
+      const next = { ...l1State, ...partial };
+      const gameType = config?.meta?.name?.toLowerCase() ?? 'catch';
+      const updates = applyL1Preset(
+        { difficulty: String(next.difficulty), pacing: String(next.pacing), emotion: String(next.emotion) },
+        gameType,
+      );
+      batchUpdateParams(updates);
+    },
+    [l1State, setL1State, config, batchUpdateParams],
+  );
+
+  /* Param change handler */
+  const handleParamChange = useCallback(
+    (paramId: string, value: unknown) => {
+      if (!config) return;
+      const plan = planUpdatesForParamChange(paramId, value, config);
+      if (plan.meta) {
+        setConfig({ ...config, meta: { ...config.meta, ...plan.meta } });
+      }
+      if (plan.params.length > 0) {
+        batchUpdateParams(plan.params);
+      }
+    },
+    [config, setConfig, batchUpdateParams],
+  );
+
   return (
     <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
       {messages.map((msg) => (
-        <MessageBubble key={msg.id} message={msg} />
+        <MessageBubble
+          key={msg.id}
+          message={msg}
+          l1State={l1State}
+          config={config}
+          onL1Change={handleL1Change}
+          onParamChange={handleParamChange}
+          onSelectGameType={onSelectGameType}
+        />
       ))}
 
       {isLoading && (
@@ -45,8 +105,32 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
 /*  MessageBubble                                                      */
 /* ------------------------------------------------------------------ */
 
-function MessageBubble({ message }: { message: ChatMessage }) {
+interface BubbleProps {
+  readonly message: ChatMessage;
+  readonly l1State: { difficulty: string; pacing: number | string; emotion: string };
+  readonly config: GameConfig | null;
+  readonly onL1Change: (partial: Record<string, string>) => void;
+  readonly onParamChange: (paramId: string, value: unknown) => void;
+  readonly onSelectGameType?: (gameTypeId: string) => void;
+}
+
+function MessageBubble({
+  message,
+  l1State,
+  config,
+  onL1Change,
+  onParamChange,
+  onSelectGameType,
+}: BubbleProps) {
   const isUser = message.role === 'user';
+
+  const liveValues = useMemo(
+    () =>
+      !isUser && message.parameterCard
+        ? getLiveValuesForParams(config, message.parameterCard.paramIds)
+        : {},
+    [isUser, message.parameterCard, config],
+  );
 
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -58,6 +142,35 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         }`}
       >
         <p className="whitespace-pre-wrap break-words">{message.content}</p>
+
+        {!isUser && message.l1Controls && (
+          <L1ExperienceCard
+            difficulty={String(l1State.difficulty)}
+            pacing={String(l1State.pacing)}
+            emotion={l1State.emotion}
+            onDifficultyChange={(v) => onL1Change({ difficulty: v })}
+            onPacingChange={(v) => onL1Change({ pacing: v })}
+            onEmotionChange={(v) => onL1Change({ emotion: v })}
+          />
+        )}
+
+        {!isUser && message.parameterCard && (
+          <GuiParamCard
+            category={message.parameterCard.category}
+            paramIds={message.parameterCard.paramIds}
+            title={message.parameterCard.title}
+            isActive={true}
+            values={liveValues}
+            onParamChange={onParamChange}
+          />
+        )}
+
+        {!isUser && message.gameTypeOptions && (
+          <GameTypeSelector
+            options={message.gameTypeOptions}
+            onSelect={(id) => onSelectGameType?.(id)}
+          />
+        )}
       </div>
     </div>
   );

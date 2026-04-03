@@ -125,6 +125,8 @@ export function useConversationManager(): ConversationManagerResult {
           role: 'assistant',
           content: result.reply,
           timestamp: Date.now(),
+          ...(result.parameterCard ? { parameterCard: result.parameterCard } : {}),
+          ...(result.config ? { l1Controls: true } : {}),
         });
 
         // Apply new config if provided (with validation + auto-fixes)

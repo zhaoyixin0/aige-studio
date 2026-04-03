@@ -2,6 +2,7 @@ import { memo, useCallback, useState } from 'react';
 import type { ParameterMeta, ParamControlType } from '@/data/parameter-registry';
 import { SegmentedControl } from '@/ui/controls/segmented-control';
 import { StepperControl } from '@/ui/controls/stepper-control';
+import { VisualStyleSelector } from './visual-style-selector';
 
 const CATEGORY_LABELS: Record<string, string> = {
   abstract: '抽象层',
@@ -162,7 +163,10 @@ function InlineControl({
           label={param.name}
         />
       );
-    case 'asset_picker':
+    case 'asset_picker': {
+      const opts = (param.options ?? []).map((id) => ({ id, name: id }));
+      return <VisualStyleSelector options={opts} value={String(value)} onChange={onChange} />;
+    }
     case 'input_field':
       return <span className="text-xs text-gray-400 italic">—</span>;
     default:

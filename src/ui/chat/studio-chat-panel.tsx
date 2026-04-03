@@ -12,6 +12,9 @@ import { SuggestionChips } from './suggestion-chips';
 
 const selectChatMessages = (s: { chatMessages: ChatMessage[] }) => s.chatMessages;
 const selectIsChatLoading = (s: { isChatLoading: boolean }) => s.isChatLoading;
+const selectSuggestionChips = (s: { suggestionChips: Chip[] }) => s.suggestionChips;
+const selectAddChatMessage = (s: { addChatMessage: (msg: ChatMessage) => void }) =>
+  s.addChatMessage;
 
 /* ------------------------------------------------------------------ */
 /*  StudioChatPanel                                                    */
@@ -20,6 +23,8 @@ const selectIsChatLoading = (s: { isChatLoading: boolean }) => s.isChatLoading;
 export function StudioChatPanel() {
   const chatMessages = useEditorStore(selectChatMessages);
   const isChatLoading = useEditorStore(selectIsChatLoading);
+  const chips = useEditorStore(selectSuggestionChips);
+  const addChatMessage = useEditorStore(selectAddChatMessage);
 
   const { submitMessage } = useConversationManager();
 
@@ -62,10 +67,25 @@ export function StudioChatPanel() {
         void submitMessage(`执行操作: ${chip.label} [${chip.action}]`);
         return;
       }
+      // For game_type chips, generate a GameTypeSelector message
+      if (chip.type === 'game_type') {
+        const gameTypeOptions = chips
+          .filter((c) => c.type === 'game_type')
+          .map((c) => ({ id: c.id, name: c.label, emoji: c.emoji }));
+
+        addChatMessage({
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: '请选择游戏类型：',
+          gameTypeOptions,
+          timestamp: Date.now(),
+        });
+        return;
+      }
       const text = chip.emoji ? `${chip.emoji} ${chip.label}` : chip.label;
       void submitMessage(text);
     },
-    [isChatLoading, submitMessage],
+    [isChatLoading, submitMessage, chips, addChatMessage],
   );
 
   /* ---------------------------------------------------------------- */

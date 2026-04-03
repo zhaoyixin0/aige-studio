@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { LandingPage } from '@/ui/landing/landing-page.tsx';
 import { StudioChatPanel } from '@/ui/chat/studio-chat-panel.tsx';
 import { PreviewCanvas } from '@/ui/preview/preview-canvas.tsx';
@@ -6,6 +6,11 @@ import { EditorPanel } from '@/ui/editor/editor-panel.tsx';
 import { BoardModePanel } from '@/ui/parameters/board-mode-panel.tsx';
 import { useEngine, EngineContext } from '@/app/hooks/use-engine.ts';
 import { useEditorStore } from '@/store/editor-store.ts';
+import { useGameStore } from '@/store/game-store.ts';
+import {
+  extractRegistryValueMap,
+  planUpdatesForParamChange,
+} from '@/data/registry-binding.ts';
 import { FullscreenMode } from '@/ui/preview/fullscreen-mode.tsx';
 import type { PreviewMode } from '@/store/editor-store.ts';
 import { PanelRight, PanelRightClose } from 'lucide-react';
@@ -18,9 +23,6 @@ const selectToggleEditor = (s: { toggleEditor: () => void }) => s.toggleEditor;
 const selectBoardModeOpen = (s: { boardModeOpen: boolean }) => s.boardModeOpen;
 const selectSetBoardModeOpen = (s: { setBoardModeOpen: (open: boolean) => void }) =>
   s.setBoardModeOpen;
-
-/** Placeholder param change handler until wired to game store */
-const NOOP_PARAM_CHANGE = (_paramId: string, _value: unknown) => {};
 
 export function MainLayout() {
   const engine = useEngine();
@@ -35,6 +37,22 @@ export function MainLayout() {
     onMouseDown: handleMouseDown,
     onTouchStart: handleTouchStart,
   } = useResizeDivider(480);
+
+  // Board Mode: live config bindings
+  const config = useGameStore((s) => s.config);
+  const batchUpdateParams = useGameStore((s) => s.batchUpdateParams);
+  const setConfig = useGameStore((s) => s.setConfig);
+  const gameType = config?.meta?.name?.toLowerCase() ?? 'catch';
+  const values = useMemo(() => extractRegistryValueMap(config), [config]);
+  const handleParamChange = useCallback(
+    (paramId: string, value: unknown) => {
+      if (!config) return;
+      const plan = planUpdatesForParamChange(paramId, value, config);
+      if (plan.meta) setConfig({ ...config, meta: { ...config.meta, ...plan.meta } });
+      if (plan.params.length > 0) batchUpdateParams(plan.params);
+    },
+    [config, setConfig, batchUpdateParams],
+  );
 
   const handleBoardModeClose = useCallback(
     () => setBoardModeOpen(false),
@@ -66,9 +84,9 @@ export function MainLayout() {
                 >
                   {boardModeOpen && (
                     <BoardModePanel
-                      gameType="catch"
-                      values={new Map()}
-                      onParamChange={NOOP_PARAM_CHANGE}
+                      gameType={gameType}
+                      values={values}
+                      onParamChange={handleParamChange}
                       onClose={handleBoardModeClose}
                     />
                   )}

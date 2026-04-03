@@ -17,6 +17,7 @@ export interface ChatMessage {
   wizardChoices?: Array<{ id: string; label: string; emoji?: string; description?: string }>;
   wizardStep?: string;
   enhancementSuggestions?: Array<{ id: string; label: string; emoji: string; moduleType?: string; action?: string }>;
+  gameTypeOptions?: Array<{ id: string; name: string; emoji?: string }>;
   parameterCard?: { category: string; paramIds: string[]; title?: string };
   l1Controls?: boolean;
   timestamp: number;
@@ -35,16 +36,16 @@ export interface Chip {
 }
 
 export const DEFAULT_CHIPS: Chip[] = [
-  { id: 'catch', label: '接住游戏', emoji: '🎯' },
-  { id: 'shooting', label: '射击游戏', emoji: '🔫' },
-  { id: 'dodge', label: '躲避游戏', emoji: '💨' },
-  { id: 'quiz', label: '答题游戏', emoji: '❓' },
-  { id: 'runner', label: '跑酷游戏', emoji: '🏃' },
-  { id: 'tap', label: '点击游戏', emoji: '👆' },
-  { id: 'rhythm', label: '节奏游戏', emoji: '🎵' },
-  { id: 'platformer', label: '平台跳跃', emoji: '🎮' },
-  { id: 'random-wheel', label: '幸运转盘', emoji: '🎰' },
-  { id: 'expression', label: '表情挑战', emoji: '😊' },
+  { id: 'catch', label: '接住游戏', emoji: '🎯', type: 'game_type' as const },
+  { id: 'shooting', label: '射击游戏', emoji: '🔫', type: 'game_type' as const },
+  { id: 'dodge', label: '躲避游戏', emoji: '💨', type: 'game_type' as const },
+  { id: 'quiz', label: '答题游戏', emoji: '❓', type: 'game_type' as const },
+  { id: 'runner', label: '跑酷游戏', emoji: '🏃', type: 'game_type' as const },
+  { id: 'tap', label: '点击游戏', emoji: '👆', type: 'game_type' as const },
+  { id: 'rhythm', label: '节奏游戏', emoji: '🎵', type: 'game_type' as const },
+  { id: 'platformer', label: '平台跳跃', emoji: '🎮', type: 'game_type' as const },
+  { id: 'random-wheel', label: '幸运转盘', emoji: '🎰', type: 'game_type' as const },
+  { id: 'expression', label: '表情挑战', emoji: '😊', type: 'game_type' as const },
 ];
 
 interface EditorStore {

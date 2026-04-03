@@ -2,6 +2,9 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useEditorStore } from '@/store/editor-store';
 
+// Capture props passed to BoardModePanel
+let capturedBoardModeProps: Record<string, unknown> = {};
+
 // Mock all heavy child components to isolate MainLayout behavior
 vi.mock('@/ui/landing/landing-page', () => ({
   LandingPage: () => <div data-testid="landing-page">Landing</div>,
@@ -19,13 +22,16 @@ vi.mock('@/ui/preview/fullscreen-mode', () => ({
   FullscreenMode: () => <div data-testid="fullscreen-mode">Fullscreen</div>,
 }));
 vi.mock('@/ui/parameters/board-mode-panel', () => ({
-  BoardModePanel: ({ onClose }: { onClose: () => void }) => (
-    <div data-testid="board-mode-panel">
-      <button data-testid="board-mode-close" onClick={onClose}>
-        Close
-      </button>
-    </div>
-  ),
+  BoardModePanel: (props: Record<string, unknown>) => {
+    capturedBoardModeProps = props;
+    return (
+      <div data-testid="board-mode-panel">
+        <button data-testid="board-mode-close" onClick={props.onClose as () => void}>
+          Close
+        </button>
+      </div>
+    );
+  },
 }));
 vi.mock('@/app/hooks/use-engine', () => ({
   useEngine: () => ({
@@ -46,6 +52,8 @@ vi.mock('@/app/hooks/use-resize-divider', () => ({
 
 // Import MainLayout after mocks are set up
 import { MainLayout } from '../main-layout';
+import { useGameStore } from '@/store/game-store';
+import type { GameConfig } from '@/engine/core/types';
 
 function setStoreState(partial: Record<string, unknown>) {
   useEditorStore.setState(partial);
@@ -114,5 +122,98 @@ describe('MainLayout — Board Mode integration', () => {
   it('renders StudioChatPanel when boardModeOpen is false', () => {
     render(<MainLayout />);
     expect(screen.getByTestId('studio-chat-panel')).toBeInTheDocument();
+  });
+
+  // --- I5: Board Mode wired to live config ---
+
+  it('passes game type from config (not hardcoded "catch")', () => {
+    const shootingConfig: GameConfig = {
+      version: '1.0',
+      meta: {
+        name: 'Shooting',
+        description: 'A shooting game',
+        thumbnail: null,
+        createdAt: '2026-01-01',
+      },
+      canvas: { width: 1080, height: 1920 },
+      modules: [],
+      assets: {},
+    };
+    useGameStore.setState({ config: shootingConfig });
+    setStoreState({ boardModeOpen: true });
+    render(<MainLayout />);
+
+    expect(capturedBoardModeProps.gameType).toBe('shooting');
+  });
+
+  it('falls back to "catch" when config is null', () => {
+    useGameStore.setState({ config: null });
+    setStoreState({ boardModeOpen: true });
+    render(<MainLayout />);
+
+    expect(capturedBoardModeProps.gameType).toBe('catch');
+  });
+
+  it('passes live values derived from config (not empty Map)', () => {
+    const config: GameConfig = {
+      version: '1.0',
+      meta: {
+        name: 'Catch',
+        description: 'A catch game',
+        thumbnail: null,
+        createdAt: '2026-01-01',
+        artStyle: 'pixel',
+      },
+      canvas: { width: 1080, height: 1920 },
+      modules: [
+        { id: 'scorer_1', type: 'Scorer', enabled: true, params: { perHit: 10 } },
+      ],
+      assets: {},
+    };
+    useGameStore.setState({ config });
+    setStoreState({ boardModeOpen: true });
+    render(<MainLayout />);
+
+    const values = capturedBoardModeProps.values as Map<string, unknown>;
+    expect(values).toBeInstanceOf(Map);
+    // artStyle is mapped via visual_audio_003 → meta.artStyle
+    expect(values.get('visual_audio_003')).toBe('pixel');
+    // Scorer perHit is mapped via game_mechanics_009 → Scorer.perHit
+    expect(values.get('game_mechanics_009')).toBe(10);
+  });
+
+  it('passes a working onParamChange that updates the store', () => {
+    const config: GameConfig = {
+      version: '1.0',
+      meta: {
+        name: 'Catch',
+        description: 'A catch game',
+        thumbnail: null,
+        createdAt: '2026-01-01',
+        artStyle: 'cartoon',
+      },
+      canvas: { width: 1080, height: 1920 },
+      modules: [
+        { id: 'scorer_1', type: 'Scorer', enabled: true, params: { perHit: 10 } },
+      ],
+      assets: {},
+    };
+    useGameStore.setState({ config });
+    setStoreState({ boardModeOpen: true });
+    render(<MainLayout />);
+
+    const handleParamChange = capturedBoardModeProps.onParamChange as (
+      paramId: string,
+      value: unknown,
+    ) => void;
+
+    // Change artStyle via meta mapping
+    handleParamChange('visual_audio_003', 'pixel');
+    expect(useGameStore.getState().config?.meta.artStyle).toBe('pixel');
+
+    // Change scorer perHit via module param mapping
+    handleParamChange('game_mechanics_009', 20);
+    const scorer = useGameStore.getState().config?.modules.find((m) => m.type === 'Scorer');
+    expect(scorer?.params.perHit).toBe(20);
   });
 });

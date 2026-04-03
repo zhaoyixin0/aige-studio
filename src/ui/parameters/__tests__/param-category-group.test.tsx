@@ -210,3 +210,78 @@ describe('ParamCategoryGroup — React.memo', () => {
     ).toBe(false);
   });
 });
+
+describe('ParamCategoryGroup — asset_picker renders VisualStyleSelector', () => {
+  it('renders a radiogroup for asset_picker control type', () => {
+    const assetParam = makeMockParam({
+      id: 'ap_001',
+      name: '视觉风格',
+      controlType: 'asset_picker',
+      options: ['classic', 'cyber', 'fresh'],
+      defaultValue: 'classic',
+    });
+
+    render(
+      <ParamCategoryGroup
+        category="visual_audio"
+        params={[assetParam]}
+        values={new Map([['ap_001', 'classic']])}
+        onParamChange={vi.fn()}
+      />,
+    );
+
+    // VisualStyleSelector renders a radiogroup
+    expect(screen.getByRole('radiogroup')).toBeTruthy();
+    const radios = screen.getAllByRole('radio');
+    expect(radios).toHaveLength(3);
+  });
+
+  it('calls onParamChange when an asset_picker option is selected', () => {
+    const onChange = vi.fn();
+    const assetParam = makeMockParam({
+      id: 'ap_001',
+      name: '视觉风格',
+      controlType: 'asset_picker',
+      options: ['classic', 'cyber', 'fresh'],
+      defaultValue: 'classic',
+    });
+
+    render(
+      <ParamCategoryGroup
+        category="visual_audio"
+        params={[assetParam]}
+        values={new Map([['ap_001', 'classic']])}
+        onParamChange={onChange}
+      />,
+    );
+
+    // Click the "cyber" option
+    fireEvent.click(screen.getByText('cyber'));
+    expect(onChange).toHaveBeenCalledWith('ap_001', 'cyber');
+  });
+
+  it('shows selected state for the current value', () => {
+    const assetParam = makeMockParam({
+      id: 'ap_001',
+      name: '视觉风格',
+      controlType: 'asset_picker',
+      options: ['classic', 'cyber', 'fresh'],
+      defaultValue: 'classic',
+    });
+
+    render(
+      <ParamCategoryGroup
+        category="visual_audio"
+        params={[assetParam]}
+        values={new Map([['ap_001', 'cyber']])}
+        onParamChange={vi.fn()}
+      />,
+    );
+
+    const radios = screen.getAllByRole('radio');
+    // cyber is index 1
+    expect(radios[1].getAttribute('aria-checked')).toBe('true');
+    expect(radios[0].getAttribute('aria-checked')).toBe('false');
+    expect(radios[2].getAttribute('aria-checked')).toBe('false');
+  });
+});
