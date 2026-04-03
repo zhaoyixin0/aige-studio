@@ -248,13 +248,14 @@ SchemaRenderer 控件：range, number, boolean, select, color, string, object, r
 
 ## 7. 实施需求清单
 
-### Phase 1 — 数据基础（P0）
+### Phase 1 — 数据基础 + 引擎桥接（P0）
 
 #### 7.1 参数注册表（Parameter Registry）
 - `src/data/parameter-registry.ts` — 229 个参数元数据
 - 数据结构见第 9 节
 - 从 Excel 导入：id, name, layer, category, mvp, exposure, controlType, gameTypes, default, dependencies
 - API：`getParamsForGameType(type)`, `getParamsByLayer(layer)`, `getParamsByCategory(cat)`
+- Excel → TS 构建脚本：定义稳定 ID 格式（`moduleId.paramName`）、i18n placeholder
 
 #### 7.2 L1 组合映射引擎
 - `src/engine/core/composite-mapper.ts`
@@ -266,24 +267,53 @@ SchemaRenderer 控件：range, number, boolean, select, color, string, object, r
 - `src/engine/core/dependency-resolver.ts`
 - 解析 Excel 依赖关系，计算参数可见性/可用性
 - API：`resolveVisibility(currentValues) → Map<paramId, {visible, enabled}>`
+- 使用 Kahn 算法拓扑排序 + 环检测，CI 验证 DAG 无环
+
+#### 7.3a Engine-UI 桥接（EngineController）⚠️ 审查新增
+- `src/app/hooks/use-engine-bridge.ts` — 订阅 `game-store.configVersion`，debounce 后调用 `ConfigLoader.applyChanges()`
+- **关键**：当前 `updateModuleParam()` 只改 Zustand state，不刷新 Engine。此 hook 补齐 Store → Engine 实时刷新链路
+- 用 RAF/microtask 队列合并连续 slider 更新，避免多次 rewire
+- Phase 2 的 L1 控件和 ParamCard 均依赖此桥接
+
+#### 7.3b 批量参数更新 API ⚠️ 审查新增
+- 在 `game-store.ts` 新增 `batchUpdateParams(updates: Array<{moduleId: string; changes: Record<string, unknown>}>)`
+- L1 → CompositeMapper → `batchUpdateParams()` → EngineController → `applyChanges()`
+- 单次 configVersion 递增，避免连续触发多次 Engine 刷新
 
 ### Phase 2 — Chat 参数交互（P0）
+
+> **前置条件**：Phase 1 的 EngineController (7.3a) 和 batchUpdateParams (7.3b) 必须完成
 
 #### 7.4 Chat 内嵌 L1 控件
 - 升级 `studio-chat-panel.tsx` 和消息渲染
 - 游戏生成后，在 Chat 系统消息中内嵌 L1 Game Experience 控件
-- 控件变更 → CompositeMapper → 批量更新参数 → 引擎实时刷新
+- 控件变更 → CompositeMapper → `batchUpdateParams()` → EngineController → 引擎实时刷新
+- ⚠️ 扩展 `editor-store.ts` 的 `ChatMessage` 类型，新增 `l1Controls?: boolean` 和 `parameterCard?` 字段
 
 #### 7.5 GUI 参数卡片升级
 - 大幅升级 `param-card.tsx`
 - 支持内嵌控件：Dropdown/Select, Slider, Toggle, Segmented, Stepper
 - 支持按分类分组显示参数
 - 卡片标题对应 L2 分类名（游戏机制、游戏对象等）
+- ⚠️ Slider 连续输入需 debounce（RAF 级别），防止大量 re-render
+- ⚠️ 旧卡片全局状态绑定 — 非最新消息中的卡片自动折叠为只读摘要
+
+#### 7.5a Chat 虚拟化 ⚠️ 审查新增
+- 引入 `react-virtuoso` 对 Chat 消息列表做虚拟化
+- 旧参数卡片 tombstone 化（折叠为单行摘要）
+- `React.memo` 包裹 ParamCard/L1ExperienceCard
+
+#### 7.5b StudioChatPanel 拆分 ⚠️ 审查新增
+- 提取 `MessageList` 组件（纯渲染：文本/L1 卡片/参数卡片/游戏类型选择器）
+- 提取 `useConversationManager` hook（LLM 调用/资产编排/结果处理）
+- StudioChatPanel 保持为容器组件，避免变成 god component
 
 #### 7.6 NLU 参数识别
 - 扩展 ConversationAgent 的 tool_use 能力
 - 新增 tool：`push_parameter_card(category, paramIds[])` — 在 Chat 中推送参数卡片
 - Agent 根据用户自然语言识别关联参数，调用 tool 推送卡片
+- ⚠️ System prompt 注入 Registry ID 列表 + 同义词，防止 LLM 生成不存在的 paramId
+- ⚠️ 参数卡片为 typed payload，禁止任意 HTML，防 XSS
 
 #### 7.7 Suggestion Chips 升级
 - 从游戏类型推荐 → 参数级建议
@@ -538,9 +568,9 @@ interface L1State {
 | `src/data/parameter-registry.ts` | 229 个参数元数据 | 1 |
 | `src/data/l1-mapping-rules.ts` | L1 组合映射规则表 | 1 |
 | `src/engine/core/composite-mapper.ts` | L1 映射引擎 | 1 |
-| `src/engine/core/dependency-resolver.ts` | 参数依赖解析器 | 1 |
+| `src/engine/core/dependency-resolver.ts` | 参数依赖解析器（含 DAG 环检测） | 1 |
 | `src/engine/modules/mechanic/spin-wheel.ts` | 幸运转盘模块 | 1 |
-| `src/store/parameter-store.ts` | 参数层级状态管理 | 1 |
+| `src/app/hooks/use-engine-bridge.ts` | Store→Engine 实时刷新桥接 ⚠️ | 1 |
 
 **UI 层：**
 
@@ -608,8 +638,8 @@ interface L1State {
 | `src/ui/chat/suggestion-chips.tsx` | 扩展 Chip 类型 | 2 |
 | `src/ui/chat/param-card.tsx` | 升级为完整参数编辑器 | 2 |
 | `src/ui/editor/schema-renderer.tsx` | 增加 segmented/stepper/asset_picker | 3 |
-| `src/store/editor-store.ts` | 增加 boardModeOpen, l1State 等 | 2 |
-| `src/store/game-store.ts` | 增加 batchUpdateParams、L1 状态 | 1 |
+| `src/store/editor-store.ts` | 增加 boardModeOpen, l1State, ChatMessage 扩展 | 2 |
+| `src/store/game-store.ts` | 增加 batchUpdateParams（不新增 L1 状态，L1State 放 editor-store）⚠️ | 1 |
 | `src/agent/conversation-agent.ts` | 新增 push_parameter_card tool | 2 |
 | `src/agent/conversation-defs.ts` | 定义新 tool schema | 2 |
 | `src/engine/core/types.ts` | 扩展 SchemaField 类型 | 1 |
@@ -660,3 +690,54 @@ interface L1State {
 ### 12.5 SESSION_ID
 
 - CODEX_SESSION: `019d508e-94b8-7d00-9e97-d8547f5706c2`
+
+---
+
+## 13. 双模型交叉审查发现（2026-04-02）
+
+> 审查方式：Codex (gpt-5) + Gemini (gemini-3.1-pro-preview + Policy Engine read-only) 并行审查计划 + 现有代码
+> Gemini 前两次通过 codeagent-wrapper 调用失败（进入实施模式/做代码概览），第三次直接调用 `gemini --policy` 成功
+
+### 13.1 Critical — 已补入计划
+
+| # | Source | 问题 | 修复 | 补入位置 |
+|---|--------|------|------|---------|
+| C1 | Codex+Gemini | Store→Engine 无实时刷新链路，L1/ParamCard 无法实现实时预览 | 新建 EngineController hook (use-engine-bridge.ts) | §7.3a |
+| C2 | Codex | `batchUpdateParams` 不存在，CompositeMapper 管线终点缺失 | 在 game-store.ts 实现 batchUpdateParams | §7.3b |
+| C3 | Codex | `push_parameter_card` 工具及 ChatMessage 类型均不存在 | 扩展 conversation-defs、agent handler、ChatMessage | §7.4, §7.6 |
+| C4 | Gemini | `parameter-store.ts` 造成双数据源 | 不创建 parameter-store.ts，L1State 放 editor-store | §11 文件表 |
+
+### 13.2 Warning — 已补入计划
+
+| # | Source | 问题 | 修复 | 补入位置 |
+|---|--------|------|------|---------|
+| W1 | Gemini | StudioChatPanel 将变成 god component | 拆分 MessageList + useConversationManager | §7.5b |
+| W2 | Codex+Gemini | Slider 连续更新触发大量 re-render | debounce + react-virtuoso + React.memo | §7.5, §7.5a |
+| W3 | Codex+Gemini | 旧 ParamCard 状态过时 | 全局状态绑定 + 旧卡片折叠为只读摘要 | §7.5 |
+| W4 | Codex | Registry-Schema 漂移无 CI 防护 | CI 测试验证一致性 | §7.1 |
+| W5 | Codex | LLM paramId 无校验 | system prompt 注入 Registry ID + 同义词 | §7.6 |
+| W6 | Codex | Phase 2 依赖 Engine bridge 但 Phase 1 未列出 | EngineController 提升为 Phase 1 P0 | §7.3a |
+| W7 | Codex | 60+ 新 schema 字段缺回归测试 | 每个扩展模块添加 getSchema() 快照测试 | §10.3 |
+
+### 13.3 Info — 待定/可选
+
+- **Undo/Redo**: 为参数编辑添加变更历史（Zustand middleware），方便探索性调参
+- **L1State 持久化**: 持久化到 localStorage 或项目保存文件
+- **Excel → TS 导入**: 定义构建脚本，稳定 ID 格式 + i18n placeholder
+- **Mobile 响应式**: main-layout 需 Tailwind responsive breakpoints + Bottom Sheet Drawer
+- **Accessibility**: Chat 内嵌控件需 ARIA roles、键盘导航、焦点顺序
+- **Agent 内容安全**: 参数卡片限制为 typed payload，禁止任意 HTML
+
+### 13.4 Passed Checks（双模型共识）
+
+- ConfigLoader.applyChanges() 支持增量批量更新
+- BaseModule 默认值合并安全，新增参数不破坏现有模块
+- SchemaRenderer 基于 Radix UI，可扩展新控件
+- ConversationAgent tool_use 架构可扩展
+- ContractRegistry 与新 schema 参数独立，不冲突
+- Option A (Minimal Overlay) 方向正确
+
+### 13.5 审查 SESSION_ID
+
+- CODEX_SESSION: `019d5129-19e5-7f92-ae17-802c2890f26b`
+- GEMINI_SESSION: `9050df19-2ab9-4ae3-ba13-7b527a1cf9e1`
