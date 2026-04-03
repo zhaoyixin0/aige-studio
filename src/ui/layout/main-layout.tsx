@@ -1,7 +1,9 @@
+import { useCallback } from 'react';
 import { LandingPage } from '@/ui/landing/landing-page.tsx';
 import { StudioChatPanel } from '@/ui/chat/studio-chat-panel.tsx';
 import { PreviewCanvas } from '@/ui/preview/preview-canvas.tsx';
 import { EditorPanel } from '@/ui/editor/editor-panel.tsx';
+import { BoardModePanel } from '@/ui/parameters/board-mode-panel.tsx';
 import { useEngine, EngineContext } from '@/app/hooks/use-engine.ts';
 import { useEditorStore } from '@/store/editor-store.ts';
 import { FullscreenMode } from '@/ui/preview/fullscreen-mode.tsx';
@@ -13,6 +15,12 @@ const selectPreviewMode = (s: { previewMode: PreviewMode }) => s.previewMode;
 const selectLayoutPhase = (s: { layoutPhase: 'landing' | 'studio' }) => s.layoutPhase;
 const selectEditorExpanded = (s: { editorExpanded: boolean }) => s.editorExpanded;
 const selectToggleEditor = (s: { toggleEditor: () => void }) => s.toggleEditor;
+const selectBoardModeOpen = (s: { boardModeOpen: boolean }) => s.boardModeOpen;
+const selectSetBoardModeOpen = (s: { setBoardModeOpen: (open: boolean) => void }) =>
+  s.setBoardModeOpen;
+
+/** Placeholder param change handler until wired to game store */
+const NOOP_PARAM_CHANGE = (_paramId: string, _value: unknown) => {};
 
 export function MainLayout() {
   const engine = useEngine();
@@ -20,7 +28,14 @@ export function MainLayout() {
   const layoutPhase = useEditorStore(selectLayoutPhase);
   const editorExpanded = useEditorStore(selectEditorExpanded);
   const toggleEditor = useEditorStore(selectToggleEditor);
+  const boardModeOpen = useEditorStore(selectBoardModeOpen);
+  const setBoardModeOpen = useEditorStore(selectSetBoardModeOpen);
   const { width: chatWidth, onMouseDown: handleMouseDown } = useResizeDivider(480);
+
+  const handleBoardModeClose = useCallback(
+    () => setBoardModeOpen(false),
+    [setBoardModeOpen],
+  );
 
   return (
     <EngineContext.Provider value={engine}>
@@ -28,14 +43,32 @@ export function MainLayout() {
         <LandingPage />
       ) : (
         <div className="h-screen w-screen flex bg-gray-950 text-white overflow-hidden">
-          {/* Left: Chat Panel */}
+          {/* Left: Chat Panel (with Board Mode slide-over) */}
           {previewMode === 'edit' && (
             <>
               <div
-                className="shrink-0 border-r border-white/5 bg-gray-950/50 backdrop-blur-xl"
+                className="shrink-0 border-r border-white/5 bg-gray-950/50 backdrop-blur-xl relative overflow-hidden"
                 style={{ width: chatWidth }}
               >
                 <StudioChatPanel />
+
+                {/* Board Mode slide-over overlay */}
+                <div
+                  data-testid="board-mode-container"
+                  className={[
+                    'absolute inset-0 z-30 transition-transform duration-300 ease-in-out',
+                    boardModeOpen ? 'translate-x-0' : '-translate-x-full',
+                  ].join(' ')}
+                >
+                  {boardModeOpen && (
+                    <BoardModePanel
+                      gameType="catch"
+                      values={new Map()}
+                      onParamChange={NOOP_PARAM_CHANGE}
+                      onClose={handleBoardModeClose}
+                    />
+                  )}
+                </div>
               </div>
 
               {/* Resizable Divider */}
@@ -63,7 +96,7 @@ export function MainLayout() {
             )}
           </div>
 
-          {/* Right: Editor Panel (collapsible) */}
+          {/* Right: Editor Panel (collapsed by default) */}
           {previewMode === 'edit' && editorExpanded && (
             <div className="w-80 shrink-0 border-l border-white/5">
               <EditorPanel />
