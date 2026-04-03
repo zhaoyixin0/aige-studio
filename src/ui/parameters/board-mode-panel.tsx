@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useDeferredValue, useMemo } from 'react';
 import {
   getParamsForGameType,
   type ParameterMeta,
@@ -34,10 +34,13 @@ export function BoardModePanel({
     [gameType],
   );
 
+  // Defer visibility recalculation to keep slider input responsive
+  const deferredValues = useDeferredValue(values);
+
   // Resolve visibility based on DAG dependencies
   const visibility = useMemo(
-    () => resolveVisibility(applicableParams, values),
-    [applicableParams, values],
+    () => resolveVisibility(applicableParams, deferredValues),
+    [applicableParams, deferredValues],
   );
 
   // Filter: only directly exposed + visible params (not hidden exposure, not DAG-hidden)

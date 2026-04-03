@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 
 export interface AssetItem {
   readonly id: string;
@@ -14,6 +14,8 @@ export interface AssetPickerGridProps {
 }
 
 export function AssetPickerGrid({ assets, value, onChange, label }: AssetPickerGridProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       const ids = assets.map((a) => a.id);
@@ -32,13 +34,17 @@ export function AssetPickerGrid({ assets, value, onChange, label }: AssetPickerG
 
       if (nextIndex !== null && nextIndex !== currentIndex) {
         onChange(ids[nextIndex]);
+        requestAnimationFrame(() => {
+          const radios = containerRef.current?.querySelectorAll<HTMLElement>('[role="radio"]');
+          radios?.[nextIndex]?.focus();
+        });
       }
     },
     [assets, value, onChange],
   );
 
   return (
-    <div role="radiogroup" aria-label={label} className="grid grid-cols-3 gap-2" onKeyDown={handleKeyDown}>
+    <div ref={containerRef} role="radiogroup" aria-label={label} className="grid grid-cols-3 gap-2" onKeyDown={handleKeyDown}>
       {assets.map((asset) => {
         const isSelected = asset.id === value;
         const displayLabel = asset.label ?? asset.id;

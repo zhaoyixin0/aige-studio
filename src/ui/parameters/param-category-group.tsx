@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import type { ParameterMeta, ParamControlType } from '@/data/parameter-registry';
 import { SegmentedControl } from '@/ui/controls/segmented-control';
 import { StepperControl } from '@/ui/controls/stepper-control';
@@ -19,7 +19,27 @@ export interface ParamCategoryGroupProps {
   readonly onParamChange: (paramId: string, value: unknown) => void;
 }
 
-export function ParamCategoryGroup({
+/** Custom areEqual: only re-render when this group's specific param values change */
+function areEqual(
+  prev: ParamCategoryGroupProps,
+  next: ParamCategoryGroupProps,
+): boolean {
+  if (prev.category !== next.category) return false;
+  if (prev.onParamChange !== next.onParamChange) return false;
+  if (prev.params !== next.params) {
+    if (prev.params.length !== next.params.length) return false;
+    for (let i = 0; i < prev.params.length; i++) {
+      if (prev.params[i] !== next.params[i]) return false;
+    }
+  }
+  // Only compare values that belong to THIS group's params
+  for (const p of next.params) {
+    if (prev.values.get(p.id) !== next.values.get(p.id)) return false;
+  }
+  return true;
+}
+
+function ParamCategoryGroupInner({
   category,
   params,
   values,
@@ -58,6 +78,8 @@ export function ParamCategoryGroup({
     </div>
   );
 }
+
+export const ParamCategoryGroup = memo(ParamCategoryGroupInner, areEqual);
 
 // --- Internal ---
 

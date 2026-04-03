@@ -8,6 +8,7 @@
 import XLSX from 'xlsx';
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { resolveDependencyName } from '../../src/utils/registry-match';
 
 // ---------------------------------------------------------------------------
 // Column mappings
@@ -48,22 +49,6 @@ const CONTROL_TYPE_MAP: Record<string, string> = {
   'Asset Picker': 'asset_picker',
   'InputField': 'input_field',
 };
-
-// ---------------------------------------------------------------------------
-// Suffix stripping for fuzzy dependency resolution
-// ---------------------------------------------------------------------------
-
-const STRIP_SUFFIXES = ['系统', '模式', '设置', '效果'];
-
-function normalizeName(name: string): string {
-  let result = name.trim();
-  for (const suffix of STRIP_SUFFIXES) {
-    if (result.endsWith(suffix) && result.length > suffix.length) {
-      result = result.slice(0, -suffix.length);
-    }
-  }
-  return result;
-}
 
 // ---------------------------------------------------------------------------
 // Value parsing
@@ -230,7 +215,7 @@ function main(): void {
     });
   }
 
-  // Phase 3: Resolve dependencies (fuzzy match)
+  // Phase 3: Resolve dependencies (conservative match — no substring/includes)
   for (let i = 0; i < rawRows.length; i++) {
     const raw = rawRows[i];
     const depName = raw.dependsOnParamName;
@@ -238,35 +223,18 @@ function main(): void {
 
     if (!depName || depName === '-' || depName === '无') continue;
 
-    // Try exact match first
-    let paramId = nameToId.get(depName);
+    const rowNum = i + 2; // +1 for 0-index, +1 for header row
+    const { id: paramId, ambiguity } = resolveDependencyName(nameToId, depName);
 
-    // Fuzzy match: strip suffixes from both sides
     if (!paramId) {
-      const normalizedDep = normalizeName(depName);
-      for (const [name, id] of nameToId) {
-        if (normalizeName(name) === normalizedDep) {
-          paramId = id;
-          break;
-        }
-      }
+      process.stderr.write(
+        `WARN: Row ${rowNum} param "${depName}" — no match found for dependency, skipping${ambiguity ? ` (${ambiguity})` : ''}\n`,
+      );
+      continue;
     }
 
-    // Fallback: substring match
-    if (!paramId) {
-      for (const [name, id] of nameToId) {
-        if (name.includes(depName) || depName.includes(name)) {
-          paramId = id;
-          break;
-        }
-      }
-    }
-
-    if (paramId && depCondition && depCondition !== '-') {
-      entries[i].dependsOn = {
-        paramId,
-        condition: depCondition,
-      };
+    if (depCondition && depCondition !== '-') {
+      entries[i].dependsOn = { paramId, condition: depCondition };
     }
   }
 

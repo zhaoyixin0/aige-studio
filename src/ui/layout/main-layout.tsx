@@ -30,7 +30,11 @@ export function MainLayout() {
   const toggleEditor = useEditorStore(selectToggleEditor);
   const boardModeOpen = useEditorStore(selectBoardModeOpen);
   const setBoardModeOpen = useEditorStore(selectSetBoardModeOpen);
-  const { width: chatWidth, onMouseDown: handleMouseDown } = useResizeDivider(480);
+  const {
+    width: chatWidth,
+    onMouseDown: handleMouseDown,
+    onTouchStart: handleTouchStart,
+  } = useResizeDivider(480);
 
   const handleBoardModeClose = useCallback(
     () => setBoardModeOpen(false),
@@ -74,6 +78,7 @@ export function MainLayout() {
               {/* Resizable Divider */}
               <div
                 onMouseDown={handleMouseDown}
+                onTouchStart={handleTouchStart}
                 className="w-1.5 shrink-0 -mx-0.75 cursor-col-resize hover:bg-blue-600/50 active:bg-blue-600 transition-colors z-20"
                 title="拖动调整大小"
               />

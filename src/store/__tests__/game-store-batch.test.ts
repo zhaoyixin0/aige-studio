@@ -104,4 +104,45 @@ describe('game-store batchUpdateParams', () => {
 
     expect(useGameStore.getState().configVersion).toBe(vBefore);
   });
+
+  it('matches suffixed module ids via baseId fallback', () => {
+    // Use suffixed ids like real presets / conversation-agent
+    const config: GameConfig = {
+      ...makeConfig(),
+      modules: [
+        { id: 'spawner_1', type: 'Spawner', enabled: true, params: { frequency: 1, speed: 200 } },
+        { id: 'scorer_1', type: 'Scorer', enabled: true, params: { perHit: 10 } },
+      ],
+    };
+    useGameStore.setState({ config, configVersion: 0 });
+
+    useGameStore.getState().batchUpdateParams([
+      { moduleId: 'spawner', changes: { frequency: 3 } },
+      { moduleId: 'scorer', changes: { perHit: 30 } },
+    ]);
+
+    const next = useGameStore.getState().config!;
+    expect(next.modules.find((m) => m.id === 'spawner_1')!.params.frequency).toBe(3);
+    expect(next.modules.find((m) => m.id === 'scorer_1')!.params.perHit).toBe(30);
+  });
+
+  it('matches hyphenated ids to CamelCase types (e.g., beat-map → BeatMap)', () => {
+    const config: GameConfig = {
+      ...makeConfig(),
+      modules: [
+        { id: 'beatmap_1', type: 'BeatMap', enabled: true, params: { bpm: 120 } },
+        { id: 'particlevfx_1', type: 'ParticleVFX', enabled: true, params: { burstScale: 1.0 } },
+      ],
+    };
+    useGameStore.setState({ config, configVersion: 0 });
+
+    useGameStore.getState().batchUpdateParams([
+      { moduleId: 'beat-map', changes: { bpm: 150 } },
+      { moduleId: 'particle-vfx', changes: { burstScale: 1.5 } },
+    ]);
+
+    const next = useGameStore.getState().config!;
+    expect(next.modules.find((m) => m.type === 'BeatMap')!.params.bpm).toBe(150);
+    expect(next.modules.find((m) => m.type === 'ParticleVFX')!.params.burstScale).toBe(1.5);
+  });
 });

@@ -91,6 +91,28 @@ describe('SegmentedControl', () => {
     fireEvent.keyDown(group, { key: 'ArrowRight' });
     expect(onChange).toHaveBeenCalledWith('medium');
   });
+
+  it('moves DOM focus to next option on ArrowRight', async () => {
+    let currentValue = 'small';
+    const onChange = vi.fn((v: string) => { currentValue = v; });
+    const { rerender } = render(
+      <SegmentedControl options={options} value={currentValue} onChange={onChange} />,
+    );
+
+    const group = screen.getByRole('radiogroup');
+    fireEvent.keyDown(group, { key: 'ArrowRight' });
+    expect(onChange).toHaveBeenCalledWith('medium');
+
+    rerender(
+      <SegmentedControl options={options} value="medium" onChange={onChange} />,
+    );
+
+    await vi.waitFor(() => {
+      expect(document.activeElement).toBe(
+        screen.getByRole('radio', { name: 'medium' }),
+      );
+    });
+  });
 });
 
 /* ================================================================== */
@@ -232,6 +254,27 @@ describe('AssetPickerGrid', () => {
     );
 
     expect(screen.getByText('sprite_3')).toBeInTheDocument();
+  });
+
+  it('moves DOM focus to next asset on ArrowDown', async () => {
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <AssetPickerGrid assets={assets} value="sprite_1" onChange={onChange} />,
+    );
+
+    const group = screen.getByRole('radiogroup');
+    fireEvent.keyDown(group, { key: 'ArrowDown' });
+    expect(onChange).toHaveBeenCalledWith('sprite_2');
+
+    rerender(
+      <AssetPickerGrid assets={assets} value="sprite_2" onChange={onChange} />,
+    );
+
+    await vi.waitFor(() => {
+      expect(document.activeElement).toBe(
+        screen.getByRole('radio', { name: /sprite 2/i }),
+      );
+    });
   });
 });
 

@@ -4,6 +4,9 @@ import type { ChatMessage, Chip } from '@/store/editor-store';
 import { useGameStore } from '@/store/game-store';
 import { useEngineContext } from '@/app/hooks/use-engine';
 import type { ConversationResult } from '@/agent/conversation-agent';
+import { validateConfig, applyFixes } from '@/engine/core/config-validator';
+import { ContractRegistry } from '@/engine/core/contract-registry';
+import { createModuleRegistry } from '@/engine/module-setup';
 import { getConversationAgent } from '@/agent/singleton';
 import { AssetAgent } from '@/services/asset-agent';
 import type { GameConfig, AssetEntry } from '@/engine/core';
@@ -124,10 +127,13 @@ export function useConversationManager(): ConversationManagerResult {
           timestamp: Date.now(),
         });
 
-        // Apply new config if provided
+        // Apply new config if provided (with validation + auto-fixes)
         if (result.config) {
-          setConfig(result.config);
-          triggerAssetFulfillment(result.config);
+          const contracts = ContractRegistry.fromRegistry(createModuleRegistry());
+          const report = validateConfig(result.config, contracts);
+          const fixed = report.fixes.length > 0 ? applyFixes(result.config, report.fixes) : result.config;
+          setConfig(fixed);
+          triggerAssetFulfillment(fixed);
         }
 
         // Update suggestion chips if provided

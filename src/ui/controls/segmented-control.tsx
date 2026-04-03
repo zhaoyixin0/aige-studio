@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 
 export interface SegmentedControlProps {
   readonly options: readonly string[];
@@ -8,6 +8,8 @@ export interface SegmentedControlProps {
 }
 
 export function SegmentedControl({ options, value, onChange, label }: SegmentedControlProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       const currentIndex = options.indexOf(value);
@@ -25,6 +27,10 @@ export function SegmentedControl({ options, value, onChange, label }: SegmentedC
 
       if (nextIndex !== null && nextIndex !== currentIndex) {
         onChange(options[nextIndex]);
+        requestAnimationFrame(() => {
+          const radios = containerRef.current?.querySelectorAll<HTMLElement>('[role="radio"]');
+          radios?.[nextIndex]?.focus();
+        });
       }
     },
     [options, value, onChange],
@@ -32,6 +38,7 @@ export function SegmentedControl({ options, value, onChange, label }: SegmentedC
 
   return (
     <div
+      ref={containerRef}
       role="radiogroup"
       aria-label={label}
       className="inline-flex rounded-lg bg-white/5 p-0.5 gap-0.5"

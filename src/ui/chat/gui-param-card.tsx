@@ -47,6 +47,7 @@ export function GuiParamCard({
       <TombstoneCard
         title={displayTitle}
         params={resolvedParams}
+        values={values}
       />
     );
   }
@@ -80,11 +81,12 @@ export function GuiParamCard({
 interface TombstoneCardProps {
   readonly title: string;
   readonly params: readonly ParameterMeta[];
+  readonly values?: Readonly<Record<string, unknown>>;
 }
 
-function TombstoneCard({ title, params }: TombstoneCardProps) {
+function TombstoneCard({ title, params, values = {} }: TombstoneCardProps) {
   const summary = params
-    .map((p) => `${p.name}=${formatDefaultValue(p.defaultValue)}`)
+    .map((p) => `${p.name}=${formatDefaultValue(values[p.id] ?? p.defaultValue)}`)
     .join(', ');
 
   return (
@@ -283,7 +285,7 @@ function InputFieldControl({
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 
-function formatDefaultValue(value: string | number | boolean): string {
+function formatDefaultValue(value: unknown): string {
   if (typeof value === 'boolean') return value ? '开启' : '关闭';
   return String(value);
 }

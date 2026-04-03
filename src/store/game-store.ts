@@ -122,15 +122,44 @@ export const useGameStore = create<GameStore>((set, get) => ({
   batchUpdateParams: (updates) =>
     set((state) => {
       if (!state.config || updates.length === 0) return state;
+
+      // Build fast lookup indices for updates
+      const byExactId = new Map<string, Record<string, unknown>>();
+      const byNormalized = new Map<string, Record<string, unknown>>();
+
+      const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const baseId = (id: string) => id.replace(/_\d+$/, '');
+
+      for (const u of updates) {
+        // Last write wins per target for deterministic behavior
+        byExactId.set(u.moduleId, { ...(byExactId.get(u.moduleId) ?? {}), ...u.changes });
+
+        const normKey = normalize(u.moduleId);
+        byNormalized.set(normKey, { ...(byNormalized.get(normKey) ?? {}), ...u.changes });
+      }
+
+      const nextModules = state.config.modules.map((m) => {
+        // 1) Exact id match
+        let changes = byExactId.get(m.id);
+
+        if (!changes) {
+          // 2) Match by normalized variants of id/baseId/type
+          const normId = normalize(m.id);
+          const normBase = normalize(baseId(m.id));
+          const normType = normalize(m.type);
+
+          changes =
+            byNormalized.get(normId) ||
+            byNormalized.get(normBase) ||
+            byNormalized.get(normType);
+        }
+
+        if (!changes) return m;
+        return { ...m, params: { ...m.params, ...changes } };
+      });
+
       return {
-        config: {
-          ...state.config,
-          modules: state.config.modules.map((m) => {
-            const upd = updates.find((u) => u.moduleId === m.id);
-            if (!upd) return m;
-            return { ...m, params: { ...m.params, ...upd.changes } };
-          }),
-        },
+        config: { ...state.config, modules: nextModules },
         configVersion: state.configVersion + 1,
       };
     }),

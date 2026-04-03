@@ -327,6 +327,24 @@ describe('GuiParamCard', () => {
     expect(defaultOnChange).not.toHaveBeenCalled();
   });
 
+  /* 6b. Tombstone mode — uses live values, not defaults */
+  it('tombstone displays live values when provided', () => {
+    render(
+      <GuiParamCard
+        category="game_mechanics"
+        paramIds={['game_mechanics_001']}
+        isActive={false}
+        values={{ game_mechanics_001: false }}
+        onParamChange={defaultOnChange}
+      />,
+    );
+
+    const card = screen.getByTestId('gui-param-card');
+    // Should show the live value (false → '关闭' or 'false'), not default (true → '开启')
+    expect(card.textContent).toContain('得分系统');
+    expect(card.textContent).not.toContain('开启');
+  });
+
   /* 7. Empty paramIds — renders nothing */
   it('handles empty paramIds gracefully', () => {
     const { container } = render(

@@ -620,7 +620,11 @@ export class ConversationAgent {
     config: GameConfig,
     changes: ConfigChange[],
   ): GameConfig {
-    return applyConfigChanges(config, changes, (c) => this.inferGameType(c));
+    const updated = applyConfigChanges(config, changes, (c) => this.inferGameType(c));
+    // Post-change validation to keep parity with create_game path
+    const report = validateConfig(updated, ConversationAgent.contracts);
+    this._lastValidationReport = report;
+    return report.fixes.length > 0 ? applyFixes(updated, report.fixes) : updated;
   }
 
   /* ---------------------------------------------------------------- */

@@ -165,6 +165,35 @@ describe('useConversationManager', () => {
     expect(useGameStore.getState().config).toEqual(mockConfig);
   });
 
+  it('validates and auto-fixes returned config before applying', async () => {
+    const badConfig = {
+      version: '1.0.0',
+      meta: { name: 'Bad', description: '', thumbnail: null, createdAt: '' },
+      canvas: { width: 1080, height: 1920 },
+      modules: [
+        { id: 'timer_1', type: 'Timer', enabled: true, params: { duration: -5 } },
+      ],
+      assets: {},
+    } as const;
+
+    mockProcess.mockResolvedValue({
+      reply: 'Updated',
+      config: badConfig as any,
+      chips: undefined,
+    });
+
+    const { result } = renderHook(() => useConversationManager());
+
+    await act(async () => {
+      await result.current.submitMessage('apply changes');
+    });
+
+    const cfg = useGameStore.getState().config!;
+    const timer = cfg.modules.find((m) => m.type === 'Timer');
+    expect(timer).toBeTruthy();
+    expect(timer!.params.duration).toBe(30); // auto-fixed
+  });
+
   it('updates suggestion chips when agent returns them', async () => {
     const mockChips = [
       { id: 'chip1', label: 'Chip 1' },

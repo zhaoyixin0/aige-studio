@@ -132,3 +132,137 @@ describe('useResizeDivider', () => {
     expect(result.current.width).toBe(400);
   });
 });
+
+describe('useResizeDivider — touch support', () => {
+  afterEach(() => {
+    document.body.style.cursor = '';
+  });
+
+  it('should return onTouchStart handler', () => {
+    const { result } = renderHook(() => useResizeDivider(480));
+
+    expect(typeof result.current.onTouchStart).toBe('function');
+  });
+
+  it('should update width on touchmove during drag', () => {
+    const { result } = renderHook(() => useResizeDivider(480));
+
+    // Start touch
+    act(() => {
+      result.current.onTouchStart({
+        preventDefault: vi.fn(),
+        touches: [{ clientX: 480 }],
+      } as unknown as React.TouchEvent);
+    });
+
+    // Move touch to x=600
+    act(() => {
+      const touchEvent = new Event('touchmove') as TouchEvent;
+      Object.defineProperty(touchEvent, 'touches', {
+        value: [{ clientX: 600 }],
+      });
+      document.dispatchEvent(touchEvent);
+    });
+
+    expect(result.current.width).toBe(600);
+  });
+
+  it('should clamp width to minimum on touch drag', () => {
+    const { result } = renderHook(() => useResizeDivider(480));
+
+    act(() => {
+      result.current.onTouchStart({
+        preventDefault: vi.fn(),
+        touches: [{ clientX: 480 }],
+      } as unknown as React.TouchEvent);
+    });
+
+    act(() => {
+      const touchEvent = new Event('touchmove') as TouchEvent;
+      Object.defineProperty(touchEvent, 'touches', {
+        value: [{ clientX: 100 }],
+      });
+      document.dispatchEvent(touchEvent);
+    });
+
+    expect(result.current.width).toBe(320);
+  });
+
+  it('should stop tracking on touchend', () => {
+    const { result } = renderHook(() => useResizeDivider(480));
+
+    // Start touch
+    act(() => {
+      result.current.onTouchStart({
+        preventDefault: vi.fn(),
+        touches: [{ clientX: 480 }],
+      } as unknown as React.TouchEvent);
+    });
+
+    // Move to 600
+    act(() => {
+      const touchEvent = new Event('touchmove') as TouchEvent;
+      Object.defineProperty(touchEvent, 'touches', {
+        value: [{ clientX: 600 }],
+      });
+      document.dispatchEvent(touchEvent);
+    });
+    expect(result.current.width).toBe(600);
+
+    // End touch
+    act(() => {
+      document.dispatchEvent(new Event('touchend'));
+    });
+
+    // Further moves should NOT change width
+    act(() => {
+      const touchEvent = new Event('touchmove') as TouchEvent;
+      Object.defineProperty(touchEvent, 'touches', {
+        value: [{ clientX: 400 }],
+      });
+      document.dispatchEvent(touchEvent);
+    });
+    expect(result.current.width).toBe(600);
+  });
+
+  it('should set cursor to col-resize during touch drag', () => {
+    const { result } = renderHook(() => useResizeDivider(480));
+
+    act(() => {
+      result.current.onTouchStart({
+        preventDefault: vi.fn(),
+        touches: [{ clientX: 480 }],
+      } as unknown as React.TouchEvent);
+    });
+
+    expect(document.body.style.cursor).toBe('col-resize');
+
+    act(() => {
+      document.dispatchEvent(new Event('touchend'));
+    });
+
+    expect(document.body.style.cursor).toBe('');
+  });
+
+  it('should clean up touch listeners on unmount', () => {
+    const removeSpy = vi.spyOn(document, 'removeEventListener');
+    const { result, unmount } = renderHook(() => useResizeDivider(480));
+
+    // Start touch drag (adds listeners)
+    act(() => {
+      result.current.onTouchStart({
+        preventDefault: vi.fn(),
+        touches: [{ clientX: 480 }],
+      } as unknown as React.TouchEvent);
+    });
+
+    // Unmount while dragging
+    unmount();
+
+    const removedEvents = removeSpy.mock.calls.map((c) => c[0]);
+    expect(removedEvents).toContain('touchmove');
+    expect(removedEvents).toContain('touchend');
+
+    removeSpy.mockRestore();
+  });
+});

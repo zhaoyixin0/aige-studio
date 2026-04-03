@@ -13,16 +13,46 @@ interface DagValidationResult {
   readonly cyclePath?: readonly string[];
 }
 
-function isTruthy(value: unknown): boolean {
-  if (value === true || value === 'on' || value === '开启' || value === '显示' || value === 1) return true;
-  if (typeof value === 'string') return value.length > 0;
+export function isTruthy(value: unknown): boolean {
+  if (value === true || value === 1) return true;
+  if (value === false || value === 0 || value === null || value === undefined) return false;
   if (typeof value === 'number') return value !== 0;
-  return false;
+  if (typeof value === 'string') {
+    const v = value.trim().toLowerCase();
+    if (v === '' || v === '0') return false;
+    if (['false', 'no', 'off', 'disabled', '关闭', '隐藏'].includes(v)) return false;
+    if (['true', 'yes', 'on', 'enabled', '开启', '显示'].includes(v)) return true;
+    return v.length > 0; // non-empty string treated as truthy
+  }
+  return Boolean(value);
 }
 
-function matchesCondition(condition: string, parentValue: unknown): boolean {
-  if (condition === '任意') return true;
-  if (condition === '开启' || condition === '显示') return isTruthy(parentValue);
+export function matchesCondition(condition: string, parentValue: unknown): boolean {
+  const c = condition.trim().toLowerCase();
+
+  // Wildcards / any
+  if (c === '任意' || c === 'any' || c === '*') return true;
+
+  // Truthy / Falsy keywords (multi-lingual)
+  if (['开启', '显示', 'on', 'enabled', 'true', 'yes', 'visible'].includes(c)) {
+    return isTruthy(parentValue);
+  }
+  if (['关闭', '隐藏', 'off', 'disabled', 'false', 'no', 'hidden'].includes(c)) {
+    return !isTruthy(parentValue);
+  }
+
+  // Emptiness checks
+  if (c === 'empty' || c === '空') {
+    return parentValue === null || parentValue === undefined || (typeof parentValue === 'string' && parentValue.trim() === '');
+  }
+  if (c === 'not-empty' || c === '非空') {
+    return !(parentValue === null || parentValue === undefined || (typeof parentValue === 'string' && parentValue.trim() === ''));
+  }
+
+  // Default: string-insensitive equality, else strict
+  if (typeof parentValue === 'string') {
+    return parentValue.trim().toLowerCase() === c;
+  }
   return parentValue === condition;
 }
 
@@ -130,40 +160,24 @@ export function resolveVisibility(
 
   const byId = new Map<string, ParameterMeta>(params.map((p) => [p.id, p]));
   const memo = new Map<string, ParamVisibility>();
+  const VISIBLE: ParamVisibility = { visible: true, enabled: true };
+  const HIDDEN: ParamVisibility = { visible: false, enabled: false };
 
   function resolve(id: string): ParamVisibility {
     const cached = memo.get(id);
     if (cached) return cached;
 
     const param = byId.get(id);
-    if (!param) {
-      const vis: ParamVisibility = { visible: true, enabled: true };
-      memo.set(id, vis);
-      return vis;
-    }
-
-    if (!param.dependsOn || !byId.has(param.dependsOn.paramId)) {
-      const vis: ParamVisibility = { visible: true, enabled: true };
-      memo.set(id, vis);
-      return vis;
+    if (!param || !param.dependsOn || !byId.has(param.dependsOn.paramId)) {
+      memo.set(id, VISIBLE);
+      return VISIBLE;
     }
 
     const parentVis = resolve(param.dependsOn.paramId);
+    if (!parentVis.visible) { memo.set(id, HIDDEN); return HIDDEN; }
 
-    // If parent is hidden, child is hidden (propagation)
-    if (!parentVis.visible) {
-      const vis: ParamVisibility = { visible: false, enabled: false };
-      memo.set(id, vis);
-      return vis;
-    }
-
-    // Check condition against parent's current value
     const parentValue = currentValues.get(param.dependsOn.paramId);
-    const conditionMet = matchesCondition(param.dependsOn.condition, parentValue);
-
-    const vis: ParamVisibility = conditionMet
-      ? { visible: true, enabled: true }
-      : { visible: false, enabled: false };
+    const vis = matchesCondition(param.dependsOn.condition, parentValue) ? VISIBLE : HIDDEN;
     memo.set(id, vis);
     return vis;
   }
