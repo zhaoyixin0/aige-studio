@@ -27,6 +27,20 @@ export class WaveSpawner extends BaseModule {
       spawnY: { type: 'range', label: 'Spawn Y', default: 0, min: 0, max: 2000 },
       enemyCollisionRadius: { type: 'range', label: 'Enemy Collision Radius', default: 24, min: 8, max: 100 },
       maxEnemiesPerWave: { type: 'range', label: 'Max Enemies Per Wave', default: 15, min: 1, max: 50 },
+      waveInterval: {
+        type: 'number',
+        label: 'Wave Interval (s)',
+        default: 5,
+        min: 1,
+        max: 60,
+      },
+      maxBulletsPerWave: {
+        type: 'number',
+        label: 'Max Bullets Per Wave',
+        default: 10,
+        min: 1,
+        max: 100,
+      },
     };
   }
 

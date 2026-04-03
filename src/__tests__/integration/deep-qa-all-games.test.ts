@@ -446,7 +446,11 @@ describe('Deep QA: Random Wheel', () => {
     startPlaying(engine);
 
     const randomizer = engine.getModulesByType('Randomizer')[0] as Randomizer;
-    const spinDuration = randomizer.getParams().spinDuration ?? 3;
+    const params = randomizer.getParams();
+    const spinDuration = params.spinDuration ?? 3;
+    const settleDuration = params.animation === 'wheel'
+      ? (params.settleDuration ?? 1.5)
+      : 0;
 
     let resultEvent: any = null;
     engine.eventBus.on('randomizer:result', (data) => {
@@ -456,8 +460,8 @@ describe('Deep QA: Random Wheel', () => {
     randomizer.spin();
     expect(randomizer.isSpinning()).toBe(true);
 
-    // Tick past the spin duration
-    tickMs(engine, (spinDuration + 0.5) * 1000);
+    // Tick past the spin duration + settle duration
+    tickMs(engine, (spinDuration + settleDuration + 0.5) * 1000);
 
     expect(randomizer.isSpinning()).toBe(false);
     expect(resultEvent).not.toBeNull();
@@ -472,9 +476,14 @@ describe('Deep QA: Random Wheel', () => {
 
     const randomizer = engine.getModulesByType('Randomizer')[0] as Randomizer;
     const items = randomizer.getItems();
+    const params = randomizer.getParams();
+    const spinDuration = params.spinDuration ?? 3;
+    const settleDuration = params.animation === 'wheel'
+      ? (params.settleDuration ?? 1.5)
+      : 0;
 
     randomizer.spin();
-    tickMs(engine, 4000);
+    tickMs(engine, (spinDuration + settleDuration + 0.5) * 1000);
 
     const result = randomizer.getResult();
     expect(result).not.toBeNull();

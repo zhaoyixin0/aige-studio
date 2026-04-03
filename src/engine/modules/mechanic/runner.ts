@@ -50,6 +50,27 @@ export class Runner extends BaseModule {
         max: 5000,
         step: 50,
       },
+      trackWidth: {
+        type: 'number',
+        label: 'Track Width (px)',
+        default: 300,
+        min: 100,
+        max: 1000,
+      },
+      steeringSensitivity: {
+        type: 'number',
+        label: 'Steering Sensitivity',
+        default: 1,
+        min: 0.1,
+        max: 5,
+      },
+      slideDistance: {
+        type: 'number',
+        label: 'Slide Distance (px)',
+        default: 100,
+        min: 10,
+        max: 500,
+      },
     };
   }
 

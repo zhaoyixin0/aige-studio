@@ -69,6 +69,27 @@ export class Scorer extends BaseModule {
         default: 0,
         min: 0,
       },
+      comboWindow: {
+        type: 'number',
+        label: 'Combo Window (s)',
+        default: 2,
+        min: 0.5,
+        max: 10,
+      },
+      comboMultiplierStep: {
+        type: 'number',
+        label: 'Combo Multiplier Step',
+        default: 0.5,
+        min: 0.1,
+        max: 5,
+      },
+      critMultiplier: {
+        type: 'number',
+        label: 'Crit Multiplier',
+        default: 2,
+        min: 1,
+        max: 10,
+      },
     };
   }
 

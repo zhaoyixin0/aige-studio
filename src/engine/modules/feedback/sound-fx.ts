@@ -27,6 +27,23 @@ export class SoundFX extends BaseModule {
         label: 'Muted',
         default: false,
       },
+      bgmAsset: {
+        type: 'string',
+        label: 'BGM Asset',
+        default: '',
+      },
+      hitSoundAsset: {
+        type: 'string',
+        label: 'Hit Sound Asset',
+        default: '',
+      },
+      feedbackVolume: {
+        type: 'number',
+        label: 'Feedback Volume',
+        default: 0.8,
+        min: 0,
+        max: 1,
+      },
     };
   }
 

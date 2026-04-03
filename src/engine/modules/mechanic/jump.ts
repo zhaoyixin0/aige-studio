@@ -49,6 +49,27 @@ export class Jump extends BaseModule {
         default: 'input:touch:tap',
         options: ['input:touch:tap', 'input:face:mouthOpen'],
       },
+      doubleJumpWindow: {
+        type: 'number',
+        label: 'Double Jump Window (s)',
+        default: 0.3,
+        min: 0,
+        max: 2,
+      },
+      landingBuffer: {
+        type: 'number',
+        label: 'Landing Buffer (s)',
+        default: 0.1,
+        min: 0,
+        max: 1,
+      },
+      jumpScoreMultiplier: {
+        type: 'number',
+        label: 'Jump Score Multiplier',
+        default: 1,
+        min: 0,
+        max: 10,
+      },
     };
   }
 

@@ -86,6 +86,31 @@ export class Spawner extends BaseModule {
         step: 4,
         unit: 'px',
       },
+      obstacleVariant: {
+        type: 'select',
+        label: 'Obstacle Variant',
+        default: 'normal',
+        options: ['normal', 'large', 'fast'],
+      },
+      spawnSafeZone: {
+        type: 'number',
+        label: 'Spawn Safe Zone (px)',
+        default: 50,
+        min: 0,
+        max: 500,
+      },
+      dropShadow: {
+        type: 'boolean',
+        label: 'Drop Shadow',
+        default: false,
+      },
+      maxConcurrent: {
+        type: 'number',
+        label: 'Max Concurrent',
+        default: 10,
+        min: 1,
+        max: 100,
+      },
     };
   }
 

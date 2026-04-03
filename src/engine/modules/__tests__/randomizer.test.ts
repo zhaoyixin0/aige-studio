@@ -133,4 +133,248 @@ describe('Randomizer', () => {
     engine.tick(600);
     expect(resultHandler).toHaveBeenCalledTimes(2);
   });
+
+  // ─── SpinWheel-specific params ──────────────────────────────
+
+  describe('SpinWheel schema params', () => {
+    it('should include all 14 schema fields', () => {
+      const randomizer = new Randomizer('rand-1');
+      const schema = randomizer.getSchema();
+      const expectedKeys = [
+        'items',
+        'animation',
+        'spinDuration',
+        'trigger',
+        'sectorCount',
+        'spinSpeed',
+        'settleDuration',
+        'pointerWidth',
+        'decelCurve',
+        'prizeMultiplier',
+        'pointerJitter',
+        'wheelRadius',
+        'pointerOffset',
+        'showLabels',
+      ];
+      for (const key of expectedKeys) {
+        expect(schema).toHaveProperty(key);
+      }
+      expect(Object.keys(schema)).toHaveLength(14);
+    });
+
+    it('should have sensible default values for all new params', () => {
+      const randomizer = new Randomizer('rand-1');
+      const params = randomizer.getParams();
+
+      expect(params.sectorCount).toBe(8);
+      expect(params.spinSpeed).toBe(720);
+      expect(params.settleDuration).toBe(1.5);
+      expect(params.pointerWidth).toBe(20);
+      expect(params.decelCurve).toBe('easeOutCubic');
+      expect(params.prizeMultiplier).toBe(1);
+      expect(params.pointerJitter).toBe(0.3);
+      expect(params.wheelRadius).toBe(150);
+      expect(params.pointerOffset).toBe(0);
+      expect(params.showLabels).toBe(true);
+    });
+
+    it('should accept new params via configure() without breaking existing', () => {
+      const { randomizer } = setup();
+      const originalParams = randomizer.getParams();
+
+      randomizer.configure({
+        sectorCount: 12,
+        spinSpeed: 900,
+        decelCurve: 'easeOutQuad',
+      });
+
+      const updated = randomizer.getParams();
+
+      // New params updated
+      expect(updated.sectorCount).toBe(12);
+      expect(updated.spinSpeed).toBe(900);
+      expect(updated.decelCurve).toBe('easeOutQuad');
+
+      // Existing params preserved
+      expect(updated.items).toEqual(originalParams.items);
+      expect(updated.animation).toBe(originalParams.animation);
+      expect(updated.spinDuration).toBe(originalParams.spinDuration);
+      expect(updated.trigger).toBe(originalParams.trigger);
+    });
+  });
+
+  describe('weighted pick distribution', () => {
+    it('should produce statistically correct distribution over many trials', () => {
+      const { engine, randomizer } = setup({
+        items: [
+          { asset: 'a', label: 'A', weight: 3 },
+          { asset: 'b', label: 'B', weight: 2 },
+          { asset: 'c', label: 'C', weight: 1 },
+        ],
+        spinDuration: 0.05,
+      });
+
+      const counts = [0, 0, 0];
+      engine.eventBus.on('randomizer:result', (data: any) => {
+        counts[data.index]++;
+      });
+
+      const trials = 600;
+      for (let i = 0; i < trials; i++) {
+        randomizer.spin();
+        engine.tick(100);
+      }
+
+      const total = counts[0] + counts[1] + counts[2];
+      expect(total).toBe(trials);
+
+      // With weights 3:2:1, expected proportions: 50%, 33%, 17%
+      // Allow 15% tolerance for randomness
+      expect(counts[0] / total).toBeGreaterThan(0.35);
+      expect(counts[0] / total).toBeLessThan(0.65);
+      expect(counts[1] / total).toBeGreaterThan(0.18);
+      expect(counts[1] / total).toBeLessThan(0.48);
+      expect(counts[2] / total).toBeGreaterThan(0.02);
+      expect(counts[2] / total).toBeLessThan(0.32);
+    });
+  });
+
+  describe('wheel animation mode', () => {
+    it('should emit randomizer:result after spinDuration + settleDuration in wheel mode', () => {
+      const { engine, randomizer } = setup({
+        animation: 'wheel',
+        spinDuration: 2,
+        settleDuration: 1.0,
+      });
+
+      const resultHandler = vi.fn();
+      engine.eventBus.on('randomizer:result', resultHandler);
+
+      randomizer.spin();
+
+      // Halfway through spin — no result yet
+      engine.tick(1500);
+      expect(resultHandler).not.toHaveBeenCalled();
+      expect(randomizer.isSpinning()).toBe(true);
+
+      // Past spinDuration but within settleDuration — still settling
+      engine.tick(600);
+      expect(resultHandler).not.toHaveBeenCalled();
+      expect(randomizer.isSpinning()).toBe(true);
+
+      // Past spinDuration + settleDuration — result emitted
+      engine.tick(1000);
+      expect(resultHandler).toHaveBeenCalledOnce();
+      expect(randomizer.isSpinning()).toBe(false);
+    });
+
+    it('should emit randomizer:settling event when entering settle phase in wheel mode', () => {
+      const { engine, randomizer } = setup({
+        animation: 'wheel',
+        spinDuration: 1,
+        settleDuration: 1.0,
+      });
+
+      const settlingHandler = vi.fn();
+      engine.eventBus.on('randomizer:settling', settlingHandler);
+
+      randomizer.spin();
+
+      // Past spinDuration — should start settling
+      engine.tick(1100);
+      expect(settlingHandler).toHaveBeenCalledOnce();
+    });
+
+    it('should not add settleDuration for non-wheel animations', () => {
+      const { engine, randomizer } = setup({
+        animation: 'instant',
+        spinDuration: 1,
+        settleDuration: 2.0, // should be ignored for instant
+      });
+
+      const resultHandler = vi.fn();
+      engine.eventBus.on('randomizer:result', resultHandler);
+
+      randomizer.spin();
+      engine.tick(1100);
+
+      // Should resolve at spinDuration, ignoring settleDuration
+      expect(resultHandler).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe('prizeMultiplier', () => {
+    it('should include prizeMultiplier in result payload', () => {
+      const { engine, randomizer } = setup({
+        spinDuration: 0.1,
+        prizeMultiplier: 3,
+      });
+
+      const resultHandler = vi.fn();
+      engine.eventBus.on('randomizer:result', resultHandler);
+
+      randomizer.spin();
+      engine.tick(200);
+
+      expect(resultHandler).toHaveBeenCalledOnce();
+      const result = resultHandler.mock.calls[0][0];
+      expect(result.prizeMultiplier).toBe(3);
+    });
+
+    it('should default prizeMultiplier to 1 in result', () => {
+      const { engine, randomizer } = setup({
+        spinDuration: 0.1,
+      });
+
+      const resultHandler = vi.fn();
+      engine.eventBus.on('randomizer:result', resultHandler);
+
+      randomizer.spin();
+      engine.tick(200);
+
+      const result = resultHandler.mock.calls[0][0];
+      expect(result.prizeMultiplier).toBe(1);
+    });
+  });
+
+  describe('contracts', () => {
+    it('should include randomizer:settling in emits for wheel-capable module', () => {
+      const randomizer = new Randomizer('rand-1');
+      const contracts = randomizer.getContracts();
+
+      expect(contracts.emits).toContain('randomizer:spinning');
+      expect(contracts.emits).toContain('randomizer:result');
+      expect(contracts.emits).toContain('randomizer:settling');
+    });
+  });
+
+  describe('getSpinProgress', () => {
+    it('should report progress accounting for settleDuration in wheel mode', () => {
+      const { engine, randomizer } = setup({
+        animation: 'wheel',
+        spinDuration: 2,
+        settleDuration: 2,
+      });
+
+      randomizer.spin();
+      // At 1s into a 2+2=4s total → 25%
+      engine.tick(1000);
+      const progress = randomizer.getSpinProgress();
+      expect(progress).toBeCloseTo(0.25, 1);
+    });
+
+    it('should report progress based on spinDuration only for non-wheel modes', () => {
+      const { engine, randomizer } = setup({
+        animation: 'instant',
+        spinDuration: 2,
+        settleDuration: 2, // ignored for non-wheel
+      });
+
+      randomizer.spin();
+      engine.tick(1000);
+      const progress = randomizer.getSpinProgress();
+      // 1s / 2s = 0.5
+      expect(progress).toBeCloseTo(0.5, 1);
+    });
+  });
 });

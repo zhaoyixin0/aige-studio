@@ -21,6 +21,10 @@ interface GameStore {
   addAsset: (assetId: string, entry: AssetEntry) => void;
 
   batchUpdateAssets: (assets: Record<string, AssetEntry>) => void;
+
+  batchUpdateParams: (
+    updates: Array<{ moduleId: string; changes: Record<string, unknown> }>
+  ) => void;
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -112,6 +116,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
             [assetId]: entry,
           },
         },
+      };
+    }),
+
+  batchUpdateParams: (updates) =>
+    set((state) => {
+      if (!state.config || updates.length === 0) return state;
+      return {
+        config: {
+          ...state.config,
+          modules: state.config.modules.map((m) => {
+            const upd = updates.find((u) => u.moduleId === m.id);
+            if (!upd) return m;
+            return { ...m, params: { ...m.params, ...upd.changes } };
+          }),
+        },
+        configVersion: state.configVersion + 1,
       };
     }),
 

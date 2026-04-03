@@ -37,6 +37,20 @@ export class DifficultyRamp extends BaseModule {
         options: ['time', 'score'],
         default: 'time',
       },
+      initialDifficulty: {
+        type: 'number',
+        label: 'Initial Difficulty',
+        default: 1,
+        min: 0,
+        max: 20,
+      },
+      maxDifficulty: {
+        type: 'number',
+        label: 'Max Difficulty',
+        default: 10,
+        min: 1,
+        max: 100,
+      },
     };
   }
 

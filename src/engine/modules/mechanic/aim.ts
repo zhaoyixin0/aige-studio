@@ -48,6 +48,19 @@ export class Aim extends BaseModule {
         label: 'Manual Event',
         default: 'input:touch:hold',
       },
+      crosshairWidth: {
+        type: 'number',
+        label: 'Crosshair Width (px)',
+        default: 32,
+        min: 8,
+        max: 128,
+      },
+      crosshairPattern: {
+        type: 'select',
+        label: 'Crosshair Pattern',
+        default: 'crosshair',
+        options: ['crosshair', 'dot', 'circle'],
+      },
     };
   }
 

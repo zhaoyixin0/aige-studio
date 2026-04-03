@@ -86,6 +86,34 @@ export class Projectile extends BaseModule {
       },
       asset: { type: 'string', label: 'Projectile Asset Key', default: 'bullet' },
       autoFire: { type: 'boolean', label: 'Auto Fire', default: false },
+      clipCapacity: {
+        type: 'number',
+        label: 'Clip Capacity',
+        default: 30,
+        min: 1,
+        max: 200,
+      },
+      recoil: {
+        type: 'number',
+        label: 'Recoil',
+        default: 0,
+        min: 0,
+        max: 50,
+      },
+      burstLimit: {
+        type: 'number',
+        label: 'Burst Limit',
+        default: 1,
+        min: 1,
+        max: 10,
+      },
+      fireInterval: {
+        type: 'number',
+        label: 'Fire Interval (s)',
+        default: 0.1,
+        min: 0.01,
+        max: 5,
+      },
     };
   }
 

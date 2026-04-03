@@ -39,6 +39,27 @@ export class Collision extends BaseModule {
         max: 2.0,
         step: 0.1,
       },
+      hitboxWidth: {
+        type: 'number',
+        label: 'Hitbox Width (px)',
+        default: 40,
+        min: 1,
+        max: 500,
+      },
+      hitboxHeight: {
+        type: 'number',
+        label: 'Hitbox Height (px)',
+        default: 40,
+        min: 1,
+        max: 500,
+      },
+      collisionBuffer: {
+        type: 'number',
+        label: 'Collision Buffer (px)',
+        default: 0,
+        min: 0,
+        max: 100,
+      },
     };
   }
 

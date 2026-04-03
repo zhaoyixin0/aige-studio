@@ -1,6 +1,9 @@
 import * as Slider from '@radix-ui/react-slider';
 import * as Switch from '@radix-ui/react-switch';
 import type { ModuleSchema, SchemaField } from '@/engine/core/types.ts';
+import { SegmentedControl } from '@/ui/controls/segmented-control';
+import { StepperControl } from '@/ui/controls/stepper-control';
+import { AssetPickerGrid } from '@/ui/controls/asset-picker-grid';
 
 interface SchemaRendererProps {
   schema: ModuleSchema;
@@ -70,6 +73,32 @@ function renderControl(
       return <RectControl value={value} onChange={onChange} />;
     case 'asset[]':
       return <AssetListControl value={value} onChange={onChange} />;
+    case 'segmented':
+      return (
+        <SegmentedControl
+          options={field.options ?? []}
+          value={String(value ?? '')}
+          onChange={onChange}
+        />
+      );
+    case 'stepper':
+      return (
+        <StepperControl
+          value={Number(value ?? field.min ?? 0)}
+          min={field.min ?? 0}
+          max={field.max ?? 100}
+          step={field.step ?? 1}
+          onChange={onChange}
+        />
+      );
+    case 'asset_picker':
+      return (
+        <AssetPickerGrid
+          assets={field.assets ?? []}
+          value={String(value ?? '')}
+          onChange={onChange}
+        />
+      );
     case 'collision-rules':
       return <CollisionRulesControl value={value} />;
     default:

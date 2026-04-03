@@ -14,7 +14,10 @@ export interface SchemaField {
     | 'collision-layers'
     | 'collision-rules'
     | 'object'
-    | 'string';
+    | 'string'
+    | 'segmented'
+    | 'stepper'
+    | 'asset_picker';
   label: string;
   default?: any;
   min?: number;
@@ -24,6 +27,7 @@ export interface SchemaField {
   options?: string[];
   assetType?: string;
   fields?: Record<string, SchemaField>;
+  assets?: ReadonlyArray<{ id: string; thumbnail: string; label?: string }>;
 }
 
 export type ModuleSchema = Record<string, SchemaField>;

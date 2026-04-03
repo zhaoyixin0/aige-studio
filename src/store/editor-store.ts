@@ -3,6 +3,12 @@ import type { ValidationReport } from '@/engine/core/config-validator';
 
 export type PreviewMode = 'edit' | 'play' | 'fullscreen';
 
+export interface L1State {
+  difficulty: 'easy' | 'normal' | 'hard' | 'very_hard' | 'extreme';
+  pacing: number;    // 0-100
+  emotion: string;   // style ID
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -11,6 +17,8 @@ export interface ChatMessage {
   wizardChoices?: Array<{ id: string; label: string; emoji?: string; description?: string }>;
   wizardStep?: string;
   enhancementSuggestions?: Array<{ id: string; label: string; emoji: string; moduleType?: string; action?: string }>;
+  parameterCard?: { category: string; paramIds: string[]; title?: string };
+  l1Controls?: boolean;
   timestamp: number;
 }
 
@@ -44,6 +52,9 @@ interface EditorStore {
   suggestionChips: Chip[];
   editorExpanded: boolean;
 
+  l1State: L1State;
+  boardModeOpen: boolean;
+
   selectModule: (id: string | null) => void;
   setPreviewMode: (mode: PreviewMode) => void;
   addChatMessage: (message: ChatMessage) => void;
@@ -54,6 +65,8 @@ interface EditorStore {
   setSuggestionChips: (chips: Chip[]) => void;
   toggleEditor: () => void;
   setValidationReport: (report: ValidationReport | null) => void;
+  setL1State: (partial: Partial<L1State>) => void;
+  setBoardModeOpen: (open: boolean) => void;
 }
 
 export const useEditorStore = create<EditorStore>((set) => ({
@@ -65,6 +78,8 @@ export const useEditorStore = create<EditorStore>((set) => ({
   layoutPhase: 'landing',
   suggestionChips: DEFAULT_CHIPS,
   editorExpanded: false,
+  l1State: { difficulty: 'normal', pacing: 50, emotion: 'cartoon' },
+  boardModeOpen: false,
 
   selectModule: (id) => set({ selectedModuleId: id }),
 
@@ -90,4 +105,7 @@ export const useEditorStore = create<EditorStore>((set) => ({
   setSuggestionChips: (chips) => set({ suggestionChips: chips }),
   toggleEditor: () => set((state) => ({ editorExpanded: !state.editorExpanded })),
   setValidationReport: (report) => set({ validationReport: report }),
+  setL1State: (partial) =>
+    set((state) => ({ l1State: { ...state.l1State, ...partial } })),
+  setBoardModeOpen: (open) => set({ boardModeOpen: open }),
 }));

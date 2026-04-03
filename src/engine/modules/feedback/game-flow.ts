@@ -25,6 +25,18 @@ export class GameFlow extends BaseModule {
         default: 'show_result',
         options: ['show_result', 'restart', 'none'],
       },
+      failRestartDelay: {
+        type: 'number',
+        label: 'Fail Restart Delay (s)',
+        default: 1,
+        min: 0,
+        max: 10,
+      },
+      pauseAllowed: {
+        type: 'boolean',
+        label: 'Pause Allowed',
+        default: true,
+      },
     };
   }
 

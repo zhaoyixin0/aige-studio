@@ -38,6 +38,20 @@ export class Lives extends BaseModule {
         default: 'finish',
         options: ['finish', 'none'],
       },
+      damageAmount: {
+        type: 'number',
+        label: 'Damage Amount',
+        default: 1,
+        min: 1,
+        max: 10,
+      },
+      shieldDuration: {
+        type: 'number',
+        label: 'Shield Duration (s)',
+        default: 0,
+        min: 0,
+        max: 30,
+      },
     };
   }
 
