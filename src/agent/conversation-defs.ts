@@ -7,6 +7,7 @@
 import type Anthropic from '@anthropic-ai/sdk';
 import { ALL_GAME_TYPES } from './game-presets.ts';
 import { DEFAULT_THEME_FOR_GAME } from './wizard.ts';
+import { PARAMETER_REGISTRY, type ParamCategory } from '@/data/parameter-registry.ts';
 
 /* ------------------------------------------------------------------ */
 /*  Public types                                                       */
@@ -23,11 +24,18 @@ export interface Chip {
   emoji?: string;
 }
 
+export interface ParameterCardPayload {
+  readonly category: string;
+  readonly paramIds: string[];
+  readonly title?: string;
+}
+
 export interface ConversationResult {
   reply: string;
   config?: import('@/engine/core/index.ts').GameConfig;
   chips?: Chip[];
   needsMoreInfo?: boolean;
+  parameterCard?: ParameterCardPayload;
 }
 
 export interface ConfigChange {
@@ -311,6 +319,29 @@ export const TOOLS: Anthropic.Messages.Tool[] = [
       required: ['current_modules', 'game_type'],
     },
   },
+  {
+    name: 'push_parameter_card',
+    description: '推送一个参数调节卡片到聊天中，让用户通过 GUI 调整特定参数',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        category: {
+          type: 'string',
+          description: '参数类别（如 game_mechanics, visual_audio, game_objects, abstract, input）',
+        },
+        param_ids: {
+          type: 'array',
+          items: { type: 'string' },
+          description: '来自参数注册表的参数 ID 列表',
+        },
+        title: {
+          type: 'string',
+          description: '卡片标题（可选）',
+        },
+      },
+      required: ['category', 'param_ids'],
+    },
+  },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -422,4 +453,31 @@ export function getGameCategory(gameType: string): string {
   if (gameType === 'action-rpg') return 'action-rpg';
   if (gameType === 'platformer') return 'platformer';
   return 'simple';
+}
+
+/* ------------------------------------------------------------------ */
+/*  Parameter registry summary for system prompt grounding             */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Build a compact summary of the parameter registry grouped by category.
+ * Used to inject parameter IDs into the system prompt so the LLM can
+ * reference real registry IDs when calling push_parameter_card.
+ */
+export function buildParameterRegistrySummary(): string {
+  const byCategory = new Map<ParamCategory, Array<{ id: string; name: string }>>();
+
+  for (const param of PARAMETER_REGISTRY) {
+    const list = byCategory.get(param.category) ?? [];
+    list.push({ id: param.id, name: param.name });
+    byCategory.set(param.category, list);
+  }
+
+  const lines: string[] = ['## 参数注册表（用于 push_parameter_card 工具）'];
+  for (const [category, params] of byCategory) {
+    const entries = params.map((p) => `${p.id}(${p.name})`).join(', ');
+    lines.push(`- ${category}: ${entries}`);
+  }
+
+  return lines.join('\n');
 }

@@ -22,10 +22,16 @@ export interface ChatMessage {
   timestamp: number;
 }
 
+export type ChipType = 'game_type' | 'param' | 'action' | 'board_mode';
+
 export interface Chip {
   id: string;
   label: string;
   emoji?: string;
+  type?: ChipType;
+  paramId?: string;
+  category?: string;
+  action?: string;
 }
 
 export const DEFAULT_CHIPS: Chip[] = [

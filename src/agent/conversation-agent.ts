@@ -24,6 +24,7 @@ import {
   type Chip,
   type ConversationResult,
   type ConfigChange,
+  type ParameterCardPayload,
   MAX_HISTORY,
   ART_STYLES,
   GAME_TYPE_DESCRIPTIONS,
@@ -35,10 +36,11 @@ import {
   PRIORITY_BY_CATEGORY,
   getGameCategory,
   detectGameTypeFromMessage,
+  buildParameterRegistrySummary,
 } from './conversation-defs.ts';
 
 // Re-export public types and functions so external consumers don't need to change imports
-export type { Chip, ConversationResult, ConfigChange, ConversationMessage };
+export type { Chip, ConversationResult, ConfigChange, ConversationMessage, ParameterCardPayload };
 export { detectGameTypeFromMessage };
 
 /* ------------------------------------------------------------------ */
@@ -119,6 +121,9 @@ export async function buildSystemPrompt(
   loader: SkillLoader = defaultSkillLoader,
 ): Promise<string> {
   let prompt = SYSTEM_PROMPT_BASE;
+
+  // Inject parameter registry summary for push_parameter_card grounding
+  prompt += `\n\n${buildParameterRegistrySummary()}`;
 
   // Load contextual knowledge from skill files
   try {
@@ -338,6 +343,7 @@ export class ConversationAgent {
       let reply = '';
       let config: GameConfig | undefined;
       let chips: Chip[] | undefined;
+      let parameterCard: ParameterCardPayload | undefined;
 
       for (const block of response.content) {
         if (block.type === 'text') {
@@ -424,6 +430,23 @@ export class ConversationAgent {
               }
               break;
             }
+
+            case 'push_parameter_card': {
+              const input = block.input as {
+                category: string;
+                param_ids: string[];
+                title?: string;
+              };
+              parameterCard = {
+                category: input.category,
+                paramIds: input.param_ids,
+                ...(input.title ? { title: input.title } : {}),
+              };
+              if (!reply) {
+                reply = '请通过下方的参数卡片进行调整：';
+              }
+              break;
+            }
           }
         }
       }
@@ -441,9 +464,9 @@ export class ConversationAgent {
       }
 
       // Determine if we still need more info
-      const needsMoreInfo = !config && !chips;
+      const needsMoreInfo = !config && !chips && !parameterCard;
 
-      return { reply, config, chips, needsMoreInfo };
+      return { reply, config, chips, needsMoreInfo, parameterCard };
     } catch (error) {
       const errMsg = error instanceof Error ? error.message : String(error);
       return {
