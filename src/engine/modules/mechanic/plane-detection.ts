@@ -62,14 +62,14 @@ export class PlaneDetection extends BaseModule {
     const brightness = data.brightness ?? data.averageBrightness ?? 0.5;
 
     // Higher sensitivity = easier to detect planes
-    if (brightness >= 1 - sensitivity) {
+    if (brightness >= 1 - (sensitivity as number)) {
       const plane: DetectedPlane = {
         id: `plane-${++this.planeCounter}`,
         x: data.x ?? 0,
         y: data.y ?? 0,
         width: data.width ?? 1,
         height: data.height ?? 1,
-        confidence: brightness * sensitivity,
+        confidence: brightness * (sensitivity as number),
       };
 
       this.planes.push(plane);
@@ -93,7 +93,7 @@ export class PlaneDetection extends BaseModule {
     const sensitivity = this.params.sensitivity ?? 0.5;
     const confidence = 0.5 + Math.random() * 0.5;
 
-    if (confidence >= 1 - sensitivity) {
+    if (confidence >= 1 - (sensitivity as number)) {
       const plane: DetectedPlane = {
         id: `plane-${++this.planeCounter}`,
         x: Math.random(),

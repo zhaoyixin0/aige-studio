@@ -73,7 +73,7 @@ export class ComboSystem extends BaseModule {
 
   private onHit(): void {
     const now = performance.now();
-    const window = this.params.comboWindow ?? 2000;
+    const window = (this.params.comboWindow as number) ?? 2000;
 
     if (now - this.lastHitTime <= window) {
       this.comboCount++;
@@ -82,8 +82,8 @@ export class ComboSystem extends BaseModule {
     }
     this.lastHitTime = now;
 
-    const multiplierStep = this.params.multiplierStep ?? 0.5;
-    const maxMultiplier = this.params.maxMultiplier ?? 5;
+    const multiplierStep = (this.params.multiplierStep as number) ?? 0.5;
+    const maxMultiplier = (this.params.maxMultiplier as number) ?? 5;
     const multiplier = Math.min(
       1 + (this.comboCount - 1) * multiplierStep,
       maxMultiplier,
@@ -99,7 +99,7 @@ export class ComboSystem extends BaseModule {
     if (this.gameflowPaused) return;
     if (this.comboCount === 0) return;
 
-    const window = this.params.comboWindow ?? 2000;
+    const window = (this.params.comboWindow as number) ?? 2000;
     const now = performance.now();
 
     if (now - this.lastHitTime > window) {
@@ -115,8 +115,8 @@ export class ComboSystem extends BaseModule {
   }
 
   getMultiplier(): number {
-    const multiplierStep = this.params.multiplierStep ?? 0.5;
-    const maxMultiplier = this.params.maxMultiplier ?? 5;
+    const multiplierStep = (this.params.multiplierStep as number) ?? 0.5;
+    const maxMultiplier = (this.params.maxMultiplier as number) ?? 5;
     if (this.comboCount === 0) return 1;
     return Math.min(
       1 + (this.comboCount - 1) * multiplierStep,

@@ -82,7 +82,7 @@ export class GameFlow extends BaseModule {
     this.emit('gameflow:state', { state: newState, previous });
 
     if (newState === 'countdown') {
-      const countdownSeconds = this.params.countdown ?? 3;
+      const countdownSeconds = (this.params.countdown ?? 3) as number;
       if (countdownSeconds <= 0) {
         // Skip directly to playing
         this.transition('playing');

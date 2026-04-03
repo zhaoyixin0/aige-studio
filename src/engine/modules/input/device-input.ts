@@ -84,8 +84,8 @@ export class DeviceInput extends BaseModule {
   }
 
   private onOrientation(e: DeviceOrientationEvent): void {
-    const sensitivity: number = this.params.sensitivity ?? 1;
-    const deadzone: number = this.params.deadzone ?? 0.1;
+    const sensitivity: number = (this.params.sensitivity ?? 1) as number;
+    const deadzone: number = (this.params.deadzone ?? 0.1) as number;
 
     // gamma: left/right tilt (-90 to 90)
     // beta: front/back tilt (-180 to 180)

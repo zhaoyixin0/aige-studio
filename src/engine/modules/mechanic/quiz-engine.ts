@@ -94,11 +94,11 @@ export class QuizEngine extends BaseModule {
     if (!this.started || this.finished) return;
     if (typeof optionIndex !== 'number' || optionIndex < 0) return;
 
-    const questions: QuizQuestion[] = this.params.questions ?? [];
+    const questions: QuizQuestion[] = (this.params.questions as QuizQuestion[]) ?? [];
     if (this.currentIndex >= questions.length) return;
 
     const question = questions[this.currentIndex];
-    const scoring: QuizScoring = this.params.scoring ?? { correct: 10, wrong: 0, timeBonus: true };
+    const scoring: QuizScoring = (this.params.scoring as QuizScoring) ?? { correct: 10, wrong: 0, timeBonus: true };
 
     if (optionIndex === question.correctIndex) {
       const score = scoring.correct;
@@ -131,12 +131,12 @@ export class QuizEngine extends BaseModule {
     if (this.gameflowPaused) return;
     if (!this.started || this.finished) return;
 
-    const timePerQuestion = (this.params.timePerQuestion ?? 15) * 1000; // ms
+    const timePerQuestion = ((this.params.timePerQuestion as number) ?? 15) * 1000; // ms
     this.questionTimer += dt;
 
     if (this.questionTimer >= timePerQuestion) {
       // Time ran out — auto-wrong
-      const questions: QuizQuestion[] = this.params.questions ?? [];
+      const questions: QuizQuestion[] = (this.params.questions as QuizQuestion[]) ?? [];
       if (this.currentIndex < questions.length) {
         const question = questions[this.currentIndex];
         this.emit('quiz:wrong', {
@@ -151,7 +151,7 @@ export class QuizEngine extends BaseModule {
   }
 
   private advanceToNext(): void {
-    const questions: QuizQuestion[] = this.params.questions ?? [];
+    const questions: QuizQuestion[] = (this.params.questions as QuizQuestion[]) ?? [];
     this.currentIndex++;
     this.questionTimer = 0;
 
@@ -167,7 +167,7 @@ export class QuizEngine extends BaseModule {
   }
 
   private emitCurrentQuestion(): void {
-    const questions: QuizQuestion[] = this.params.questions ?? [];
+    const questions: QuizQuestion[] = (this.params.questions as QuizQuestion[]) ?? [];
     if (this.currentIndex >= questions.length) return;
 
     const question = questions[this.currentIndex];
@@ -181,13 +181,13 @@ export class QuizEngine extends BaseModule {
 
   getCurrentQuestion(): QuizQuestion | null {
     if (!this.started || this.finished) return null;
-    const questions: QuizQuestion[] = this.params.questions ?? [];
+    const questions: QuizQuestion[] = (this.params.questions as QuizQuestion[]) ?? [];
     if (this.currentIndex >= questions.length) return null;
     return questions[this.currentIndex];
   }
 
   getProgress(): { current: number; total: number } {
-    const questions: QuizQuestion[] = this.params.questions ?? [];
+    const questions: QuizQuestion[] = (this.params.questions as QuizQuestion[]) ?? [];
     return { current: this.currentIndex, total: questions.length };
   }
 

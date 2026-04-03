@@ -70,7 +70,7 @@ export class DifficultyRamp extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    const rules: DifficultyRule[] = this.params.rules ?? [];
+    const rules: DifficultyRule[] = (this.params.rules as DifficultyRule[]) ?? [];
     this.ruleTimers = rules.map(() => 0);
     this.ruleMilestones = rules.map(() => 0);
 
@@ -85,7 +85,7 @@ export class DifficultyRamp extends BaseModule {
 
   update(dt: number): void {
     if (this.gameflowPaused) return;
-    const rules: DifficultyRule[] = this.params.rules ?? [];
+    const rules: DifficultyRule[] = (this.params.rules as DifficultyRule[]) ?? [];
     if (rules.length === 0) return;
 
     if (this.params.mode === 'time') {
@@ -112,7 +112,7 @@ export class DifficultyRamp extends BaseModule {
   }
 
   private applyRule(rule: DifficultyRule): void {
-    const target = this.engine?.getModule(this.params.target);
+    const target = this.engine?.getModule(this.params.target as string);
     if (!target) {
       if (!this.warnedMissingTarget) {
         console.warn(`[DifficultyRamp] Target module "${this.params.target}" not found`);
@@ -153,8 +153,8 @@ export class DifficultyRamp extends BaseModule {
   }
 
   reset(): void {
-    this.ruleTimers = (this.params.rules ?? []).map(() => 0);
-    this.ruleMilestones = (this.params.rules ?? []).map(() => 0);
+    this.ruleTimers = ((this.params.rules as DifficultyRule[]) ?? []).map(() => 0);
+    this.ruleMilestones = ((this.params.rules as DifficultyRule[]) ?? []).map(() => 0);
     this.currentScore = 0;
     this.warnedMissingTarget = false;
   }

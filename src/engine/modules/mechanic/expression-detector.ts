@@ -57,14 +57,14 @@ export class ExpressionDetector extends BaseModule {
     const now = performance.now();
     const cooldown = this.params.cooldown ?? 500;
 
-    if (now - this.lastDetectTime < cooldown) return;
+    if (now - this.lastDetectTime < (cooldown as number)) return;
 
-    const expressionType = this.params.expressionType ?? 'smile';
-    const threshold = this.params.threshold ?? 0.7;
+    const expressionType = (this.params.expressionType as string) ?? 'smile';
+    const threshold = (this.params.threshold as number) ?? 0.7;
 
     const confidence = this.getConfidence(expressionType, data);
 
-    if (confidence >= threshold) {
+    if (confidence >= (threshold as number)) {
       this.lastDetectTime = now;
       this.matched = true;
       this.matchFadeTimer = 1500; // ms to show checkmark

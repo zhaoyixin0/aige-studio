@@ -111,7 +111,7 @@ export class Scorer extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    this.on(this.params.hitEvent ?? 'collision:hit', () => this.onHit());
+    this.on((this.params.hitEvent as string) ?? 'collision:hit', () => this.onHit());
 
     if (this.params.deductOnMiss) {
       this.on('spawner:destroyed', () => this.onMiss());
@@ -120,7 +120,7 @@ export class Scorer extends BaseModule {
 
   private onHit(): void {
     const now = performance.now();
-    const combo = this.params.combo ?? this.getSchema().combo.default;
+    const combo = (this.params.combo as { enabled: boolean; window: number; multiplier: number[] }) ?? this.getSchema().combo.default;
 
     if (combo.enabled) {
       // Check if within combo window
@@ -141,7 +141,7 @@ export class Scorer extends BaseModule {
     );
     const multiplier = multiplierArray[multiplierIndex] ?? 1;
 
-    const delta = Math.round(this.params.perHit * multiplier);
+    const delta = Math.round((this.params.perHit as number) * multiplier);
     this.score += delta;
 
     this.emit('scorer:update', {
@@ -170,7 +170,7 @@ export class Scorer extends BaseModule {
   update(dt: number): void {
     if (this.gameflowPaused) return;
     // Check combo timeout — reset combo if window has elapsed
-    const combo = this.params.combo;
+    const combo = this.params.combo as { enabled: boolean; window: number; multiplier: number[] } | undefined;
     if (combo?.enabled && this.comboCount > 0) {
       const now = performance.now();
       if (now - this.lastHitTime > combo.window) {
@@ -178,9 +178,9 @@ export class Scorer extends BaseModule {
       }
     }
     // Survival scoring: accumulate fractional points, emit when crossing whole number
-    const scorePerSecond = this.params.scorePerSecond ?? 0;
+    const scorePerSecond = (this.params.scorePerSecond as number) ?? 0;
     if (scorePerSecond > 0) {
-      this.scoreAccumulator += scorePerSecond * (dt / 1000);
+      this.scoreAccumulator += (scorePerSecond as number) * (dt / 1000);
       const delta = Math.floor(this.scoreAccumulator);
       if (delta >= 1) {
         this.scoreAccumulator -= delta;

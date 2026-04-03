@@ -70,8 +70,8 @@ export class AudioInput extends BaseModule {
     if (this.gameflowPaused) return;
     if (!this.isActive || !this.analyser || !this.dataArray) return;
 
-    const mode: string = this.params.mode ?? 'volume';
-    const threshold: number = this.params.threshold ?? 0.3;
+    const mode: string = (this.params.mode ?? 'volume') as string;
+    const threshold: number = (this.params.threshold ?? 0.3) as number;
 
     if (mode === 'volume' || mode === 'blow') {
       this.analyser.getByteTimeDomainData(this.dataArray);

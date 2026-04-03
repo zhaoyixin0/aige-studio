@@ -71,13 +71,13 @@ export class Lives extends BaseModule {
 
   init(engine: GameEngine): void {
     super.init(engine);
-    this.current = this.params.count;
+    this.current = this.params.count as number;
 
     this.on('collision:damage', () => {
       // Skip damage during invincibility frames
       if (this.isInvincible()) return;
 
-      const amount = Math.abs(this.params.events?.damage ?? 1);
+      const amount = Math.abs((this.params.events as { damage?: number })?.damage ?? 1);
       this.decrease(amount);
     });
   }
@@ -89,7 +89,7 @@ export class Lives extends BaseModule {
 
     this.emit('lives:change', {
       current: this.current,
-      max: this.params.count,
+      max: this.params.count as number,
     });
 
     if (this.current === 0) {
@@ -98,7 +98,7 @@ export class Lives extends BaseModule {
   }
 
   increase(amount: number): void {
-    this.current = Math.min(this.params.count, this.current + amount);
+    this.current = Math.min(this.params.count as number, this.current + amount);
 
     this.emit('lives:change', {
       current: this.current,
@@ -129,7 +129,7 @@ export class Lives extends BaseModule {
   }
 
   reset(): void {
-    this.current = this.params.count;
+    this.current = this.params.count as number;
   }
 
   update(_dt: number): void {

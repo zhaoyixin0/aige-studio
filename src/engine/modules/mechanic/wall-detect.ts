@@ -57,7 +57,7 @@ export class WallDetect extends BaseModule {
 
     const wallJump = this.params.wallJump;
     if (wallJump !== false) {
-      const event = this.params.wallJumpEvent ?? 'input:touch:tap';
+      const event = (this.params.wallJumpEvent as string) ?? 'input:touch:tap';
       this.on(event, () => {
         this.tryWallJump();
       });
@@ -84,13 +84,13 @@ export class WallDetect extends BaseModule {
   }
 
   getSlideSpeed(): number {
-    return this.params.slideSpeed ?? 100;
+    return (this.params.slideSpeed as number) ?? 100;
   }
 
   tryWallJump(): void {
     if (!this.touching) return;
 
-    const force = this.params.wallJumpForce ?? { x: 400, y: 600 };
+    const force = (this.params.wallJumpForce as { x: number; y: number }) ?? { x: 400, y: 600 };
     const awaySide = this.side === 'left' ? 'right' : 'left';
 
     this.emit('wall:jump', {

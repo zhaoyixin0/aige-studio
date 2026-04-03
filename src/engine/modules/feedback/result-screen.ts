@@ -61,7 +61,7 @@ export class ResultScreen extends BaseModule {
   private collectStats(): void {
     if (!this.engine) return;
 
-    const showFields: string[] = this.params.show ?? ['score'];
+    const showFields: string[] = (this.params.show ?? ['score']) as string[];
 
     for (const field of showFields) {
       switch (field) {
@@ -96,7 +96,7 @@ export class ResultScreen extends BaseModule {
 
   private computeStarRating(): number {
     const score = this.stats.score ?? 0;
-    const rating = this.params.rating ?? { '3star': 500, '2star': 300, '1star': 100 };
+    const rating = (this.params.rating ?? { '3star': 500, '2star': 300, '1star': 100 }) as Record<string, number>;
 
     if (score >= rating['3star']) return 3;
     if (score >= rating['2star']) return 2;
@@ -117,7 +117,7 @@ export class ResultScreen extends BaseModule {
     return {
       stats: { ...this.stats },
       starRating: this.computeStarRating(),
-      actions: [...(this.params.actions ?? ['retry', 'share'])],
+      actions: [...((this.params.actions ?? ['retry', 'share']) as string[])],
     };
   }
 

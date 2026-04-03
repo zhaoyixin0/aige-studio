@@ -41,7 +41,7 @@ export class Inventory extends BaseModule {
     super.init(engine);
     this.initializeAmounts();
 
-    this.on(this.params.trackEvent, (data?: any) => {
+    this.on(this.params.trackEvent as string, (data?: any) => {
       if (data?.type && data?.value != null) {
         this.add(data.type, data.value);
       }

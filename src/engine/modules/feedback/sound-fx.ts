@@ -57,7 +57,7 @@ export class SoundFX extends BaseModule {
     super.init(engine);
     this.gameflowPaused = false;
 
-    const events: Record<string, string> = this.params.events ?? {};
+    const events: Record<string, string> = (this.params.events ?? {}) as Record<string, string>;
     for (const [eventName, assetId] of Object.entries(events)) {
       this.on(eventName, () => {
         this.playSound(assetId);

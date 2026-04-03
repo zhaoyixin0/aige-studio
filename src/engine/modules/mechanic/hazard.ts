@@ -72,7 +72,7 @@ export class Hazard extends BaseModule {
   }
 
   getContracts(): ModuleContracts {
-    const damageEvent: string = this.params.damageEvent ?? 'collision:damage';
+    const damageEvent: string = (this.params.damageEvent as string) ?? 'collision:damage';
     return {
       emits: [damageEvent],
     };
@@ -97,8 +97,8 @@ export class Hazard extends BaseModule {
   update(dt: number): void {
     if (this.gameflowPaused) return;
     const dtSec = dt / 1000;
-    const speed = this.params.oscillateSpeed ?? 100;
-    const range = this.params.oscillateRange ?? 100;
+    const speed = (this.params.oscillateSpeed as number) ?? 100;
+    const range = (this.params.oscillateRange as number) ?? 100;
 
     for (const state of this.states) {
       const { def } = state;
@@ -146,8 +146,8 @@ export class Hazard extends BaseModule {
         py + playerRadius >= currentY &&
         py - playerRadius <= currentY + def.height
       ) {
-        this.emit(this.params.damageEvent ?? 'collision:damage', {
-          damage: this.params.damage ?? 1,
+        this.emit((this.params.damageEvent as string) ?? 'collision:damage', {
+          damage: (this.params.damage as number) ?? 1,
           x: px,
           y: py,
         });

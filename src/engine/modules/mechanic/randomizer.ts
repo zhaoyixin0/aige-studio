@@ -166,7 +166,7 @@ export class Randomizer extends BaseModule {
   spin(): void {
     if (this.spinning) return;
 
-    const items: RandomizerItem[] = this.params.items ?? [];
+    const items: RandomizerItem[] = (this.params.items as RandomizerItem[]) ?? [];
     if (items.length === 0) return;
 
     this.spinning = true;
@@ -187,10 +187,10 @@ export class Randomizer extends BaseModule {
       const settleDuration = isWheel
         ? (this.params.settleDuration ?? 1.5)
         : 0;
-      const totalDuration = spinDuration + settleDuration;
+      const totalDuration = (spinDuration as number) + (settleDuration as number);
 
       // Transition from spinning to settling phase (wheel mode only)
-      if (isWheel && !this.settling && this.spinTimer >= spinDuration) {
+      if (isWheel && !this.settling && this.spinTimer >= (spinDuration as number)) {
         this.settling = true;
         this.emit('randomizer:settling');
       }
@@ -220,7 +220,7 @@ export class Randomizer extends BaseModule {
   }
 
   private pickWeightedRandom(): RandomizerResult | null {
-    const items: RandomizerItem[] = this.params.items ?? [];
+    const items: RandomizerItem[] = (this.params.items as RandomizerItem[]) ?? [];
     if (items.length === 0) return null;
 
     const totalWeight = items.reduce((sum, item) => sum + (item.weight ?? 1), 0);
@@ -232,7 +232,7 @@ export class Randomizer extends BaseModule {
         return {
           item: items[i],
           index: i,
-          prizeMultiplier: this.params.prizeMultiplier ?? 1,
+          prizeMultiplier: (this.params.prizeMultiplier as number) ?? 1,
         };
       }
     }
@@ -241,7 +241,7 @@ export class Randomizer extends BaseModule {
     return {
       item: items[items.length - 1],
       index: items.length - 1,
-      prizeMultiplier: this.params.prizeMultiplier ?? 1,
+      prizeMultiplier: (this.params.prizeMultiplier as number) ?? 1,
     };
   }
 
@@ -255,17 +255,17 @@ export class Randomizer extends BaseModule {
 
   getSpinProgress(): number {
     if (!this.spinning) return 0;
-    const spinDuration = this.params.spinDuration ?? 3;
+    const spinDuration = (this.params.spinDuration as number) ?? 3;
     const isWheel = this.params.animation === 'wheel';
     const settleDuration = isWheel
-      ? (this.params.settleDuration ?? 1.5)
+      ? ((this.params.settleDuration as number) ?? 1.5)
       : 0;
     const totalDuration = spinDuration + settleDuration;
     return Math.min(1, this.spinTimer / totalDuration);
   }
 
   getItems(): Array<{ asset: string; label?: string; weight: number }> {
-    return this.params.items ?? [];
+    return (this.params.items as Array<{ asset: string; label?: string; weight: number }>) ?? [];
   }
 
   reset(): void {

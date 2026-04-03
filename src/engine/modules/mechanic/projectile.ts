@@ -144,7 +144,7 @@ export class Projectile extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    const fireEvent = this.params.fireEvent ?? 'input:touch:tap';
+    const fireEvent = (this.params.fireEvent as string) ?? 'input:touch:tap';
     this.on(fireEvent, () => this.fire());
 
     this.on('aim:update', (data?: any) => {
@@ -163,12 +163,12 @@ export class Projectile extends BaseModule {
   fire(): void {
     if (this.gameflowPaused) return;
     if (this.fireTimer > 0) return;
-    if (this.projectiles.length >= (this.params.maxProjectiles ?? 50)) return;
+    if (this.projectiles.length >= ((this.params.maxProjectiles as number) ?? 50)) return;
 
     const { dx, dy } = this.aimDirection;
     const { x, y } = this.sourcePosition;
-    const speed = this.params.speed ?? 600;
-    const damage = this.params.damage ?? 10;
+    const speed = (this.params.speed as number) ?? 600;
+    const damage = (this.params.damage as number) ?? 10;
     const id = `proj-${++this.nextId}`;
 
     const proj: ProjectileInstance = {
@@ -184,7 +184,7 @@ export class Projectile extends BaseModule {
     };
 
     this.projectiles = [...this.projectiles, proj];
-    this.fireTimer = this.params.fireRate ?? 200;
+    this.fireTimer = (this.params.fireRate as number) ?? 200;
 
     this.emit('projectile:fire', { id, x, y, dx, dy, speed, damage });
   }
@@ -202,7 +202,7 @@ export class Projectile extends BaseModule {
       this.fire();
     }
 
-    const lifetime = this.params.lifetime ?? 3000;
+    const lifetime = (this.params.lifetime as number) ?? 3000;
     const destroyed: string[] = [];
 
     // Move projectiles and check lifetime

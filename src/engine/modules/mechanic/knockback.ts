@@ -54,7 +54,7 @@ export class Knockback extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    const trigger = this.params.triggerEvent ?? 'collision:damage';
+    const trigger = (this.params.triggerEvent as string) ?? 'collision:damage';
     this.on(trigger, (data?: any) => {
       this.activate(data);
     });
@@ -102,7 +102,7 @@ export class Knockback extends BaseModule {
 
     this.elapsed += dt;
 
-    if (this.elapsed >= duration) {
+    if (this.elapsed >= (duration as number)) {
       this.active = false;
       this.emit('knockback:end');
     }

@@ -169,15 +169,15 @@ export class PlayerMovement extends BaseModule {
     });
 
     // Support custom discrete events (for non-touch inputs like hand gesture)
-    const moveLeftEvent = this.params.moveLeftEvent;
-    const moveRightEvent = this.params.moveRightEvent;
-    const holdDuration = this.params.holdDuration ?? 0;
+    const moveLeftEvent = this.params.moveLeftEvent as string;
+    const moveRightEvent = this.params.moveRightEvent as string;
+    const holdDuration = (this.params.holdDuration as number) ?? 0;
     if (moveLeftEvent && !moveLeftEvent.startsWith('input:touch:')) {
       this.on(moveLeftEvent, () => {
         if (this.inputLocked) return;
         this.direction = -1;
         this.inputActive = true;
-        if (holdDuration > 0) this.holdTimer = holdDuration;
+        if ((holdDuration as number) > 0) this.holdTimer = holdDuration as number;
       });
     }
     if (moveRightEvent && !moveRightEvent.startsWith('input:touch:')) {
@@ -185,7 +185,7 @@ export class PlayerMovement extends BaseModule {
         if (this.inputLocked) return;
         this.direction = 1;
         this.inputActive = true;
-        if (holdDuration > 0) this.holdTimer = holdDuration;
+        if ((holdDuration as number) > 0) this.holdTimer = holdDuration as number;
       });
     }
 
@@ -200,14 +200,14 @@ export class PlayerMovement extends BaseModule {
       return;
     }
 
-    const speed = this.params.speed ?? 300;
-    const acceleration = this.params.acceleration ?? 1000;
-    const deceleration = this.params.deceleration ?? 800;
+    const speed = (this.params.speed as number) ?? 300;
+    const acceleration = (this.params.acceleration as number) ?? 1000;
+    const deceleration = (this.params.deceleration as number) ?? 800;
     const dtSec = dt / 1000;
 
     if (this.inputActive) {
       // Accelerate toward direction * speed
-      const targetVelocity = this.direction * speed;
+      const targetVelocity = this.direction * (speed as number);
       const diff = targetVelocity - this.velocityX;
 
       if (Math.abs(diff) < acceleration * dtSec) {
@@ -230,15 +230,15 @@ export class PlayerMovement extends BaseModule {
     } else {
       // Decelerate toward 0
       if (this.velocityX > 0) {
-        this.velocityX = Math.max(0, this.velocityX - deceleration * dtSec);
+        this.velocityX = Math.max(0, this.velocityX - (deceleration as number) * dtSec);
       } else if (this.velocityX < 0) {
-        this.velocityX = Math.min(0, this.velocityX + deceleration * dtSec);
+        this.velocityX = Math.min(0, this.velocityX + (deceleration as number) * dtSec);
       }
     }
 
     // Cap at max speed
-    if (Math.abs(this.velocityX) > speed) {
-      this.velocityX = Math.sign(this.velocityX) * speed;
+    if (Math.abs(this.velocityX) > (speed as number)) {
+      this.velocityX = Math.sign(this.velocityX) * (speed as number);
     }
 
     // Update position

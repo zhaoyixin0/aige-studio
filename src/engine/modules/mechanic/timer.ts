@@ -51,7 +51,7 @@ export class Timer extends BaseModule {
   update(dt: number): void {
     if (this.gameflowPaused || this.ended) return;
 
-    const durationMs = this.params.duration * 1000;
+    const durationMs = (this.params.duration as number) * 1000;
 
     // Advance elapsed, but clamp to duration for countdown
     if (this.params.mode === 'countdown') {
@@ -64,7 +64,7 @@ export class Timer extends BaseModule {
     const elapsedSec = this.elapsed / 1000;
     const remainingSec =
       this.params.mode === 'countdown'
-        ? Math.max(0, this.params.duration - elapsedSec)
+        ? Math.max(0, (this.params.duration as number) - elapsedSec)
         : 0;
 
     this.emit('timer:tick', {
@@ -81,7 +81,7 @@ export class Timer extends BaseModule {
 
   getRemaining(): number {
     if (this.params.mode === 'countdown') {
-      return Math.max(0, this.params.duration - this.elapsed / 1000);
+      return Math.max(0, (this.params.duration as number) - this.elapsed / 1000);
     }
     return 0;
   }

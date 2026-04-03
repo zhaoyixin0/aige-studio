@@ -51,12 +51,12 @@ export class BranchStateMachine extends BaseModule {
 
   start(): void {
     this.started = true;
-    const startState = this.params.startState ?? 'start';
+    const startState = (this.params.startState as string) ?? 'start';
     this.goToState(startState);
   }
 
   goToState(stateId: string): void {
-    const states: Record<string, BranchState> = this.params.states ?? {};
+    const states: Record<string, BranchState> = (this.params.states as Record<string, BranchState>) ?? {};
     const state = states[stateId];
 
     if (!state) {
@@ -86,7 +86,7 @@ export class BranchStateMachine extends BaseModule {
   choose(choiceIndex: number): void {
     if (!this.started || !this.currentState) return;
 
-    const states: Record<string, BranchState> = this.params.states ?? {};
+    const states: Record<string, BranchState> = (this.params.states as Record<string, BranchState>) ?? {};
     const state = states[this.currentState];
     if (!state) return;
 
@@ -111,7 +111,7 @@ export class BranchStateMachine extends BaseModule {
 
   getCurrentStateData(): BranchState | null {
     if (!this.currentState) return null;
-    const states: Record<string, BranchState> = this.params.states ?? {};
+    const states: Record<string, BranchState> = (this.params.states as Record<string, BranchState>) ?? {};
     return states[this.currentState] ?? null;
   }
 

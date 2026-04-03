@@ -108,8 +108,8 @@ export class FaceInput extends BaseModule {
     const result = this.tracker.getLastResult();
     if (!result) return;
 
-    const smoothing: number = this.params.smoothing ?? 0.3;
-    const sensitivity: number = this.params.sensitivity ?? 1;
+    const smoothing: number = (this.params.smoothing ?? 0.3) as number;
+    const sensitivity: number = (this.params.sensitivity ?? 1) as number;
 
     const canvas = this.engine?.getCanvas();
     const canvasW = canvas?.width ?? 1;

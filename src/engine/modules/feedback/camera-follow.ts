@@ -74,7 +74,7 @@ export class CameraFollow extends BaseModule {
   }
 
   getContracts(): ModuleContracts {
-    const shakeEvent: string = this.params.shakeEvent ?? '';
+    const shakeEvent: string = (this.params.shakeEvent ?? '') as string;
     return {
       emits: [
         'camera:shake',
@@ -95,7 +95,7 @@ export class CameraFollow extends BaseModule {
       }
     });
 
-    const shakeEvent: string = this.params.shakeEvent;
+    const shakeEvent: string = this.params.shakeEvent as string;
     if (shakeEvent) {
       this.on(shakeEvent, () => {
         this.shaking = true;
@@ -108,7 +108,7 @@ export class CameraFollow extends BaseModule {
   update(dt: number): void {
     if (this.gameflowPaused) return;
     const mode: CameraMode = (this.params.mode ?? 'center') as CameraMode;
-    const smoothing: number = this.params.smoothing ?? 0.1;
+    const smoothing: number = (this.params.smoothing ?? 0.1) as number;
     const t = 1 - smoothing;
 
     // Compute goal based on mode
@@ -116,10 +116,10 @@ export class CameraFollow extends BaseModule {
     let goalY = this.targetY;
 
     if (mode === 'look-ahead') {
-      const lookAheadDistance: number = this.params.lookAheadDistance;
+      const lookAheadDistance: number = this.params.lookAheadDistance as number;
       goalX = this.targetX + this.playerDirection * lookAheadDistance;
     } else if (mode === 'dead-zone') {
-      const dz = this.params.deadZone ?? { width: 100, height: 50 };
+      const dz = (this.params.deadZone ?? { width: 100, height: 50 }) as { width: number; height: number };
       const halfW = dz.width / 2;
       const halfH = dz.height / 2;
 
@@ -148,7 +148,7 @@ export class CameraFollow extends BaseModule {
     this.y += (goalY - this.y) * t;
 
     // Clamp to bounds if set
-    const bounds = this.params.bounds;
+    const bounds = this.params.bounds as { minX?: number; maxX?: number; minY?: number; maxY?: number } | undefined;
     if (bounds) {
       if (bounds.minX !== undefined && this.x < bounds.minX) this.x = bounds.minX;
       if (bounds.maxX !== undefined && this.x > bounds.maxX) this.x = bounds.maxX;
@@ -159,7 +159,7 @@ export class CameraFollow extends BaseModule {
     // Handle shake timer
     if (this.shaking) {
       this.shakeElapsed += dt;
-      const shakeDuration: number = this.params.shakeDuration;
+      const shakeDuration: number = this.params.shakeDuration as number;
       if (this.shakeElapsed >= shakeDuration) {
         this.shaking = false;
         this.shakeElapsed = 0;
@@ -183,7 +183,7 @@ export class CameraFollow extends BaseModule {
 
   getShakeOffset(): { x: number; y: number } {
     if (!this.shaking) return { x: 0, y: 0 };
-    const intensity: number = this.params.shakeIntensity;
+    const intensity: number = this.params.shakeIntensity as number;
     return {
       x: (Math.random() * 2 - 1) * intensity,
       y: (Math.random() * 2 - 1) * intensity,

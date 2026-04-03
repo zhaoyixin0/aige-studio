@@ -34,7 +34,7 @@ export class EquipmentSlot extends BaseModule {
   }
 
   getContracts(): ModuleContracts {
-    const equipEvent: string = this.params.equipEvent ?? 'collectible:pickup';
+    const equipEvent: string = (this.params.equipEvent as string) ?? 'collectible:pickup';
     return {
       emits: ['equipment:equip', 'equipment:unequip', 'equipment:stats'],
       consumes: [equipEvent],
@@ -43,7 +43,7 @@ export class EquipmentSlot extends BaseModule {
 
   init(engine: GameEngine): void {
     super.init(engine);
-    const equipEvent: string = this.params.equipEvent ?? 'collectible:pickup';
+    const equipEvent: string = (this.params.equipEvent as string) ?? 'collectible:pickup';
     this.on(equipEvent, (data?: any) => this.handleAutoEquip(data));
   }
 

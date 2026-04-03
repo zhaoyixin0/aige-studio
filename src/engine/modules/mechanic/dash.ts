@@ -63,7 +63,7 @@ export class Dash extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    const trigger = this.params.triggerEvent ?? 'input:touch:doubleTap';
+    const trigger = (this.params.triggerEvent as string) ?? 'input:touch:doubleTap';
     this.on(trigger, (data?: any) => {
       this.tryDash(data);
     });
@@ -110,8 +110,8 @@ export class Dash extends BaseModule {
 
     if (!this.active) return;
 
-    const distance = this.params.distance ?? 150;
-    const duration = this.params.duration ?? 150;
+    const distance = (this.params.distance as number) ?? 150;
+    const duration = (this.params.duration as number) ?? 150;
 
     this.elapsed += dt;
 
@@ -124,7 +124,7 @@ export class Dash extends BaseModule {
 
     if (this.elapsed >= duration) {
       this.active = false;
-      this.cooldownRemaining = this.params.cooldown ?? 500;
+      this.cooldownRemaining = (this.params.cooldown as number) ?? 500;
 
       this.emit('dash:end', {
         displacement: { ...this.displacement },

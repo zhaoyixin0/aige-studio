@@ -51,8 +51,8 @@ export class DialogueSystem extends BaseModule {
   }
 
   getContracts(): ModuleContracts {
-    const triggerEvent: string = this.params.triggerEvent ?? 'collision:hit';
-    const advanceEvent: string = this.params.advanceEvent ?? 'input:touch:tap';
+    const triggerEvent: string = (this.params.triggerEvent as string) ?? 'collision:hit';
+    const advanceEvent: string = (this.params.advanceEvent as string) ?? 'input:touch:tap';
     return {
       emits: [
         'gameflow:pause',
@@ -69,14 +69,14 @@ export class DialogueSystem extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    const triggerEvent: string = this.params.triggerEvent ?? 'collision:hit';
+    const triggerEvent: string = (this.params.triggerEvent as string) ?? 'collision:hit';
     this.on(triggerEvent, (data?: any) => {
       if (data && typeof data.dialogueId === 'string') {
         this.startDialogue(data.dialogueId);
       }
     });
 
-    const advanceEvent: string = this.params.advanceEvent ?? 'input:touch:tap';
+    const advanceEvent: string = (this.params.advanceEvent as string) ?? 'input:touch:tap';
     this.on(advanceEvent, () => {
       if (this.activeDialogueId !== null) {
         this.advanceNode();
@@ -180,7 +180,7 @@ export class DialogueSystem extends BaseModule {
   }
 
   private getTree(dialogueId: string): DialogueTree | undefined {
-    const dialogues = this.params.dialogues ?? {};
+    const dialogues = (this.params.dialogues as Record<string, DialogueTree>) ?? {};
     return dialogues[dialogueId];
   }
 

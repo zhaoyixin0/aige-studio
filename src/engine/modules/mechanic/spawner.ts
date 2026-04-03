@@ -116,7 +116,7 @@ export class Spawner extends BaseModule {
 
   getContracts(): ModuleContracts {
     const spriteSize = (this.params.spriteSize as number) ?? 48;
-    const itemConfigs: Array<{ asset: string; layer?: string }> = this.params.items ?? [];
+    const itemConfigs: Array<{ asset: string; layer?: string }> = (this.params.items as Array<{ asset: string; layer?: string }>) ?? [];
     // Default layer for items without an explicit layer assignment
     const defaultLayer = 'items';
 
@@ -155,13 +155,13 @@ export class Spawner extends BaseModule {
   update(dt: number): void {
     if (this.gameflowPaused) return;
 
-    const frequency = (this.params.frequency ?? 1.5) * 1000; // convert to ms
+    const frequency = ((this.params.frequency as number) ?? 1.5) * 1000; // convert to ms
 
     // Advance spawn timer
     this.spawnTimer += dt;
 
     // Spawn if timer exceeds frequency and under maxCount
-    if (this.spawnTimer >= frequency && this.objects.length < (this.params.maxCount ?? 10)) {
+    if (this.spawnTimer >= frequency && this.objects.length < ((this.params.maxCount as number) ?? 10)) {
       this.spawn();
       this.spawnTimer -= frequency;
     }
@@ -211,7 +211,7 @@ export class Spawner extends BaseModule {
   }
 
   spawn(): SpawnedObject | null {
-    const items: Array<{ asset: string; weight: number }> = this.params.items ?? [];
+    const items: Array<{ asset: string; weight: number }> = (this.params.items as Array<{ asset: string; weight: number }>) ?? [];
     if (items.length === 0) return null;
 
     // Weighted random pick
@@ -226,8 +226,8 @@ export class Spawner extends BaseModule {
       }
     }
 
-    const area = this.params.spawnArea ?? { x: 0, y: 0, width: 800, height: 0 };
-    const speed = this.params.speed ?? { min: 100, max: 200 };
+    const area = (this.params.spawnArea as { x: number; y: number; width: number; height: number }) ?? { x: 0, y: 0, width: 800, height: 0 };
+    const speed = (this.params.speed as { min: number; max: number }) ?? { min: 100, max: 200 };
 
     const directions: Array<'down' | 'up' | 'left' | 'right'> = ['down', 'up', 'left', 'right'];
     const direction =
@@ -245,9 +245,9 @@ export class Spawner extends BaseModule {
       x: area.x + Math.random() * (area.width ?? 0),
       y: area.y + Math.random() * (area.height ?? 0),
       speed: speedMin + Math.random() * (speedMax - speedMin),
-      direction,
+      direction: direction as 'down' | 'up' | 'left' | 'right',
       rotation: 0,
-      rotationSpeed: this.params.rotation ? (this.params.rotationSpeed ?? 0) : 0,
+      rotationSpeed: this.params.rotation ? ((this.params.rotationSpeed as number) ?? 0) : 0,
     };
 
     this.objects.push(obj);

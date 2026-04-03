@@ -63,7 +63,7 @@ export class OneWayPlatform extends BaseModule {
 
     const dropEvent = this.params.dropThroughEvent;
     if (dropEvent) {
-      this.on(dropEvent, () => {
+      this.on(dropEvent as string, () => {
         this.dropping = true;
         this.dropTimer = 0;
         this.emit('platform:drop', { id: this.id });

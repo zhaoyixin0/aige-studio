@@ -83,17 +83,17 @@ export class Runner extends BaseModule {
   }
 
   start(): void {
-    const laneCount = this.params.laneCount ?? 3;
+    const laneCount = (this.params.laneCount as number) ?? 3;
     this.currentLane = Math.floor(laneCount / 2);
     this.distance = 0;
-    this.currentSpeed = this.params.speed ?? 300;
+    this.currentSpeed = (this.params.speed as number) ?? 300;
     this.started = true;
   }
 
   private handleSwipe(data?: any): void {
     if (!this.started) return;
 
-    const laneCount = this.params.laneCount ?? 3;
+    const laneCount = (this.params.laneCount as number) ?? 3;
     const direction = data?.direction as string | undefined;
 
     let newLane = this.currentLane;
@@ -119,8 +119,8 @@ export class Runner extends BaseModule {
     if (this.gameflowPaused) return;
     if (!this.started) return;
 
-    const acceleration = this.params.acceleration ?? 10;
-    const maxSpeed = this.params.maxSpeed ?? 1500;
+    const acceleration = (this.params.acceleration as number) ?? 10;
+    const maxSpeed = (this.params.maxSpeed as number) ?? 1500;
 
     // Increase speed over time, clamped to maxSpeed
     this.currentSpeed += acceleration * (dt / 1000);

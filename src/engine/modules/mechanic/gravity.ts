@@ -66,7 +66,7 @@ export class Gravity extends BaseModule {
   }
 
   getContracts(): ModuleContracts {
-    const toggleEvent: string = this.params.toggleEvent ?? '';
+    const toggleEvent: string = (this.params.toggleEvent as string) ?? '';
     return {
       emits: [
         'gravity:falling',
@@ -103,7 +103,7 @@ export class Gravity extends BaseModule {
       this.frozen = false;
     });
 
-    const toggleEvent = this.params.toggleEvent;
+    const toggleEvent = this.params.toggleEvent as string;
     if (toggleEvent) {
       this.on(toggleEvent, () => {
         this.enabled = !this.enabled;
@@ -200,8 +200,8 @@ export class Gravity extends BaseModule {
     if (this.gameflowPaused) return;
     if (!this.enabled) return;
 
-    const strength = this.params.strength ?? 980;
-    const terminalVelocity = this.params.terminalVelocity ?? 800;
+    const strength = (this.params.strength as number) ?? 980;
+    const terminalVelocity = (this.params.terminalVelocity as number) ?? 800;
     const dtSec = dt / 1000;
     this.lastDt = dtSec;
 

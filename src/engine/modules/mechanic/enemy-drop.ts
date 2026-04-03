@@ -45,7 +45,7 @@ export class EnemyDrop extends BaseModule {
   }
 
   getContracts(): ModuleContracts {
-    const triggerEvent: string = this.params.triggerEvent ?? 'enemy:death';
+    const triggerEvent: string = (this.params.triggerEvent as string) ?? 'enemy:death';
     return {
       emits: ['levelup:xp', 'drop:spawn'],
       consumes: [triggerEvent],
@@ -54,7 +54,7 @@ export class EnemyDrop extends BaseModule {
 
   init(engine: GameEngine): void {
     super.init(engine);
-    const triggerEvent: string = this.params.triggerEvent ?? 'enemy:death';
+    const triggerEvent: string = (this.params.triggerEvent as string) ?? 'enemy:death';
     this.on(triggerEvent, (data?: any) => {
       const x: number = data?.x ?? 0;
       const y: number = data?.y ?? 0;
@@ -64,10 +64,10 @@ export class EnemyDrop extends BaseModule {
 
   rollDrop(x: number, y: number): void {
     // Always award XP
-    const xpAmount: number = this.params.xpAmount ?? 10;
+    const xpAmount: number = (this.params.xpAmount as number) ?? 10;
     this.emit('levelup:xp', { amount: xpAmount });
 
-    const dropChance: number = this.params.dropChance ?? 0.8;
+    const dropChance: number = (this.params.dropChance as number) ?? 0.8;
     if (Math.random() >= dropChance) return;
 
     const lootTable: LootEntry[] = this.getLootTable();

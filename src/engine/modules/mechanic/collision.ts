@@ -114,7 +114,7 @@ export class Collision extends BaseModule {
       hook(_dt);
     }
 
-    const rules: CollisionRule[] = this.params.rules ?? [];
+    const rules: CollisionRule[] = (this.params.rules as CollisionRule[]) ?? [];
     const toDestroy = new Set<string>();
 
     for (const rule of rules) {
@@ -137,7 +137,7 @@ export class Collision extends BaseModule {
           const dy = objA.y - objB.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          const scale = this.params.hitboxScale ?? 1.0;
+          const scale = (this.params.hitboxScale as number) ?? 1.0;
           if (distance < (objA.radius + objB.radius) * scale) {
             // Collision detected
             const midX = (objA.x + objB.x) / 2;

@@ -93,7 +93,7 @@ export class StatusEffect extends BaseModule {
       return;
     }
 
-    const maxEffects: number = this.params.maxEffects ?? 10;
+    const maxEffects: number = (this.params.maxEffects as number) ?? 10;
     if (this.effects.length >= maxEffects) return;
 
     const effect: ActiveEffect = {

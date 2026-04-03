@@ -133,7 +133,7 @@ export class Collectible extends BaseModule {
       const dx = px - items[i].x;
       const dy = py - items[i].y;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      const magnetRadius = this.params.magnetRadius ?? 16;
+      const magnetRadius = (this.params.magnetRadius as number) ?? 16;
       const threshold = radius + magnetRadius;
 
       if (dist < threshold) {
@@ -153,8 +153,8 @@ export class Collectible extends BaseModule {
       if (this.collected.has(i)) continue;
 
       const item = items[i];
-      const amplitude = this.params.floatAmplitude ?? 6;
-      const frequency = this.params.floatFrequency ?? 500;
+      const amplitude = (this.params.floatAmplitude as number) ?? 6;
+      const frequency = (this.params.floatFrequency as number) ?? 500;
       const floatOffset = this.params.floatAnimation
         ? Math.sin(this.elapsed / frequency + i) * amplitude
         : 0;

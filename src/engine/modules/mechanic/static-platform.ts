@@ -99,7 +99,7 @@ export class StaticPlatform extends BaseModule {
     if (material && material in FRICTION_MAP) {
       return FRICTION_MAP[material];
     }
-    return this.params.friction ?? 0.8;
+    return (this.params.friction as number) ?? 0.8;
   }
 
   update(_dt: number): void {

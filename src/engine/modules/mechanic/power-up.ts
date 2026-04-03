@@ -45,7 +45,7 @@ export class PowerUp extends BaseModule {
     if (!data?.powerUpType) return;
 
     const types: Array<{ type: string; multiplier?: number; duration: number }> =
-      this.params.powerUpTypes ?? [];
+      (this.params.powerUpTypes as Array<{ type: string; multiplier?: number; duration: number }>) ?? [];
 
     const definition = types.find((t) => t.type === data.powerUpType);
     if (!definition) return;

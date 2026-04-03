@@ -66,7 +66,7 @@ export class HandInput extends BaseModule {
 
     // Check gesture
     if (result.gesture && result.gesture !== 'none') {
-      const filter: string = this.params.gesture ?? 'any';
+      const filter: string = (this.params.gesture ?? 'any') as string;
       const matches = filter === 'any' || result.gesture === filter;
 
       if (matches && result.gesture !== this.currentGesture) {

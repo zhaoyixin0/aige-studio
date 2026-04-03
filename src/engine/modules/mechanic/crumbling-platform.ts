@@ -94,8 +94,8 @@ export class CrumblingPlatform extends BaseModule {
 
   update(dt: number): void {
     if (this.gameflowPaused) return;
-    const delay = this.params.delay ?? 500;
-    const respawnTime = this.params.respawnTime ?? 3;
+    const delay = (this.params.delay as number) ?? 500;
+    const respawnTime = (this.params.respawnTime as number) ?? 3;
 
     for (let i = 0; i < this.states.length; i++) {
       const state = this.states[i];
@@ -111,9 +111,9 @@ export class CrumblingPlatform extends BaseModule {
             index: i,
           });
         }
-      } else if (!state.active && respawnTime > 0) {
+      } else if (!state.active && (respawnTime as number) > 0) {
         state.respawnTimer += dt;
-        if (state.respawnTimer >= respawnTime * 1000) {
+        if (state.respawnTimer >= (respawnTime as number) * 1000) {
           state.active = true;
           state.respawnTimer = 0;
           this.emit('platform:respawn', {

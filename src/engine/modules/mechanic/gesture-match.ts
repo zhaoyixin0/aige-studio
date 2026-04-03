@@ -55,13 +55,13 @@ export class GestureMatch extends BaseModule {
   start(): void {
     this.active = true;
     this.matchCount = 0;
-    const gestures: string[] = this.params.targetGestures ?? [];
+    const gestures: string[] = (this.params.targetGestures as string[]) ?? [];
     this.totalTargets = gestures.length;
     this.nextTarget();
   }
 
   private nextTarget(): void {
-    const gestures: string[] = this.params.targetGestures ?? [];
+    const gestures: string[] = (this.params.targetGestures as string[]) ?? [];
     if (gestures.length === 0) return;
 
     this.currentTarget = gestures[Math.floor(Math.random() * gestures.length)];
@@ -80,7 +80,7 @@ export class GestureMatch extends BaseModule {
     const gesture = data.gesture as string | undefined;
     const confidence = (data.confidence as number | undefined) ?? 1;
 
-    if (gesture === this.currentTarget && confidence >= threshold) {
+    if (gesture === this.currentTarget && confidence >= (threshold as number)) {
       this.matchCount++;
       this.emit('gesture:match', {
         target: this.currentTarget,
@@ -101,7 +101,7 @@ export class GestureMatch extends BaseModule {
     if (this.gameflowPaused) return;
     if (!this.active || !this.currentTarget) return;
 
-    const displayTime = (this.params.displayTime ?? 3) * 1000; // s to ms
+    const displayTime = ((this.params.displayTime as number) ?? 3) * 1000; // s to ms
     this.displayTimer += dt;
 
     if (this.displayTimer >= displayTime) {

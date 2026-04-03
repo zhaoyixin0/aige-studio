@@ -91,11 +91,11 @@ export class MatchEngine extends BaseModule {
   }
 
   private generateGrid(): void {
-    const cols = this.params.gridCols ?? 4;
-    const rows = this.params.gridRows ?? 4;
-    const matchCount = this.params.matchCount ?? 2;
-    const totalCells = cols * rows;
-    const numValues = Math.floor(totalCells / matchCount);
+    const cols = (this.params.gridCols as number) ?? 4;
+    const rows = (this.params.gridRows as number) ?? 4;
+    const matchCount = (this.params.matchCount as number) ?? 2;
+    const totalCells = (cols as number) * (rows as number);
+    const numValues = Math.floor(totalCells / (matchCount as number));
     this.totalPairs = numValues;
 
     // Create cells with paired values
@@ -140,7 +140,7 @@ export class MatchEngine extends BaseModule {
     cell.revealed = true;
     this.selected.push(index);
 
-    if (this.selected.length >= matchCount) {
+    if (this.selected.length >= (matchCount as number)) {
       this.checkMatch();
     }
   }

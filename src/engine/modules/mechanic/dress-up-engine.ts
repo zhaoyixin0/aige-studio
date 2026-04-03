@@ -40,7 +40,7 @@ export class DressUpEngine extends BaseModule {
     super.init(engine);
 
     // Initialize empty equipment for each layer
-    const layers: string[] = this.params.layers ?? [];
+    const layers: string[] = (this.params.layers as string[]) ?? [];
     for (const layer of layers) {
       this.equipped.set(layer, []);
     }
@@ -53,10 +53,10 @@ export class DressUpEngine extends BaseModule {
   }
 
   equip(layer: string, itemId: string): boolean {
-    const layers: string[] = this.params.layers ?? [];
+    const layers: string[] = (this.params.layers as string[]) ?? [];
     if (!layers.includes(layer)) return false;
 
-    const maxPerLayer = this.params.maxPerLayer ?? 1;
+    const maxPerLayer = (this.params.maxPerLayer as number) ?? 1;
     let items = this.equipped.get(layer) ?? [];
 
     // Already equipped
@@ -131,7 +131,7 @@ export class DressUpEngine extends BaseModule {
   }
 
   reset(): void {
-    const layers: string[] = this.params.layers ?? [];
+    const layers: string[] = (this.params.layers as string[]) ?? [];
     this.equipped.clear();
     for (const layer of layers) {
       this.equipped.set(layer, []);

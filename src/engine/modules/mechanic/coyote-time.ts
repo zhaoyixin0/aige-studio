@@ -51,7 +51,7 @@ export class CoyoteTime extends BaseModule {
     this.on('gravity:falling', () => {
       if (this.grounded) {
         this.grounded = false;
-        this.coyoteTimer = this.params.coyoteFrames * 16;
+        this.coyoteTimer = (this.params.coyoteFrames as number) * 16;
       }
     });
 
@@ -66,13 +66,13 @@ export class CoyoteTime extends BaseModule {
       }
     });
 
-    this.on(this.params.jumpEvent, () => {
+    this.on(this.params.jumpEvent as string, () => {
       if (this.grounded || this.coyoteTimer > 0) {
         this.emit('coyote:jump');
         this.coyoteTimer = 0;
       } else {
         this.jumpBuffered = true;
-        this.bufferTimer = this.params.bufferFrames * 16;
+        this.bufferTimer = (this.params.bufferFrames as number) * 16;
       }
     });
   }

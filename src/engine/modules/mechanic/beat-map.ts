@@ -59,7 +59,7 @@ export class BeatMap extends BaseModule {
     this.pendingInput = false;
 
     // Generate beats from BPM if no explicit beats provided
-    const explicitBeats: number[] = this.params.beats ?? [];
+    const explicitBeats: number[] = (this.params.beats as number[]) ?? [];
     if (explicitBeats.length > 0) {
       this.beats = [...explicitBeats];
     } else {
@@ -68,7 +68,7 @@ export class BeatMap extends BaseModule {
   }
 
   private generateBeatsFromBPM(): number[] {
-    const bpm = this.params.bpm ?? 120;
+    const bpm = (this.params.bpm as number) ?? 120;
     const interval = 60000 / bpm; // ms per beat
     const totalBeats = 32; // generate 32 beats
     const result: number[] = [];
@@ -91,7 +91,7 @@ export class BeatMap extends BaseModule {
 
     this.elapsed += dt;
 
-    const tolerance = this.params.tolerance ?? 200;
+    const tolerance = (this.params.tolerance as number) ?? 200;
 
     // Check if player input matches any beat
     if (this.pendingInput) {
@@ -109,7 +109,7 @@ export class BeatMap extends BaseModule {
             beatIndex: i,
             beatTime,
             inputTime,
-            accuracy: 1 - diff / tolerance,
+            accuracy: 1 - diff / (tolerance as number),
           });
           // Advance past this beat so it can't be hit again
           if (i >= this.beatIndex) {
@@ -130,7 +130,7 @@ export class BeatMap extends BaseModule {
     // Check for missed beats (past tolerance window with no input)
     while (
       this.beatIndex < this.beats.length &&
-      this.elapsed > this.beats[this.beatIndex] + tolerance
+      this.elapsed > this.beats[this.beatIndex] + (tolerance as number)
     ) {
       this.emit('beat:miss', {
         beatIndex: this.beatIndex,

@@ -12,7 +12,7 @@ export abstract class BaseModule implements GameModule {
   abstract readonly type: string;
 
   protected engine: GameEngine | null = null;
-  protected params: Record<string, any>;
+  protected params: Record<string, unknown>;
 
   /**
    * Whether this module is paused by GameFlow.
@@ -26,11 +26,11 @@ export abstract class BaseModule implements GameModule {
 
   private _trackedListeners: Array<{ event: string; handler: EventHandler }> = [];
 
-  constructor(id: string, params: Record<string, any> = {}) {
+  constructor(id: string, params: Record<string, unknown> = {}) {
     this.id = id;
     // Merge defaults from schema with provided params
     const schema = this.getSchema();
-    const defaults: Record<string, any> = {};
+    const defaults: Record<string, unknown> = {};
     for (const [key, field] of Object.entries(schema)) {
       if (field.default !== undefined) {
         defaults[key] = field.type === 'object' && typeof field.default === 'object'

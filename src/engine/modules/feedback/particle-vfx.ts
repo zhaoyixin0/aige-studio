@@ -41,7 +41,7 @@ export class ParticleVFX extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    const events: Record<string, ParticleConfig> = this.params.events ?? {};
+    const events: Record<string, ParticleConfig> = (this.params.events ?? {}) as Record<string, ParticleConfig>;
     for (const [eventName, config] of Object.entries(events)) {
       this.on(eventName, () => {
         this.particles.push({

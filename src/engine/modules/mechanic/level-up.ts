@@ -58,7 +58,7 @@ export class LevelUp extends BaseModule {
   }
 
   getContracts(): ModuleContracts {
-    const xpSource: string = this.params.xpSource ?? 'enemy:death';
+    const xpSource: string = (this.params.xpSource as string) ?? 'enemy:death';
     return {
       emits: ['levelup:xp', 'levelup:levelup'],
       consumes: [xpSource],
@@ -68,7 +68,7 @@ export class LevelUp extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    const xpSource: string = this.params.xpSource ?? 'enemy:death';
+    const xpSource: string = (this.params.xpSource as string) ?? 'enemy:death';
     this.on(xpSource, (data?: any) => {
       const amount =
         data && typeof data.amount === 'number'
@@ -79,8 +79,8 @@ export class LevelUp extends BaseModule {
   }
 
   private getXpThreshold(forLevel: number): number {
-    const base: number = this.params.xpPerLevel ?? 100;
-    const curve: ScalingCurve = this.params.scalingCurve ?? 'quadratic';
+    const base: number = (this.params.xpPerLevel as number) ?? 100;
+    const curve: ScalingCurve = (this.params.scalingCurve as ScalingCurve) ?? 'quadratic';
 
     if (curve === 'linear') return base * forLevel;
     if (curve === 'quadratic') return Math.floor(base * Math.pow(forLevel, 1.5));
@@ -90,7 +90,7 @@ export class LevelUp extends BaseModule {
 
   addXp(amount: number): void {
     if (amount <= 0) return;
-    const maxLevel: number = this.params.maxLevel ?? 50;
+    const maxLevel: number = (this.params.maxLevel as number) ?? 50;
 
     this.currentXp += amount;
     this.totalXp += amount;
@@ -132,7 +132,7 @@ export class LevelUp extends BaseModule {
   }
 
   getXpToNextLevel(): number {
-    const maxLevel: number = this.params.maxLevel ?? 50;
+    const maxLevel: number = (this.params.maxLevel as number) ?? 50;
     if (this.level >= maxLevel) return 0;
     return this.getXpThreshold(this.level) - this.currentXp;
   }
@@ -142,7 +142,7 @@ export class LevelUp extends BaseModule {
   }
 
   getStats(): Record<string, number> {
-    const growth: Record<string, number> = this.params.statGrowth ?? { hp: 10, attack: 2, defense: 1 };
+    const growth: Record<string, number> = (this.params.statGrowth as Record<string, number>) ?? { hp: 10, attack: 2, defense: 1 };
     const result: Record<string, number> = {};
     for (const [stat, baseValue] of Object.entries(growth)) {
       result[stat] = baseValue * this.level;

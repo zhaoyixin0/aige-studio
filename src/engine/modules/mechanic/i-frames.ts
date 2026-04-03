@@ -44,11 +44,11 @@ export class IFrames extends BaseModule {
   init(engine: GameEngine): void {
     super.init(engine);
 
-    this.on(this.params.triggerEvent, () => {
+    this.on(this.params.triggerEvent as string, () => {
       if (!this.active) {
         this.active = true;
         this.elapsed = 0;
-        this.emit('iframes:start', { duration: this.params.duration });
+        this.emit('iframes:start', { duration: this.params.duration as number });
       }
     });
   }
@@ -59,7 +59,7 @@ export class IFrames extends BaseModule {
 
     this.elapsed += dt;
 
-    if (this.elapsed >= this.params.duration) {
+    if (this.elapsed >= (this.params.duration as number)) {
       this.active = false;
       this.emit('iframes:end');
     }

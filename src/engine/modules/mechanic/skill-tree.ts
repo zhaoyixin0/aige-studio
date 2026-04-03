@@ -56,7 +56,7 @@ export class SkillTree extends BaseModule {
 
   getContracts(): ModuleContracts {
     // NOTE: skill effect events (entry.def.effect) are dynamic — not statically declarable
-    const activateEvent: string = this.params.activateEvent ?? 'input:touch:doubleTap';
+    const activateEvent: string = (this.params.activateEvent as string) ?? 'input:touch:doubleTap';
     return {
       emits: ['skill:unlock', 'skill:activate', 'skill:cooldown'],
       consumes: ['levelup:levelup', activateEvent],
@@ -72,10 +72,10 @@ export class SkillTree extends BaseModule {
       }
     });
 
-    const activateEvent: string = this.params.activateEvent ?? 'input:touch:doubleTap';
+    const activateEvent: string = (this.params.activateEvent as string) ?? 'input:touch:doubleTap';
     this.on(activateEvent, () => {
       const skills = this.getSkillDefs();
-      const index: number = this.params.selectedSkillIndex ?? 0;
+      const index: number = (this.params.selectedSkillIndex as number) ?? 0;
       const skill = skills[index];
       if (skill) {
         this.activateSkill(skill.id);

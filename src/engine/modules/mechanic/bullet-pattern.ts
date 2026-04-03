@@ -99,12 +99,12 @@ export class BulletPattern extends BaseModule {
     const pattern = this.params.pattern ?? 'single';
 
     if (pattern === 'burst') {
-      const count = this.params.bulletCount ?? 1;
+      const count = (this.params.bulletCount as number) ?? 1;
       // Fire first bullet immediately
       this.emit('bulletpattern:fire', { directions: this.calculateDirections(baseDx, baseDy) });
       if (count > 1) {
         this.burstQueue = { baseDx, baseDy, remaining: count - 1 };
-        this.burstTimer = this.params.burstDelay ?? 50;
+        this.burstTimer = (this.params.burstDelay as number) ?? 50;
       }
       return;
     }
@@ -115,8 +115,8 @@ export class BulletPattern extends BaseModule {
 
   calculateDirections(baseDx: number, baseDy: number): Direction[] {
     const pattern = this.params.pattern ?? 'single';
-    const count = this.params.bulletCount ?? 1;
-    const spreadAngle = this.params.spreadAngle ?? 30;
+    const count = (this.params.bulletCount as number) ?? 1;
+    const spreadAngle = (this.params.spreadAngle as number) ?? 30;
 
     switch (pattern) {
       case 'single':
@@ -124,11 +124,11 @@ export class BulletPattern extends BaseModule {
 
       case 'spread': {
         if (count === 1) return [{ dx: baseDx, dy: baseDy }];
-        const step = spreadAngle / (count - 1);
-        const startAngle = -spreadAngle / 2;
+        const step = (spreadAngle as number) / ((count as number) - 1);
+        const startAngle = -(spreadAngle as number) / 2;
         const results: Direction[] = [];
-        for (let i = 0; i < count; i++) {
-          results.push(rotateVec(baseDx, baseDy, startAngle + step * i));
+        for (let i = 0; i < (count as number); i++) {
+          results.push(rotateVec(baseDx, baseDy, (startAngle as number) + step * i));
         }
         return results;
       }
@@ -145,8 +145,8 @@ export class BulletPattern extends BaseModule {
       case 'random': {
         const results: Direction[] = [];
         const baseAngle = toAngle(baseDx, baseDy);
-        for (let i = 0; i < count; i++) {
-          const offset = (Math.random() - 0.5) * spreadAngle;
+        for (let i = 0; i < (count as number); i++) {
+          const offset = (Math.random() - 0.5) * (spreadAngle as number);
           results.push(fromAngle(baseAngle + offset));
         }
         return results;
@@ -164,7 +164,7 @@ export class BulletPattern extends BaseModule {
 
     // Advance spiral angle
     if (pattern === 'spiral') {
-      const spiralSpeed = this.params.spiralSpeed ?? 90;
+      const spiralSpeed = (this.params.spiralSpeed as number) ?? 90;
       this.spiralAngle += spiralSpeed * (dt / 1000);
     }
 
@@ -175,7 +175,7 @@ export class BulletPattern extends BaseModule {
         const { baseDx, baseDy } = this.burstQueue;
         this.emit('bulletpattern:fire', { directions: [{ dx: baseDx, dy: baseDy }] });
         this.burstQueue = { ...this.burstQueue, remaining: this.burstQueue.remaining - 1 };
-        this.burstTimer = this.params.burstDelay ?? 50;
+        this.burstTimer = (this.params.burstDelay as number) ?? 50;
       }
     }
   }

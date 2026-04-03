@@ -55,7 +55,7 @@ export class BodyInput extends BaseModule {
     this.emit('input:body:move', { landmarks: result.landmarks });
 
     // Basic pose matching stub — emits when a named pose is configured
-    const matchPose: string = this.params.matchPose ?? '';
+    const matchPose: string = (this.params.matchPose ?? '') as string;
     if (matchPose) {
       const match = this.checkPoseMatch(result.landmarks, matchPose);
       this.emit('input:body:pose', {
@@ -80,7 +80,7 @@ export class BodyInput extends BaseModule {
     landmarks: BodyLandmark[],
     _poseName: string,
   ): boolean {
-    const tolerance: number = this.params.tolerance ?? 0.3;
+    const tolerance: number = (this.params.tolerance ?? 0.3) as number;
 
     // Example: 'handsUp' — both wrists above shoulders
     if (_poseName === 'handsUp') {

@@ -95,14 +95,14 @@ export class Jump extends BaseModule {
     const groundY = this.params.groundY ?? 0.8;
     this.canvasWidth = engine.getCanvas().width;
     this.canvasHeight = engine.getCanvas().height;
-    this.y = groundY;
+    this.y = groundY as number;
     this.grounded = true;
 
     // Check if Gravity module is present for integrated physics
     const gravityModules = engine.getModulesByType('Gravity');
     if (gravityModules.length > 0) {
       this.gravity = gravityModules[0] as unknown as Gravity;
-      const pixelY = groundY * this.canvasHeight;
+      const pixelY = (groundY as number) * this.canvasHeight;
       this.gravity.addObject('player', {
         x: engine.getCanvas().width / 2,
         y: pixelY,
@@ -122,7 +122,7 @@ export class Jump extends BaseModule {
       });
     }
 
-    const trigger = this.params.triggerEvent ?? 'touch:tap';
+    const trigger = (this.params.triggerEvent as string) ?? 'touch:tap';
     this.on(trigger, () => {
       this.triggerJump();
     });
@@ -197,7 +197,7 @@ export class Jump extends BaseModule {
     }
 
     // Standalone mode: internal fractional physics
-    const gravity = (this.params.gravity ?? 980) / 1000;
+    const gravity = ((this.params.gravity as number) ?? 980) / 1000;
     const groundY = this.params.groundY ?? 0.8;
 
     this.velocityY += gravity * (dt / 1000);
@@ -208,8 +208,8 @@ export class Jump extends BaseModule {
       this.emit('jump:peak', { y: this.y });
     }
 
-    if (this.y >= groundY) {
-      this.y = groundY;
+    if (this.y >= (groundY as number)) {
+      this.y = groundY as number;
       this.velocityY = 0;
       this.grounded = true;
       this.emit('jump:land', { y: this.y });
@@ -225,14 +225,14 @@ export class Jump extends BaseModule {
   }
 
   reset(): void {
-    const groundY = this.params.groundY ?? 0.8;
+    const groundY = (this.params.groundY as number) ?? 0.8;
     this.y = groundY;
     this.velocityY = 0;
     this.grounded = true;
     this.peakReached = false;
 
     if (this.gravity) {
-      const pixelY = groundY * this.canvasHeight;
+      const pixelY = (groundY as number) * this.canvasHeight;
       const obj = this.gravity.getObject('player');
       this.gravity.addObject('player', {
         x: obj?.x ?? this.canvasWidth / 2,
