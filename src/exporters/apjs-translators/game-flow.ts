@@ -9,8 +9,8 @@ export class GameFlowTranslator extends BaseTranslator {
   readonly moduleType = 'GameFlow';
 
   translate(config: ModuleConfig): string {
-    const countdown = config.params.countdown ?? 3;
-    const onFinish = config.params.onFinish ?? 'show_result';
+    const countdown = (config.params.countdown as number) ?? 3;
+    const onFinish = (config.params.onFinish as string) ?? 'show_result';
 
     return `${this.header('GameFlow: ' + config.id)}
 let gameState_${config.id} = 'ready'; // ready | countdown | playing | finished

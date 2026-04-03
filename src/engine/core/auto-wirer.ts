@@ -295,8 +295,7 @@ export class AutoWirer {
     collision: Collision,
     layerOwners: Map<string, LayerOwner>,
   ): void {
-    const rules: Array<{ a: string; b: string; event: string; destroy?: string[] }> =
-      collision.getParams().rules ?? [];
+    const rules = (collision.getParams().rules ?? []) as Array<{ a: string; b: string; event: string; destroy?: string[] }>;
 
     // Build lookup for playerPosition → Health damageReceiver
     let healthReceiver: { handle: (id: string, amount: number) => void } | undefined;

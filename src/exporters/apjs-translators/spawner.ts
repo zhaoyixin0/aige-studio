@@ -9,12 +9,13 @@ export class SpawnerTranslator extends BaseTranslator {
   readonly moduleType = 'Spawner';
 
   translate(config: ModuleConfig): string {
-    const frequency = config.params.frequency ?? 1.5;
+    const frequency = (config.params.frequency as number) ?? 1.5;
     const intervalMs = Math.round(frequency * 1000);
-    const speedMin = config.params.speed?.min ?? 100;
-    const speedMax = config.params.speed?.max ?? 200;
-    const direction = config.params.direction ?? 'down';
-    const maxCount = config.params.maxCount ?? 10;
+    const speedParam = config.params.speed as { min?: number; max?: number } | undefined;
+    const speedMin = speedParam?.min ?? 100;
+    const speedMax = speedParam?.max ?? 200;
+    const direction = (config.params.direction as string) ?? 'down';
+    const maxCount = (config.params.maxCount as number) ?? 10;
 
     return `${this.header('Spawner: ' + config.id)}
 const spawned_${config.id} = [];

@@ -1,4 +1,4 @@
-export type EventHandler = (data?: any) => void;
+export type EventHandler = (data?: unknown) => void;
 
 export interface SchemaField {
   type:
@@ -19,7 +19,7 @@ export interface SchemaField {
     | 'stepper'
     | 'asset_picker';
   label: string;
-  default?: any;
+  default?: unknown;
   min?: number;
   max?: number;
   step?: number;
@@ -36,7 +36,7 @@ export interface ModuleConfig {
   id: string;
   type: string;
   enabled: boolean;
-  params: Record<string, any>;
+  params: Record<string, unknown>;
 }
 
 export interface AssetEntry {
@@ -84,8 +84,8 @@ export interface GameModule {
   getSchema(): ModuleSchema;
   getDependencies(): ModuleDependencies;
   getContracts(): import('./contracts').ModuleContracts;
-  configure(params: Record<string, any>): void;
-  getParams(): Record<string, any>;
+  configure(params: Record<string, unknown>): void;
+  getParams(): Record<string, unknown>;
   onAttach(engine: GameEngine): void;
   onDetach(engine: GameEngine): void;
 }

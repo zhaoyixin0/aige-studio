@@ -171,7 +171,8 @@ export class GameObjectRenderer {
     const spawner = engine.getModulesByType('Spawner')[0] as Spawner | undefined;
     if (!spawner) return;
 
-    const isTapStyle = spawner.getParams().speed?.max === 0;
+    const speedParam = spawner.getParams().speed as { max?: number } | undefined;
+    const isTapStyle = speedParam?.max === 0;
 
     // Try FaceInput, HandInput, then TouchInput
     const faceInput = engine.getModulesByType('FaceInput')[0] as FaceInput | undefined;

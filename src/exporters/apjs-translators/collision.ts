@@ -9,8 +9,7 @@ export class CollisionTranslator extends BaseTranslator {
   readonly moduleType = 'Collision';
 
   translate(config: ModuleConfig): string {
-    const rules: Array<{ a: string; b: string; event: string; destroy?: string[] }> =
-      config.params.rules ?? [];
+    const rules = (config.params.rules ?? []) as Array<{ a: string; b: string; event: string; destroy?: string[] }>;
 
     const ruleChecks = rules
       .map(

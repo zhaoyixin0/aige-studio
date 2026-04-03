@@ -66,11 +66,11 @@ export abstract class BaseModule implements GameModule {
     this.engine = null;
   }
 
-  configure(params: Record<string, any>): void {
+  configure(params: Record<string, unknown>): void {
     this.params = { ...this.params, ...params };
   }
 
-  getParams(): Record<string, any> {
+  getParams(): Record<string, unknown> {
     return { ...this.params };
   }
 
