@@ -42,6 +42,24 @@ import {
 // Re-export public types and functions so external consumers don't need to change imports
 export type { Chip, ConversationResult, ConfigChange, ConversationMessage, ParameterCardPayload };
 export { detectGameTypeFromMessage };
+// Note: generateV2CreationChips is exported via its function declaration below
+
+/* ------------------------------------------------------------------ */
+/*  Pure function: V2 creation chips (board_mode + L1 param controls)  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Generate V2-style creation chips shown after create_game.
+ * Returns 1 board_mode chip + 3 abstract L1 parameter chips.
+ */
+export function generateV2CreationChips(_gameType: string): Chip[] {
+  return [
+    { id: 'board_mode', type: 'board_mode', label: 'GUI 面板', emoji: '\u{1F39B}\uFE0F' },
+    { id: 'l1-difficulty', type: 'param', label: '调整难度', emoji: '\u{1F39A}\uFE0F', paramId: 'l1_001', category: 'abstract' },
+    { id: 'l1-pacing', type: 'param', label: '调整节奏', emoji: '\u23F1\uFE0F', paramId: 'l1_002', category: 'abstract' },
+    { id: 'l1-emotion', type: 'param', label: '切换风格', emoji: '\u{1F3A8}', paramId: 'l1_003', category: 'abstract' },
+  ];
+}
 
 /* ------------------------------------------------------------------ */
 /*  Pure function: generate suggestion chips (game-type-aware)         */
@@ -50,6 +68,7 @@ export { detectGameTypeFromMessage };
 /**
  * Generate suggestion chips for a given set of current modules and game type.
  * Returns up to 8 chips: prioritized module suggestions + theme + style.
+ * @deprecated Kept for backward compatibility — use generateV2CreationChips after create_game.
  */
 export function generateSuggestions(currentModules: string[], gameType: string): Chip[] {
   const chips: Chip[] = [];
@@ -344,6 +363,7 @@ export class ConversationAgent {
       let config: GameConfig | undefined;
       let chips: Chip[] | undefined;
       let parameterCard: ParameterCardPayload | undefined;
+      let createdThisTurn = false;
 
       for (const block of response.content) {
         if (block.type === 'text') {
@@ -364,9 +384,9 @@ export class ConversationAgent {
                 asset_descriptions?: Record<string, string>;
               };
               config = this.buildGameConfig(input);
-              // Auto-generate suggestions for the newly created game
-              const moduleTypes = config.modules.map((m) => m.type);
-              chips = generateSuggestions(moduleTypes, input.game_type);
+              // V2: use creation chips (board_mode + L1 params) instead of old module suggestions
+              chips = generateV2CreationChips(input.game_type);
+              createdThisTurn = true;
               if (!reply) {
                 const desc = GAME_TYPE_DESCRIPTIONS[input.game_type] ?? input.game_type;
                 reply = `已为你创建「${desc.split(' — ')[0]}」游戏！`;
@@ -420,6 +440,8 @@ export class ConversationAgent {
             }
 
             case 'suggest_enhancements': {
+              // Skip if create_game already produced V2 chips this turn
+              if (createdThisTurn) break;
               const input = block.input as {
                 current_modules: string[];
                 game_type: string;
@@ -643,8 +665,8 @@ export class ConversationAgent {
 
     if (detectedType) {
       const config = this.buildGameConfig({ game_type: detectedType });
-      const moduleTypes = config.modules.map((m) => m.type);
-      const chips = generateSuggestions(moduleTypes, detectedType);
+      // V2: use creation chips (board_mode + L1 params) instead of old module suggestions
+      const chips = generateV2CreationChips(detectedType);
       const desc = GAME_TYPE_DESCRIPTIONS[detectedType] ?? detectedType;
 
       return {
@@ -654,16 +676,16 @@ export class ConversationAgent {
       };
     }
 
-    // Could not detect — return chips for game type selection
+    // Could not detect — return chips for game type selection (V2: type field)
     const typeChips: Chip[] = [
-      { id: 'type:catch', label: '接住类', emoji: '\u{1F3AF}' },
-      { id: 'type:dodge', label: '躲避类', emoji: '\u{1F3C3}' },
-      { id: 'type:platformer', label: '平台跳跃', emoji: '\u{1F3AE}' },
-      { id: 'type:runner', label: '跑酷', emoji: '\u{1F3C3}\u200D\u2642\uFE0F' },
-      { id: 'type:shooting', label: '射击', emoji: '\u{1F52B}' },
-      { id: 'type:rhythm', label: '节奏', emoji: '\u{1F3B5}' },
-      { id: 'type:quiz', label: '答题', emoji: '\u2753' },
-      { id: 'type:puzzle', label: '配对', emoji: '\u{1F9E9}' },
+      { id: 'catch', label: '接住类', emoji: '\u{1F3AF}', type: 'game_type' as const },
+      { id: 'dodge', label: '躲避类', emoji: '\u{1F3C3}', type: 'game_type' as const },
+      { id: 'platformer', label: '平台跳跃', emoji: '\u{1F3AE}', type: 'game_type' as const },
+      { id: 'runner', label: '跑酷', emoji: '\u{1F3C3}\u200D\u2642\uFE0F', type: 'game_type' as const },
+      { id: 'shooting', label: '射击', emoji: '\u{1F52B}', type: 'game_type' as const },
+      { id: 'rhythm', label: '节奏', emoji: '\u{1F3B5}', type: 'game_type' as const },
+      { id: 'quiz', label: '答题', emoji: '\u2753', type: 'game_type' as const },
+      { id: 'puzzle', label: '配对', emoji: '\u{1F9E9}', type: 'game_type' as const },
     ];
 
     return {

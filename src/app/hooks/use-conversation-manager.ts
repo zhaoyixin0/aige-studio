@@ -119,28 +119,63 @@ export function useConversationManager(): ConversationManagerResult {
         const agent = getConversationAgent();
         const result: ConversationResult = await agent.process(text, config ?? undefined);
 
-        // Add assistant reply
-        addChatMessage({
+        // Build assistant message
+        const assistantMsg: ChatMessage = {
           id: crypto.randomUUID(),
           role: 'assistant',
           content: result.reply,
           timestamp: Date.now(),
           ...(result.parameterCard ? { parameterCard: result.parameterCard } : {}),
           ...(result.config ? { l1Controls: true } : {}),
-        });
+        };
+
+        // A3: Detect vague intent response and inject gameTypeOptions
+        const isVagueIntentResponse =
+          result.reply.includes('请选择') && result.reply.includes('游戏类型');
+        if (isVagueIntentResponse && !result.config) {
+          assistantMsg.gameTypeOptions = [
+            { id: 'catch', name: '接住游戏', emoji: '🎯' },
+            { id: 'dodge', name: '躲避游戏', emoji: '🏃' },
+            { id: 'tap', name: '点击游戏', emoji: '👆' },
+            { id: 'shooting', name: '射击游戏', emoji: '🔫' },
+            { id: 'runner', name: '跑酷游戏', emoji: '🏃‍♂️' },
+            { id: 'platformer', name: '平台跳跃', emoji: '🦘' },
+            { id: 'quiz', name: '答题游戏', emoji: '❓' },
+            { id: 'rhythm', name: '节奏游戏', emoji: '🎵' },
+            { id: 'random-wheel', name: '幸运转盘', emoji: '🎡' },
+            { id: 'expression', name: '表情挑战', emoji: '😄' },
+          ];
+        }
+
+        addChatMessage(assistantMsg);
 
         // Apply new config if provided (with validation + auto-fixes)
+        let fixedConfig: GameConfig | undefined;
         if (result.config) {
           const contracts = ContractRegistry.fromRegistry(createModuleRegistry());
           const report = validateConfig(result.config, contracts);
-          const fixed = report.fixes.length > 0 ? applyFixes(result.config, report.fixes) : result.config;
-          setConfig(fixed);
-          triggerAssetFulfillment(fixed);
+          fixedConfig = report.fixes.length > 0 ? applyFixes(result.config, report.fixes) : result.config;
+          setConfig(fixedConfig);
         }
 
         // Update suggestion chips if provided
-        if (result.chips) {
+        if (result.chips && result.chips.length > 0) {
           setSuggestionChips(result.chips);
+        }
+
+        // A9: Safety net — fallback V2 chips when config exists but no chips
+        if (result.config && (!result.chips || result.chips.length === 0)) {
+          setSuggestionChips([
+            { id: 'board_mode', type: 'board_mode', label: 'GUI 面板', emoji: '🎛️' },
+            { id: 'l1-difficulty', type: 'param', label: '调整难度', emoji: '🎚️', paramId: 'l1_001', category: 'abstract' },
+            { id: 'l1-pacing', type: 'param', label: '调整节奏', emoji: '⏱️', paramId: 'l1_002', category: 'abstract' },
+            { id: 'l1-emotion', type: 'param', label: '切换风格', emoji: '🎨', paramId: 'l1_003', category: 'abstract' },
+          ]);
+        }
+
+        // Trigger asset fulfillment after all synchronous state updates
+        if (fixedConfig) {
+          triggerAssetFulfillment(fixedConfig);
         }
       } catch (err) {
         const errorText = err instanceof Error ? err.message : String(err);

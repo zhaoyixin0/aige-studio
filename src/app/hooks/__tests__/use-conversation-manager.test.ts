@@ -295,4 +295,162 @@ describe('useConversationManager', () => {
 
     expect(useEditorStore.getState().isChatLoading).toBe(false);
   });
+
+  /* ---------------------------------------------------------------- */
+  /*  A3: Vague intent detection — gameTypeOptions                     */
+  /* ---------------------------------------------------------------- */
+
+  it('attaches gameTypeOptions when reply contains vague intent trigger', async () => {
+    mockProcess.mockResolvedValue({
+      reply: '请选择你想创建的游戏类型：',
+      config: undefined,
+      chips: undefined,
+    });
+
+    const { result } = renderHook(() => useConversationManager());
+
+    await act(async () => {
+      await result.current.submitMessage('做个游戏');
+    });
+
+    const messages = useEditorStore.getState().chatMessages;
+    const assistantMsg = messages.find((m) => m.role === 'assistant');
+    expect(assistantMsg?.gameTypeOptions).toBeDefined();
+    expect(assistantMsg!.gameTypeOptions!.length).toBe(10);
+    expect(assistantMsg!.gameTypeOptions!.map((o) => o.id)).toContain('catch');
+    expect(assistantMsg!.gameTypeOptions!.map((o) => o.id)).toContain('dodge');
+  });
+
+  it('does not attach gameTypeOptions when reply has no vague intent trigger', async () => {
+    mockProcess.mockResolvedValue({
+      reply: '好的，我来帮你创建一个接住游戏！',
+      config: undefined,
+      chips: undefined,
+    });
+
+    const { result } = renderHook(() => useConversationManager());
+
+    await act(async () => {
+      await result.current.submitMessage('做个接住游戏');
+    });
+
+    const messages = useEditorStore.getState().chatMessages;
+    const assistantMsg = messages.find((m) => m.role === 'assistant');
+    expect(assistantMsg?.gameTypeOptions).toBeUndefined();
+  });
+
+  it('does not attach gameTypeOptions when config is present even with trigger phrase', async () => {
+    const mockConfig = {
+      version: '1.0.0',
+      meta: { name: 'Test', description: '', thumbnail: null, createdAt: '' },
+      canvas: { width: 1080, height: 1920 },
+      modules: [],
+      assets: {},
+    };
+
+    mockProcess.mockResolvedValue({
+      reply: '请选择你想创建的游戏类型：',
+      config: mockConfig,
+      chips: undefined,
+    });
+
+    const { result } = renderHook(() => useConversationManager());
+
+    await act(async () => {
+      await result.current.submitMessage('test');
+    });
+
+    const messages = useEditorStore.getState().chatMessages;
+    const assistantMsg = messages.find((m) => m.role === 'assistant' && m.content.includes('请选择'));
+    expect(assistantMsg?.gameTypeOptions).toBeUndefined();
+  });
+
+  /* ---------------------------------------------------------------- */
+  /*  A9: Fallback V2 chips when config exists but no chips            */
+  /* ---------------------------------------------------------------- */
+
+  it('sets fallback V2 chips when config exists but no chips returned', async () => {
+    const mockConfig = {
+      version: '1.0.0',
+      meta: { name: 'Test', description: '', thumbnail: null, createdAt: '' },
+      canvas: { width: 1080, height: 1920 },
+      modules: [],
+      assets: {},
+    };
+
+    mockProcess.mockResolvedValue({
+      reply: 'Game created!',
+      config: mockConfig,
+      chips: undefined,
+    });
+
+    const { result } = renderHook(() => useConversationManager());
+
+    await act(async () => {
+      await result.current.submitMessage('create a game');
+    });
+
+    const chips = useEditorStore.getState().suggestionChips;
+    expect(chips.length).toBe(4);
+    expect(chips[0].id).toBe('board_mode');
+    expect(chips[0].type).toBe('board_mode');
+    expect(chips.find((c) => c.id === 'l1-difficulty')).toBeTruthy();
+    expect(chips.find((c) => c.id === 'l1-pacing')).toBeTruthy();
+    expect(chips.find((c) => c.id === 'l1-emotion')).toBeTruthy();
+  });
+
+  it('sets fallback V2 chips when config exists but chips array is empty', async () => {
+    const mockConfig = {
+      version: '1.0.0',
+      meta: { name: 'Test', description: '', thumbnail: null, createdAt: '' },
+      canvas: { width: 1080, height: 1920 },
+      modules: [],
+      assets: {},
+    };
+
+    mockProcess.mockResolvedValue({
+      reply: 'Game created!',
+      config: mockConfig,
+      chips: [],
+    });
+
+    const { result } = renderHook(() => useConversationManager());
+
+    await act(async () => {
+      await result.current.submitMessage('create a game');
+    });
+
+    const chips = useEditorStore.getState().suggestionChips;
+    expect(chips.length).toBe(4);
+    expect(chips[0].type).toBe('board_mode');
+  });
+
+  it('does not set fallback chips when config and chips both exist', async () => {
+    const mockConfig = {
+      version: '1.0.0',
+      meta: { name: 'Test', description: '', thumbnail: null, createdAt: '' },
+      canvas: { width: 1080, height: 1920 },
+      modules: [],
+      assets: {},
+    };
+
+    const mockChips = [
+      { id: 'custom1', label: 'Custom Chip' },
+    ];
+
+    mockProcess.mockResolvedValue({
+      reply: 'Game created!',
+      config: mockConfig,
+      chips: mockChips,
+    });
+
+    const { result } = renderHook(() => useConversationManager());
+
+    await act(async () => {
+      await result.current.submitMessage('create a game');
+    });
+
+    const chips = useEditorStore.getState().suggestionChips;
+    expect(chips).toEqual(mockChips);
+  });
 });
