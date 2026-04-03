@@ -6,6 +6,10 @@ import type { Gravity } from '@/engine/modules/mechanic/gravity';
 import type { PlayerMovement } from '@/engine/modules/mechanic/player-movement';
 import type { EnemyAI } from '@/engine/modules/mechanic/enemy-ai';
 
+/** Narrow event payload to a record for safe property access */
+const asRecord = (data: unknown): Record<string, unknown> =>
+  typeof data === 'object' && data !== null ? (data as Record<string, unknown>) : {};
+
 // ── Phase D: Module-specific bridges that can't be expressed as contracts ──
 
 interface WiringRule {
@@ -42,10 +46,11 @@ const BRIDGE_RULES: WiringRule[] = [
           x: p.x, y: p.y, width: p.width, oneWay: false, active: true,
         });
       }
-      on('platform:move', (data?: any) => {
-        if (data?.id != null) {
-          gravity.updateSurface(`moving-${mp.id}-${data.id}`, {
-            x: data.x, y: data.y, width: data.width,
+      on('platform:move', (data?: unknown) => {
+        const d = asRecord(data);
+        if (d.id != null) {
+          gravity.updateSurface(`moving-${mp.id}-${d.id}`, {
+            x: d.x as number, y: d.y as number, width: d.width as number,
           });
         }
       });
@@ -80,18 +85,21 @@ const BRIDGE_RULES: WiringRule[] = [
           oneWay: false, active: true,
         });
       }
-      on('platform:crumble', (data?: any) => {
-        if (data?.id != null) {
-          gravity.updateSurface(data.id, { active: false });
+      on('platform:crumble', (data?: unknown) => {
+        const d = asRecord(data);
+        if (d.id != null) {
+          const id = String(d.id);
+          gravity.updateSurface(id, { active: false });
           const obj = gravity.getObject('player');
-          if (obj?.currentSurfaceId === data.id) {
+          if (obj?.currentSurfaceId === id) {
             gravity.checkSurfaceDeparture('player');
           }
         }
       });
-      on('platform:respawn', (data?: any) => {
-        if (data?.id != null) {
-          gravity.updateSurface(data.id, { active: true });
+      on('platform:respawn', (data?: unknown) => {
+        const d = asRecord(data);
+        if (d.id != null) {
+          gravity.updateSurface(String(d.id), { active: true });
         }
       });
     },
@@ -110,15 +118,17 @@ const BRIDGE_RULES: WiringRule[] = [
     setup: (_engine, modules, on) => {
       const enemyAI = modules.get('EnemyAI') as unknown as EnemyAI;
 
-      on('wave:spawn', (data?: any) => {
-        if (data?.id != null) {
-          enemyAI.addEnemy(data.id, data.x ?? 0, data.y ?? 0);
+      on('wave:spawn', (data?: unknown) => {
+        const d = asRecord(data);
+        if (d.id != null) {
+          enemyAI.addEnemy(String(d.id), Number(d.x ?? 0), Number(d.y ?? 0));
         }
       });
 
-      on('enemy:death', (data?: any) => {
-        if (data?.id != null) {
-          enemyAI.removeEnemy(data.id);
+      on('enemy:death', (data?: unknown) => {
+        const d = asRecord(data);
+        if (d.id != null) {
+          enemyAI.removeEnemy(String(d.id));
         }
       });
     },
@@ -196,8 +206,9 @@ export class AutoWirer {
 
     // ── Phase D extra: health:zero → lives:zero bridge ──
     if (byType.has('Health')) {
-      AutoWirer.on(engine, 'health:zero', (data?: any) => {
-        if (data?.id === 'player_1') {
+      AutoWirer.on(engine, 'health:zero', (data?: unknown) => {
+        const d = asRecord(data);
+        if (d.id === 'player_1') {
           engine.eventBus.emit('lives:zero', {});
         }
       });
@@ -213,14 +224,16 @@ export class AutoWirer {
     for (const { contract } of layerOwners.values()) {
       // Spawn event → register (with per-object layer routing if available)
       if (contract.spawnEvent) {
-        AutoWirer.on(engine, contract.spawnEvent, (data?: any) => {
-          if (data?.id != null) {
+        AutoWirer.on(engine, contract.spawnEvent, (data?: unknown) => {
+          const d = asRecord(data);
+          if (d.id != null) {
+            const objData = { asset: d.asset as string | undefined, id: d.id as string | undefined };
             const layer = contract.getLayerForObject
-              ? contract.getLayerForObject(data)
+              ? contract.getLayerForObject(objData)
               : contract.layer;
-            collision.registerObject(data.id, layer, {
-              x: data.x ?? 0,
-              y: data.y ?? 0,
+            collision.registerObject(String(d.id), layer, {
+              x: Number(d.x ?? 0),
+              y: Number(d.y ?? 0),
               radius: contract.radius,
             });
           }
@@ -229,18 +242,20 @@ export class AutoWirer {
 
       // Destroy event → unregister
       if (contract.destroyEvent) {
-        AutoWirer.on(engine, contract.destroyEvent, (data?: any) => {
-          if (data?.id != null) {
-            collision.unregisterObject(data.id);
+        AutoWirer.on(engine, contract.destroyEvent, (data?: unknown) => {
+          const d = asRecord(data);
+          if (d.id != null) {
+            collision.unregisterObject(String(d.id));
           }
         });
       }
 
       // Move event → update position
       if (contract.moveEvent) {
-        AutoWirer.on(engine, contract.moveEvent, (data?: any) => {
-          if (data?.id != null) {
-            collision.updateObject(data.id, { x: data.x ?? 0, y: data.y ?? 0 });
+        AutoWirer.on(engine, contract.moveEvent, (data?: unknown) => {
+          const d = asRecord(data);
+          if (d.id != null) {
+            collision.updateObject(String(d.id), { x: Number(d.x ?? 0), y: Number(d.y ?? 0) });
           }
         });
       }
@@ -309,15 +324,16 @@ export class AutoWirer {
     for (const rule of rules) {
       const eventName = `collision:${rule.event}`;
 
-      AutoWirer.on(engine, eventName, (data?: any) => {
+      AutoWirer.on(engine, eventName, (data?: unknown) => {
+        const d = asRecord(data);
         // Only process events from Collision module (must have objectA/objectB)
-        if (!data || !data.objectA || !data.objectB) return;
+        if (!d.objectA || !d.objectB) return;
 
         // Convention: 'hit' = A damages B, 'damage' = B damages A
         const isHit = rule.event === 'hit';
         const sourceLayer = isHit ? rule.a : rule.b;
         const targetLayer = isHit ? rule.b : rule.a;
-        const targetObjectId = isHit ? data.objectB : data.objectA;
+        const targetObjectId = String(isHit ? d.objectB : d.objectA);
 
         const sourceOwner = layerOwners.get(sourceLayer);
         const targetOwner = layerOwners.get(targetLayer);
@@ -339,14 +355,16 @@ export class AutoWirer {
     engine: GameEngine,
     layerOwners: Map<string, LayerOwner>,
   ): void {
-    AutoWirer.on(engine, 'aim:queryTargets', (data?: any) => {
-      if (!data?.layer || typeof data?.callback !== 'function') return;
+    AutoWirer.on(engine, 'aim:queryTargets', (data?: unknown) => {
+      const d = asRecord(data);
+      if (!d.layer || typeof d.callback !== 'function') return;
 
-      const owner = layerOwners.get(data.layer);
+      const owner = layerOwners.get(String(d.layer));
+      const cb = d.callback as (objects: ReadonlyArray<{ id: string; x: number; y: number }>) => void;
       if (owner?.contract.getActiveObjects) {
-        data.callback(owner.contract.getActiveObjects());
+        cb(owner.contract.getActiveObjects());
       } else {
-        data.callback([]);
+        cb([]);
       }
     });
   }

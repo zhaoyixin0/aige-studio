@@ -10,7 +10,7 @@ export interface ConfigChange {
   id?: string;
   moduleId?: string;
   type?: string;
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
 }
 
 export interface ConfigLoaderOptions {
