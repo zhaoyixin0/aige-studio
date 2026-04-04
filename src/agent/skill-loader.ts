@@ -14,8 +14,16 @@ export function toKebabCase(name: string): string {
     .toLowerCase();
 }
 
+// Expert knowledge cards from M0 pipeline
+const expertCardFiles = import.meta.glob('/src/knowledge/cards/**/*.card.json', {
+  query: '?raw',
+  import: 'default',
+  eager: false,
+});
+
 export class SkillLoader {
   private cache = new Map<string, string>();
+  private cardCache = new Map<string, string>();
 
   async load(path: string): Promise<string> {
     if (this.cache.has(path)) return this.cache.get(path)!;
@@ -131,6 +139,41 @@ export class SkillLoader {
     if (relevant.length === 0) return '';
 
     return relevant.join('\n').trim();
+  }
+
+  /**
+   * Load a summary of expert knowledge cards for the given game type.
+   * Returns a text prompt fragment for ConversationAgent, or empty string.
+   */
+  async loadExpertCardSummary(gameType: string): Promise<string> {
+    const key = `/src/knowledge/cards/game-type/gametype-${gameType}.card.json`;
+    const loader = expertCardFiles[key];
+    if (!loader) return '';
+
+    if (this.cardCache.has(key)) return this.cardCache.get(key)!;
+
+    try {
+      const raw = (await loader()) as string;
+      const card = JSON.parse(raw);
+      const summary = `[Expert Data: ${card.displayName ?? gameType}] ` +
+        `Group: ${card.group ?? '?'}, ` +
+        `Top modules: ${(card.topModules ?? []).join(', ')}, ` +
+        `Supported: ${card.supportedToday ? 'yes' : 'no'}`;
+      this.cardCache.set(key, summary);
+      return summary;
+    } catch {
+      return '';
+    }
+  }
+
+  /**
+   * Returns the list of game types that have expert card data available.
+   */
+  getAvailableExpertTypes(): string[] {
+    const prefix = '/src/knowledge/cards/game-type/gametype-';
+    return Object.keys(expertCardFiles)
+      .filter((k) => k.startsWith(prefix))
+      .map((k) => k.slice(prefix.length).replace('.card.json', ''));
   }
 
   private parseRequiredModules(skillContent: string): string[] {

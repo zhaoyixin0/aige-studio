@@ -99,12 +99,16 @@ describe('GameTypeSelector', () => {
     expect(secondCard.className).not.toContain('border-blue-400');
   });
 
-  it('renders at least the 15 known game types', () => {
-    const { container } = render(
+  it('renders at least the 15 known game types after expanding', () => {
+    render(
       <GameTypeSelector options={ALL_OPTIONS} onSelect={vi.fn()} />,
     );
 
-    const cards = container.querySelectorAll('[data-testid="game-type-card"]');
+    // Progressive disclosure: expand first
+    const showMore = screen.getByText(/更多/);
+    fireEvent.click(showMore);
+
+    const cards = screen.getAllByTestId('game-type-card');
     expect(cards.length).toBeGreaterThanOrEqual(15);
 
     // Verify all 15 names are rendered

@@ -9,6 +9,19 @@ export interface L1State {
   emotion: string;   // style ID
 }
 
+export interface ExpertInsightPayload {
+  readonly title: string;
+  readonly body: string;
+}
+
+export interface ModuleTuningPayload {
+  readonly title: string;
+  readonly modules: ReadonlyArray<{
+    readonly name: string;
+    readonly params: ReadonlyArray<{ readonly name: string; readonly value: string | number }>;
+  }>;
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -20,6 +33,8 @@ export interface ChatMessage {
   gameTypeOptions?: Array<{ id: string; name: string; emoji?: string }>;
   parameterCard?: { category: string; paramIds: string[]; title?: string };
   l1Controls?: boolean;
+  expertInsight?: ExpertInsightPayload;
+  moduleTuning?: ModuleTuningPayload;
   timestamp: number;
 }
 
@@ -48,6 +63,20 @@ export const DEFAULT_CHIPS: Chip[] = [
   { id: 'expression', label: '表情挑战', emoji: '😊', type: 'game_type' as const },
 ];
 
+export interface GameFeelSuggestion {
+  readonly id: string;
+  readonly title: string;
+  readonly description: string;
+  readonly delta: number;
+}
+
+export interface GameFeelState {
+  score: number;
+  dimensions: Readonly<Record<string, number>>;
+  suggestions: readonly GameFeelSuggestion[];
+  badge: 'bronze' | 'silver' | 'gold' | 'expert' | null;
+}
+
 interface EditorStore {
   selectedModuleId: string | null;
   previewMode: PreviewMode;
@@ -62,6 +91,8 @@ interface EditorStore {
   l1State: L1State;
   boardModeOpen: boolean;
 
+  gameFeel: GameFeelState;
+
   selectModule: (id: string | null) => void;
   setPreviewMode: (mode: PreviewMode) => void;
   addChatMessage: (message: ChatMessage) => void;
@@ -74,6 +105,7 @@ interface EditorStore {
   setValidationReport: (report: ValidationReport | null) => void;
   setL1State: (partial: Partial<L1State>) => void;
   setBoardModeOpen: (open: boolean) => void;
+  setGameFeel: (partial: Partial<GameFeelState>) => void;
 }
 
 export const useEditorStore = create<EditorStore>((set) => ({
@@ -87,6 +119,7 @@ export const useEditorStore = create<EditorStore>((set) => ({
   editorExpanded: false,
   l1State: { difficulty: 'normal', pacing: 50, emotion: 'cartoon' },
   boardModeOpen: false,
+  gameFeel: { score: 0, dimensions: {}, suggestions: [], badge: null },
 
   selectModule: (id) => set({ selectedModuleId: id }),
 
@@ -115,4 +148,6 @@ export const useEditorStore = create<EditorStore>((set) => ({
   setL1State: (partial) =>
     set((state) => ({ l1State: { ...state.l1State, ...partial } })),
   setBoardModeOpen: (open) => set({ boardModeOpen: open }),
+  setGameFeel: (partial) =>
+    set((state) => ({ gameFeel: { ...state.gameFeel, ...partial } })),
 }));

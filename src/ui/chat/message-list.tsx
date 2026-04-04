@@ -7,6 +7,8 @@ import { useGameStore } from '@/store/game-store';
 import { L1ExperienceCard } from './l1-experience-card';
 import { GuiParamCard } from './gui-param-card';
 import { GameTypeSelector } from './game-type-selector';
+import { ExpertInsightBlock } from './expert-insight-block';
+import { ModuleCombinationCard } from './module-combination-card';
 import { applyL1Preset } from '@/engine/core/composite-mapper';
 import {
   getLiveValuesForParams,
@@ -169,6 +171,19 @@ function MessageBubble({
           <GameTypeSelector
             options={message.gameTypeOptions}
             onSelect={(id) => onSelectGameType?.(id)}
+          />
+        )}
+
+        {!isUser && message.expertInsight && (
+          <ExpertInsightBlock title={message.expertInsight.title}>
+            <p>{message.expertInsight.body}</p>
+          </ExpertInsightBlock>
+        )}
+
+        {!isUser && message.moduleTuning && (
+          <ModuleCombinationCard
+            tuning={message.moduleTuning}
+            onApply={() => {/* TODO: wire to Zustand */}}
           />
         )}
       </div>

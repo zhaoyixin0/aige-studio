@@ -340,7 +340,9 @@ describe('ConfigValidator — missing input module', () => {
 // ── 8. All Presets Pass Validation ─────────────────────────────
 
 describe('ConfigValidator — all game presets pass', () => {
-  for (const gameType of ALL_GAME_TYPES) {
+  // Only test game types that have full preset definitions
+  const typesWithPresets = ALL_GAME_TYPES.filter((t) => getGamePreset(t) !== undefined);
+  for (const gameType of typesWithPresets) {
     it(`should produce no errors for "${gameType}" preset`, () => {
       const preset = getGamePreset(gameType)!;
       const modules: ModuleConfig[] = [];

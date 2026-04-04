@@ -8,18 +8,86 @@
 // - src/knowledge/game-types/*.md (per-type recommended configs)
 
 export const ALL_GAME_TYPES = [
+  // Original 16
   'catch', 'dodge', 'quiz', 'random-wheel',
   'tap', 'shooting', 'expression', 'runner',
   'gesture', 'rhythm', 'puzzle', 'dress-up', 'world-ar', 'narrative',
   'platformer', 'action-rpg',
+  // M0 expansion: 22 new types from expert data
+  'quick-reaction', 'whack-a-mole',
+  'slingshot', 'ball-physics', 'trajectory', 'bouncing', 'rope-cutting',
+  'match-link', 'jigsaw', 'water-pipe', 'scale-matching',
+  'flip-guess', 'head-tilt',
+  'drawing', 'avatar-frame',
+  'racing', 'cross-road', 'ball-rolling',
+  'maze', 'sugar-insert', 'swimmer', 'jelly',
 ] as const;
 
 export type GameType = (typeof ALL_GAME_TYPES)[number];
 
+/** Metadata for each game type — used by UI selectors, taxonomy, ConversationAgent */
+export interface GameTypeMeta {
+  readonly displayName: string;
+  readonly category: string;
+  readonly description: string;
+  readonly supportedToday: boolean;
+  readonly tags: readonly string[];
+  readonly emoji?: string;
+}
+
+export const GAME_TYPE_META: Record<GameType, GameTypeMeta> = {
+  // --- Reflex ---
+  'catch': { displayName: '接住', category: 'Reflex', description: 'Catch falling items', supportedToday: true, tags: ['casual', 'spawner'], emoji: '🎯' },
+  'dodge': { displayName: '躲避', category: 'Reflex', description: 'Avoid obstacles', supportedToday: true, tags: ['casual', 'survival'], emoji: '💨' },
+  'tap': { displayName: '点击', category: 'Reflex', description: 'Tap targets quickly', supportedToday: true, tags: ['casual', 'speed'], emoji: '👆' },
+  'rhythm': { displayName: '节奏', category: 'Reflex', description: 'Hit beats in time', supportedToday: true, tags: ['music', 'timing'], emoji: '🎵' },
+  'quick-reaction': { displayName: '快速反应', category: 'Reflex', description: 'React to sudden prompts', supportedToday: false, tags: ['speed', 'casual'], emoji: '⚡' },
+  'whack-a-mole': { displayName: '打地鼠', category: 'Reflex', description: 'Tap popping targets', supportedToday: false, tags: ['casual', 'tween'], emoji: '🔨' },
+  // --- Physics ---
+  'shooting': { displayName: '射击', category: 'Physics', description: 'Aim and shoot targets', supportedToday: true, tags: ['combat', 'aim'], emoji: '🔫' },
+  'slingshot': { displayName: '弹弓', category: 'Physics', description: 'Fling projectiles at structures', supportedToday: false, tags: ['physics', 'aim'], emoji: '🏹' },
+  'ball-physics': { displayName: '物理球', category: 'Physics', description: 'Physics-based ball mechanics', supportedToday: false, tags: ['physics'], emoji: '⚽' },
+  'trajectory': { displayName: '弹道', category: 'Physics', description: 'Plot projectile paths', supportedToday: false, tags: ['physics', 'aim'], emoji: '📐' },
+  'bouncing': { displayName: '弹球', category: 'Physics', description: 'Ball bouncing in enclosed area', supportedToday: false, tags: ['physics'], emoji: '🏓' },
+  'rope-cutting': { displayName: '割绳子', category: 'Physics', description: 'Cut ropes to solve puzzles', supportedToday: false, tags: ['physics', 'puzzle'], emoji: '✂️' },
+  // --- Puzzle ---
+  'puzzle': { displayName: '解谜', category: 'Puzzle', description: 'Generic puzzle mechanics', supportedToday: true, tags: ['logic'], emoji: '🧩' },
+  'match-link': { displayName: '连线配对', category: 'Puzzle', description: 'Connect matching items', supportedToday: false, tags: ['logic', 'tween'], emoji: '🔗' },
+  'jigsaw': { displayName: '拼图', category: 'Puzzle', description: 'Assemble pieces to form image', supportedToday: false, tags: ['logic', 'casual'], emoji: '🖼️' },
+  'water-pipe': { displayName: '水管', category: 'Puzzle', description: 'Connect pipes to guide flow', supportedToday: false, tags: ['logic', 'tween'], emoji: '🚰' },
+  'scale-matching': { displayName: '天平', category: 'Puzzle', description: 'Balance items on a scale', supportedToday: false, tags: ['physics', 'logic'], emoji: '⚖️' },
+  // --- Social ---
+  'quiz': { displayName: '答题', category: 'Social', description: 'Answer questions', supportedToday: true, tags: ['trivia', 'social'], emoji: '❓' },
+  'random-wheel': { displayName: '转盘', category: 'Social', description: 'Spin to decide', supportedToday: false, tags: ['social', 'tween'], emoji: '🎰' },
+  'expression': { displayName: '表情', category: 'Social', description: 'Face expression games', supportedToday: true, tags: ['face', 'social'], emoji: '😊' },
+  'gesture': { displayName: '手势', category: 'Social', description: 'Hand gesture challenges', supportedToday: true, tags: ['hand', 'social'], emoji: '✋' },
+  'flip-guess': { displayName: '翻牌猜', category: 'Social', description: 'Flip cards for friend guessing', supportedToday: false, tags: ['social', 'tween'], emoji: '🃏' },
+  'head-tilt': { displayName: '歪头选择', category: 'Social', description: 'Tilt head to choose options', supportedToday: false, tags: ['face', 'casual'], emoji: '🤔' },
+  // --- Creative ---
+  'dress-up': { displayName: '换装', category: 'Creative', description: 'Customize character appearance', supportedToday: true, tags: ['creative', 'social'], emoji: '👗' },
+  'drawing': { displayName: '画画', category: 'Creative', description: 'Free-hand drawing', supportedToday: false, tags: ['creative', 'canvas'], emoji: '🎨' },
+  'avatar-frame': { displayName: '头像框', category: 'Creative', description: 'Create custom avatar frames', supportedToday: false, tags: ['creative', 'social'], emoji: '🖼️' },
+  // --- Sports ---
+  'runner': { displayName: '跑酷', category: 'Sports', description: 'Endless side-scroller', supportedToday: false, tags: ['action', 'scrolling'], emoji: '🏃' },
+  'platformer': { displayName: '平台跳跃', category: 'Sports', description: 'Jump across platforms', supportedToday: true, tags: ['action', 'physics'], emoji: '🎮' },
+  'action-rpg': { displayName: '动作RPG', category: 'Sports', description: 'Combat with stats', supportedToday: true, tags: ['combat', 'rpg'], emoji: '⚔️' },
+  'racing': { displayName: '赛车', category: 'Sports', description: 'Swipe to steer vehicle', supportedToday: false, tags: ['action', 'scrolling'], emoji: '🏎️' },
+  'cross-road': { displayName: '过马路', category: 'Sports', description: 'Navigate through traffic', supportedToday: false, tags: ['action', 'survival'], emoji: '🚗' },
+  'ball-rolling': { displayName: '滚球', category: 'Sports', description: '3D ball on terrain', supportedToday: false, tags: ['physics', 'action'], emoji: '🎱' },
+  // --- Narrative ---
+  'narrative': { displayName: '叙事', category: 'Narrative', description: 'Branching story', supportedToday: true, tags: ['story', 'dialogue'], emoji: '📖' },
+  'world-ar': { displayName: 'World AR', category: 'Narrative', description: 'AR world placement', supportedToday: true, tags: ['ar', 'spatial'], emoji: '🌍' },
+  // --- Experimental ---
+  'maze': { displayName: '迷宫', category: 'Experimental', description: 'Navigate through maze', supportedToday: false, tags: ['physics', 'puzzle'], emoji: '🏰' },
+  'sugar-insert': { displayName: '糖果挑战', category: 'Experimental', description: 'Precision dropping challenge', supportedToday: false, tags: ['physics', 'precision'], emoji: '🍬' },
+  'swimmer': { displayName: '游泳', category: 'Experimental', description: 'Aquatic navigation game', supportedToday: false, tags: ['physics', 'scrolling'], emoji: '🏊' },
+  'jelly': { displayName: '果冻', category: 'Experimental', description: 'Soft-body physics game', supportedToday: false, tags: ['physics', 'tween'], emoji: '🍮' },
+};
+
 /** Per-module params keyed by module type */
 export type GamePreset = Record<string, Record<string, unknown>>;
 
-const PRESETS: Record<GameType, GamePreset> = {
+const PRESETS: Partial<Record<GameType, GamePreset>> = {
 
   // ──────────────────────────────────────────
   // CATCH (接住类)

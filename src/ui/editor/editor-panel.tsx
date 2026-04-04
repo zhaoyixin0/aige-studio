@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
-import { Layers, Settings, Image, Sparkles } from 'lucide-react';
+import { Layers, Settings, Image, Sparkles, Activity } from 'lucide-react';
 import { ModuleList } from './module-list.tsx';
 import { PropertiesPanel } from './properties-panel.tsx';
+import { GameFeelScore } from './game-feel-score.tsx';
+import { GameFeelSuggestions } from './game-feel-suggestions.tsx';
 import { AssetBrowser } from '@/ui/assets/asset-browser.tsx';
 import { AssetUpload } from '@/ui/assets/asset-upload.tsx';
 import { AIGenerateDialog } from '@/ui/assets/ai-generate-dialog.tsx';
+import { useEditorStore } from '@/store/editor-store.ts';
 
 export function EditorPanel() {
   const [aiDialogOpen, setAiDialogOpen] = useState(false);
+  const gameFeel = useEditorStore((s) => s.gameFeel);
 
   return (
     <div className="flex flex-col h-full bg-gray-900 border-l border-white/5">
@@ -28,6 +32,13 @@ export function EditorPanel() {
           >
             <Image size={13} />
             Assets
+          </Tabs.Trigger>
+          <Tabs.Trigger
+            value="gamefeel"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs text-gray-400 border-b-2 border-transparent data-[state=active]:text-white data-[state=active]:border-blue-500 transition-colors"
+          >
+            <Activity size={13} />
+            Game Feel
           </Tabs.Trigger>
         </Tabs.List>
 
@@ -80,6 +91,21 @@ export function EditorPanel() {
 
             {/* Asset browser */}
             <AssetBrowser />
+          </div>
+        </Tabs.Content>
+
+        {/* Game Feel tab content */}
+        <Tabs.Content value="gamefeel" className="flex flex-col flex-1 min-h-0 overflow-y-auto">
+          <div className="flex flex-col gap-4 p-4">
+            <GameFeelScore
+              score={gameFeel.score}
+              dimensions={gameFeel.dimensions}
+              badge={gameFeel.badge}
+            />
+            <GameFeelSuggestions
+              suggestions={gameFeel.suggestions}
+              onApply={() => {/* TODO: wire apply action */}}
+            />
           </div>
         </Tabs.Content>
       </Tabs.Root>

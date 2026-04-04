@@ -9,8 +9,11 @@ describe('GamePresets', () => {
     }
   });
 
+  // Only iterate types that have a full preset definition (not stub-only types)
+  const typesWithPresets = ALL_GAME_TYPES.filter((t) => getGamePreset(t) !== undefined);
+
   it('each preset should have valid module params', () => {
-    for (const type of ALL_GAME_TYPES) {
+    for (const type of typesWithPresets) {
       const preset = getGamePreset(type);
       // Every preset must include at least GameFlow
       expect(preset!.GameFlow).toBeDefined();
@@ -18,7 +21,7 @@ describe('GamePresets', () => {
   });
 
   it('Spawner presets should always have items array', () => {
-    for (const type of ALL_GAME_TYPES) {
+    for (const type of typesWithPresets) {
       const preset = getGamePreset(type)!;
       if (preset.Spawner) {
         const spawner = preset.Spawner as Record<string, any>;
@@ -31,7 +34,7 @@ describe('GamePresets', () => {
   });
 
   it('Collision presets should always have rules array', () => {
-    for (const type of ALL_GAME_TYPES) {
+    for (const type of typesWithPresets) {
       const preset = getGamePreset(type)!;
       if (preset.Collision) {
         const collision = preset.Collision as Record<string, any>;
@@ -41,7 +44,7 @@ describe('GamePresets', () => {
   });
 
   it('DifficultyRamp presets should have target and rules', () => {
-    for (const type of ALL_GAME_TYPES) {
+    for (const type of typesWithPresets) {
       const preset = getGamePreset(type)!;
       if (preset.DifficultyRamp) {
         const ramp = preset.DifficultyRamp as Record<string, any>;
@@ -52,7 +55,7 @@ describe('GamePresets', () => {
   });
 
   it('Timer duration should match common social game durations', () => {
-    for (const type of ALL_GAME_TYPES) {
+    for (const type of typesWithPresets) {
       const preset = getGamePreset(type)!;
       if (preset.Timer) {
         const timer = preset.Timer as Record<string, any>;

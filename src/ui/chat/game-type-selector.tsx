@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -8,6 +8,8 @@ export interface GameTypeOption {
   readonly id: string;
   readonly name: string;
   readonly emoji?: string;
+  readonly category?: string;
+  readonly supportedToday?: boolean;
 }
 
 export interface GameTypeSelectorProps {
@@ -35,7 +37,6 @@ function GameTypeCard({ option, isHovered, onHover, onConfirm }: CardProps) {
 
   return (
     <div
-      role="group"
       aria-label={option.name}
       data-testid="game-type-card"
       className={`${baseClasses} ${stateClasses}`}
@@ -48,6 +49,11 @@ function GameTypeCard({ option, isHovered, onHover, onConfirm }: CardProps) {
       <span className="text-sm text-gray-200 text-center font-medium">
         {option.name}
       </span>
+      {option.supportedToday === false && (
+        <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-600/50 text-gray-400">
+          Coming Soon
+        </span>
+      )}
       <button
         type="button"
         aria-label={`确定选择${option.name}`}
@@ -61,11 +67,83 @@ function GameTypeCard({ option, isHovered, onHover, onConfirm }: CardProps) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Category tabs                                                      */
+/* ------------------------------------------------------------------ */
+
+interface CategoryTabsProps {
+  readonly categories: readonly string[];
+  readonly active: string | null;
+  readonly onSelect: (cat: string | null) => void;
+}
+
+function CategoryTabs({ categories, active, onSelect }: CategoryTabsProps) {
+  return (
+    <div className="flex gap-1 overflow-x-auto pb-1 px-3 scrollbar-hide">
+      <button
+        type="button"
+        onClick={() => onSelect(null)}
+        className={`shrink-0 px-2.5 py-1 rounded-full text-xs transition-colors ${
+          active === null
+            ? 'bg-blue-600 text-white'
+            : 'bg-white/5 text-gray-400 hover:bg-white/10'
+        }`}
+      >
+        All
+      </button>
+      {categories.map((cat) => (
+        <button
+          key={cat}
+          type="button"
+          onClick={() => onSelect(cat)}
+          className={`shrink-0 px-2.5 py-1 rounded-full text-xs transition-colors ${
+            active === cat
+              ? 'bg-blue-600 text-white'
+              : 'bg-white/5 text-gray-400 hover:bg-white/10'
+          }`}
+        >
+          {cat}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  GameTypeSelector                                                   */
 /* ------------------------------------------------------------------ */
 
 export function GameTypeSelector({ options, onSelect }: GameTypeSelectorProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const COLLAPSED_COUNT = 6;
+
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    for (const opt of options) {
+      if (opt.category) cats.add(opt.category);
+    }
+    return [...cats];
+  }, [options]);
+
+  const filtered = useMemo(() => {
+    let result = [...options];
+    if (activeCategory) {
+      result = result.filter((o) => o.category === activeCategory);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      result = result.filter(
+        (o) =>
+          o.name.toLowerCase().includes(q) ||
+          o.id.toLowerCase().includes(q) ||
+          (o.category?.toLowerCase().includes(q) ?? false),
+      );
+    }
+    return result;
+  }, [options, activeCategory, searchQuery]);
 
   const handleHover = useCallback((id: string | null) => {
     setHoveredId(id);
@@ -81,16 +159,60 @@ export function GameTypeSelector({ options, onSelect }: GameTypeSelectorProps) {
   if (options.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-3 gap-3 p-3">
-      {options.map((option) => (
-        <GameTypeCard
-          key={option.id}
-          option={option}
-          isHovered={hoveredId === option.id}
-          onHover={handleHover}
-          onConfirm={handleConfirm}
+    <div className="flex flex-col gap-2 py-2">
+      {/* Search */}
+      <div className="px-3">
+        <input
+          type="text"
+          placeholder="搜索游戏类型..."
+          aria-label="搜索游戏类型"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
         />
-      ))}
+      </div>
+
+      {/* Category tabs */}
+      {categories.length > 1 && (
+        <CategoryTabs
+          categories={categories}
+          active={activeCategory}
+          onSelect={setActiveCategory}
+        />
+      )}
+
+      {/* Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3">
+        {(isExpanded || searchQuery.trim() || activeCategory
+          ? filtered
+          : filtered.slice(0, COLLAPSED_COUNT)
+        ).map((option) => (
+          <GameTypeCard
+            key={option.id}
+            option={option}
+            isHovered={hoveredId === option.id}
+            onHover={handleHover}
+            onConfirm={handleConfirm}
+          />
+        ))}
+      </div>
+
+      {/* Show More / Show Less */}
+      {!searchQuery.trim() && !activeCategory && filtered.length > COLLAPSED_COUNT && (
+        <button
+          type="button"
+          onClick={() => setIsExpanded((v) => !v)}
+          className="mx-3 py-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+        >
+          {isExpanded ? '收起' : `显示更多 (${filtered.length - COLLAPSED_COUNT})`}
+        </button>
+      )}
+
+      {filtered.length === 0 && (
+        <p className="text-center text-xs text-gray-500 py-4">
+          未找到匹配的游戏类型
+        </p>
+      )}
     </div>
   );
 }

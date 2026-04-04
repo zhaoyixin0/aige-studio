@@ -39,7 +39,10 @@ function tickMs(engine: Engine, ms: number) {
   for (let i = 0; i < frames; i++) engine.tick(16);
 }
 
-for (const gameType of ALL_GAME_TYPES) {
+// Only test game types that have full preset definitions
+const typesWithPresets = ALL_GAME_TYPES.filter((t) => getGamePreset(t) !== undefined);
+
+for (const gameType of typesWithPresets) {
   describe(`${gameType} lifecycle`, () => {
     it('loads all modules without errors', () => {
       const engine = createEngine(gameType);
