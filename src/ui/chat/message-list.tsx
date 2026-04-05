@@ -1,4 +1,5 @@
 import { useRef, useEffect, useCallback, useMemo } from 'react';
+import type { ModuleTuningPayload } from '@/store/editor-store';
 import { Loader2 } from 'lucide-react';
 import type { ChatMessage } from '@/store/editor-store';
 import type { GameConfig } from '@/engine/core';
@@ -62,6 +63,33 @@ export function MessageList({
     [l1State, setL1State, config, batchUpdateParams],
   );
 
+  /* Expert tuning apply handler */
+  const handleApplyTuning = useCallback(
+    (tuning: ModuleTuningPayload) => {
+      if (!config) return;
+      const updates: Array<{ moduleId: string; changes: Record<string, unknown> }> = [];
+
+      for (const mod of tuning.modules) {
+        const target = config.modules.find(
+          (m) => m.type.toLowerCase() === mod.name.toLowerCase(),
+        );
+        if (!target) continue;
+
+        const changes: Record<string, unknown> = {};
+        for (const p of mod.params) {
+          changes[p.name] =
+            typeof p.value === 'string' && p.value.trim() !== '' && !isNaN(Number(p.value))
+              ? Number(p.value)
+              : p.value;
+        }
+        updates.push({ moduleId: target.id, changes });
+      }
+
+      if (updates.length > 0) batchUpdateParams(updates);
+    },
+    [config, batchUpdateParams],
+  );
+
   /* Param change handler */
   const handleParamChange = useCallback(
     (paramId: string, value: unknown) => {
@@ -87,6 +115,7 @@ export function MessageList({
           config={config}
           onL1Change={handleL1Change}
           onParamChange={handleParamChange}
+          onApplyTuning={handleApplyTuning}
           onSelectGameType={onSelectGameType}
         />
       ))}
@@ -113,6 +142,7 @@ interface BubbleProps {
   readonly config: GameConfig | null;
   readonly onL1Change: (partial: Record<string, string>) => void;
   readonly onParamChange: (paramId: string, value: unknown) => void;
+  readonly onApplyTuning: (tuning: ModuleTuningPayload) => void;
   readonly onSelectGameType?: (gameTypeId: string) => void;
 }
 
@@ -122,6 +152,7 @@ function MessageBubble({
   config,
   onL1Change,
   onParamChange,
+  onApplyTuning,
   onSelectGameType,
 }: BubbleProps) {
   const isUser = message.role === 'user';
@@ -183,7 +214,7 @@ function MessageBubble({
         {!isUser && message.moduleTuning && (
           <ModuleCombinationCard
             tuning={message.moduleTuning}
-            onApply={() => {/* TODO: wire to Zustand */}}
+            onApply={() => onApplyTuning(message.moduleTuning!)}
           />
         )}
       </div>

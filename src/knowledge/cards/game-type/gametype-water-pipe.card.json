@@ -1,0 +1,33 @@
+{
+  "description": "Connect pipes to guide flow",
+  "displayName": "Water Pipe",
+  "evidence": "2d_let_crow_drink_water_game",
+  "expertDataCount": 1,
+  "group": "Puzzle",
+  "id": "gametype-water-pipe",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.05,
+      "suggested": 0.167
+    },
+    "collider_count": {
+      "confidence": 0.05,
+      "suggested": 1.167
+    },
+    "complexity_score": {
+      "confidence": 0.05,
+      "suggested": 16
+    },
+    "object_count": {
+      "confidence": 0.05,
+      "suggested": 5.333
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "MatchEngine",
+    "Collision",
+    "Tween"
+  ]
+}

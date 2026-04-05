@@ -8,6 +8,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { ALL_GAME_TYPES } from './game-presets.ts';
 import { DEFAULT_THEME_FOR_GAME } from './wizard.ts';
 import { PARAMETER_REGISTRY, type ParamCategory } from '@/data/parameter-registry.ts';
+import type { ExpertInsightPayload, ModuleTuningPayload } from '@/store/editor-store.ts';
 
 /* ------------------------------------------------------------------ */
 /*  Public types                                                       */
@@ -40,6 +41,8 @@ export interface ConversationResult {
   chips?: Chip[];
   needsMoreInfo?: boolean;
   parameterCard?: ParameterCardPayload;
+  expertInsight?: ExpertInsightPayload;
+  moduleTuning?: ModuleTuningPayload;
 }
 
 export interface ConfigChange {
@@ -385,6 +388,37 @@ export const TOOLS: Anthropic.Messages.Tool[] = [
         },
       },
       required: ['category', 'param_ids'],
+    },
+  },
+  {
+    name: 'push_expert_insight',
+    description: '推送专家洞见与参数调优建议到聊天界面',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        title: { type: 'string', description: '洞见标题' },
+        body: { type: 'string', description: '详细说明' },
+        modules: {
+          type: 'array',
+          description: '推荐的模块参数调整',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              params: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: { name: { type: 'string' }, value: {} },
+                  required: ['name', 'value'],
+                },
+              },
+            },
+            required: ['name', 'params'],
+          },
+        },
+      },
+      required: ['title'],
     },
   },
 ];

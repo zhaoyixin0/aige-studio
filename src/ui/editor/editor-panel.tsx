@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import { Layers, Settings, Image, Sparkles, Activity } from 'lucide-react';
 import { ModuleList } from './module-list.tsx';
@@ -9,10 +9,41 @@ import { AssetBrowser } from '@/ui/assets/asset-browser.tsx';
 import { AssetUpload } from '@/ui/assets/asset-upload.tsx';
 import { AIGenerateDialog } from '@/ui/assets/ai-generate-dialog.tsx';
 import { useEditorStore } from '@/store/editor-store.ts';
+import { useGameStore } from '@/store/game-store.ts';
+import { useGameFeelSync } from '@/hooks/use-game-feel-sync.ts';
 
 export function EditorPanel() {
   const [aiDialogOpen, setAiDialogOpen] = useState(false);
   const gameFeel = useEditorStore((s) => s.gameFeel);
+  const config = useGameStore((s) => s.config);
+  const addModule = useGameStore((s) => s.addModule);
+  const batchUpdateParams = useGameStore((s) => s.batchUpdateParams);
+
+  useGameFeelSync();
+
+  const handleApplySuggestion = useCallback(
+    (id: string) => {
+      if (!config) return;
+      const suggestion = gameFeel.suggestions.find((s) => s.id === id);
+      if (!suggestion?.payload) return;
+      for (const entry of suggestion.payload) {
+        const existing = config.modules.find((m) => m.type === entry.moduleType);
+        if (existing) {
+          if (entry.params && Object.keys(entry.params).length > 0) {
+            batchUpdateParams([{ moduleId: existing.id, changes: entry.params }]);
+          }
+        } else {
+          addModule({
+            id: `${entry.moduleType.toLowerCase()}_${crypto.randomUUID()}`,
+            type: entry.moduleType,
+            enabled: true,
+            params: entry.params ?? {},
+          });
+        }
+      }
+    },
+    [config, gameFeel.suggestions, addModule, batchUpdateParams],
+  );
 
   return (
     <div className="flex flex-col h-full bg-gray-900 border-l border-white/5">
@@ -104,7 +135,7 @@ export function EditorPanel() {
             />
             <GameFeelSuggestions
               suggestions={gameFeel.suggestions}
-              onApply={() => {/* TODO: wire apply action */}}
+              onApply={handleApplySuggestion}
             />
           </div>
         </Tabs.Content>

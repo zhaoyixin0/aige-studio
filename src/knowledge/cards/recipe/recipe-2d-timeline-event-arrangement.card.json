@@ -1,0 +1,20 @@
+{
+  "commands": [
+    "createObject",
+    "renameObject",
+    "setProperty",
+    "setParent"
+  ],
+  "complexity": "M",
+  "decomposeInputs": [
+    "name",
+    "position",
+    "size",
+    "texture",
+    "input"
+  ],
+  "description": "Follow this tutorial to create interactive 2D timeline bars with chronological markers, event slots, and progression indicators for game UI production.",
+  "id": "recipe-2d-timeline-event-arrangement",
+  "source": "command:2D_Timeline_Event_Arrangement.json",
+  "stepCount": 22
+}

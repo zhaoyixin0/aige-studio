@@ -1,0 +1,32 @@
+{
+  "description": "Answer questions",
+  "displayName": "Quiz",
+  "evidence": "2D_Random_Question_Display",
+  "expertDataCount": 1,
+  "group": "Social",
+  "id": "gametype-quiz",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.05,
+      "suggested": 0
+    },
+    "collider_count": {
+      "confidence": 0.05,
+      "suggested": 0
+    },
+    "complexity_score": {
+      "confidence": 0.05,
+      "suggested": 1.167
+    },
+    "object_count": {
+      "confidence": 0.05,
+      "suggested": 1.167
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "Scorer",
+    "Timer"
+  ]
+}

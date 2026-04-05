@@ -1,0 +1,33 @@
+{
+  "description": "Endless side-scroller",
+  "displayName": "Runner",
+  "evidence": "2D_side_scrolling_game, 2D_Swipe_Car_Racing_Game, side-scrolling shaping game",
+  "expertDataCount": 29,
+  "group": "Sports",
+  "id": "gametype-runner",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 1,
+      "suggested": 0.8
+    },
+    "collider_count": {
+      "confidence": 1,
+      "suggested": 0
+    },
+    "complexity_score": {
+      "confidence": 0.552,
+      "suggested": 23.2
+    },
+    "object_count": {
+      "confidence": 0.643,
+      "suggested": 22.4
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "Spawner",
+    "Collision",
+    "ScrollingLayers"
+  ]
+}

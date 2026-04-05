@@ -1,0 +1,32 @@
+{
+  "description": "Hit beats in time",
+  "displayName": "Rhythm",
+  "evidence": "2D_Timeline_Event_Arrangement",
+  "expertDataCount": 1,
+  "group": "Reflex",
+  "id": "gametype-rhythm",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.05,
+      "suggested": 0.116
+    },
+    "collider_count": {
+      "confidence": 0.05,
+      "suggested": 0
+    },
+    "complexity_score": {
+      "confidence": 0.05,
+      "suggested": 1.5
+    },
+    "object_count": {
+      "confidence": 0.05,
+      "suggested": 1.5
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "BeatMap",
+    "Scorer"
+  ]
+}

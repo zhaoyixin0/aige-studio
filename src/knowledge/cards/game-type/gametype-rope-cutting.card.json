@@ -1,0 +1,15 @@
+{
+  "description": "Cut ropes to solve puzzles",
+  "displayName": "Rope Cutting",
+  "evidence": "2D_Rope_Cutting_Friend_Rescue_Game",
+  "expertDataCount": 0,
+  "group": "Physics",
+  "id": "gametype-rope-cutting",
+  "missingModules": [],
+  "signatureParams": {},
+  "supportedToday": true,
+  "topModules": [
+    "Physics2D",
+    "Collision"
+  ]
+}

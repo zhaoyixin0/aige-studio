@@ -1,0 +1,21 @@
+{
+  "commands": [
+    "createObject",
+    "renameObject",
+    "setProperty",
+    "setParent"
+  ],
+  "complexity": "M",
+  "decomposeInputs": [
+    "name",
+    "position",
+    "size",
+    "texture",
+    "pivot",
+    "rotation"
+  ],
+  "description": "Follow this tutorial to create interactive 2D spinning wheel game components with segmented answer zones and a stationary pointer for selecting objects/answers. This includes physics-based rotation mechanics, smooth spin animations, pointer collision detection, and visual feedback systems for game UI production.",
+  "id": "recipe-2d-spinning-wheel-pointer-game",
+  "source": "command:2D_Spinning_Wheel_Pointer_Game.json",
+  "stepCount": 15
+}

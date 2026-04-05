@@ -363,6 +363,8 @@ export class ConversationAgent {
       let config: GameConfig | undefined;
       let chips: Chip[] | undefined;
       let parameterCard: ParameterCardPayload | undefined;
+      let expertInsight: ConversationResult['expertInsight'];
+      let moduleTuning: ConversationResult['moduleTuning'];
       let createdThisTurn = false;
 
       for (const block of response.content) {
@@ -469,6 +471,43 @@ export class ConversationAgent {
               }
               break;
             }
+
+            case 'push_expert_insight': {
+              const input = block.input as {
+                title?: string;
+                body?: string;
+                modules?: Array<{
+                  name: string;
+                  params: Array<{ name: string; value: unknown }>;
+                }>;
+              };
+              const safeTitle = String(input?.title ?? '').trim();
+              if (safeTitle) {
+                if (typeof input?.body === 'string' && input.body.trim().length > 0) {
+                  expertInsight = { title: safeTitle, body: input.body.trim() };
+                }
+                if (Array.isArray(input?.modules) && input.modules.length > 0) {
+                  moduleTuning = {
+                    title: safeTitle,
+                    modules: input.modules.map((m) => ({
+                      name: String(m?.name ?? ''),
+                      params: Array.isArray(m?.params)
+                        ? m.params.map((p) => ({
+                            name: String(p?.name ?? ''),
+                            value: typeof p?.value === 'string' && p.value.trim() !== '' && !isNaN(Number(p.value))
+                              ? Number(p.value)
+                              : (p?.value as string | number),
+                          }))
+                        : [],
+                    })),
+                  };
+                }
+                if (!reply) {
+                  reply = '以下是专家调参建议：';
+                }
+              }
+              break;
+            }
           }
         }
       }
@@ -488,7 +527,7 @@ export class ConversationAgent {
       // Determine if we still need more info
       const needsMoreInfo = !config && !chips && !parameterCard;
 
-      return { reply, config, chips, needsMoreInfo, parameterCard };
+      return { reply, config, chips, needsMoreInfo, parameterCard, expertInsight, moduleTuning };
     } catch (error) {
       const errMsg = error instanceof Error ? error.message : String(error);
       return {

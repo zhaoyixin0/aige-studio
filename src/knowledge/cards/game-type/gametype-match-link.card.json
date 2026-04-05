@@ -1,0 +1,33 @@
+{
+  "description": "Connect matching items",
+  "displayName": "Match & Link",
+  "evidence": "2d_match_linl_game, 2d_match_lock_game",
+  "expertDataCount": 2,
+  "group": "Puzzle",
+  "id": "gametype-match-link",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.1,
+      "suggested": 0.286
+    },
+    "collider_count": {
+      "confidence": 0.1,
+      "suggested": 0
+    },
+    "complexity_score": {
+      "confidence": 0.092,
+      "suggested": 7.143
+    },
+    "object_count": {
+      "confidence": 0.092,
+      "suggested": 7.143
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "MatchEngine",
+    "Collision",
+    "Tween"
+  ]
+}

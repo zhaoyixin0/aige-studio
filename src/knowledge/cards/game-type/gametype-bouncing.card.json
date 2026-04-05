@@ -1,0 +1,15 @@
+{
+  "description": "Ball bouncing in enclosed area",
+  "displayName": "Bounded Bounce",
+  "evidence": "2D_Bounded_Area_Bounce_Game",
+  "expertDataCount": 0,
+  "group": "Physics",
+  "id": "gametype-bouncing",
+  "missingModules": [],
+  "signatureParams": {},
+  "supportedToday": true,
+  "topModules": [
+    "Physics2D",
+    "Collision"
+  ]
+}

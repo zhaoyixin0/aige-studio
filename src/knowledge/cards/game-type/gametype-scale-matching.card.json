@@ -1,0 +1,32 @@
+{
+  "description": "Balance items on a scale",
+  "displayName": "Scale Matching",
+  "evidence": "2d_scale-matching game",
+  "expertDataCount": 29,
+  "group": "Puzzle",
+  "id": "gametype-scale-matching",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 1,
+      "suggested": 0.8
+    },
+    "collider_count": {
+      "confidence": 1,
+      "suggested": 0
+    },
+    "complexity_score": {
+      "confidence": 0.552,
+      "suggested": 23.2
+    },
+    "object_count": {
+      "confidence": 0.643,
+      "suggested": 22.4
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "Physics2D",
+    "Scorer"
+  ]
+}

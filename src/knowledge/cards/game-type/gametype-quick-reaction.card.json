@@ -1,0 +1,35 @@
+{
+  "description": "React to sudden prompts",
+  "displayName": "Quick Reaction",
+  "evidence": "Quick_Reaction_Game",
+  "expertDataCount": 1,
+  "group": "Reflex",
+  "id": "gametype-quick-reaction",
+  "missingModules": [
+    "Preset"
+  ],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.05,
+      "suggested": 0.167
+    },
+    "collider_count": {
+      "confidence": 0.05,
+      "suggested": 0
+    },
+    "complexity_score": {
+      "confidence": 0.05,
+      "suggested": 2.5
+    },
+    "object_count": {
+      "confidence": 0.05,
+      "suggested": 2.5
+    }
+  },
+  "supportedToday": false,
+  "topModules": [
+    "Timer",
+    "Spawner",
+    "Scorer"
+  ]
+}

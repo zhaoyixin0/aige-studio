@@ -1,0 +1,21 @@
+{
+  "commands": [
+    "createObject",
+    "setProperty",
+    "addRigidBody2D",
+    "addCollider2D"
+  ],
+  "complexity": "M",
+  "decomposeInputs": [
+    "position",
+    "size",
+    "texture",
+    "velocity",
+    "opacity",
+    "radius"
+  ],
+  "description": "Follow this tutorial to create interactive 2D slingshot game components with a slingshot base, elastic bands, and a launchable ball. This includes slingshot pull mechanics, elastic band stretching structure, ball placement, and real-time physics updates for game UI production.",
+  "id": "recipe-2d-angrybirds-slingshot-game",
+  "source": "command:2D_AngryBirds_Slingshot_Game.json",
+  "stepCount": 19
+}

@@ -1,0 +1,19 @@
+{
+  "commands": [
+    "createObject",
+    "setProperty",
+    "addCollider3D",
+    "setParent"
+  ],
+  "complexity": "S",
+  "decomposeInputs": [
+    "localPosition",
+    "localScale",
+    "localRotation",
+    "groundTexture"
+  ],
+  "description": "Create a 3D ground surface for a parkour game that provides a stable platform for player movement and navigation. The ground features a flat, textured surface with proper collision detection to support running, jumping, and other parkour maneuvers. It is designed to be easily scalable and customizable to fit different parkour course layouts and environments.",
+  "id": "recipe-3d-parkour-ground",
+  "source": "command:3D_Parkour_Ground.json",
+  "stepCount": 8
+}

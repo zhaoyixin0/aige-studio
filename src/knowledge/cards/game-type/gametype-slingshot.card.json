@@ -1,0 +1,33 @@
+{
+  "description": "Fling projectiles at structures",
+  "displayName": "Slingshot",
+  "evidence": "2D_Slingshot_Ball_Launch_Game (AngryBirds-style)",
+  "expertDataCount": 1,
+  "group": "Physics",
+  "id": "gametype-slingshot",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.05,
+      "suggested": 0.167
+    },
+    "collider_count": {
+      "confidence": 0.05,
+      "suggested": 3
+    },
+    "complexity_score": {
+      "confidence": 0.05,
+      "suggested": 13.667
+    },
+    "object_count": {
+      "confidence": 0.05,
+      "suggested": 6.833
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "Physics2D",
+    "Collision",
+    "Projectile"
+  ]
+}

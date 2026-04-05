@@ -1,0 +1,21 @@
+{
+  "commands": [
+    "createObject",
+    "renameObject",
+    "generateAsset2D",
+    "setProperty",
+    "addCollider2D"
+  ],
+  "complexity": "S",
+  "decomposeInputs": [
+    "name",
+    "position",
+    "size",
+    "sprite_description",
+    "sprite_style"
+  ],
+  "description": "Follow this tutorial to create a 2D edge collider with physics interaction, collision detection, and connected line segment definitions. This knowledge is used for creating platform boundaries, obstacle edges, and terrain collision barriers in 2D platformer games, side-scrolling shooters, and physics-based puzzle games where precise edge collision detection is required.",
+  "id": "recipe-game-2d-physics-edge-collider",
+  "source": "command:game_2d_physics_edge_collider.json",
+  "stepCount": 10
+}

@@ -1,0 +1,11 @@
+{
+  "commands": [
+    "applyTemplate"
+  ],
+  "complexity": "S",
+  "decomposeInputs": [],
+  "description": "Template: GetProjectSnapshot",
+  "id": "recipe-tpl-chimpionswimmer",
+  "source": "template:ChimpionSwimmer.json",
+  "stepCount": 1
+}

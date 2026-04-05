@@ -1,0 +1,25 @@
+{
+  "commands": [
+    "createObject",
+    "renameObject",
+    "setProperty",
+    "setParent",
+    "addRigidBody2D",
+    "addCollider2D"
+  ],
+  "complexity": "L",
+  "decomposeInputs": [
+    "name",
+    "position",
+    "size",
+    "texture",
+    "pivot",
+    "rotation",
+    "gravity",
+    "mass"
+  ],
+  "description": "Follow this tutorial to create interactive 2D pendulum game components with a swinging arm and an attached ball for physics-based gameplay. This includes pendulum swing mechanics, gravity and momentum simulation, collision detection for the ball, and visual feedback systems for game UI production.",
+  "id": "recipe-2d-pendulum-ball-game",
+  "source": "command:2D_Pendulum_Ball_Game.json",
+  "stepCount": 28
+}

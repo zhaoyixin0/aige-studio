@@ -1,0 +1,29 @@
+{
+  "description": "Catch falling items",
+  "displayName": "Catch",
+  "evidence": "2D_Random_Drop_Slot_Game, Random_Pause_Sorting_Game",
+  "expertDataCount": 2,
+  "group": "Reflex",
+  "id": "gametype-catch",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.1,
+      "suggested": 0.286
+    },
+    "complexity_score": {
+      "confidence": 0.023,
+      "suggested": 17.143
+    },
+    "object_count": {
+      "confidence": 0.042,
+      "suggested": 9.571
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "Spawner",
+    "Collision",
+    "Scorer"
+  ]
+}

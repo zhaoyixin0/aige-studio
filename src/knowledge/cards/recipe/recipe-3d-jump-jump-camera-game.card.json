@@ -1,0 +1,16 @@
+{
+  "commands": [
+    "createObject",
+    "setProperty"
+  ],
+  "complexity": "S",
+  "decomposeInputs": [
+    "position",
+    "rotation",
+    "scale"
+  ],
+  "description": "Create a 3D jump-jump game with a moving camera system that follows a sinusoidal trajectory. The camera moves forward at a constant speed along the z-axis, with y-axis rotation controlled by left/right touch swipes. The camera's y-position follows a sin curve (0-5 range) to simulate jumping between ground platforms placed at intervals along the z-axis, with each gap between platforms representing one jump.",
+  "id": "recipe-3d-jump-jump-camera-game",
+  "source": "command:3D_Jump_Jump_Camera_Game.json",
+  "stepCount": 5
+}

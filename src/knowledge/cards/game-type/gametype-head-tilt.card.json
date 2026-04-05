@@ -1,0 +1,34 @@
+{
+  "description": "Tilt head to choose options",
+  "displayName": "Head Tilt Choice",
+  "evidence": "2D_HeadTilt_Choice_Game",
+  "expertDataCount": 1,
+  "group": "Social",
+  "id": "gametype-head-tilt",
+  "missingModules": [
+    "Preset"
+  ],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.05,
+      "suggested": 0
+    },
+    "collider_count": {
+      "confidence": 0.05,
+      "suggested": 0
+    },
+    "complexity_score": {
+      "confidence": 0.05,
+      "suggested": 4
+    },
+    "object_count": {
+      "confidence": 0.05,
+      "suggested": 4
+    }
+  },
+  "supportedToday": false,
+  "topModules": [
+    "FaceInput",
+    "Scorer"
+  ]
+}

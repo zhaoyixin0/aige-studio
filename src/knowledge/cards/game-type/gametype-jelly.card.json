@@ -1,0 +1,15 @@
+{
+  "description": "Soft-body physics game",
+  "displayName": "Jelly",
+  "evidence": "JellyGame template",
+  "expertDataCount": 0,
+  "group": "Experimental",
+  "id": "gametype-jelly",
+  "missingModules": [],
+  "signatureParams": {},
+  "supportedToday": true,
+  "topModules": [
+    "Physics2D",
+    "Tween"
+  ]
+}

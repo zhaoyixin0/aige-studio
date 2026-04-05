@@ -1,0 +1,32 @@
+{
+  "description": "Generic puzzle mechanics",
+  "displayName": "Puzzle",
+  "evidence": "Puzzle_Memory, Puzzle_Assemble",
+  "expertDataCount": 5,
+  "group": "Puzzle",
+  "id": "gametype-puzzle",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.25,
+      "suggested": 0.5
+    },
+    "collider_count": {
+      "confidence": 0.25,
+      "suggested": 0
+    },
+    "complexity_score": {
+      "confidence": 0.217,
+      "suggested": 7.5
+    },
+    "object_count": {
+      "confidence": 0.217,
+      "suggested": 7.5
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "MatchEngine",
+    "Scorer"
+  ]
+}

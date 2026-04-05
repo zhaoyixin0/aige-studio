@@ -1,0 +1,11 @@
+{
+  "commands": [
+    "applyTemplate"
+  ],
+  "complexity": "S",
+  "decomposeInputs": [],
+  "description": "Template: GetProjectSnapshot",
+  "id": "recipe-tpl-2d-brush-maze",
+  "source": "template:2D_Brush_Maze.json",
+  "stepCount": 1
+}

@@ -1,0 +1,17 @@
+{
+  "commands": [
+    "createObject",
+    "setProperty",
+    "setParent",
+    "unknown"
+  ],
+  "complexity": "S",
+  "decomposeInputs": [
+    "intensity",
+    "makeupTexture"
+  ],
+  "description": "Create a 2D interactive makeup random selector. The selector consists of multiple makeup options.You can trigger selection events, with visual feedback and smooth transition animations between makeup items and control the selected item enabled.",
+  "id": "recipe-makeup-selector",
+  "source": "command:Makeup_Selector.json",
+  "stepCount": 6
+}

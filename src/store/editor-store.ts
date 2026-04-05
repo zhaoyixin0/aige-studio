@@ -68,6 +68,10 @@ export interface GameFeelSuggestion {
   readonly title: string;
   readonly description: string;
   readonly delta: number;
+  readonly payload?: ReadonlyArray<{
+    moduleType: string;
+    params: Record<string, unknown>;
+  }>;
 }
 
 export interface GameFeelState {

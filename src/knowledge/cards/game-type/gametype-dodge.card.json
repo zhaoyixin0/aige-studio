@@ -1,0 +1,29 @@
+{
+  "description": "Avoid obstacles",
+  "displayName": "Dodge",
+  "evidence": "Obstacle_Dodge_Game, Obstacle_Clearing_Game, MazeChase",
+  "expertDataCount": 2,
+  "group": "Reflex",
+  "id": "gametype-dodge",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.1,
+      "suggested": 0.286
+    },
+    "complexity_score": {
+      "confidence": 0.038,
+      "suggested": 12
+    },
+    "object_count": {
+      "confidence": 0.064,
+      "suggested": 7.143
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "Spawner",
+    "Collision",
+    "Lives"
+  ]
+}

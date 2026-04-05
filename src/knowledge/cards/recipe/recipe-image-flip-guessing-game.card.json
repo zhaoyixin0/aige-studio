@@ -1,0 +1,17 @@
+{
+  "commands": [
+    "createObject",
+    "renameObject",
+    "setProperty"
+  ],
+  "complexity": "S",
+  "decomposeInputs": [
+    "name",
+    "rotation",
+    "texture"
+  ],
+  "description": "Create a 2D interactive image flip guessing game where players reveal hidden content by flipping images, testing memory or deduction skills. Features configurable screen image cards that flip to show different content, with interactive click/tap controls.",
+  "id": "recipe-image-flip-guessing-game",
+  "source": "command:Image_Flip_Guessing_Game.json",
+  "stepCount": 5
+}

@@ -1,0 +1,31 @@
+{
+  "description": "Customize character appearance",
+  "displayName": "Dress Up",
+  "evidence": "2D_Makeup_Random_Match_System, 2D_Avatar_Frame_And_Name_Customization",
+  "expertDataCount": 2,
+  "group": "Creative",
+  "id": "gametype-dress-up",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.049,
+      "suggested": 0.189
+    },
+    "collider_count": {
+      "confidence": 0.1,
+      "suggested": 0
+    },
+    "complexity_score": {
+      "confidence": 0.097,
+      "suggested": 13.286
+    },
+    "object_count": {
+      "confidence": 0.097,
+      "suggested": 13.286
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "DressUpEngine"
+  ]
+}

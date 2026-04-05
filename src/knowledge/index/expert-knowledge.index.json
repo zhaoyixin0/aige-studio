@@ -1,0 +1,273 @@
+{
+  "files": [
+    {
+      "path": "cards/game-type/gametype-action-rpg.card.json",
+      "sha256": "8b45a8bab17dbca8965761618fb7740dd1e26d902563e62c6b1dfeb2ed5c7b6f"
+    },
+    {
+      "path": "cards/game-type/gametype-avatar-frame.card.json",
+      "sha256": "58b0188d08f116c924f6b371bc2de97082e896807a151954fd73d1fada477196"
+    },
+    {
+      "path": "cards/game-type/gametype-ball-physics.card.json",
+      "sha256": "68953a166c9c070a77da0c8e1bb40035e4bf399edf3b52cbf9e55a911a8a1894"
+    },
+    {
+      "path": "cards/game-type/gametype-ball-rolling.card.json",
+      "sha256": "88befb0b9300d554711e11114d67bef6278c763e2ecf61e462aa0e6d0b853fa1"
+    },
+    {
+      "path": "cards/game-type/gametype-bouncing.card.json",
+      "sha256": "a5ee53227e07947b559af151c64a312e4f8824fc048ecd896dbdf874454c9682"
+    },
+    {
+      "path": "cards/game-type/gametype-catch.card.json",
+      "sha256": "9e302505fb6f1b676579e38c351592ce019266b76416a56ca8be07059cd91791"
+    },
+    {
+      "path": "cards/game-type/gametype-cross-road.card.json",
+      "sha256": "a8dcbd167980f0c6c54bcf9322477a903d225b18853a1a6822d9a56b21891ab7"
+    },
+    {
+      "path": "cards/game-type/gametype-dodge.card.json",
+      "sha256": "3601c8020cd0a23455fcffe76bca6f3018af1e54be2eace4a8d97e269591ea90"
+    },
+    {
+      "path": "cards/game-type/gametype-drawing.card.json",
+      "sha256": "a1b31682c884176a55a551bb2fdd839914c637dee4d763313da7504a43aa50c6"
+    },
+    {
+      "path": "cards/game-type/gametype-dress-up.card.json",
+      "sha256": "b9008b16b2f333350c8dae4ee933ae1f65095036969bdf9f80e75d7566f75427"
+    },
+    {
+      "path": "cards/game-type/gametype-expression.card.json",
+      "sha256": "dfcf7e652ecac3b340d214d4ef8907d2f4541d17b70f3296092432128bb049a0"
+    },
+    {
+      "path": "cards/game-type/gametype-flip-guess.card.json",
+      "sha256": "570a524061e8b00951e358255e08f093aa6dc6c9fac2bdce9bd5b68b9800a769"
+    },
+    {
+      "path": "cards/game-type/gametype-gesture.card.json",
+      "sha256": "9d9fe086c0353ef9c9360002b28942e3feff0395e0656cb28d6ed2ee7114444f"
+    },
+    {
+      "path": "cards/game-type/gametype-head-tilt.card.json",
+      "sha256": "e297d40dbe44b9e0ce3dd67af16d73932639a87a7ae73481116788678888e4fb"
+    },
+    {
+      "path": "cards/game-type/gametype-jelly.card.json",
+      "sha256": "e1d031d8a68b96218314dfe94bb87ae63cedf3d49c75c163aee0bcf8ba37c92c"
+    },
+    {
+      "path": "cards/game-type/gametype-jigsaw.card.json",
+      "sha256": "f5e808c2ef45ac2d6e972c630dda30c4b2117ab4468be85f1e483231b2f93135"
+    },
+    {
+      "path": "cards/game-type/gametype-match-link.card.json",
+      "sha256": "c7f762fdba65bad02bf05015fa18770bc7f6591777bb69107974ee007d5b8325"
+    },
+    {
+      "path": "cards/game-type/gametype-maze.card.json",
+      "sha256": "0a0edd69959f525117fbd51f71f351f63237f20e00dc33f1e973bddb68c5f3f6"
+    },
+    {
+      "path": "cards/game-type/gametype-narrative.card.json",
+      "sha256": "522b6b1dca8178a73abd9b616c40fd373c83766a5a4540f3c6aa00999b764f1e"
+    },
+    {
+      "path": "cards/game-type/gametype-platformer.card.json",
+      "sha256": "91ee9177cab3453b49202ff5da0b5fa47749bc886a31bacaa2a5458aafef8a3a"
+    },
+    {
+      "path": "cards/game-type/gametype-puzzle.card.json",
+      "sha256": "abe9d00dae90f09585cd1c1b95a712e45897511cbb4be32a2b6f297fe7d4b3cd"
+    },
+    {
+      "path": "cards/game-type/gametype-quick-reaction.card.json",
+      "sha256": "9931c70f5d7a4d162586f49a6e25acb2f0167118032283175ec2be60aa2836e3"
+    },
+    {
+      "path": "cards/game-type/gametype-quiz.card.json",
+      "sha256": "dbb0210e539bf111e24a74877858161bcbc062f84de0375d3768d79482edc665"
+    },
+    {
+      "path": "cards/game-type/gametype-racing.card.json",
+      "sha256": "b5d34c96f67ec24b8094f0c7a6dde12584a244437ddb35c04216dfc8c8310f7c"
+    },
+    {
+      "path": "cards/game-type/gametype-random-wheel.card.json",
+      "sha256": "96f75395a0ab94a33e511708796ea9f783fecd518e3d31696e2c1c5005938d3f"
+    },
+    {
+      "path": "cards/game-type/gametype-rhythm.card.json",
+      "sha256": "decd3898f08c0892d4d39d77901935880d2bef329d32bc284c048b3d8f9e3803"
+    },
+    {
+      "path": "cards/game-type/gametype-rope-cutting.card.json",
+      "sha256": "655b54e4c4077c83d8cc23b0a863d7e8a301b39ac62341132a54164e78fef7d5"
+    },
+    {
+      "path": "cards/game-type/gametype-runner.card.json",
+      "sha256": "b5d0fa6e6f0a99d72b76c0d7aba6703cc52986697a76ec6da98cb93a912e661c"
+    },
+    {
+      "path": "cards/game-type/gametype-scale-matching.card.json",
+      "sha256": "c51a419214f813397a9e92dff61fec849f5983188b5f71e5b884e1c534812818"
+    },
+    {
+      "path": "cards/game-type/gametype-shooting.card.json",
+      "sha256": "a6be38fa0b833d40b75216125268d778f203b8e93b74c4ed79da435ee8f0ebf2"
+    },
+    {
+      "path": "cards/game-type/gametype-slingshot.card.json",
+      "sha256": "39ae47f97a14934a1550da7102fb2a5d1d4ad0bca8c2d424203f6d3ea7aca9b8"
+    },
+    {
+      "path": "cards/game-type/gametype-sugar-insert.card.json",
+      "sha256": "1a4a62d1a07a5af948bf253c9bc262b958269b8b5d1ee51e939b57bce380650b"
+    },
+    {
+      "path": "cards/game-type/gametype-swimmer.card.json",
+      "sha256": "f8565b0ee5d49237d3920812adc778b75643c7d76a3e1ab5ae844ed0172512e3"
+    },
+    {
+      "path": "cards/game-type/gametype-tap.card.json",
+      "sha256": "e8acfca22f043844dcad3531cc26bff5510b02f9dcfeb5c3ea57cd2d4216e2d1"
+    },
+    {
+      "path": "cards/game-type/gametype-trajectory.card.json",
+      "sha256": "c675209a81769c32258e9de2ed7569931a0edb4c8fb82aed689e0d6564eff167"
+    },
+    {
+      "path": "cards/game-type/gametype-water-pipe.card.json",
+      "sha256": "8d35518325c8518e295090564448b204bdfedef63c9c231489b69d4857ed5810"
+    },
+    {
+      "path": "cards/game-type/gametype-whack-a-mole.card.json",
+      "sha256": "1bba6bd09654ccd59996c0106760ce14f8b61d469601610527f4f65f1dc383fd"
+    },
+    {
+      "path": "cards/game-type/gametype-world-ar.card.json",
+      "sha256": "9490f0efadfab13442464a6333feefd25e7d55a8fef19db12e5cb8cd6d6ab1de"
+    },
+    {
+      "path": "cards/recipe/recipe-2d-angrybirds-slingshot-game.card.json",
+      "sha256": "54fbe8ec1370a001666f3c1feb9ad30f7ddcbe54833033d033bce3478f6fe189"
+    },
+    {
+      "path": "cards/recipe/recipe-2d-avatar-name-component.card.json",
+      "sha256": "12500cf320d3bb942ae074d5753976f2c396ef22892e7109f4cda2abdfb5eb64"
+    },
+    {
+      "path": "cards/recipe/recipe-2d-bounded-area-bounce-game.card.json",
+      "sha256": "e653c6b8f8f484db68a1e225d0bdc661fa512c9138295164b2abb7d403ea02f3"
+    },
+    {
+      "path": "cards/recipe/recipe-2d-click-disappear-image-component.card.json",
+      "sha256": "6b99df3e1538b4a69c57fa28eba76cb7ff9461ff80d36f939c44bf3da6678639"
+    },
+    {
+      "path": "cards/recipe/recipe-2d-head-following-text-selector.card.json",
+      "sha256": "40e1575b006de498cf78aeef444926c6cdf03d3bb4f87443503f6d76390bb6d8"
+    },
+    {
+      "path": "cards/recipe/recipe-2d-headtilt-choice-game.card.json",
+      "sha256": "fb0f20e23463db0f630b10ee786efa857cb636e70a8f5fa97cf043f8f86bcdb8"
+    },
+    {
+      "path": "cards/recipe/recipe-2d-interactive-click-button-component.card.json",
+      "sha256": "4042ef0a03efd5a3c4f3d1357a57b01a652a18294b125ab43bfa60bb7a57285c"
+    },
+    {
+      "path": "cards/recipe/recipe-2d-overhead-random-carousel-selector.card.json",
+      "sha256": "8494a8f7ea80b7219e8dc7dd0de79739d8d6639f58fdef6f6419d6eb3210c3b3"
+    },
+    {
+      "path": "cards/recipe/recipe-2d-pendulum-ball-game.card.json",
+      "sha256": "a029b176c5d2ee0e9cc0feb403c48017e2489346f3a7e96de3412e825ec7c4e2"
+    },
+    {
+      "path": "cards/recipe/recipe-2d-rope-cutting-friend-rescue-game-1.card.json",
+      "sha256": "e43003ab102c5b1544c01655935903a41f5863714dec6dfd9a87483ed5166180"
+    },
+    {
+      "path": "cards/recipe/recipe-2d-rope-cutting-friend-rescue-game.card.json",
+      "sha256": "1d5a1c3d9f74cb64697c8d19efd9449e55586528e3bdf65cab02eb27a76be6cd"
+    },
+    {
+      "path": "cards/recipe/recipe-2d-spinning-wheel-pointer-game.card.json",
+      "sha256": "abd0f6ca7d6b77c672eb7a3502bf3bf1bac5c2d2bd1bc839c6d3ad8ff9d2c24e"
+    },
+    {
+      "path": "cards/recipe/recipe-2d-swipe-car-racing-game.card.json",
+      "sha256": "98cae4f595c5632e7b0e248be4cd020f34f882b94935028a73e076ea1dc9e75b"
+    },
+    {
+      "path": "cards/recipe/recipe-2d-timeline-event-arrangement.card.json",
+      "sha256": "5dd1c27a79a3e8c417a70532d86d50d8c4f068c97abee2c74ccb2b8706e83435"
+    },
+    {
+      "path": "cards/recipe/recipe-3d-jump-jump-camera-game.card.json",
+      "sha256": "8857b59af4b4a011709d5b960e36abd6e454af489e85320059132848b3fcfb62"
+    },
+    {
+      "path": "cards/recipe/recipe-3d-parkour-ground.card.json",
+      "sha256": "d50fd0d5f2e542456397a35dc77cb69f2cd505fe51900420f612a0ad3c7fb630"
+    },
+    {
+      "path": "cards/recipe/recipe-game-2d-physics-edge-collider.card.json",
+      "sha256": "3a715c2b730a53f6039ddcc718186fd486ecb7fc41d9781a1bb81dc788e7a3d1"
+    },
+    {
+      "path": "cards/recipe/recipe-image-flip-guessing-game.card.json",
+      "sha256": "0ed1650f00d0688a59bf4c524eaa9dd5c736f8c3736d90ee30fba03d38ccb95b"
+    },
+    {
+      "path": "cards/recipe/recipe-makeup-selector.card.json",
+      "sha256": "b0f96f7491e9173fb07227797bc4a5643474b9281be238c5df2b310b4d760124"
+    },
+    {
+      "path": "cards/recipe/recipe-tpl-2d-brush-maze.card.json",
+      "sha256": "77c31321105a9d785c568ef2f566aee416014f8349ef08ad216398d6c6cd0078"
+    },
+    {
+      "path": "cards/recipe/recipe-tpl-backgroundgroups-template.card.json",
+      "sha256": "8aebf64d459ff1dc178651958498327132a501a27daf7ee59f23ecb864329762"
+    },
+    {
+      "path": "cards/recipe/recipe-tpl-chimpionswimmer.card.json",
+      "sha256": "7c9c09a704e85570cf8955f1fe2fa28bbb3e630f9feb0bc0b71686d07966a8e2"
+    },
+    {
+      "path": "cards/recipe/recipe-tpl-jellygame.card.json",
+      "sha256": "34189382c724024d7d191df66d0b3f51f939696e11854170ec8501e467e35994"
+    },
+    {
+      "path": "cards/recipe/recipe-tpl-ladybuggame.card.json",
+      "sha256": "cb4f08d4b501292fe00b603cd22cdbce5b51caa12817ac7978d13a187f3d8710"
+    },
+    {
+      "path": "cards/recipe/recipe-tpl-light-up-the-stars.card.json",
+      "sha256": "582498026a16183a89959c5f6e6d0e08cf35e9884800d0e6c1a5c0906a561453"
+    },
+    {
+      "path": "cards/recipe/recipe-tpl-player-template.card.json",
+      "sha256": "81258d4e3768e51412796c05a36cc4e24d6ed29df576dcdc15c78bd2804fdb71"
+    },
+    {
+      "path": "cards/recipe/recipe-tpl-quiz-dash.card.json",
+      "sha256": "6d8d23d58d7acc794b76964fd93a6b988c5adc6689374de924cff843cf81dd72"
+    },
+    {
+      "path": "cards/recipe/recipe-tpl-sending-friends-home.card.json",
+      "sha256": "a388fa20af37a6260a7a1969950aa32d7c6a4aa141075dd96ffa8ff922cd2773"
+    },
+    {
+      "path": "overlays/presets.overlay.json",
+      "sha256": "64a05ae5f086f1e886a4ed998339397a7e0770432f8fe21efae4a5130eda810d"
+    }
+  ],
+  "generatedAt": "2026-04-05T07:35:26.374Z"
+}

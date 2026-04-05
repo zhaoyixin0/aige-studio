@@ -7,6 +7,8 @@
 // - ar_game_effects_research_report.html (6 platforms, 14 types)
 // - src/knowledge/game-types/*.md (per-type recommended configs)
 
+import { mergePresetWithOverlay } from './preset-overlays.ts';
+
 export const ALL_GAME_TYPES = [
   // Original 16
   'catch', 'dodge', 'quiz', 'random-wheel',
@@ -812,7 +814,9 @@ const INPUT_FALLBACKS: Record<string, Record<string, unknown>> = {
  * Get the complete parameter preset for a game type.
  */
 export function getGamePreset(gameType: string): GamePreset | undefined {
-  return PRESETS[gameType as GameType];
+  const base = PRESETS[gameType as GameType];
+  if (!base) return undefined;
+  return mergePresetWithOverlay(base, gameType);
 }
 
 /**

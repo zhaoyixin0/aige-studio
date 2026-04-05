@@ -1,0 +1,11 @@
+{
+  "commands": [
+    "applyTemplate"
+  ],
+  "complexity": "S",
+  "decomposeInputs": [],
+  "description": "Template: GetProjectSnapshot",
+  "id": "recipe-tpl-sending-friends-home",
+  "source": "template:Sending_Friends_Home.json",
+  "stepCount": 1
+}

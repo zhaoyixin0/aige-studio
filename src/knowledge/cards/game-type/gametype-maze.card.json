@@ -1,0 +1,15 @@
+{
+  "description": "Navigate through maze",
+  "displayName": "Maze",
+  "evidence": "2D_Brush_Maze, MazeChase_knowledge",
+  "expertDataCount": 0,
+  "group": "Experimental",
+  "id": "gametype-maze",
+  "missingModules": [],
+  "signatureParams": {},
+  "supportedToday": true,
+  "topModules": [
+    "Collision",
+    "Physics2D"
+  ]
+}

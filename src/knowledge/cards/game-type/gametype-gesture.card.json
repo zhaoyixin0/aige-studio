@@ -1,0 +1,32 @@
+{
+  "description": "Hand gesture challenges",
+  "displayName": "Gesture",
+  "evidence": "Expert gesture games",
+  "expertDataCount": 1,
+  "group": "Social",
+  "id": "gametype-gesture",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.05,
+      "suggested": 0.167
+    },
+    "collider_count": {
+      "confidence": 0.05,
+      "suggested": 0
+    },
+    "complexity_score": {
+      "confidence": 0.05,
+      "suggested": 5.5
+    },
+    "object_count": {
+      "confidence": 0.05,
+      "suggested": 5.5
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "GestureMatch",
+    "HandInput"
+  ]
+}

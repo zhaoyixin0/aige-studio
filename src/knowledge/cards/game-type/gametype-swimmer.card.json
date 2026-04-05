@@ -1,0 +1,16 @@
+{
+  "description": "Aquatic navigation game",
+  "displayName": "Swimmer",
+  "evidence": "ChimpionSwimmer template",
+  "expertDataCount": 0,
+  "group": "Experimental",
+  "id": "gametype-swimmer",
+  "missingModules": [],
+  "signatureParams": {},
+  "supportedToday": true,
+  "topModules": [
+    "Physics2D",
+    "Collision",
+    "ScrollingLayers"
+  ]
+}

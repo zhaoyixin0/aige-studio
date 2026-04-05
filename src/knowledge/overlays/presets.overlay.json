@@ -1,0 +1,90 @@
+[
+  {
+    "gameType": "puzzle",
+    "params": {
+      "_expertMeta": {
+        "colliderCount": 0.667,
+        "colliderCountConfidence": 0.5,
+        "complexityScore": 18,
+        "complexityScoreConfidence": 0.364,
+        "objectCount": 16.333,
+        "objectCountConfidence": 0.364
+      }
+    },
+    "source": "expert-knowledge-10-docs"
+  },
+  {
+    "gameType": "action-rpg",
+    "params": {
+      "_expertMeta": {
+        "colliderCount": 1.25,
+        "colliderCountConfidence": 0.15,
+        "complexityScore": 10.375,
+        "complexityScoreConfidence": 0.123,
+        "objectCount": 7.25,
+        "objectCountConfidence": 0.123
+      }
+    },
+    "source": "expert-knowledge-3-docs"
+  },
+  {
+    "gameType": "shooting",
+    "params": {
+      "_expertMeta": {
+        "colliderCount": 1,
+        "colliderCountConfidence": 0.25,
+        "complexityScore": 24,
+        "complexityScoreConfidence": 0.105,
+        "objectCount": 21.5,
+        "objectCountConfidence": 0.23
+      }
+    },
+    "source": "expert-knowledge-5-docs"
+  },
+  {
+    "gameType": "tap",
+    "params": {
+      "_expertMeta": {
+        "colliderCount": 1.25,
+        "colliderCountConfidence": 0.15
+      }
+    },
+    "source": "expert-knowledge-3-docs"
+  },
+  {
+    "gameType": "runner",
+    "params": {
+      "_expertMeta": {
+        "complexityScore": 24.667,
+        "complexityScoreConfidence": 0.135,
+        "objectCount": 16.556,
+        "objectCountConfidence": 0.142
+      }
+    },
+    "source": "expert-knowledge-4-docs"
+  },
+  {
+    "gameType": "platformer",
+    "params": {
+      "_expertMeta": {
+        "colliderCount": 1.111,
+        "colliderCountConfidence": 0.2,
+        "complexityScore": 44.222,
+        "complexityScoreConfidence": 0.123,
+        "objectCount": 32.778,
+        "objectCountConfidence": 0.101
+      }
+    },
+    "source": "expert-knowledge-4-docs"
+  },
+  {
+    "gameType": "random-wheel",
+    "params": {
+      "_expertMeta": {
+        "colliderCount": 1.25,
+        "colliderCountConfidence": 0.15
+      }
+    },
+    "source": "expert-knowledge-3-docs"
+  }
+]

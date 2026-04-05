@@ -1,0 +1,33 @@
+{
+  "description": "Swipe to steer vehicle",
+  "displayName": "Racing",
+  "evidence": "2D_Swipe_Car_Racing_Game",
+  "expertDataCount": 1,
+  "group": "Sports",
+  "id": "gametype-racing",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.05,
+      "suggested": 0.167
+    },
+    "collider_count": {
+      "confidence": 0.05,
+      "suggested": 0
+    },
+    "complexity_score": {
+      "confidence": 0.05,
+      "suggested": 6.333
+    },
+    "object_count": {
+      "confidence": 0.05,
+      "suggested": 6.333
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "ScrollingLayers",
+    "Collision",
+    "Timer"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "commands": [
+    "createObject",
+    "renameObject",
+    "setProperty",
+    "setParent"
+  ],
+  "complexity": "M",
+  "decomposeInputs": [
+    "name",
+    "position",
+    "size",
+    "drawMode",
+    "fontSize",
+    "texture",
+    "text"
+  ],
+  "description": "Follow this tutorial to create interactive 2D components including avatar characters, decorative photo frames, and customizable name display elements for game UI production.",
+  "id": "recipe-2d-avatar-name-component",
+  "source": "command:2D_Avatar_Name_Component.json",
+  "stepCount": 14
+}

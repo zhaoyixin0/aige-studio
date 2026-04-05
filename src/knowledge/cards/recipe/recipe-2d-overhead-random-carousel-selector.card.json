@@ -1,0 +1,18 @@
+{
+  "commands": [
+    "createObject",
+    "setProperty",
+    "removeObject",
+    "setParent"
+  ],
+  "complexity": "M",
+  "decomposeInputs": [
+    "frame_texture",
+    "position",
+    "item_texture"
+  ],
+  "description": "Create a 2D interactive overhead random carousel selector positioned above the user's head. The carousel consists of a decorative border frame and a central image that cycles through multiple options randomly. Users can trigger selection events, with visual feedback and smooth transition animations between carousel items. The component tracks the user's head movement, ensuring it stays positioned correctly above the user at all times.",
+  "id": "recipe-2d-overhead-random-carousel-selector",
+  "source": "command:2D_Overhead_Random_Carousel_Selector.json",
+  "stepCount": 12
+}

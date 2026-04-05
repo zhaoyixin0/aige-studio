@@ -1,0 +1,33 @@
+{
+  "description": "Create custom avatar frames",
+  "displayName": "Avatar Frame",
+  "evidence": "2D_Avatar_Frame_And_Name_Customization",
+  "expertDataCount": 1,
+  "group": "Creative",
+  "id": "gametype-avatar-frame",
+  "missingModules": [
+    "Preset"
+  ],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.05,
+      "suggested": 0.167
+    },
+    "collider_count": {
+      "confidence": 0.05,
+      "suggested": 0
+    },
+    "complexity_score": {
+      "confidence": 0.05,
+      "suggested": 8
+    },
+    "object_count": {
+      "confidence": 0.05,
+      "suggested": 8
+    }
+  },
+  "supportedToday": false,
+  "topModules": [
+    "DressUpEngine"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "description": "3D ball on terrain",
+  "displayName": "Ball Rolling",
+  "evidence": "3D_Sliding_Ball_Terrain_Rolling_Game",
+  "expertDataCount": 1,
+  "group": "Sports",
+  "id": "gametype-ball-rolling",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.05,
+      "suggested": 0.167
+    },
+    "collider_count": {
+      "confidence": 0.05,
+      "suggested": 0
+    },
+    "complexity_score": {
+      "confidence": 0.05,
+      "suggested": 16
+    },
+    "object_count": {
+      "confidence": 0.05,
+      "suggested": 16
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "Physics2D",
+    "Gravity"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "description": "Precision dropping challenge",
+  "displayName": "Sugar Insert",
+  "evidence": "SugarInsertingChallenge_knowledge",
+  "expertDataCount": 0,
+  "group": "Experimental",
+  "id": "gametype-sugar-insert",
+  "missingModules": [],
+  "signatureParams": {},
+  "supportedToday": true,
+  "topModules": [
+    "Physics2D",
+    "Collision",
+    "Tween"
+  ]
+}

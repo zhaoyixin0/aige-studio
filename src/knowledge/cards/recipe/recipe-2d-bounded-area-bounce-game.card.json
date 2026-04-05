@@ -1,0 +1,20 @@
+{
+  "commands": [
+    "createObject",
+    "renameObject",
+    "setProperty",
+    "addCollider2D"
+  ],
+  "complexity": "L",
+  "decomposeInputs": [
+    "name",
+    "position",
+    "size",
+    "texture",
+    "rotation"
+  ],
+  "description": "Follow this tutorial to create interactive 2D bounded area game components with collision walls (left, right, top, bottom),and a central obstacle. This includes collision wall setup, obstacle placement, and visual feedback systems for game UI production.",
+  "id": "recipe-2d-bounded-area-bounce-game",
+  "source": "command:2D_Bounded_Area_Bounce_Game.json",
+  "stepCount": 26
+}

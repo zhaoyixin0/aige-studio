@@ -1,0 +1,33 @@
+{
+  "description": "Aim and shoot targets",
+  "displayName": "Shooting",
+  "evidence": "Shooting_Game, WaterBlaster, 3D_Rope_Cutting_Shooting_Game",
+  "expertDataCount": 3,
+  "group": "Physics",
+  "id": "gametype-shooting",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.15,
+      "suggested": 0.375
+    },
+    "collider_count": {
+      "confidence": 0.15,
+      "suggested": 0
+    },
+    "complexity_score": {
+      "confidence": 0.15,
+      "suggested": 14.25
+    },
+    "object_count": {
+      "confidence": 0.15,
+      "suggested": 14.25
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "Projectile",
+    "Aim",
+    "WaveSpawner"
+  ]
+}

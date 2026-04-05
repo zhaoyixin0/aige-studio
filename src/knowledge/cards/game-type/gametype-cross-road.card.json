@@ -1,0 +1,33 @@
+{
+  "description": "Navigate through traffic",
+  "displayName": "Cross Road",
+  "evidence": "2d_cross_stree_game",
+  "expertDataCount": 1,
+  "group": "Sports",
+  "id": "gametype-cross-road",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.05,
+      "suggested": 0.188
+    },
+    "collider_count": {
+      "confidence": 0.05,
+      "suggested": 0.667
+    },
+    "complexity_score": {
+      "confidence": 0.05,
+      "suggested": 15
+    },
+    "object_count": {
+      "confidence": 0.05,
+      "suggested": 7.5
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "Spawner",
+    "Collision",
+    "ScrollingLayers"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "description": "Jump across platforms",
+  "displayName": "Platformer",
+  "evidence": "3D_Jump_Jump_Parkour_Game, 3D_platform_jump",
+  "expertDataCount": 2,
+  "group": "Sports",
+  "id": "gametype-platformer",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.1,
+      "suggested": 0.286
+    },
+    "collider_count": {
+      "confidence": 0.1,
+      "suggested": 0
+    },
+    "complexity_score": {
+      "confidence": 0.03,
+      "suggested": 27.857
+    },
+    "object_count": {
+      "confidence": 0.03,
+      "suggested": 27.857
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "Gravity",
+    "Jump",
+    "StaticPlatform"
+  ]
+}

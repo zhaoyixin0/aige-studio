@@ -1,0 +1,11 @@
+{
+  "commands": [
+    "applyTemplate"
+  ],
+  "complexity": "S",
+  "decomposeInputs": [],
+  "description": "Template: backgroundGroups_template",
+  "id": "recipe-tpl-backgroundgroups-template",
+  "source": "template:backgroundGroups_template.json",
+  "stepCount": 3
+}

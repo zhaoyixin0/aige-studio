@@ -127,6 +127,8 @@ export function useConversationManager(): ConversationManagerResult {
           timestamp: Date.now(),
           ...(result.parameterCard ? { parameterCard: result.parameterCard } : {}),
           ...(result.config ? { l1Controls: true } : {}),
+          ...(result.expertInsight ? { expertInsight: result.expertInsight } : {}),
+          ...(result.moduleTuning ? { moduleTuning: result.moduleTuning } : {}),
         };
 
         // A3: Detect vague intent response and inject gameTypeOptions

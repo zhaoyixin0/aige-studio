@@ -1,0 +1,28 @@
+{
+  "description": "Plot projectile paths",
+  "displayName": "Trajectory",
+  "evidence": "Trajectory_Slove, 2D_Emoji_Graph_Trajectory_Game",
+  "expertDataCount": 2,
+  "group": "Physics",
+  "id": "gametype-trajectory",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.1,
+      "suggested": 0.286
+    },
+    "complexity_score": {
+      "confidence": 0.065,
+      "suggested": 20.714
+    },
+    "object_count": {
+      "confidence": 0.098,
+      "suggested": 13.714
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "Physics2D",
+    "Collision"
+  ]
+}

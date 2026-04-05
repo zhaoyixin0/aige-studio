@@ -1,0 +1,14 @@
+{
+  "description": "AR world placement",
+  "displayName": "World AR",
+  "evidence": "Expert AR experiences",
+  "expertDataCount": 0,
+  "group": "Narrative",
+  "id": "gametype-world-ar",
+  "missingModules": [],
+  "signatureParams": {},
+  "supportedToday": true,
+  "topModules": [
+    "BodyInput"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "commands": [
+    "createObject",
+    "renameObject",
+    "setProperty",
+    "setParent"
+  ],
+  "complexity": "M",
+  "decomposeInputs": [
+    "name",
+    "size",
+    "image1_texture",
+    "image2_texture"
+  ],
+  "description": "Create a 2D interactive component with a parent TwoDNewObject containing two ScreenImageEntity children that disappear when clicked. The component responds to screen taps or clicks by hiding both image entities, creating an interactive element that can be used for popup messages, temporary notifications, or interactive UI elements that need to be dismissed by user interaction.",
+  "id": "recipe-2d-click-disappear-image-component",
+  "source": "command:2D_Click_Disappear_Image_Component.json",
+  "stepCount": 13
+}

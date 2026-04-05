@@ -1,0 +1,11 @@
+{
+  "commands": [
+    "applyTemplate"
+  ],
+  "complexity": "S",
+  "decomposeInputs": [],
+  "description": "Template: GetProjectSnapshot",
+  "id": "recipe-tpl-jellygame",
+  "source": "template:JellyGame.json",
+  "stepCount": 1
+}

@@ -1,0 +1,20 @@
+{
+  "commands": [
+    "createObject",
+    "renameObject",
+    "setProperty",
+    "setParent"
+  ],
+  "complexity": "M",
+  "decomposeInputs": [
+    "name",
+    "size",
+    "base_texture",
+    "frame_texture",
+    "number_text"
+  ],
+  "description": "Create an interactive 2D button component with a container base image, icon border, and text number. When clicked, the button enlarges, the number disappears, and the base image switches to a target image. The component features smooth scaling animation, text removal, and texture replacement, creating an engaging interactive element for games or applications.",
+  "id": "recipe-2d-interactive-click-button-component",
+  "source": "command:2D_Interactive_Click_Button_Component.json",
+  "stepCount": 13
+}

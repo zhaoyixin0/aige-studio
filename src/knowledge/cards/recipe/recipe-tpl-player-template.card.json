@@ -1,0 +1,11 @@
+{
+  "commands": [
+    "applyTemplate"
+  ],
+  "complexity": "S",
+  "decomposeInputs": [],
+  "description": "Template: player_template",
+  "id": "recipe-tpl-player-template",
+  "source": "template:player_template.json",
+  "stepCount": 2
+}

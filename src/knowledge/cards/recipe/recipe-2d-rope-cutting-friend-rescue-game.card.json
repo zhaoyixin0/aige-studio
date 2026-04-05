@@ -1,0 +1,27 @@
+{
+  "commands": [
+    "createObject",
+    "renameObject",
+    "setProperty",
+    "removeObject",
+    "setParent",
+    "duplicateObject",
+    "addRigidBody2D",
+    "queryScene"
+  ],
+  "complexity": "L",
+  "decomposeInputs": [
+    "name",
+    "texture",
+    "rope_position",
+    "rope_size",
+    "friendbody_position",
+    "friendbody_size",
+    "avatar_position",
+    "avatar_size"
+  ],
+  "description": "Create a 2D interactive friend rescue game component where ropes hang from the ceiling, each connected to a friend's avatar and animated character. When rescued by clicking/touching, the ropes disappear, the character's animation changes, and both the avatar and character fall downward. The component includes ceiling setup, rope physics, friend avatar placement, animated character integration, and rescue mechanics with falling animation.",
+  "id": "recipe-2d-rope-cutting-friend-rescue-game",
+  "source": "command:2D_Rope_Cutting_Friend_Rescue_Game.json",
+  "stepCount": 26
+}

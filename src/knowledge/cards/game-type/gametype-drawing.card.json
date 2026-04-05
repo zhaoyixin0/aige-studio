@@ -1,0 +1,17 @@
+{
+  "description": "Free-hand drawing",
+  "displayName": "Drawing",
+  "evidence": "2d_screen_drawing, 2D_Brush_Maze",
+  "expertDataCount": 0,
+  "group": "Creative",
+  "id": "gametype-drawing",
+  "missingModules": [
+    "Canvas2D"
+  ],
+  "signatureParams": {},
+  "supportedToday": false,
+  "topModules": [
+    "TouchInput",
+    "Canvas2D"
+  ]
+}

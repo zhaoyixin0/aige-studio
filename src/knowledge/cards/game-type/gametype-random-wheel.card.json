@@ -1,0 +1,31 @@
+{
+  "description": "Spin to decide",
+  "displayName": "Random Wheel",
+  "evidence": "2D_Spinning_Wheel_Pointer_Game, 2D_Spinning_Wheel_Match_Game",
+  "expertDataCount": 2,
+  "group": "Social",
+  "id": "gametype-random-wheel",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.1,
+      "suggested": 0.286
+    },
+    "collider_count": {
+      "confidence": 0.1,
+      "suggested": 0
+    },
+    "complexity_score": {
+      "confidence": 0.078,
+      "suggested": 10.286
+    },
+    "object_count": {
+      "confidence": 0.078,
+      "suggested": 10.286
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "Tween"
+  ]
+}

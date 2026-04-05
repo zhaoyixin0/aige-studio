@@ -1,0 +1,33 @@
+{
+  "description": "Combat with stats",
+  "displayName": "Action RPG",
+  "evidence": "Action_Game_Micro_Control, Action_Micro_Control, Health_Management_Game",
+  "expertDataCount": 3,
+  "group": "Sports",
+  "id": "gametype-action-rpg",
+  "missingModules": [],
+  "signatureParams": {
+    "canvas_coverage": {
+      "confidence": 0.135,
+      "suggested": 0.475
+    },
+    "collider_count": {
+      "confidence": 0.15,
+      "suggested": 0
+    },
+    "complexity_score": {
+      "confidence": 0.123,
+      "suggested": 4.125
+    },
+    "object_count": {
+      "confidence": 0.123,
+      "suggested": 4.125
+    }
+  },
+  "supportedToday": true,
+  "topModules": [
+    "Health",
+    "EnemyAI",
+    "LevelUp"
+  ]
+}

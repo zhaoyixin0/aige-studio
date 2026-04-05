@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "gen:registry": "npx tsx tools/registry/import-excel.ts"
+    "gen:registry": "npx tsx tools/registry/import-excel.ts",
+    "build:knowledge": "npx tsx tools/m0/cli/build-knowledge.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",

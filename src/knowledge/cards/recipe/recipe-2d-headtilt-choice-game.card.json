@@ -1,0 +1,20 @@
+{
+  "commands": [
+    "createObject",
+    "setProperty",
+    "removeObject",
+    "setParent",
+    "renameObject",
+    "duplicateObject"
+  ],
+  "complexity": "M",
+  "decomposeInputs": [
+    "text",
+    "position",
+    "texture"
+  ],
+  "description": "Create a 2D interactive scene with a central topic display and two choice options positioned above the user's head. Users control selection by tilting their head left or right, with real-time head position tracking to detect intended choices. The game features visual indicators for selected options, smooth transition animations, and a scoring system that leads to a final winning answer determined by cumulative selections or immediate validation.",
+  "id": "recipe-2d-headtilt-choice-game",
+  "source": "command:2D_HeadTilt_Choice_Game.json",
+  "stepCount": 24
+}

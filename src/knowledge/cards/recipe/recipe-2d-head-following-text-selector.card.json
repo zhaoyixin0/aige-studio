@@ -1,0 +1,21 @@
+{
+  "commands": [
+    "createObject",
+    "setProperty",
+    "removeObject",
+    "setParent"
+  ],
+  "complexity": "M",
+  "decomposeInputs": [
+    "frame_texture",
+    "position",
+    "title_text",
+    "random_text",
+    "font_size",
+    "color"
+  ],
+  "description": "Create a 2D interactive head-following text selector positioned above the user's head. The selector consists of a decorative border frame, a title text display, and a random text generator that cycles through multiple text options. The component tracks the user's head movement, ensuring it stays positioned correctly above the user at all times.",
+  "id": "recipe-2d-head-following-text-selector",
+  "source": "command:2D_Head_Following_Text_Selector.json",
+  "stepCount": 15
+}

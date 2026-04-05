@@ -1,0 +1,15 @@
+{
+  "description": "Physics-based ball mechanics",
+  "displayName": "Ball Physics",
+  "evidence": "2d_ball_type_physics_setup, 2D_Pendulum_Ball_Game",
+  "expertDataCount": 0,
+  "group": "Physics",
+  "id": "gametype-ball-physics",
+  "missingModules": [],
+  "signatureParams": {},
+  "supportedToday": true,
+  "topModules": [
+    "Physics2D",
+    "Collision"
+  ]
+}
