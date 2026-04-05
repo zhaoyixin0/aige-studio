@@ -106,9 +106,9 @@ describe('A8: processWithoutApi game type chips', () => {
       expect(id).not.toMatch(/^type:/);
     }
 
-    // Should include known game types
+    // Should include known game types from first 12 supported entries
     expect(ids).toContain('catch');
     expect(ids).toContain('dodge');
-    expect(ids).toContain('platformer');
+    expect(ids).toContain('shooting');
   });
 });

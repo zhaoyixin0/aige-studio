@@ -1,0 +1,28 @@
+{
+  "id": "hero-platformer-basic",
+  "title": "基础平台跳跃",
+  "description": "跳跃收集道具，避开障碍到达终点",
+  "gameType": "platformer",
+  "tags": ["action", "beginner", "physics"],
+  "params": [
+    { "name": "jumpForce", "type": "number", "default": 600, "min": 300, "max": 1000, "description": "跳跃力度" },
+    { "name": "gravity", "type": "number", "default": 1200, "min": 600, "max": 2000, "description": "重力加速度" }
+  ],
+  "sequence": {
+    "id": "hero-platformer-basic",
+    "commands": [
+      { "name": "addModule", "args": { "id": "gameflow_1", "type": "GameFlow", "params": { "countdown": 3, "onFinish": "show_result" } } },
+      { "name": "addModule", "args": { "id": "gravity_1", "type": "Gravity", "params": { "acceleration": "$gravity" } } },
+      { "name": "addModule", "args": { "id": "jump_1", "type": "Jump", "params": { "force": "$jumpForce" } } },
+      { "name": "addModule", "args": { "id": "playermovement_1", "type": "PlayerMovement", "params": { "speed": 300, "mode": "platformer" } } },
+      { "name": "addModule", "args": { "id": "staticplatform_1", "type": "StaticPlatform" } },
+      { "name": "addModule", "args": { "id": "collectible_1", "type": "Collectible" } },
+      { "name": "addModule", "args": { "id": "collision_1", "type": "Collision", "params": { "rules": [] } } },
+      { "name": "addModule", "args": { "id": "scorer_1", "type": "Scorer", "params": { "perHit": 10 } } },
+      { "name": "addModule", "args": { "id": "timer_1", "type": "Timer", "params": { "duration": 60, "mode": "countdown" } } },
+      { "name": "addModule", "args": { "id": "uioverlay_1", "type": "UIOverlay" } },
+      { "name": "addModule", "args": { "id": "resultscreen_1", "type": "ResultScreen" } }
+    ]
+  },
+  "requiredModules": ["GameFlow", "Gravity", "Jump", "PlayerMovement", "StaticPlatform", "Collectible"]
+}

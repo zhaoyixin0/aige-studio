@@ -1,0 +1,23 @@
+{
+  "id": "hero-match-pairs",
+  "title": "记忆配对",
+  "description": "翻牌找到相同的配对",
+  "gameType": "puzzle",
+  "tags": ["logic", "casual", "tween"],
+  "params": [
+    { "name": "pairCount", "type": "number", "default": 8, "min": 4, "max": 16, "description": "配对数量" },
+    { "name": "duration", "type": "number", "default": 60, "min": 30, "max": 180, "description": "游戏时长(秒)" }
+  ],
+  "sequence": {
+    "id": "hero-match-pairs",
+    "commands": [
+      { "name": "addModule", "args": { "id": "gameflow_1", "type": "GameFlow", "params": { "countdown": 3, "onFinish": "show_result" } } },
+      { "name": "addModule", "args": { "id": "matchengine_1", "type": "MatchEngine", "params": { "mode": "pairs", "gridSize": "$pairCount" } } },
+      { "name": "addModule", "args": { "id": "scorer_1", "type": "Scorer", "params": { "perHit": 20 } } },
+      { "name": "addModule", "args": { "id": "timer_1", "type": "Timer", "params": { "duration": "$duration", "mode": "countdown" } } },
+      { "name": "addModule", "args": { "id": "uioverlay_1", "type": "UIOverlay" } },
+      { "name": "addModule", "args": { "id": "resultscreen_1", "type": "ResultScreen" } }
+    ]
+  },
+  "requiredModules": ["GameFlow", "MatchEngine", "Scorer", "Timer"]
+}

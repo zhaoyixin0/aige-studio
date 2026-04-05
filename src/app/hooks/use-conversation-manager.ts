@@ -8,6 +8,7 @@ import { validateConfig, applyFixes } from '@/engine/core/config-validator';
 import { ContractRegistry } from '@/engine/core/contract-registry';
 import { createModuleRegistry } from '@/engine/module-setup';
 import { getConversationAgent } from '@/agent/singleton';
+import { buildGameTypeOptions } from '@/agent/game-type-options';
 import { AssetAgent } from '@/services/asset-agent';
 import type { GameConfig, AssetEntry } from '@/engine/core';
 
@@ -135,18 +136,7 @@ export function useConversationManager(): ConversationManagerResult {
         const isVagueIntentResponse =
           result.reply.includes('请选择') && result.reply.includes('游戏类型');
         if (isVagueIntentResponse && !result.config) {
-          assistantMsg.gameTypeOptions = [
-            { id: 'catch', name: '接住游戏', emoji: '🎯' },
-            { id: 'dodge', name: '躲避游戏', emoji: '🏃' },
-            { id: 'tap', name: '点击游戏', emoji: '👆' },
-            { id: 'shooting', name: '射击游戏', emoji: '🔫' },
-            { id: 'runner', name: '跑酷游戏', emoji: '🏃‍♂️' },
-            { id: 'platformer', name: '平台跳跃', emoji: '🦘' },
-            { id: 'quiz', name: '答题游戏', emoji: '❓' },
-            { id: 'rhythm', name: '节奏游戏', emoji: '🎵' },
-            { id: 'random-wheel', name: '幸运转盘', emoji: '🎡' },
-            { id: 'expression', name: '表情挑战', emoji: '😄' },
-          ];
+          assistantMsg.gameTypeOptions = buildGameTypeOptions();
         }
 
         addChatMessage(assistantMsg);

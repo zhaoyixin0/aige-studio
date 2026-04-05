@@ -316,7 +316,7 @@ describe('useConversationManager', () => {
     const messages = useEditorStore.getState().chatMessages;
     const assistantMsg = messages.find((m) => m.role === 'assistant');
     expect(assistantMsg?.gameTypeOptions).toBeDefined();
-    expect(assistantMsg!.gameTypeOptions!.length).toBe(10);
+    expect(assistantMsg!.gameTypeOptions!.length).toBe(38);
     expect(assistantMsg!.gameTypeOptions!.map((o) => o.id)).toContain('catch');
     expect(assistantMsg!.gameTypeOptions!.map((o) => o.id)).toContain('dodge');
   });

@@ -212,6 +212,43 @@ export class SkillLoader {
   }
 
   /**
+   * Load compact summaries of recipe cards relevant to a game type.
+   * Returns ≤ limit bullet-point lines, each ≤ 140 chars.
+   */
+  async loadRecipeCardSummaries(gameType: string, limit = 3): Promise<string[]> {
+    const prefix = '/src/knowledge/cards/recipe/';
+    const entries = Object.entries(expertCardFiles)
+      .filter(([p]) => p.startsWith(prefix));
+
+    const cards = await Promise.all(
+      entries.map(async ([, loader]) => {
+        try { return JSON.parse((await loader()) as string); }
+        catch { return null; }
+      }),
+    );
+
+    const terms = [gameType, ...gameType.split(/[-_]/)].map((t) => t.toLowerCase());
+    const ranked = cards
+      .filter(Boolean)
+      .map((c: Record<string, unknown>) => ({
+        c,
+        score: terms.reduce(
+          (s, t) => s + (`${String(c.id)} ${String(c.source)} ${String(c.description ?? '')}`.toLowerCase().includes(t) ? 1 : 0),
+          0,
+        ),
+      }))
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score || String(a.c.id).localeCompare(String(b.c.id)))
+      .slice(0, limit);
+
+    return ranked.map(({ c }) => {
+      const desc = String(c.description ?? '').slice(0, 80);
+      const line = `- ${String(c.id)}: ${desc} (${String(c.stepCount ?? '?')} steps, ${String(c.complexity ?? '?')})`;
+      return line.slice(0, 140);
+    });
+  }
+
+  /**
    * Returns the list of game types that have expert card data available.
    */
   getAvailableExpertTypes(): string[] {

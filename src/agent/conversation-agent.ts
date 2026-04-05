@@ -17,7 +17,7 @@ import { validateConfig, applyFixes, type ValidationReport } from '@/engine/core
 import { ContractRegistry } from '@/engine/core/contract-registry.ts';
 import { createModuleRegistry } from '@/engine/module-setup.ts';
 import { resolveInputProfile } from '@/engine/core/profiles.ts';
-import { ALL_GAME_TYPES, getGamePreset, getModuleParams } from './game-presets.ts';
+import { ALL_GAME_TYPES, GAME_TYPE_META, getGamePreset, getModuleParams } from './game-presets.ts';
 import { SkillLoader } from './skill-loader.ts';
 import {
   type ConversationMessage,
@@ -170,6 +170,17 @@ export async function buildSystemPrompt(
       }
     } catch {
       // Graceful degradation if card loading fails
+    }
+
+    // Inject relevant recipe card summaries
+    try {
+      const recipeLines = await loader.loadRecipeCardSummaries(gameType, 3);
+      if (recipeLines.length > 0) {
+        prompt += '\n\n## 相关配方参考\n' + recipeLines.join('\n');
+        prompt += '\n\n当用户询问"怎么做"时，参考以上配方；使用 push_expert_insight 推送建议。';
+      }
+    } catch {
+      // Graceful degradation if recipe loading fails
     }
   }
 
@@ -729,20 +740,16 @@ export class ConversationAgent {
     }
 
     // Could not detect — return chips for game type selection (V2: type field)
-    const typeChips: Chip[] = [
-      { id: 'catch', label: '接住类', emoji: '\u{1F3AF}', type: 'game_type' as const },
-      { id: 'dodge', label: '躲避类', emoji: '\u{1F3C3}', type: 'game_type' as const },
-      { id: 'platformer', label: '平台跳跃', emoji: '\u{1F3AE}', type: 'game_type' as const },
-      { id: 'runner', label: '跑酷', emoji: '\u{1F3C3}\u200D\u2642\uFE0F', type: 'game_type' as const },
-      { id: 'shooting', label: '射击', emoji: '\u{1F52B}', type: 'game_type' as const },
-      { id: 'rhythm', label: '节奏', emoji: '\u{1F3B5}', type: 'game_type' as const },
-      { id: 'quiz', label: '答题', emoji: '\u2753', type: 'game_type' as const },
-      { id: 'puzzle', label: '配对', emoji: '\u{1F9E9}', type: 'game_type' as const },
-      { id: 'whack-a-mole', label: '打地鼠', emoji: '\u{1F528}', type: 'game_type' as const },
-      { id: 'slingshot', label: '弹弓', emoji: '\u{1F3F9}', type: 'game_type' as const },
-      { id: 'water-pipe', label: '水管', emoji: '\u{1F6B0}', type: 'game_type' as const },
-      { id: 'cross-road', label: '过马路', emoji: '\u{1F697}', type: 'game_type' as const },
-    ];
+    // Show up to 12 supported types from GAME_TYPE_META
+    const typeChips: Chip[] = ALL_GAME_TYPES
+      .filter((id) => GAME_TYPE_META[id].supportedToday !== false)
+      .slice(0, 12)
+      .map((id) => ({
+        id,
+        label: GAME_TYPE_META[id].displayName,
+        emoji: GAME_TYPE_META[id].emoji,
+        type: 'game_type' as const,
+      }));
 
     return {
       reply: '没有检测到具体游戏类型，请选择一种游戏类型开始创建：',

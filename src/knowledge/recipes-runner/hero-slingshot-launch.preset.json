@@ -1,0 +1,26 @@
+{
+  "id": "hero-slingshot-launch",
+  "title": "弹弓发射",
+  "description": "拖拽瞄准释放投射物击打目标",
+  "gameType": "slingshot",
+  "tags": ["physics", "aim", "intermediate"],
+  "params": [
+    { "name": "projectileSpeed", "type": "number", "default": 500, "min": 200, "max": 1000, "description": "投射速度" },
+    { "name": "gravityScale", "type": "number", "default": 1.0, "min": 0.3, "max": 2.0, "description": "重力系数" }
+  ],
+  "sequence": {
+    "id": "hero-slingshot-launch",
+    "commands": [
+      { "name": "addModule", "args": { "id": "gameflow_1", "type": "GameFlow", "params": { "countdown": 3, "onFinish": "show_result" } } },
+      { "name": "addModule", "args": { "id": "aim_1", "type": "Aim" } },
+      { "name": "addModule", "args": { "id": "projectile_1", "type": "Projectile", "params": { "speed": "$projectileSpeed" } } },
+      { "name": "addModule", "args": { "id": "gravity_1", "type": "Gravity", "params": { "acceleration": 1200, "scale": "$gravityScale" } } },
+      { "name": "addModule", "args": { "id": "collision_1", "type": "Collision", "params": { "rules": [{ "a": "projectile", "b": "targets", "event": "hit", "destroy": ["b"] }] } } },
+      { "name": "addModule", "args": { "id": "scorer_1", "type": "Scorer", "params": { "perHit": 100 } } },
+      { "name": "addModule", "args": { "id": "lives_1", "type": "Lives", "params": { "count": 5 } } },
+      { "name": "addModule", "args": { "id": "uioverlay_1", "type": "UIOverlay" } },
+      { "name": "addModule", "args": { "id": "resultscreen_1", "type": "ResultScreen" } }
+    ]
+  },
+  "requiredModules": ["GameFlow", "Aim", "Projectile", "Gravity", "Collision"]
+}

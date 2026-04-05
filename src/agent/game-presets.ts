@@ -1084,6 +1084,7 @@ const PRESETS: Partial<Record<GameType, GamePreset>> = {
   'head-tilt': {
     GameFlow:     { countdown: 3, onFinish: 'show_result' },
     Timer:        { duration: 30, mode: 'countdown' },
+    Collision:    { rules: [{ a: 'player', b: 'items', event: 'hit', destroy: ['b'] }] },
     Scorer:       { perHit: 10 },
     UIOverlay:    {},
     ResultScreen: { show: ['score'], rating: { '3star': 100, '2star': 50, '1star': 20 } },

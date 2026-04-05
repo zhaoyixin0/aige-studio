@@ -1,0 +1,23 @@
+{
+  "id": "hero-quiz-challenge",
+  "title": "限时答题",
+  "description": "限时回答选择题，连续正确加分",
+  "gameType": "quiz",
+  "tags": ["trivia", "social", "beginner"],
+  "params": [
+    { "name": "timePerQuestion", "type": "number", "default": 10, "min": 5, "max": 30, "description": "每题限时(秒)" },
+    { "name": "questionCount", "type": "number", "default": 10, "min": 5, "max": 20, "description": "题目数量" }
+  ],
+  "sequence": {
+    "id": "hero-quiz-challenge",
+    "commands": [
+      { "name": "addModule", "args": { "id": "gameflow_1", "type": "GameFlow", "params": { "countdown": 3, "onFinish": "show_result" } } },
+      { "name": "addModule", "args": { "id": "quizengine_1", "type": "QuizEngine", "params": { "totalQuestions": "$questionCount", "timeLimit": "$timePerQuestion" } } },
+      { "name": "addModule", "args": { "id": "scorer_1", "type": "Scorer", "params": { "perHit": 100 } } },
+      { "name": "addModule", "args": { "id": "timer_1", "type": "Timer", "params": { "duration": "$timePerQuestion", "mode": "countdown" } } },
+      { "name": "addModule", "args": { "id": "uioverlay_1", "type": "UIOverlay" } },
+      { "name": "addModule", "args": { "id": "resultscreen_1", "type": "ResultScreen" } }
+    ]
+  },
+  "requiredModules": ["GameFlow", "QuizEngine", "Scorer", "Timer"]
+}
