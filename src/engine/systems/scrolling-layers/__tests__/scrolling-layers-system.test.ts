@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ScrollingLayersSystem } from '../scrolling-layers-system';
-import type { ScrollingLayersConfig, LayerState } from '../types';
+import type { ScrollingLayersConfig } from '../types';
 
 describe('ScrollingLayersSystem', () => {
   let system: ScrollingLayersSystem;
