@@ -65,6 +65,8 @@ import { WaveSpawner } from './modules/mechanic/wave-spawner.ts';
 import { Tween } from './modules/mechanic/tween.ts';
 // Physics2D module
 import { Physics2D } from './modules/mechanic/physics2d.ts';
+// ScrollingLayers module
+import { ScrollingLayers } from './modules/mechanic/scrolling-layers.ts';
 // Feedback modules
 import { GameFlow } from './modules/feedback/game-flow.ts';
 import { ParticleVFX } from './modules/feedback/particle-vfx.ts';
@@ -144,6 +146,8 @@ export function createModuleRegistry(): ModuleRegistry {
   registry.register('Tween', Tween as unknown as ModuleConstructor);
   // Physics2D
   registry.register('Physics2D', Physics2D as unknown as ModuleConstructor);
+  // ScrollingLayers
+  registry.register('ScrollingLayers', ScrollingLayers as unknown as ModuleConstructor);
 
   // Feedback modules
   registry.register('GameFlow', GameFlow as unknown as ModuleConstructor);

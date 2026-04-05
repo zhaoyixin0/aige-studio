@@ -56,11 +56,11 @@ const TYPES: GameTypeEntry[] = [
   { id: 'avatar-frame', group: 'Creative', displayName: 'Avatar Frame', description: 'Create custom avatar frames', requiredModules: ['DressUpEngine'], missingModules: ['Preset'], supportedToday: false, evidence: '2D_Avatar_Frame_And_Name_Customization' },
 
   // === PLATFORMER / RUNNER (跑酷类) ===
-  { id: 'runner', group: 'Sports', displayName: 'Runner', description: 'Endless side-scroller', requiredModules: ['Spawner', 'Collision', 'ScrollingLayers'], missingModules: ['ScrollingLayers'], supportedToday: false, evidence: '2D_side_scrolling_game, 2D_Swipe_Car_Racing_Game, side-scrolling shaping game' },
+  { id: 'runner', group: 'Sports', displayName: 'Runner', description: 'Endless side-scroller', requiredModules: ['Spawner', 'Collision', 'ScrollingLayers'], missingModules: [], supportedToday: true, evidence: '2D_side_scrolling_game, 2D_Swipe_Car_Racing_Game, side-scrolling shaping game' },
   { id: 'platformer', group: 'Sports', displayName: 'Platformer', description: 'Jump across platforms', requiredModules: ['Gravity', 'Jump', 'StaticPlatform'], missingModules: [], supportedToday: true, evidence: '3D_Jump_Jump_Parkour_Game, 3D_platform_jump' },
   { id: 'action-rpg', group: 'Sports', displayName: 'Action RPG', description: 'Combat with stats', requiredModules: ['Health', 'EnemyAI', 'LevelUp'], missingModules: [], supportedToday: true, evidence: 'Action_Game_Micro_Control, Action_Micro_Control, Health_Management_Game' },
-  { id: 'racing', group: 'Sports', displayName: 'Racing', description: 'Swipe to steer vehicle', requiredModules: ['ScrollingLayers', 'Collision', 'Timer'], missingModules: ['ScrollingLayers'], supportedToday: false, evidence: '2D_Swipe_Car_Racing_Game' },
-  { id: 'cross-road', group: 'Sports', displayName: 'Cross Road', description: 'Navigate through traffic', requiredModules: ['Spawner', 'Collision', 'ScrollingLayers'], missingModules: ['ScrollingLayers'], supportedToday: false, evidence: '2d_cross_stree_game' },
+  { id: 'racing', group: 'Sports', displayName: 'Racing', description: 'Swipe to steer vehicle', requiredModules: ['ScrollingLayers', 'Collision', 'Timer'], missingModules: [], supportedToday: true, evidence: '2D_Swipe_Car_Racing_Game' },
+  { id: 'cross-road', group: 'Sports', displayName: 'Cross Road', description: 'Navigate through traffic', requiredModules: ['Spawner', 'Collision', 'ScrollingLayers'], missingModules: [], supportedToday: true, evidence: '2d_cross_stree_game' },
   { id: 'ball-rolling', group: 'Sports', displayName: 'Ball Rolling', description: '3D ball on terrain', requiredModules: ['Physics2D', 'Gravity'], missingModules: [], supportedToday: true, evidence: '3D_Sliding_Ball_Terrain_Rolling_Game' },
 
   // === NARRATIVE (叙事类) ===
@@ -70,7 +70,7 @@ const TYPES: GameTypeEntry[] = [
   // === EXPERIMENTAL (实验类) ===
   { id: 'maze', group: 'Experimental', displayName: 'Maze', description: 'Navigate through maze', requiredModules: ['Collision', 'Physics2D'], missingModules: [], supportedToday: true, evidence: '2D_Brush_Maze, MazeChase_knowledge' },
   { id: 'sugar-insert', group: 'Experimental', displayName: 'Sugar Insert', description: 'Precision dropping challenge', requiredModules: ['Physics2D', 'Collision', 'Tween'], missingModules: [], supportedToday: true, evidence: 'SugarInsertingChallenge_knowledge' },
-  { id: 'swimmer', group: 'Experimental', displayName: 'Swimmer', description: 'Aquatic navigation game', requiredModules: ['Physics2D', 'Collision', 'ScrollingLayers'], missingModules: ['ScrollingLayers'], supportedToday: false, evidence: 'ChimpionSwimmer template' },
+  { id: 'swimmer', group: 'Experimental', displayName: 'Swimmer', description: 'Aquatic navigation game', requiredModules: ['Physics2D', 'Collision', 'ScrollingLayers'], missingModules: [], supportedToday: true, evidence: 'ChimpionSwimmer template' },
   { id: 'jelly', group: 'Experimental', displayName: 'Jelly', description: 'Soft-body physics game', requiredModules: ['Physics2D', 'Tween'], missingModules: [], supportedToday: true, evidence: 'JellyGame template' },
 ];
 

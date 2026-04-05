@@ -31,9 +31,9 @@ describe('Game Type Taxonomy v2', () => {
     }
   });
 
-  it('at least 29 types are supported today', () => {
+  it('at least 33 types are supported today', () => {
     const supported = taxonomy.types.filter((t) => t.supportedToday);
-    expect(supported.length).toBeGreaterThanOrEqual(29);
+    expect(supported.length).toBeGreaterThanOrEqual(33);
   });
 
   it('unsupported types list missingModules', () => {

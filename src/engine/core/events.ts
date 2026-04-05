@@ -313,6 +313,15 @@ export const SKILL_COOLDOWN = 'skill:cooldown';
 export interface SkillPayload { skillId: string; name: string }
 export interface SkillCooldownPayload { skillId: string; remaining: number; total: number }
 
+// ── ScrollingLayers ────────────────────────────────────────
+export const SCROLLING_UPDATE = 'scrolling:update';
+export const SCROLLING_SET_SPEED = 'scrolling:set-speed';
+export const SCROLLING_SET_DIRECTION = 'scrolling:set-direction';
+
+export interface ScrollingUpdatePayload {
+  layers: ReadonlyArray<{ textureId: string; ratio: number; offsetX: number; offsetY: number }>;
+}
+
 // ── Physics2D ──────────────────────────────────────────────
 export const PHYSICS2D_CONTACT_BEGIN = 'physics2d:contact-begin';
 export const PHYSICS2D_CONTACT_END = 'physics2d:contact-end';

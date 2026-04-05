@@ -68,11 +68,11 @@ export const GAME_TYPE_META: Record<GameType, GameTypeMeta> = {
   'drawing': { displayName: '画画', category: 'Creative', description: 'Free-hand drawing', supportedToday: false, tags: ['creative', 'canvas'], emoji: '🎨' },
   'avatar-frame': { displayName: '头像框', category: 'Creative', description: 'Create custom avatar frames', supportedToday: false, tags: ['creative', 'social'], emoji: '🖼️' },
   // --- Sports ---
-  'runner': { displayName: '跑酷', category: 'Sports', description: 'Endless side-scroller', supportedToday: false, tags: ['action', 'scrolling'], emoji: '🏃' },
+  'runner': { displayName: '跑酷', category: 'Sports', description: 'Endless side-scroller', supportedToday: true, tags: ['action', 'scrolling'], emoji: '🏃' },
   'platformer': { displayName: '平台跳跃', category: 'Sports', description: 'Jump across platforms', supportedToday: true, tags: ['action', 'physics'], emoji: '🎮' },
   'action-rpg': { displayName: '动作RPG', category: 'Sports', description: 'Combat with stats', supportedToday: true, tags: ['combat', 'rpg'], emoji: '⚔️' },
-  'racing': { displayName: '赛车', category: 'Sports', description: 'Swipe to steer vehicle', supportedToday: false, tags: ['action', 'scrolling'], emoji: '🏎️' },
-  'cross-road': { displayName: '过马路', category: 'Sports', description: 'Navigate through traffic', supportedToday: false, tags: ['action', 'survival'], emoji: '🚗' },
+  'racing': { displayName: '赛车', category: 'Sports', description: 'Swipe to steer vehicle', supportedToday: true, tags: ['action', 'scrolling'], emoji: '🏎️' },
+  'cross-road': { displayName: '过马路', category: 'Sports', description: 'Navigate through traffic', supportedToday: true, tags: ['action', 'survival'], emoji: '🚗' },
   'ball-rolling': { displayName: '滚球', category: 'Sports', description: '3D ball on terrain', supportedToday: true, tags: ['physics', 'action'], emoji: '🎱' },
   // --- Narrative ---
   'narrative': { displayName: '叙事', category: 'Narrative', description: 'Branching story', supportedToday: true, tags: ['story', 'dialogue'], emoji: '📖' },
@@ -80,7 +80,7 @@ export const GAME_TYPE_META: Record<GameType, GameTypeMeta> = {
   // --- Experimental ---
   'maze': { displayName: '迷宫', category: 'Experimental', description: 'Navigate through maze', supportedToday: true, tags: ['physics', 'puzzle'], emoji: '🏰' },
   'sugar-insert': { displayName: '糖果挑战', category: 'Experimental', description: 'Precision dropping challenge', supportedToday: true, tags: ['physics', 'precision'], emoji: '🍬' },
-  'swimmer': { displayName: '游泳', category: 'Experimental', description: 'Aquatic navigation game', supportedToday: false, tags: ['physics', 'scrolling'], emoji: '🏊' },
+  'swimmer': { displayName: '游泳', category: 'Experimental', description: 'Aquatic navigation game', supportedToday: true, tags: ['physics', 'scrolling'], emoji: '🏊' },
   'jelly': { displayName: '果冻', category: 'Experimental', description: 'Soft-body physics game', supportedToday: true, tags: ['physics', 'tween'], emoji: '🍮' },
 };
 
