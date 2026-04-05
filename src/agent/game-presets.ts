@@ -738,6 +738,8 @@ const PRESETS: Partial<Record<GameType, GamePreset>> = {
     Tween:        { clips: [
       { id: 'pop-up', duration: 0.3, tracks: [{ property: 'scaleY', from: 0, to: 1, easing: 'BounceOut' }] },
       { id: 'pop-down', duration: 0.25, tracks: [{ property: 'scaleY', from: 1, to: 0, easing: 'QuadIn' }] },
+      { id: 'spawn-in', duration: 0.3, tracks: [{ property: 'scaleX', from: 0, to: 1, easing: 'BounceOut' }, { property: 'scaleY', from: 0, to: 1, easing: 'BounceOut' }] },
+      { id: 'despawn-out', duration: 0.25, tracks: [{ property: 'alpha', from: 1, to: 0, easing: 'QuadOut' }] },
     ] },
     UIOverlay:    {},
     ResultScreen: { show: ['score', 'combo_max'], rating: { '3star': 250, '2star': 120, '1star': 40 } },
@@ -927,7 +929,10 @@ const PRESETS: Partial<Record<GameType, GamePreset>> = {
     Scorer:         { perHit: 10 },
     Timer:          { duration: 45, mode: 'countdown' },
     DifficultyRamp: { mode: 'time', rules: [] },
-    Tween:          { clips: [{ id: 'squash', duration: 0.2, tracks: [{ property: 'scaleY', from: 1, to: 0.7, easing: 'BounceOut' }] }] },
+    Tween:          { clips: [
+      { id: 'squash', duration: 0.2, tracks: [{ property: 'scaleY', from: 1, to: 0.7, easing: 'BounceOut' }] },
+      { id: 'spawn-in', duration: 0.3, tracks: [{ property: 'scaleX', from: 0, to: 1, easing: 'BounceOut' }, { property: 'scaleY', from: 0, to: 1, easing: 'BounceOut' }] },
+    ] },
     UIOverlay:      {},
     ResultScreen:   { show: ['score'], rating: { '3star': 150, '2star': 80, '1star': 30 } },
     TouchInput:     { playerSize: 64 },

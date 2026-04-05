@@ -77,6 +77,8 @@ export const ALL_MODULES = [
   'Projectile', 'BulletPattern', 'Aim', 'EnemyAI', 'WaveSpawner', 'Health', 'Shield',
   // Mechanic — RPG (Batch 3)
   'EnemyDrop', 'LevelUp', 'StatusEffect', 'SkillTree', 'EquipmentSlot', 'DialogueSystem',
+  // Mechanic — Tween
+  'Tween',
   // Feedback
   'GameFlow', 'CameraFollow', 'ParticleVFX', 'SoundFX', 'UIOverlay', 'ResultScreen',
 ];

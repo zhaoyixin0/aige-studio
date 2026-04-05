@@ -108,6 +108,8 @@ export class ShooterRenderer {
   private aimCrosshair: Graphics | null = null;
   private shieldCircle: Graphics | null = null;
   private shieldFlashTimer = 0;
+  /** Pending tween offsets applied during sync() */
+  private tweenOffsets = new Map<string, Partial<Record<string, number>>>();
 
   constructor(parent: Container) {
     this.container = new Container();
@@ -154,6 +156,35 @@ export class ShooterRenderer {
     // Shield visual
     const shield = engine.getModulesByType('Shield')[0] as Shield | undefined;
     this.syncShieldVisual(shield, engine, dt);
+
+    // Apply tween offsets on top of base positions (once per frame)
+    this.applyTweenOffsets();
+  }
+
+  private applyTweenOffsets(): void {
+    for (const [id, offsets] of this.tweenOffsets) {
+      const sprite = this.enemySprites.get(id) ?? this.projectileSprites.get(id) ?? null;
+      if (!sprite) continue;
+      if (offsets.x != null) sprite.x += offsets.x;
+      if (offsets.y != null) sprite.y += offsets.y;
+      if (offsets.scaleX != null) sprite.scale.x = offsets.scaleX;
+      if (offsets.scaleY != null) sprite.scale.y = offsets.scaleY;
+      if (offsets.rotation != null) sprite.rotation = offsets.rotation;
+      if (offsets.alpha != null) sprite.alpha = offsets.alpha;
+    }
+  }
+
+  /** Store pending tween offsets for an entity. Returns false if entity sprite not found. */
+  applyTweenUpdate(entityId: string, properties: Record<string, number>): boolean {
+    const sprite = this.enemySprites.get(entityId) ?? this.projectileSprites.get(entityId) ?? null;
+    if (!sprite) return false;
+    this.tweenOffsets.set(entityId, { ...this.tweenOffsets.get(entityId), ...properties });
+    return true;
+  }
+
+  /** Remove all tween offsets for an entity. */
+  clearTweenOffset(entityId: string): void {
+    this.tweenOffsets.delete(entityId);
   }
 
   /** Flash shield visual (called from event handler). */
@@ -180,6 +211,7 @@ export class ShooterRenderer {
         this.container.removeChild(sprite);
         sprite.destroy();
         this.projectileSprites.delete(id);
+        this.tweenOffsets.delete(id);
       }
     }
 
@@ -231,6 +263,7 @@ export class ShooterRenderer {
         this.container.removeChild(sprite);
         sprite.destroy();
         this.enemySprites.delete(id);
+        this.tweenOffsets.delete(id);
       }
     }
 
@@ -381,6 +414,7 @@ export class ShooterRenderer {
   }
 
   reset(): void {
+    this.tweenOffsets.clear();
     for (const sprite of this.projectileSprites.values()) {
       this.container.removeChild(sprite);
       sprite.destroy();

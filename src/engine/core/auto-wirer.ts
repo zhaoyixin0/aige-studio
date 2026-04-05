@@ -128,6 +128,45 @@ const BRIDGE_RULES: WiringRule[] = [
     },
   },
   {
+    // Spawner + Tween: spawn/despawn trigger tween animations
+    requires: ['Spawner', 'Tween'],
+    setup: (engine, _modules, on) => {
+      on('spawner:created', (data?: unknown) => {
+        const d = asRecord(data);
+        if (d.id != null) {
+          engine.eventBus.emit('tween:trigger', {
+            clipId: 'spawn-in',
+            entityId: String(d.id),
+          });
+        }
+      });
+      on('spawner:destroyed', (data?: unknown) => {
+        const d = asRecord(data);
+        if (d.id != null) {
+          engine.eventBus.emit('tween:trigger', {
+            clipId: 'despawn-out',
+            entityId: String(d.id),
+          });
+        }
+      });
+    },
+  },
+  {
+    // EnemyAI + Tween: enemy death triggers fade animation
+    requires: ['EnemyAI', 'Tween'],
+    setup: (engine, _modules, on) => {
+      on('enemy:death', (data?: unknown) => {
+        const d = asRecord(data);
+        if (d.id != null) {
+          engine.eventBus.emit('tween:trigger', {
+            clipId: 'death-fade',
+            entityId: String(d.id),
+          });
+        }
+      });
+    },
+  },
+  {
     // WaveSpawner + EnemyAI: spawn enemies into AI system
     requires: ['WaveSpawner', 'EnemyAI'],
     setup: (_engine, modules, on) => {

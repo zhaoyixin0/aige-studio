@@ -321,6 +321,25 @@ export class PixiRenderer {
       this.shakeDuration = 200;
     });
 
+    // Tween visual updates — route to sub-renderers
+    listen('tween:update', (data?: any) => {
+      const entityId = data?.entityId as string | undefined;
+      const properties = data?.properties as Record<string, number> | undefined;
+      if (!entityId || !properties) return;
+      // Try game object renderer first, then shooter renderer
+      const handled = this.gameObjectRenderer?.applyTweenUpdate(entityId, properties);
+      if (!handled) {
+        this.shooterRenderer?.applyTweenUpdate(entityId, properties);
+      }
+    });
+
+    listen('tween:complete', (data?: any) => {
+      const entityId = data?.entityId as string | undefined;
+      if (!entityId) return;
+      this.gameObjectRenderer?.clearTweenOffset(entityId);
+      this.shooterRenderer?.clearTweenOffset(entityId);
+    });
+
     listen('shield:block', () => {
       this.shooterRenderer?.flashShield();
     });

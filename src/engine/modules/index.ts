@@ -69,6 +69,9 @@ export { EnemyAI } from './mechanic/enemy-ai';
 export type { EnemyInstance, AIState } from './mechanic/enemy-ai';
 export { WaveSpawner } from './mechanic/wave-spawner';
 
+// Mechanic — Tween
+export { Tween } from './mechanic/tween';
+
 // Feedback
 export { GameFlow } from './feedback/game-flow';
 export { ParticleVFX } from './feedback/particle-vfx';

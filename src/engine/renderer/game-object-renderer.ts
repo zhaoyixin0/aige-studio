@@ -27,12 +27,15 @@ export class GameObjectRenderer {
   /** IFrames visual flicker state */
   private iframesActive = false;
   private iframesStartTime = 0;
+  /** Pending tween offsets applied during sync() */
+  private tweenOffsets = new Map<string, Partial<Record<string, number>>>();
 
   constructor(container: Container) {
     this.container = container;
   }
 
   destroy(): void {
+    this.tweenOffsets.clear();
     for (const tex of this.textureCache.values()) {
       tex.destroy(true);
     }
@@ -54,6 +57,19 @@ export class GameObjectRenderer {
   wireIFramesEvents(listen: (event: string, handler: (data?: any) => void) => void): void {
     listen('iframes:start', () => { this.iframesActive = true; this.iframesStartTime = performance.now(); });
     listen('iframes:end', () => { this.iframesActive = false; });
+  }
+
+  /** Store pending tween offsets for an entity. Returns false if entity sprite not found. */
+  applyTweenUpdate(entityId: string, properties: Record<string, number>): boolean {
+    const sprite = this.sprites.get(entityId) ?? (entityId === 'player_1' ? this.playerSprite : null);
+    if (!sprite) return false;
+    this.tweenOffsets.set(entityId, { ...this.tweenOffsets.get(entityId), ...properties });
+    return true;
+  }
+
+  /** Remove all tween offsets for an entity. */
+  clearTweenOffset(entityId: string): void {
+    this.tweenOffsets.delete(entityId);
   }
 
   sync(engine: Engine): void {
@@ -112,6 +128,22 @@ export class GameObjectRenderer {
       this.syncSpawnedObjects(engine);
       this.syncPlayer(engine);
     }
+
+    // Apply tween offsets on top of base positions (once per frame)
+    this.applyTweenOffsets();
+  }
+
+  private applyTweenOffsets(): void {
+    for (const [id, offsets] of this.tweenOffsets) {
+      const sprite = this.sprites.get(id) ?? (id === 'player_1' ? this.playerSprite : null);
+      if (!sprite) continue;
+      if (offsets.x != null) sprite.x += offsets.x;           // additive
+      if (offsets.y != null) sprite.y += offsets.y;           // additive
+      if (offsets.scaleX != null) sprite.scale.x = offsets.scaleX; // absolute
+      if (offsets.scaleY != null) sprite.scale.y = offsets.scaleY; // absolute
+      if (offsets.rotation != null) sprite.rotation = offsets.rotation; // absolute
+      if (offsets.alpha != null) sprite.alpha = offsets.alpha;         // absolute
+    }
   }
 
   private syncSpawnedObjects(engine: Engine): void {
@@ -163,6 +195,7 @@ export class GameObjectRenderer {
         this.container.removeChild(sprite);
         sprite.destroy();
         this.sprites.delete(id);
+        this.tweenOffsets.delete(id);
       }
     }
   }
@@ -504,6 +537,7 @@ export class GameObjectRenderer {
   reset(): void {
     this.iframesActive = false;
     this.iframesStartTime = 0;
+    this.tweenOffsets.clear();
     for (const sprite of this.sprites.values()) {
       this.container.removeChild(sprite);
       sprite.destroy();

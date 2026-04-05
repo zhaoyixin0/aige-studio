@@ -41,6 +41,54 @@ class FakeCollision {
   unregisterObject = vi.fn();
 }
 
+class FakeSpawner {
+  readonly id = 'spawner_1';
+  readonly type = 'Spawner';
+  getSchema = (): ModuleSchema => ({});
+  getDependencies = () => ({ requires: [], optional: [] });
+  getContracts = (): ModuleContracts => ({
+    collisionProvider: {
+      layer: 'items',
+      radius: 30,
+      spawnEvent: 'spawner:created',
+      destroyEvent: 'spawner:destroyed',
+    },
+    emits: ['spawner:created', 'spawner:destroyed'],
+  });
+  init = vi.fn();
+  update = vi.fn();
+  destroy = vi.fn();
+  configure = vi.fn();
+  getParams = () => ({});
+  onAttach = vi.fn();
+  onDetach = vi.fn();
+}
+
+class FakeEnemyAI {
+  readonly id = 'enemyai_1';
+  readonly type = 'EnemyAI';
+  getSchema = (): ModuleSchema => ({});
+  getDependencies = () => ({ requires: [], optional: [] });
+  getContracts = (): ModuleContracts => ({
+    collisionProvider: {
+      layer: 'enemies',
+      radius: 30,
+    },
+    damageReceiver: { handle: vi.fn() },
+    emits: ['enemy:death'],
+  });
+  init = vi.fn();
+  update = vi.fn();
+  destroy = vi.fn();
+  configure = vi.fn();
+  getParams = () => ({});
+  onAttach = vi.fn();
+  onDetach = vi.fn();
+  addEnemy = vi.fn();
+  removeEnemy = vi.fn();
+  getActiveEnemies = vi.fn().mockReturnValue([]);
+}
+
 function createEngine(modules: GameModule[]): GameEngine {
   const eventBus = new EventBus();
   return {
@@ -98,6 +146,85 @@ describe('AutoWirer Tween Bridge', () => {
       objectA: 'a', objectB: 'b', layerA: 'l1', layerB: 'l2',
       targetId: 'b', x: 0, y: 0,
     });
+
+    expect(spy).not.toHaveBeenCalled();
+  });
+});
+
+describe('AutoWirer Spawner+Tween Bridge', () => {
+  it('spawner:created triggers tween:trigger with clipId spawn-in', () => {
+    const tween = new FakeTween();
+    const spawner = new FakeSpawner();
+    const engine = createEngine([spawner as unknown as GameModule, tween as unknown as GameModule]);
+    AutoWirer.wire(engine);
+
+    const spy = vi.fn();
+    engine.eventBus.on('tween:trigger', spy);
+
+    engine.eventBus.emit('spawner:created', { id: 'item_1', x: 100, y: 200 });
+
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({ clipId: 'spawn-in', entityId: 'item_1' }),
+    );
+  });
+
+  it('spawner:destroyed triggers tween:trigger with clipId despawn-out', () => {
+    const tween = new FakeTween();
+    const spawner = new FakeSpawner();
+    const engine = createEngine([spawner as unknown as GameModule, tween as unknown as GameModule]);
+    AutoWirer.wire(engine);
+
+    const spy = vi.fn();
+    engine.eventBus.on('tween:trigger', spy);
+
+    engine.eventBus.emit('spawner:destroyed', { id: 'item_2' });
+
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({ clipId: 'despawn-out', entityId: 'item_2' }),
+    );
+  });
+
+  it('does not trigger without Tween module present', () => {
+    const spawner = new FakeSpawner();
+    const engine = createEngine([spawner as unknown as GameModule]);
+    AutoWirer.wire(engine);
+
+    const spy = vi.fn();
+    engine.eventBus.on('tween:trigger', spy);
+
+    engine.eventBus.emit('spawner:created', { id: 'item_1' });
+    engine.eventBus.emit('spawner:destroyed', { id: 'item_1' });
+
+    expect(spy).not.toHaveBeenCalled();
+  });
+});
+
+describe('AutoWirer EnemyAI+Tween Bridge', () => {
+  it('enemy:death triggers tween:trigger with clipId death-fade', () => {
+    const tween = new FakeTween();
+    const enemyAI = new FakeEnemyAI();
+    const engine = createEngine([enemyAI as unknown as GameModule, tween as unknown as GameModule]);
+    AutoWirer.wire(engine);
+
+    const spy = vi.fn();
+    engine.eventBus.on('tween:trigger', spy);
+
+    engine.eventBus.emit('enemy:death', { id: 'enemy_1', x: 300, y: 400 });
+
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({ clipId: 'death-fade', entityId: 'enemy_1' }),
+    );
+  });
+
+  it('does not trigger without Tween module present', () => {
+    const enemyAI = new FakeEnemyAI();
+    const engine = createEngine([enemyAI as unknown as GameModule]);
+    AutoWirer.wire(engine);
+
+    const spy = vi.fn();
+    engine.eventBus.on('tween:trigger', spy);
+
+    engine.eventBus.emit('enemy:death', { id: 'enemy_1' });
 
     expect(spy).not.toHaveBeenCalled();
   });
