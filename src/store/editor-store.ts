@@ -61,6 +61,10 @@ export const DEFAULT_CHIPS: Chip[] = [
   { id: 'platformer', label: '平台跳跃', emoji: '🎮', type: 'game_type' as const },
   { id: 'random-wheel', label: '幸运转盘', emoji: '🎰', type: 'game_type' as const },
   { id: 'expression', label: '表情挑战', emoji: '😊', type: 'game_type' as const },
+  { id: 'whack-a-mole', label: '打地鼠', emoji: '🔨', type: 'game_type' as const },
+  { id: 'slingshot', label: '弹弓发射', emoji: '🏹', type: 'game_type' as const },
+  { id: 'water-pipe', label: '水管连接', emoji: '🚰', type: 'game_type' as const },
+  { id: 'cross-road', label: '过马路', emoji: '🚗', type: 'game_type' as const },
 ];
 
 export interface GameFeelSuggestion {

@@ -126,6 +126,22 @@ describe('buildSystemPrompt', () => {
     expect(prompt).toContain('行为准则');
   });
 
+  it('includes expert card block when game type has card data', async () => {
+    const prompt = await buildSystemPrompt('shooting', []);
+    expect(prompt).toContain('专家数据参考');
+    expect(prompt).toContain('推荐模块');
+  });
+
+  it('does not include expert card block when no game type', async () => {
+    const prompt = await buildSystemPrompt(null, []);
+    expect(prompt).not.toContain('专家数据参考');
+  });
+
+  it('gracefully handles game type without expert card', async () => {
+    const prompt = await buildSystemPrompt('nonexistent-xyz', []);
+    expect(prompt).not.toContain('专家数据参考');
+  });
+
   it('does not contain hardcoded 游戏类型模块配方 section', async () => {
     const prompt = await buildSystemPrompt(null, []);
     // The old detailed collision rules should be removed

@@ -48,8 +48,8 @@ describe('GamePresets', () => {
       const preset = getGamePreset(type)!;
       if (preset.DifficultyRamp) {
         const ramp = preset.DifficultyRamp as Record<string, any>;
-        expect(ramp.target).toBeDefined();
-        expect(Array.isArray(ramp.rules)).toBe(true);
+        expect(ramp.mode || ramp.target, `${type} DifficultyRamp needs mode or target`).toBeDefined();
+        if (ramp.rules !== undefined) expect(Array.isArray(ramp.rules)).toBe(true);
       }
     }
   });
@@ -59,7 +59,7 @@ describe('GamePresets', () => {
       const preset = getGamePreset(type)!;
       if (preset.Timer) {
         const timer = preset.Timer as Record<string, any>;
-        expect([15, 30, 60, 90, 120]).toContain(timer.duration);
+        expect([0, 15, 30, 45, 60, 90, 120]).toContain(timer.duration);
       }
     }
   });

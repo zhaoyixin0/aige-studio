@@ -160,6 +160,19 @@ export async function buildSystemPrompt(
     }
   }
 
+  // Inject expert card data for selected game type
+  if (gameType) {
+    try {
+      const expertBlock = await loader.loadExpertCardRich(gameType);
+      if (expertBlock) {
+        prompt += `\n\n## 专家数据参考\n${expertBlock}`;
+        prompt += '\n\n**策略**: 创建游戏后，如有高置信度参数建议，使用 push_expert_insight 工具推送（不要长段落解释）。仅在重大优化建议时引用专家数据。';
+      }
+    } catch {
+      // Graceful degradation if card loading fails
+    }
+  }
+
   // Append current config context
   if (currentConfig) {
     const moduleTypes = currentConfig.modules.map((m) => m.type);
@@ -725,6 +738,10 @@ export class ConversationAgent {
       { id: 'rhythm', label: '节奏', emoji: '\u{1F3B5}', type: 'game_type' as const },
       { id: 'quiz', label: '答题', emoji: '\u2753', type: 'game_type' as const },
       { id: 'puzzle', label: '配对', emoji: '\u{1F9E9}', type: 'game_type' as const },
+      { id: 'whack-a-mole', label: '打地鼠', emoji: '\u{1F528}', type: 'game_type' as const },
+      { id: 'slingshot', label: '弹弓', emoji: '\u{1F3F9}', type: 'game_type' as const },
+      { id: 'water-pipe', label: '水管', emoji: '\u{1F6B0}', type: 'game_type' as const },
+      { id: 'cross-road', label: '过马路', emoji: '\u{1F697}', type: 'game_type' as const },
     ];
 
     return {

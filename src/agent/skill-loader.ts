@@ -167,6 +167,51 @@ export class SkillLoader {
   }
 
   /**
+   * Load a rich expert card summary for ConversationAgent system prompt.
+   * Returns a multi-line text block with top modules, signature params, and gaps.
+   */
+  async loadExpertCardRich(gameType: string): Promise<string> {
+    const key = `/src/knowledge/cards/game-type/gametype-${gameType}.card.json`;
+    const loader = expertCardFiles[key];
+    if (!loader) return '';
+
+    const richKey = `rich:${key}`;
+    if (this.cardCache.has(richKey)) return this.cardCache.get(richKey)!;
+
+    try {
+      const raw = (await loader()) as string;
+      const card = JSON.parse(raw) as {
+        displayName?: string;
+        group?: string;
+        expertDataCount?: number;
+        topModules?: string[];
+        signatureParams?: Record<string, { suggested: number; confidence: number }>;
+        missingModules?: string[];
+        supportedToday?: boolean;
+      };
+      const top = (card.topModules ?? []).slice(0, 6).join(', ');
+      const sig = Object.entries(card.signatureParams ?? {})
+        .filter(([, v]) => (v?.confidence ?? 0) >= 0.3)
+        .slice(0, 6)
+        .map(([k, v]) => `${k}: ${Math.round((v.suggested ?? 0) * 10) / 10}`)
+        .join(', ');
+      const missing = (card.missingModules ?? []).slice(0, 5).join(', ');
+      const supported = card.supportedToday !== false;
+      const lines = [
+        `[Expert: ${card.displayName ?? gameType} (${card.expertDataCount ?? 0} games)]`,
+        !supported ? '!! 注意: 引擎暂不完全支持该游戏类型，功能可能受限 !!' : '',
+        top ? `推荐模块: ${top}` : '',
+        sig ? `参考参数: ${sig}` : '',
+        missing ? `缺失模块: ${missing}` : '',
+      ].filter(Boolean).join('\n');
+      this.cardCache.set(richKey, lines);
+      return lines;
+    } catch {
+      return '';
+    }
+  }
+
+  /**
    * Returns the list of game types that have expert card data available.
    */
   getAvailableExpertTypes(): string[] {

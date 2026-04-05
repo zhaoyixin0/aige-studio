@@ -63,6 +63,6 @@ describe('DEFAULT_CHIPS type field', () => {
   });
 
   it('DEFAULT_CHIPS count matches expected length', () => {
-    expect(DEFAULT_CHIPS.length).toBe(10);
+    expect(DEFAULT_CHIPS.length).toBe(14);
   });
 });

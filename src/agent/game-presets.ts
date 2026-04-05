@@ -797,6 +797,322 @@ const PRESETS: Partial<Record<GameType, GamePreset>> = {
     ResultScreen: { show: ['score', 'time'], rating: { '3star': 200, '2star': 100, '1star': 40 } },
     TouchInput:   { playerSize: 48 },
   },
+
+  // ──────────────────────────────────────────
+  // SLINGSHOT (弹弓)
+  // Drag-and-release projectile physics
+  // ──────────────────────────────────────────
+  slingshot: {
+    GameFlow:       { countdown: 3, onFinish: 'show_result' },
+    Gravity:        { g: 9.8, pixelsPerMeter: 33.33 },
+    Aim:            { mode: 'drag', sensitivity: 1.0 },
+    Projectile:     { speed: 800, gravityScale: 1.0, autoFire: false },
+    Collision:      { rules: [{ a: 'projectile', b: 'items', event: 'hit', destroy: ['b'] }] },
+    Scorer:         { perHit: 15 },
+    Timer:          { duration: 60, mode: 'countdown' },
+    DifficultyRamp: { mode: 'time', rules: [] },
+    ParticleVFX:    { events: { 'collision:hit': 'sparkle' } },
+    SoundFX:        { events: { 'collision:hit': 'pop' } },
+    UIOverlay:      {},
+    ResultScreen:   { show: ['score'], rating: { '3star': 200, '2star': 100, '1star': 40 } },
+    TouchInput:     { playerSize: 64 },
+  },
+
+  // ──────────────────────────────────────────
+  // BALL-PHYSICS (物理球)
+  // Physics-based ball mechanics
+  // ──────────────────────────────────────────
+  'ball-physics': {
+    GameFlow:        { countdown: 3, onFinish: 'show_result' },
+    Gravity:         { g: 9.8, pixelsPerMeter: 33.33 },
+    PlayerMovement:  { mode: 'follow', speed: 300, lerp: 0.15 },
+    Spawner:         { frequency: 1.0, maxCount: 4, speed: { min: 0, max: 0 }, direction: 'random',
+      items: [{ asset: 'good_1', weight: 3 }, { asset: 'bad_1', weight: 1, layer: 'obstacles' }],
+      spawnArea: { x: 100, y: 200, width: 880, height: 1000 } },
+    Collision:       { rules: [{ a: 'player', b: 'items', event: 'hit', destroy: ['b'] }] },
+    Scorer:          { perHit: 10 },
+    Timer:           { duration: 60, mode: 'countdown' },
+    ParticleVFX:     { events: {} },
+    SoundFX:         { events: {} },
+    UIOverlay:       {},
+    ResultScreen:    { show: ['score'], rating: { '3star': 150, '2star': 80, '1star': 30 } },
+    TouchInput:      { playerSize: 64 },
+  },
+
+  // ──────────────────────────────────────────
+  // TRAJECTORY (弹道)
+  // Plot and fire projectile arcs
+  // ──────────────────────────────────────────
+  trajectory: {
+    GameFlow:       { countdown: 3, onFinish: 'show_result' },
+    Gravity:        { g: 9.8, pixelsPerMeter: 33.33 },
+    Aim:            { mode: 'line', sensitivity: 1.0 },
+    Projectile:     { speed: 600, gravityScale: 1.0, autoFire: false },
+    Collision:      { rules: [{ a: 'projectile', b: 'items', event: 'hit', destroy: ['b'] }] },
+    Scorer:         { perHit: 20 },
+    Timer:          { duration: 60, mode: 'countdown' },
+    DifficultyRamp: { mode: 'time', rules: [] },
+    UIOverlay:      {},
+    ResultScreen:   { show: ['score'], rating: { '3star': 200, '2star': 100, '1star': 40 } },
+    TouchInput:     { playerSize: 64 },
+  },
+
+  // ──────────────────────────────────────────
+  // BOUNCING (弹球)
+  // Ball bouncing in enclosed area
+  // ──────────────────────────────────────────
+  bouncing: {
+    GameFlow:        { countdown: 3, onFinish: 'show_result' },
+    Gravity:         { g: 5.0, pixelsPerMeter: 33.33 },
+    PlayerMovement:  { mode: 'follow', speed: 400, lerp: 0.12 },
+    Spawner:         { frequency: 1.2, maxCount: 5, speed: { min: 50, max: 150 }, direction: 'random',
+      items: [{ asset: 'good_1', weight: 3 }, { asset: 'good_2', weight: 2 }],
+      spawnArea: { x: 100, y: 100, width: 880, height: 1400 } },
+    Collision:       { rules: [{ a: 'player', b: 'items', event: 'hit', destroy: ['b'] }] },
+    Scorer:          { perHit: 10, combo: { enabled: true, window: 2000, multiplier: [1, 1.5, 2] } },
+    Timer:           { duration: 60, mode: 'countdown' },
+    DifficultyRamp:  { mode: 'time', rules: [] },
+    UIOverlay:       {},
+    ResultScreen:    { show: ['score'], rating: { '3star': 150, '2star': 80, '1star': 30 } },
+    TouchInput:      { playerSize: 64 },
+  },
+
+  // ──────────────────────────────────────────
+  // ROPE-CUTTING (割绳子)
+  // Swipe to cut ropes, physics puzzles
+  // ──────────────────────────────────────────
+  'rope-cutting': {
+    GameFlow:       { countdown: 3, onFinish: 'show_result' },
+    Gravity:        { g: 9.8, pixelsPerMeter: 33.33 },
+    Collision:      { rules: [{ a: 'items', b: 'target', event: 'hit', destroy: [] }] },
+    Scorer:         { perHit: 25 },
+    Timer:          { duration: 90, mode: 'countdown' },
+    Lives:          { count: 3 },
+    UIOverlay:      {},
+    ResultScreen:   { show: ['score'], rating: { '3star': 200, '2star': 100, '1star': 40 } },
+    TouchInput:     { playerSize: 48 },
+  },
+
+  // ──────────────────────────────────────────
+  // BALL-ROLLING (滚球)
+  // Tilt/swipe to roll ball on terrain
+  // ──────────────────────────────────────────
+  'ball-rolling': {
+    GameFlow:        { countdown: 3, onFinish: 'show_result' },
+    Gravity:         { g: 5.0, pixelsPerMeter: 33.33 },
+    PlayerMovement:  { mode: 'follow', speed: 350, lerp: 0.1 },
+    Spawner:         { frequency: 1.0, maxCount: 4, speed: { min: 0, max: 0 }, direction: 'random',
+      items: [{ asset: 'good_1', weight: 2 }, { asset: 'bad_1', weight: 2, layer: 'obstacles' }],
+      spawnArea: { x: 100, y: 200, width: 880, height: 1200 } },
+    Collision:       { rules: [{ a: 'player', b: 'items', event: 'hit', destroy: ['b'] }, { a: 'player', b: 'obstacles', event: 'damage', destroy: [] }] },
+    Scorer:          { perHit: 10 },
+    Timer:           { duration: 60, mode: 'countdown' },
+    Lives:           { count: 3 },
+    UIOverlay:       {},
+    ResultScreen:    { show: ['score', 'time'], rating: { '3star': 150, '2star': 80, '1star': 30 } },
+    TouchInput:      { playerSize: 64 },
+  },
+
+  // ──────────────────────────────────────────
+  // JELLY (果冻)
+  // Soft-body physics with tween effects
+  // ──────────────────────────────────────────
+  jelly: {
+    GameFlow:       { countdown: 3, onFinish: 'show_result' },
+    Gravity:        { g: 3.0, pixelsPerMeter: 33.33 },
+    Spawner:        { frequency: 1.0, maxCount: 4, speed: { min: 50, max: 100 }, direction: 'down',
+      items: [{ asset: 'good_1', weight: 3 }, { asset: 'good_2', weight: 2 }],
+      spawnArea: { x: 100, y: 0, width: 880, height: 0 } },
+    Collision:      { rules: [{ a: 'player', b: 'items', event: 'hit', destroy: ['b'] }] },
+    Scorer:         { perHit: 10 },
+    Timer:          { duration: 45, mode: 'countdown' },
+    DifficultyRamp: { mode: 'time', rules: [] },
+    Tween:          { clips: [{ id: 'squash', duration: 0.2, tracks: [{ property: 'scaleY', from: 1, to: 0.7, easing: 'BounceOut' }] }] },
+    UIOverlay:      {},
+    ResultScreen:   { show: ['score'], rating: { '3star': 150, '2star': 80, '1star': 30 } },
+    TouchInput:     { playerSize: 64 },
+  },
+
+  // ──────────────────────────────────────────
+  // SCALE-MATCHING (天平)
+  // Balance items on a scale
+  // ──────────────────────────────────────────
+  'scale-matching': {
+    GameFlow:     { countdown: 3, onFinish: 'show_result' },
+    Spawner:      { frequency: 0.8, maxCount: 6, speed: { min: 0, max: 0 }, direction: 'none',
+      items: [{ asset: 'good_1', weight: 3 }, { asset: 'good_2', weight: 2 }, { asset: 'bad_1', weight: 1 }],
+      spawnArea: { x: 100, y: 200, width: 880, height: 0 } },
+    Collision:    { rules: [{ a: 'player', b: 'items', event: 'hit', destroy: ['b'] }] },
+    Scorer:       { perHit: 15 },
+    Timer:        { duration: 60, mode: 'countdown' },
+    UIOverlay:    {},
+    ResultScreen: { show: ['score'], rating: { '3star': 200, '2star': 100, '1star': 40 } },
+    TouchInput:   { playerSize: 48 },
+  },
+
+  // ──────────────────────────────────────────
+  // RACING (赛车)
+  // Swipe to steer, avoid obstacles
+  // ──────────────────────────────────────────
+  racing: {
+    GameFlow:        { countdown: 3, onFinish: 'show_result' },
+    PlayerMovement:  { mode: 'follow', speed: 600, lerp: 0.15 },
+    Spawner:         { frequency: 1.0, maxCount: 4, speed: { min: 300, max: 500 }, direction: 'down',
+      items: [{ asset: 'good_1', weight: 2 }, { asset: 'bad_1', weight: 3, layer: 'obstacles' }],
+      spawnArea: { x: 100, y: 0, width: 880, height: 0 } },
+    Collision:       { rules: [{ a: 'player', b: 'items', event: 'hit', destroy: ['b'] }, { a: 'player', b: 'obstacles', event: 'damage', destroy: ['b'] }] },
+    Scorer:          { perHit: 5 },
+    Timer:           { duration: 0, mode: 'endless' },
+    Lives:           { count: 3 },
+    DifficultyRamp:  { mode: 'time', rules: [] },
+    UIOverlay:       {},
+    ResultScreen:    { show: ['score', 'time'], rating: { '3star': 300, '2star': 150, '1star': 60 } },
+    TouchInput:      { playerSize: 64 },
+  },
+
+  // ──────────────────────────────────────────
+  // CROSS-ROAD (过马路)
+  // Navigate through horizontal traffic lanes
+  // ──────────────────────────────────────────
+  'cross-road': {
+    GameFlow:        { countdown: 3, onFinish: 'show_result' },
+    PlayerMovement:  { mode: 'follow', speed: 300, lerp: 0.15 },
+    Spawner:      { frequency: 1.5, maxCount: 6, speed: { min: 150, max: 350 }, direction: 'horizontal',
+      items: [{ asset: 'bad_1', weight: 3, layer: 'obstacles' }, { asset: 'bad_2', weight: 2, layer: 'obstacles' }],
+      spawnArea: { x: 0, y: 300, width: 0, height: 1200 } },
+    Collision:    { rules: [{ a: 'player', b: 'obstacles', event: 'damage', destroy: [] }] },
+    Scorer:       { perHit: 0 },
+    Timer:        { duration: 0, mode: 'endless' },
+    Lives:        { count: 1 },
+    UIOverlay:    {},
+    ResultScreen: { show: ['score', 'time'], rating: { '3star': 60, '2star': 30, '1star': 10 } },
+    TouchInput:   { playerSize: 64 },
+  },
+
+  // ──────────────────────────────────────────
+  // MAZE (迷宫)
+  // Navigate through maze with touch controls
+  // ──────────────────────────────────────────
+  maze: {
+    GameFlow:        { countdown: 3, onFinish: 'show_result' },
+    PlayerMovement:  { mode: 'follow', speed: 250, lerp: 0.12 },
+    Spawner:         { frequency: 0.5, maxCount: 6, speed: { min: 0, max: 0 }, direction: 'none',
+      items: [{ asset: 'good_1', weight: 3 }],
+      spawnArea: { x: 100, y: 200, width: 880, height: 1200 } },
+    Collision:       { rules: [{ a: 'player', b: 'items', event: 'hit', destroy: ['b'] }, { a: 'player', b: 'obstacles', event: 'damage', destroy: [] }] },
+    Scorer:          { perHit: 10 },
+    Timer:           { duration: 90, mode: 'countdown' },
+    UIOverlay:       {},
+    ResultScreen:    { show: ['score', 'time'], rating: { '3star': 200, '2star': 100, '1star': 40 } },
+    TouchInput:      { playerSize: 48 },
+  },
+
+  // ──────────────────────────────────────────
+  // SUGAR-INSERT (糖果挑战)
+  // Precision dropping into containers
+  // ──────────────────────────────────────────
+  'sugar-insert': {
+    GameFlow:     { countdown: 3, onFinish: 'show_result' },
+    Gravity:      { g: 4.0, pixelsPerMeter: 33.33 },
+    Spawner:      { frequency: 0.5, maxCount: 1, speed: { min: 0, max: 0 }, direction: 'down',
+      items: [{ asset: 'good_1', weight: 1 }],
+      spawnArea: { x: 200, y: 0, width: 680, height: 0 } },
+    Collision:    { rules: [{ a: 'items', b: 'target', event: 'hit', destroy: ['a'] }] },
+    Scorer:       { perHit: 25 },
+    Timer:        { duration: 60, mode: 'countdown' },
+    UIOverlay:    {},
+    ResultScreen: { show: ['score'], rating: { '3star': 200, '2star': 100, '1star': 40 } },
+    TouchInput:   { playerSize: 48 },
+  },
+
+  // ──────────────────────────────────────────
+  // SWIMMER (游泳)
+  // Aquatic navigation, reduced gravity
+  // ──────────────────────────────────────────
+  swimmer: {
+    GameFlow:        { countdown: 3, onFinish: 'show_result' },
+    Gravity:         { g: 2.0, pixelsPerMeter: 33.33 },
+    PlayerMovement:  { mode: 'follow', speed: 300, lerp: 0.1 },
+    Spawner:         { frequency: 1.0, maxCount: 4, speed: { min: 100, max: 250 }, direction: 'horizontal',
+      items: [{ asset: 'good_1', weight: 2 }, { asset: 'bad_1', weight: 2, layer: 'obstacles' }],
+      spawnArea: { x: 0, y: 200, width: 0, height: 1400 } },
+    Collision:       { rules: [{ a: 'player', b: 'items', event: 'hit', destroy: ['b'] }, { a: 'player', b: 'obstacles', event: 'damage', destroy: ['b'] }] },
+    Scorer:          { perHit: 10 },
+    Timer:           { duration: 60, mode: 'countdown' },
+    Lives:           { count: 3 },
+    DifficultyRamp:  { mode: 'time', rules: [] },
+    UIOverlay:       {},
+    ResultScreen:    { show: ['score'], rating: { '3star': 150, '2star': 80, '1star': 30 } },
+    TouchInput:      { playerSize: 64 },
+  },
+
+  // ──────────────────────────────────────────
+  // JIGSAW (拼图) — supportedToday: false
+  // Minimal baseline preset
+  // ──────────────────────────────────────────
+  jigsaw: {
+    GameFlow:     { countdown: 3, onFinish: 'show_result' },
+    MatchEngine:  { mode: 'assemble', gridSize: { cols: 3, rows: 3 }, items: 9 },
+    Scorer:       { perHit: 20, hitEvent: 'match:found' },
+    Timer:        { duration: 120, mode: 'countdown' },
+    UIOverlay:    {},
+    ResultScreen: { show: ['score', 'time'], rating: { '3star': 180, '2star': 100, '1star': 40 } },
+    TouchInput:   { playerSize: 48 },
+  },
+
+  // ──────────────────────────────────────────
+  // QUICK-REACTION (快速反应) — supportedToday: false
+  // Minimal baseline preset
+  // ──────────────────────────────────────────
+  'quick-reaction': {
+    GameFlow:     { countdown: 3, onFinish: 'show_result' },
+    Spawner:      { frequency: 2.0, maxCount: 1, speed: { min: 0, max: 0 }, direction: 'random',
+      items: [{ asset: 'good_1', weight: 1 }],
+      spawnArea: { x: 100, y: 300, width: 880, height: 1000 } },
+    Collision:    { rules: [{ a: 'player', b: 'items', event: 'hit', destroy: ['b'] }] },
+    Scorer:       { perHit: 10, combo: { enabled: true, window: 800, multiplier: [1, 2, 3, 5] } },
+    Timer:        { duration: 15, mode: 'countdown' },
+    UIOverlay:    {},
+    ResultScreen: { show: ['score'], rating: { '3star': 100, '2star': 50, '1star': 20 } },
+    TouchInput:   { playerSize: 64 },
+  },
+
+  // ──────────────────────────────────────────
+  // HEAD-TILT (歪头选择) — supportedToday: false
+  // Minimal baseline preset
+  // ──────────────────────────────────────────
+  'head-tilt': {
+    GameFlow:     { countdown: 3, onFinish: 'show_result' },
+    Timer:        { duration: 30, mode: 'countdown' },
+    Scorer:       { perHit: 10 },
+    UIOverlay:    {},
+    ResultScreen: { show: ['score'], rating: { '3star': 100, '2star': 50, '1star': 20 } },
+    FaceInput:    { smoothing: 0.3, sensitivity: 1.0 },
+  },
+
+  // ──────────────────────────────────────────
+  // DRAWING (画画) — supportedToday: false
+  // Minimal baseline preset
+  // ──────────────────────────────────────────
+  drawing: {
+    GameFlow:     { countdown: 0, onFinish: 'show_result' },
+    Timer:        { duration: 0, mode: 'endless' },
+    UIOverlay:    {},
+    ResultScreen: { show: [] },
+    TouchInput:   { playerSize: 48 },
+  },
+
+  // ──────────────────────────────────────────
+  // AVATAR-FRAME (头像框) — supportedToday: false
+  // Minimal baseline preset
+  // ──────────────────────────────────────────
+  'avatar-frame': {
+    GameFlow:     { countdown: 0, onFinish: 'show_result' },
+    Timer:        { duration: 0, mode: 'endless' },
+    UIOverlay:    {},
+    ResultScreen: { show: [] },
+    TouchInput:   { playerSize: 48 },
+  },
 };
 
 // Fallback defaults for input modules not listed in a specific game preset.
