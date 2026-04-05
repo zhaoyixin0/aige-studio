@@ -58,7 +58,7 @@ describe('buildSystemPrompt', () => {
     const prompt = await buildSystemPrompt(null, []);
     // Should have the base content (game types, modules list)
     expect(prompt).toContain('AIGE Studio');
-    expect(prompt).toContain('16 种游戏类型');
+    expect(prompt).toContain('38 种游戏类型');
     expect(prompt).toContain('可用模块');
     // Should NOT have detailed knowledge section
     expect(prompt).not.toContain('详细游戏知识');

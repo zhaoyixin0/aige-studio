@@ -82,22 +82,52 @@ export const THEMES = ['fruit', 'space', 'ocean', 'halloween', 'candy'] as const
 export const ART_STYLES = ['cartoon', 'pixel', 'flat', 'realistic', 'watercolor', 'chibi'] as const;
 
 export const GAME_TYPE_DESCRIPTIONS: Record<string, string> = {
-  'catch':        '接住类 — 用头/手接住掉落物品',
-  'dodge':        '躲避类 — 躲避从上方掉落的障碍物',
-  'quiz':         '答题类 — 限时回答趣味问题',
-  'random-wheel': '随机转盘 — 转动转盘看结果',
-  'tap':          '点击类 — 点击屏幕上出现的目标',
-  'shooting':     '射击类 — 发射子弹消灭敌人、躲避攻击',
-  'expression':   '表情挑战 — 用面部表情匹配目标',
-  'runner':       '跑酷类 — 控制角色躲避障碍跑到最远',
-  'gesture':      '手势互动 — 用手势匹配目标动作',
-  'rhythm':       '节奏类 — 跟随节奏点击屏幕',
-  'puzzle':       '拼图/配对 — 翻开卡片找到配对',
-  'dress-up':     '换装/贴纸 — 给角色搭配服装和配饰',
-  'world-ar':     '世界AR — 在真实环境中放置虚拟物品',
-  'narrative':    '分支叙事 — 做出选择影响故事走向',
-  'platformer':   '平台跳跃 — 跳跃闯关、收集金币、躲避障碍',
-  'action-rpg':   '动作RPG — 射击敌人、升级角色、收集装备',
+  // --- Reflex ---
+  'catch':          '接住类 — 用头/手接住掉落物品',
+  'dodge':          '躲避类 — 躲避从上方掉落的障碍物',
+  'tap':            '点击类 — 点击屏幕上出现的目标',
+  'rhythm':         '节奏类 — 跟随节奏点击屏幕',
+  'quick-reaction': '快速反应 — 对突然出现的提示做出反应',
+  'whack-a-mole':   '打地鼠 — 点击弹出的目标',
+  // --- Physics ---
+  'shooting':       '射击类 — 发射子弹消灭敌人、躲避攻击',
+  'slingshot':      '弹弓 — 拉弹弓发射物体破坏建筑',
+  'ball-physics':   '物理球 — 基于物理引擎的弹球玩法',
+  'trajectory':     '弹道 — 计算抛物线击中目标',
+  'bouncing':       '弹球 — 球在封闭区域内弹跳',
+  'rope-cutting':   '割绳子 — 切断绳索解开谜题',
+  // --- Puzzle ---
+  'puzzle':         '解谜/配对 — 翻开卡片找到配对',
+  'match-link':     '连线配对 — 连接相同图案的物品',
+  'jigsaw':         '拼图 — 拼合碎片还原图片',
+  'water-pipe':     '水管 — 连接管道引导水流',
+  'scale-matching': '天平 — 在天平上平衡物品重量',
+  // --- Social ---
+  'quiz':           '答题类 — 限时回答趣味问题',
+  'random-wheel':   '随机转盘 — 转动转盘看结果',
+  'expression':     '表情挑战 — 用面部表情匹配目标',
+  'gesture':        '手势互动 — 用手势匹配目标动作',
+  'flip-guess':     '翻牌猜 — 翻牌配对朋友猜谜',
+  'head-tilt':      '歪头选择 — 歪头选择屏幕选项',
+  // --- Creative ---
+  'dress-up':       '换装/贴纸 — 给角色搭配服装和配饰',
+  'drawing':        '画画 — 自由绘画涂鸦',
+  'avatar-frame':   '头像框 — 创建自定义头像装饰框',
+  // --- Sports ---
+  'runner':         '跑酷类 — 控制角色躲避障碍跑到最远',
+  'platformer':     '平台跳跃 — 跳跃闯关、收集金币、躲避障碍',
+  'action-rpg':     '动作RPG — 射击敌人、升级角色、收集装备',
+  'racing':         '赛车 — 滑动方向盘躲避障碍竞速',
+  'cross-road':     '过马路 — 穿越车流安全到达对面',
+  'ball-rolling':   '滚球 — 控制球体在地形上滚动',
+  // --- Narrative ---
+  'narrative':      '分支叙事 — 做出选择影响故事走向',
+  'world-ar':       '世界AR — 在真实环境中放置虚拟物品',
+  // --- Experimental ---
+  'maze':           '迷宫 — 找到迷宫出口',
+  'sugar-insert':   '糖果挑战 — 精准投放糖果到容器中',
+  'swimmer':        '游泳 — 水中导航游泳竞赛',
+  'jelly':          '果冻 — 软体物理弹跳游戏',
 };
 
 // Use wizard.ts DEFAULT_THEME_FOR_GAME as single source of truth
@@ -105,7 +135,7 @@ export const DEFAULT_THEME = DEFAULT_THEME_FOR_GAME;
 
 export const SYSTEM_PROMPT_BASE = `你是 AIGE Studio 的游戏创建对话助手。用户通过自然语言描述想要的游戏，你直接创建或修改。
 
-## 16 种游戏类型
+## 38 种游戏类型
 ${Object.entries(GAME_TYPE_DESCRIPTIONS).map(([id, desc]) => `- ${id}: ${desc}`).join('\n')}
 
 ## 可用模块（按类别）
@@ -364,22 +394,47 @@ export const TOOLS: Anthropic.Messages.Tool[] = [
 /* ------------------------------------------------------------------ */
 
 export const KEYWORD_MAP: Array<{ pattern: RegExp; gameType: string }> = [
+  // --- Original 16 (order: specific before generic) ---
   { pattern: /接住|接水果|接东西|掉落.*接/i, gameType: 'catch' },
   { pattern: /躲避|闪避|躲开|躲.*障碍/i, gameType: 'dodge' },
   { pattern: /答题|问答|知识|答案|quiz/i, gameType: 'quiz' },
-  { pattern: /转盘|抽奖|随机|轮盘/i, gameType: 'random-wheel' },
-  { pattern: /点击|点点|戳|tap/i, gameType: 'tap' },
+  { pattern: /转盘|抽奖|轮盘/i, gameType: 'random-wheel' },
   { pattern: /射击|打靶|shoot|瞄准|飞机|大战|子弹/i, gameType: 'shooting' },
   { pattern: /表情|emoji|笑脸/i, gameType: 'expression' },
   { pattern: /跑酷|奔跑|runner|酷跑/i, gameType: 'runner' },
   { pattern: /手势|gesture|比划/i, gameType: 'gesture' },
   { pattern: /节奏|音乐|rhythm|节拍/i, gameType: 'rhythm' },
-  { pattern: /拼图|配对|翻牌|记忆/i, gameType: 'puzzle' },
   { pattern: /换装|穿搭|dress|服装/i, gameType: 'dress-up' },
   { pattern: /AR|增强现实/i, gameType: 'world-ar' },
   { pattern: /故事|叙事|选择.*影响|剧情/i, gameType: 'narrative' },
   { pattern: /平台|跳跃|闯关|mario|马里奥/i, gameType: 'platformer' },
   { pattern: /RPG|角色扮演|升级|刷怪|打怪/i, gameType: 'action-rpg' },
+  // --- M0 expansion: 22 new types (specific patterns first) ---
+  { pattern: /快速反应|反应速度|反应测试/i, gameType: 'quick-reaction' },
+  { pattern: /打地鼠|地鼠|whack/i, gameType: 'whack-a-mole' },
+  { pattern: /弹弓|弹射|slingshot|愤怒的小鸟/i, gameType: 'slingshot' },
+  { pattern: /物理球|钟摆|ball[\s-]?physics/i, gameType: 'ball-physics' },
+  { pattern: /弹道|轨迹|trajectory/i, gameType: 'trajectory' },
+  { pattern: /弹球|弹珠|反弹|bounce|bouncing/i, gameType: 'bouncing' },
+  { pattern: /割绳子|cut.*rope/i, gameType: 'rope-cutting' },
+  { pattern: /连线|link.*match|match.*link/i, gameType: 'match-link' },
+  { pattern: /拼图|jigsaw|组装|assemble/i, gameType: 'jigsaw' },
+  { pattern: /水管|管道|pipe|接水/i, gameType: 'water-pipe' },
+  { pattern: /天平|称重|scale.*match|balance/i, gameType: 'scale-matching' },
+  { pattern: /翻牌|猜牌|flip.*guess|记忆卡/i, gameType: 'flip-guess' },
+  { pattern: /歪头|head.*tilt|偏头/i, gameType: 'head-tilt' },
+  { pattern: /画画|涂鸦|drawing|画笔/i, gameType: 'drawing' },
+  { pattern: /头像框|avatar.*frame|相框/i, gameType: 'avatar-frame' },
+  { pattern: /赛车|竞速|racing|飙车/i, gameType: 'racing' },
+  { pattern: /过马路|cross.*road|穿越马路/i, gameType: 'cross-road' },
+  { pattern: /滚球|rolling.*ball|球.*滚/i, gameType: 'ball-rolling' },
+  { pattern: /迷宫|maze|走迷宫/i, gameType: 'maze' },
+  { pattern: /糖果挑战|sugar|精准投放/i, gameType: 'sugar-insert' },
+  { pattern: /游泳|swimmer/i, gameType: 'swimmer' },
+  { pattern: /果冻|jelly|软体/i, gameType: 'jelly' },
+  // --- Generic (must be after specific types that share keywords) ---
+  { pattern: /点击|点点|戳|tap/i, gameType: 'tap' },
+  { pattern: /puzzle|解谜|配对|记忆/i, gameType: 'puzzle' },
 ];
 
 /* ------------------------------------------------------------------ */
