@@ -113,6 +113,21 @@ const BRIDGE_RULES: WiringRule[] = [
     },
   },
   {
+    // Collision + Tween: collision hits trigger tween animations
+    requires: ['Collision', 'Tween'],
+    setup: (engine, _modules, on) => {
+      on('collision:hit', (data?: unknown) => {
+        const d = asRecord(data);
+        if (d.targetId != null) {
+          engine.eventBus.emit('tween:trigger', {
+            clipId: 'hit',
+            entityId: String(d.targetId),
+          });
+        }
+      });
+    },
+  },
+  {
     // WaveSpawner + EnemyAI: spawn enemies into AI system
     requires: ['WaveSpawner', 'EnemyAI'],
     setup: (_engine, modules, on) => {

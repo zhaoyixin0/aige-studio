@@ -42,7 +42,7 @@ export const GAME_TYPE_META: Record<GameType, GameTypeMeta> = {
   'tap': { displayName: '点击', category: 'Reflex', description: 'Tap targets quickly', supportedToday: true, tags: ['casual', 'speed'], emoji: '👆' },
   'rhythm': { displayName: '节奏', category: 'Reflex', description: 'Hit beats in time', supportedToday: true, tags: ['music', 'timing'], emoji: '🎵' },
   'quick-reaction': { displayName: '快速反应', category: 'Reflex', description: 'React to sudden prompts', supportedToday: false, tags: ['speed', 'casual'], emoji: '⚡' },
-  'whack-a-mole': { displayName: '打地鼠', category: 'Reflex', description: 'Tap popping targets', supportedToday: false, tags: ['casual', 'tween'], emoji: '🔨' },
+  'whack-a-mole': { displayName: '打地鼠', category: 'Reflex', description: 'Tap popping targets', supportedToday: true, tags: ['casual', 'tween'], emoji: '🔨' },
   // --- Physics ---
   'shooting': { displayName: '射击', category: 'Physics', description: 'Aim and shoot targets', supportedToday: true, tags: ['combat', 'aim'], emoji: '🔫' },
   'slingshot': { displayName: '弹弓', category: 'Physics', description: 'Fling projectiles at structures', supportedToday: false, tags: ['physics', 'aim'], emoji: '🏹' },
@@ -52,16 +52,16 @@ export const GAME_TYPE_META: Record<GameType, GameTypeMeta> = {
   'rope-cutting': { displayName: '割绳子', category: 'Physics', description: 'Cut ropes to solve puzzles', supportedToday: false, tags: ['physics', 'puzzle'], emoji: '✂️' },
   // --- Puzzle ---
   'puzzle': { displayName: '解谜', category: 'Puzzle', description: 'Generic puzzle mechanics', supportedToday: true, tags: ['logic'], emoji: '🧩' },
-  'match-link': { displayName: '连线配对', category: 'Puzzle', description: 'Connect matching items', supportedToday: false, tags: ['logic', 'tween'], emoji: '🔗' },
+  'match-link': { displayName: '连线配对', category: 'Puzzle', description: 'Connect matching items', supportedToday: true, tags: ['logic', 'tween'], emoji: '🔗' },
   'jigsaw': { displayName: '拼图', category: 'Puzzle', description: 'Assemble pieces to form image', supportedToday: false, tags: ['logic', 'casual'], emoji: '🖼️' },
-  'water-pipe': { displayName: '水管', category: 'Puzzle', description: 'Connect pipes to guide flow', supportedToday: false, tags: ['logic', 'tween'], emoji: '🚰' },
+  'water-pipe': { displayName: '水管', category: 'Puzzle', description: 'Connect pipes to guide flow', supportedToday: true, tags: ['logic', 'tween'], emoji: '🚰' },
   'scale-matching': { displayName: '天平', category: 'Puzzle', description: 'Balance items on a scale', supportedToday: false, tags: ['physics', 'logic'], emoji: '⚖️' },
   // --- Social ---
   'quiz': { displayName: '答题', category: 'Social', description: 'Answer questions', supportedToday: true, tags: ['trivia', 'social'], emoji: '❓' },
-  'random-wheel': { displayName: '转盘', category: 'Social', description: 'Spin to decide', supportedToday: false, tags: ['social', 'tween'], emoji: '🎰' },
+  'random-wheel': { displayName: '转盘', category: 'Social', description: 'Spin to decide', supportedToday: true, tags: ['social', 'tween'], emoji: '🎰' },
   'expression': { displayName: '表情', category: 'Social', description: 'Face expression games', supportedToday: true, tags: ['face', 'social'], emoji: '😊' },
   'gesture': { displayName: '手势', category: 'Social', description: 'Hand gesture challenges', supportedToday: true, tags: ['hand', 'social'], emoji: '✋' },
-  'flip-guess': { displayName: '翻牌猜', category: 'Social', description: 'Flip cards for friend guessing', supportedToday: false, tags: ['social', 'tween'], emoji: '🃏' },
+  'flip-guess': { displayName: '翻牌猜', category: 'Social', description: 'Flip cards for friend guessing', supportedToday: true, tags: ['social', 'tween'], emoji: '🃏' },
   'head-tilt': { displayName: '歪头选择', category: 'Social', description: 'Tilt head to choose options', supportedToday: false, tags: ['face', 'casual'], emoji: '🤔' },
   // --- Creative ---
   'dress-up': { displayName: '换装', category: 'Creative', description: 'Customize character appearance', supportedToday: true, tags: ['creative', 'social'], emoji: '👗' },
@@ -310,6 +310,10 @@ const PRESETS: Partial<Record<GameType, GamePreset>> = {
         'randomizer:result': { effect: 'burst', at: 'center', duration: 600, color: '#ffdd00' },
       },
     },
+    Tween:        { clips: [
+      { id: 'spin', duration: 3, tracks: [{ property: 'rotation', from: 0, to: 25.13, easing: 'ExpoOut' }] },
+      { id: 'bounce', duration: 0.3, tracks: [{ property: 'scaleX', from: 1, to: 1.1, easing: 'BounceOut' }, { property: 'scaleY', from: 1, to: 1.1, easing: 'BounceOut' }] },
+    ] },
   },
 
   // ──────────────────────────────────────────
@@ -715,6 +719,81 @@ const PRESETS: Partial<Record<GameType, GamePreset>> = {
     TouchInput:     { playerSize: 64 },
     ParticleVFX:    { events: { 'collision:hit': { effect: 'sparkle', at: 'target', duration: 400, color: '#ffaa00' }, 'enemy:death': { effect: 'burst', at: 'target', duration: 500, color: '#ff0000' }, 'levelup:levelup': { effect: 'burst', at: 'player', duration: 800, color: '#00ff88' } } },
     SoundFX:        { events: { 'collision:hit': 'pop', 'enemy:death': 'boom', 'levelup:levelup': 'cheer', 'wave:complete': 'ding' } },
+  },
+
+  // ──────────────────────────────────────────
+  // WHACK-A-MOLE (打地鼠)
+  // Tap popping targets with tween pop-up animations
+  // ──────────────────────────────────────────
+  'whack-a-mole': {
+    GameFlow:     { countdown: 3, onFinish: 'show_result' },
+    Spawner:      { frequency: 1.2, maxCount: 3, speed: { min: 0, max: 0 }, direction: 'random',
+      items: [{ asset: 'good_1', weight: 3 }, { asset: 'good_2', weight: 2 }],
+      spawnArea: { x: 100, y: 400, width: 880, height: 1000 } },
+    Collision:    { rules: [{ a: 'player', b: 'items', event: 'hit', destroy: ['b'] }] },
+    Scorer:       { perHit: 10, combo: { enabled: true, window: 1200, multiplier: [1, 1.5, 2, 3] } },
+    Timer:        { duration: 30, mode: 'countdown' },
+    Tween:        { clips: [
+      { id: 'pop-up', duration: 0.3, tracks: [{ property: 'scaleY', from: 0, to: 1, easing: 'BounceOut' }] },
+      { id: 'pop-down', duration: 0.25, tracks: [{ property: 'scaleY', from: 1, to: 0, easing: 'QuadIn' }] },
+    ] },
+    UIOverlay:    {},
+    ResultScreen: { show: ['score', 'combo_max'], rating: { '3star': 250, '2star': 120, '1star': 40 } },
+    TouchInput:   { playerSize: 64 },
+  },
+
+  // ──────────────────────────────────────────
+  // MATCH-LINK (连线配对)
+  // Connect matching items with flip/match animations
+  // ──────────────────────────────────────────
+  'match-link': {
+    GameFlow:     { countdown: 3, onFinish: 'show_result' },
+    MatchEngine:  { mode: 'pairs', gridSize: { cols: 4, rows: 4 }, items: 8 },
+    Scorer:       { perHit: 15, hitEvent: 'match:found' },
+    Timer:        { duration: 60, mode: 'countdown' },
+    Tween:        { clips: [
+      { id: 'flip', duration: 0.3, tracks: [{ property: 'scaleX', from: 1, to: 0, easing: 'QuadIn' }], pingPong: true, loop: 2 },
+      { id: 'match-pop', duration: 0.2, tracks: [{ property: 'scaleX', from: 1, to: 1.3, easing: 'BounceOut' }, { property: 'scaleY', from: 1, to: 1.3, easing: 'BounceOut' }] },
+    ] },
+    UIOverlay:    {},
+    ResultScreen: { show: ['score', 'time'], rating: { '3star': 200, '2star': 100, '1star': 40 } },
+    TouchInput:   { playerSize: 48 },
+  },
+
+  // ──────────────────────────────────────────
+  // WATER-PIPE (水管)
+  // Connect pipes to guide water flow
+  // ──────────────────────────────────────────
+  'water-pipe': {
+    GameFlow:     { countdown: 3, onFinish: 'show_result' },
+    MatchEngine:  { mode: 'connect', gridSize: { cols: 5, rows: 5 } },
+    Scorer:       { perHit: 20, hitEvent: 'match:found' },
+    Timer:        { duration: 90, mode: 'countdown' },
+    Tween:        { clips: [
+      { id: 'flow', duration: 0.5, tracks: [{ property: 'alpha', from: 0.3, to: 1, easing: 'SineInOut' }] },
+      { id: 'rotate', duration: 0.2, tracks: [{ property: 'rotation', from: 0, to: 1.5708, easing: 'CubicOut' }] },
+    ] },
+    UIOverlay:    {},
+    ResultScreen: { show: ['score'], rating: { '3star': 300, '2star': 150, '1star': 60 } },
+    TouchInput:   { playerSize: 48 },
+  },
+
+  // ──────────────────────────────────────────
+  // FLIP-GUESS (翻牌猜)
+  // Flip cards for friend guessing game
+  // ──────────────────────────────────────────
+  'flip-guess': {
+    GameFlow:     { countdown: 3, onFinish: 'show_result' },
+    MatchEngine:  { mode: 'memory', gridSize: { cols: 4, rows: 3 }, items: 6 },
+    Timer:        { duration: 30, mode: 'countdown' },
+    Scorer:       { perHit: 20, hitEvent: 'match:found', combo: { enabled: true, window: 3000, multiplier: [1, 1.5, 2] } },
+    Tween:        { clips: [
+      { id: 'flip', duration: 0.4, tracks: [{ property: 'scaleX', from: 1, to: 0, easing: 'SineIn' }], pingPong: true, loop: 2 },
+      { id: 'reveal', duration: 0.3, tracks: [{ property: 'alpha', from: 0, to: 1, easing: 'SineOut' }] },
+    ] },
+    UIOverlay:    {},
+    ResultScreen: { show: ['score', 'time'], rating: { '3star': 200, '2star': 100, '1star': 40 } },
+    TouchInput:   { playerSize: 48 },
   },
 };
 

@@ -313,6 +313,17 @@ export const SKILL_COOLDOWN = 'skill:cooldown';
 export interface SkillPayload { skillId: string; name: string }
 export interface SkillCooldownPayload { skillId: string; remaining: number; total: number }
 
+// ── Tween ──────────────────────────────────────────────────
+export const TWEEN_START = 'tween:start';
+export const TWEEN_COMPLETE = 'tween:complete';
+export const TWEEN_UPDATE = 'tween:update';
+export const TWEEN_TRIGGER = 'tween:trigger';
+
+export interface TweenStartPayload { entityId: string; clipId: string }
+export interface TweenCompletePayload { entityId: string; clipId: string }
+export interface TweenUpdatePayload { entityId: string; properties: Record<string, number> }
+export interface TweenTriggerPayload { clipId: string; entityId: string }
+
 // ── DialogueSystem ─────────────────────────────────────────
 export const DIALOGUE_START = 'dialogue:start';
 export const DIALOGUE_NODE = 'dialogue:node';

@@ -25,7 +25,7 @@ const TYPES: GameTypeEntry[] = [
   { id: 'tap', group: 'Reflex', displayName: 'Tap', description: 'Tap targets quickly', requiredModules: ['Spawner', 'Collision', 'Timer'], missingModules: [], supportedToday: true, evidence: 'Quick_Reaction_Game, whack-a-mole' },
   { id: 'rhythm', group: 'Reflex', displayName: 'Rhythm', description: 'Hit beats in time', requiredModules: ['BeatMap', 'Scorer'], missingModules: [], supportedToday: true, evidence: '2D_Timeline_Event_Arrangement' },
   { id: 'quick-reaction', group: 'Reflex', displayName: 'Quick Reaction', description: 'React to sudden prompts', requiredModules: ['Timer', 'Spawner', 'Scorer'], missingModules: ['Preset'], supportedToday: false, evidence: 'Quick_Reaction_Game' },
-  { id: 'whack-a-mole', group: 'Reflex', displayName: 'Whack-a-Mole', description: 'Tap popping targets', requiredModules: ['Spawner', 'Collision', 'Timer', 'Tween'], missingModules: ['Tween'], supportedToday: false, evidence: 'whack-a-mole type games' },
+  { id: 'whack-a-mole', group: 'Reflex', displayName: 'Whack-a-Mole', description: 'Tap popping targets', requiredModules: ['Spawner', 'Collision', 'Timer', 'Tween'], missingModules: [], supportedToday: true, evidence: 'whack-a-mole type games' },
 
   // === PHYSICS (物理类) ===
   { id: 'shooting', group: 'Physics', displayName: 'Shooting', description: 'Aim and shoot targets', requiredModules: ['Projectile', 'Aim', 'WaveSpawner'], missingModules: [], supportedToday: true, evidence: 'Shooting_Game, WaterBlaster, 3D_Rope_Cutting_Shooting_Game' },
@@ -37,17 +37,17 @@ const TYPES: GameTypeEntry[] = [
 
   // === PUZZLE (解谜类) ===
   { id: 'puzzle', group: 'Puzzle', displayName: 'Puzzle', description: 'Generic puzzle mechanics', requiredModules: ['MatchEngine', 'Scorer'], missingModules: [], supportedToday: true, evidence: 'Puzzle_Memory, Puzzle_Assemble' },
-  { id: 'match-link', group: 'Puzzle', displayName: 'Match & Link', description: 'Connect matching items', requiredModules: ['MatchEngine', 'Collision', 'Tween'], missingModules: ['Tween'], supportedToday: false, evidence: '2d_match_linl_game, 2d_match_lock_game' },
+  { id: 'match-link', group: 'Puzzle', displayName: 'Match & Link', description: 'Connect matching items', requiredModules: ['MatchEngine', 'Collision', 'Tween'], missingModules: [], supportedToday: true, evidence: '2d_match_linl_game, 2d_match_lock_game' },
   { id: 'jigsaw', group: 'Puzzle', displayName: 'Jigsaw / Assembly', description: 'Assemble pieces to form image', requiredModules: ['MatchEngine', 'Collision'], missingModules: ['Preset'], supportedToday: false, evidence: 'Puzzle_Assemble, 2d_puzzle_painting_game' },
-  { id: 'water-pipe', group: 'Puzzle', displayName: 'Water Pipe', description: 'Connect pipes to guide flow', requiredModules: ['MatchEngine', 'Collision', 'Tween'], missingModules: ['Tween'], supportedToday: false, evidence: '2d_let_crow_drink_water_game' },
+  { id: 'water-pipe', group: 'Puzzle', displayName: 'Water Pipe', description: 'Connect pipes to guide flow', requiredModules: ['MatchEngine', 'Collision', 'Tween'], missingModules: [], supportedToday: true, evidence: '2d_let_crow_drink_water_game' },
   { id: 'scale-matching', group: 'Puzzle', displayName: 'Scale Matching', description: 'Balance items on a scale', requiredModules: ['Physics2D', 'Scorer'], missingModules: ['Physics2D'], supportedToday: false, evidence: '2d_scale-matching game' },
 
   // === SOCIAL (社交类) ===
   { id: 'quiz', group: 'Social', displayName: 'Quiz', description: 'Answer questions', requiredModules: ['Scorer', 'Timer'], missingModules: [], supportedToday: true, evidence: '2D_Random_Question_Display' },
-  { id: 'random-wheel', group: 'Social', displayName: 'Random Wheel', description: 'Spin to decide', requiredModules: ['Tween'], missingModules: ['Tween'], supportedToday: false, evidence: '2D_Spinning_Wheel_Pointer_Game, 2D_Spinning_Wheel_Match_Game' },
+  { id: 'random-wheel', group: 'Social', displayName: 'Random Wheel', description: 'Spin to decide', requiredModules: ['Tween'], missingModules: [], supportedToday: true, evidence: '2D_Spinning_Wheel_Pointer_Game, 2D_Spinning_Wheel_Match_Game' },
   { id: 'expression', group: 'Social', displayName: 'Expression', description: 'Face expression games', requiredModules: ['ExpressionDetector', 'FaceInput'], missingModules: [], supportedToday: true, evidence: '2D_HeadTilt_Choice_Game' },
   { id: 'gesture', group: 'Social', displayName: 'Gesture', description: 'Hand gesture challenges', requiredModules: ['GestureMatch', 'HandInput'], missingModules: [], supportedToday: true, evidence: 'Expert gesture games' },
-  { id: 'flip-guess', group: 'Social', displayName: 'Flip & Guess', description: 'Flip cards for friend guessing', requiredModules: ['MatchEngine', 'Timer', 'Tween'], missingModules: ['Tween'], supportedToday: false, evidence: 'Social_Friend_Flip_Guessing_Game' },
+  { id: 'flip-guess', group: 'Social', displayName: 'Flip & Guess', description: 'Flip cards for friend guessing', requiredModules: ['MatchEngine', 'Timer', 'Tween'], missingModules: [], supportedToday: true, evidence: 'Social_Friend_Flip_Guessing_Game' },
   { id: 'head-tilt', group: 'Social', displayName: 'Head Tilt Choice', description: 'Tilt head to choose options', requiredModules: ['FaceInput', 'Scorer'], missingModules: ['Preset'], supportedToday: false, evidence: '2D_HeadTilt_Choice_Game' },
 
   // === CREATIVE (创意类) ===
@@ -69,9 +69,9 @@ const TYPES: GameTypeEntry[] = [
 
   // === EXPERIMENTAL (实验类) ===
   { id: 'maze', group: 'Experimental', displayName: 'Maze', description: 'Navigate through maze', requiredModules: ['Collision', 'Physics2D'], missingModules: ['Physics2D'], supportedToday: false, evidence: '2D_Brush_Maze, MazeChase_knowledge' },
-  { id: 'sugar-insert', group: 'Experimental', displayName: 'Sugar Insert', description: 'Precision dropping challenge', requiredModules: ['Physics2D', 'Collision', 'Tween'], missingModules: ['Physics2D', 'Tween'], supportedToday: false, evidence: 'SugarInsertingChallenge_knowledge' },
+  { id: 'sugar-insert', group: 'Experimental', displayName: 'Sugar Insert', description: 'Precision dropping challenge', requiredModules: ['Physics2D', 'Collision', 'Tween'], missingModules: ['Physics2D'], supportedToday: false, evidence: 'SugarInsertingChallenge_knowledge' },
   { id: 'swimmer', group: 'Experimental', displayName: 'Swimmer', description: 'Aquatic navigation game', requiredModules: ['Physics2D', 'Collision', 'ScrollingLayers'], missingModules: ['Physics2D', 'ScrollingLayers'], supportedToday: false, evidence: 'ChimpionSwimmer template' },
-  { id: 'jelly', group: 'Experimental', displayName: 'Jelly', description: 'Soft-body physics game', requiredModules: ['Physics2D', 'Tween'], missingModules: ['Physics2D', 'Tween'], supportedToday: false, evidence: 'JellyGame template' },
+  { id: 'jelly', group: 'Experimental', displayName: 'Jelly', description: 'Soft-body physics game', requiredModules: ['Physics2D', 'Tween'], missingModules: ['Physics2D'], supportedToday: false, evidence: 'JellyGame template' },
 ];
 
 const GROUPS = ['Reflex', 'Physics', 'Puzzle', 'Social', 'Creative', 'Sports', 'Narrative', 'Experimental'];
