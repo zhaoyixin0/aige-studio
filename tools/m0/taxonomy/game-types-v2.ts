@@ -29,18 +29,18 @@ const TYPES: GameTypeEntry[] = [
 
   // === PHYSICS (物理类) ===
   { id: 'shooting', group: 'Physics', displayName: 'Shooting', description: 'Aim and shoot targets', requiredModules: ['Projectile', 'Aim', 'WaveSpawner'], missingModules: [], supportedToday: true, evidence: 'Shooting_Game, WaterBlaster, 3D_Rope_Cutting_Shooting_Game' },
-  { id: 'slingshot', group: 'Physics', displayName: 'Slingshot', description: 'Fling projectiles at structures', requiredModules: ['Physics2D', 'Collision', 'Projectile'], missingModules: ['Physics2D'], supportedToday: false, evidence: '2D_Slingshot_Ball_Launch_Game (AngryBirds-style)' },
-  { id: 'ball-physics', group: 'Physics', displayName: 'Ball Physics', description: 'Physics-based ball mechanics', requiredModules: ['Physics2D', 'Collision'], missingModules: ['Physics2D'], supportedToday: false, evidence: '2d_ball_type_physics_setup, 2D_Pendulum_Ball_Game' },
-  { id: 'trajectory', group: 'Physics', displayName: 'Trajectory', description: 'Plot projectile paths', requiredModules: ['Physics2D', 'Collision'], missingModules: ['Physics2D'], supportedToday: false, evidence: 'Trajectory_Slove, 2D_Emoji_Graph_Trajectory_Game' },
-  { id: 'bouncing', group: 'Physics', displayName: 'Bounded Bounce', description: 'Ball bouncing in enclosed area', requiredModules: ['Physics2D', 'Collision'], missingModules: ['Physics2D'], supportedToday: false, evidence: '2D_Bounded_Area_Bounce_Game' },
-  { id: 'rope-cutting', group: 'Physics', displayName: 'Rope Cutting', description: 'Cut ropes to solve puzzles', requiredModules: ['Physics2D', 'Collision'], missingModules: ['Physics2D'], supportedToday: false, evidence: '2D_Rope_Cutting_Friend_Rescue_Game' },
+  { id: 'slingshot', group: 'Physics', displayName: 'Slingshot', description: 'Fling projectiles at structures', requiredModules: ['Physics2D', 'Collision', 'Projectile'], missingModules: [], supportedToday: true, evidence: '2D_Slingshot_Ball_Launch_Game (AngryBirds-style)' },
+  { id: 'ball-physics', group: 'Physics', displayName: 'Ball Physics', description: 'Physics-based ball mechanics', requiredModules: ['Physics2D', 'Collision'], missingModules: [], supportedToday: true, evidence: '2d_ball_type_physics_setup, 2D_Pendulum_Ball_Game' },
+  { id: 'trajectory', group: 'Physics', displayName: 'Trajectory', description: 'Plot projectile paths', requiredModules: ['Physics2D', 'Collision'], missingModules: [], supportedToday: true, evidence: 'Trajectory_Slove, 2D_Emoji_Graph_Trajectory_Game' },
+  { id: 'bouncing', group: 'Physics', displayName: 'Bounded Bounce', description: 'Ball bouncing in enclosed area', requiredModules: ['Physics2D', 'Collision'], missingModules: [], supportedToday: true, evidence: '2D_Bounded_Area_Bounce_Game' },
+  { id: 'rope-cutting', group: 'Physics', displayName: 'Rope Cutting', description: 'Cut ropes to solve puzzles', requiredModules: ['Physics2D', 'Collision'], missingModules: [], supportedToday: true, evidence: '2D_Rope_Cutting_Friend_Rescue_Game' },
 
   // === PUZZLE (解谜类) ===
   { id: 'puzzle', group: 'Puzzle', displayName: 'Puzzle', description: 'Generic puzzle mechanics', requiredModules: ['MatchEngine', 'Scorer'], missingModules: [], supportedToday: true, evidence: 'Puzzle_Memory, Puzzle_Assemble' },
   { id: 'match-link', group: 'Puzzle', displayName: 'Match & Link', description: 'Connect matching items', requiredModules: ['MatchEngine', 'Collision', 'Tween'], missingModules: [], supportedToday: true, evidence: '2d_match_linl_game, 2d_match_lock_game' },
   { id: 'jigsaw', group: 'Puzzle', displayName: 'Jigsaw / Assembly', description: 'Assemble pieces to form image', requiredModules: ['MatchEngine', 'Collision'], missingModules: ['Preset'], supportedToday: false, evidence: 'Puzzle_Assemble, 2d_puzzle_painting_game' },
   { id: 'water-pipe', group: 'Puzzle', displayName: 'Water Pipe', description: 'Connect pipes to guide flow', requiredModules: ['MatchEngine', 'Collision', 'Tween'], missingModules: [], supportedToday: true, evidence: '2d_let_crow_drink_water_game' },
-  { id: 'scale-matching', group: 'Puzzle', displayName: 'Scale Matching', description: 'Balance items on a scale', requiredModules: ['Physics2D', 'Scorer'], missingModules: ['Physics2D'], supportedToday: false, evidence: '2d_scale-matching game' },
+  { id: 'scale-matching', group: 'Puzzle', displayName: 'Scale Matching', description: 'Balance items on a scale', requiredModules: ['Physics2D', 'Scorer'], missingModules: [], supportedToday: true, evidence: '2d_scale-matching game' },
 
   // === SOCIAL (社交类) ===
   { id: 'quiz', group: 'Social', displayName: 'Quiz', description: 'Answer questions', requiredModules: ['Scorer', 'Timer'], missingModules: [], supportedToday: true, evidence: '2D_Random_Question_Display' },
@@ -61,17 +61,17 @@ const TYPES: GameTypeEntry[] = [
   { id: 'action-rpg', group: 'Sports', displayName: 'Action RPG', description: 'Combat with stats', requiredModules: ['Health', 'EnemyAI', 'LevelUp'], missingModules: [], supportedToday: true, evidence: 'Action_Game_Micro_Control, Action_Micro_Control, Health_Management_Game' },
   { id: 'racing', group: 'Sports', displayName: 'Racing', description: 'Swipe to steer vehicle', requiredModules: ['ScrollingLayers', 'Collision', 'Timer'], missingModules: ['ScrollingLayers'], supportedToday: false, evidence: '2D_Swipe_Car_Racing_Game' },
   { id: 'cross-road', group: 'Sports', displayName: 'Cross Road', description: 'Navigate through traffic', requiredModules: ['Spawner', 'Collision', 'ScrollingLayers'], missingModules: ['ScrollingLayers'], supportedToday: false, evidence: '2d_cross_stree_game' },
-  { id: 'ball-rolling', group: 'Sports', displayName: 'Ball Rolling', description: '3D ball on terrain', requiredModules: ['Physics2D', 'Gravity'], missingModules: ['Physics2D'], supportedToday: false, evidence: '3D_Sliding_Ball_Terrain_Rolling_Game' },
+  { id: 'ball-rolling', group: 'Sports', displayName: 'Ball Rolling', description: '3D ball on terrain', requiredModules: ['Physics2D', 'Gravity'], missingModules: [], supportedToday: true, evidence: '3D_Sliding_Ball_Terrain_Rolling_Game' },
 
   // === NARRATIVE (叙事类) ===
   { id: 'narrative', group: 'Narrative', displayName: 'Narrative', description: 'Branching story', requiredModules: ['BranchStateMachine', 'DialogueSystem'], missingModules: [], supportedToday: true, evidence: '2D_Timeline_Event_Arrangement' },
   { id: 'world-ar', group: 'Narrative', displayName: 'World AR', description: 'AR world placement', requiredModules: ['BodyInput'], missingModules: [], supportedToday: true, evidence: 'Expert AR experiences' },
 
   // === EXPERIMENTAL (实验类) ===
-  { id: 'maze', group: 'Experimental', displayName: 'Maze', description: 'Navigate through maze', requiredModules: ['Collision', 'Physics2D'], missingModules: ['Physics2D'], supportedToday: false, evidence: '2D_Brush_Maze, MazeChase_knowledge' },
-  { id: 'sugar-insert', group: 'Experimental', displayName: 'Sugar Insert', description: 'Precision dropping challenge', requiredModules: ['Physics2D', 'Collision', 'Tween'], missingModules: ['Physics2D'], supportedToday: false, evidence: 'SugarInsertingChallenge_knowledge' },
-  { id: 'swimmer', group: 'Experimental', displayName: 'Swimmer', description: 'Aquatic navigation game', requiredModules: ['Physics2D', 'Collision', 'ScrollingLayers'], missingModules: ['Physics2D', 'ScrollingLayers'], supportedToday: false, evidence: 'ChimpionSwimmer template' },
-  { id: 'jelly', group: 'Experimental', displayName: 'Jelly', description: 'Soft-body physics game', requiredModules: ['Physics2D', 'Tween'], missingModules: ['Physics2D'], supportedToday: false, evidence: 'JellyGame template' },
+  { id: 'maze', group: 'Experimental', displayName: 'Maze', description: 'Navigate through maze', requiredModules: ['Collision', 'Physics2D'], missingModules: [], supportedToday: true, evidence: '2D_Brush_Maze, MazeChase_knowledge' },
+  { id: 'sugar-insert', group: 'Experimental', displayName: 'Sugar Insert', description: 'Precision dropping challenge', requiredModules: ['Physics2D', 'Collision', 'Tween'], missingModules: [], supportedToday: true, evidence: 'SugarInsertingChallenge_knowledge' },
+  { id: 'swimmer', group: 'Experimental', displayName: 'Swimmer', description: 'Aquatic navigation game', requiredModules: ['Physics2D', 'Collision', 'ScrollingLayers'], missingModules: ['ScrollingLayers'], supportedToday: false, evidence: 'ChimpionSwimmer template' },
+  { id: 'jelly', group: 'Experimental', displayName: 'Jelly', description: 'Soft-body physics game', requiredModules: ['Physics2D', 'Tween'], missingModules: [], supportedToday: true, evidence: 'JellyGame template' },
 ];
 
 const GROUPS = ['Reflex', 'Physics', 'Puzzle', 'Social', 'Creative', 'Sports', 'Narrative', 'Experimental'];

@@ -63,6 +63,8 @@ import { EnemyAI } from './modules/mechanic/enemy-ai.ts';
 import { WaveSpawner } from './modules/mechanic/wave-spawner.ts';
 // Tween module
 import { Tween } from './modules/mechanic/tween.ts';
+// Physics2D module
+import { Physics2D } from './modules/mechanic/physics2d.ts';
 // Feedback modules
 import { GameFlow } from './modules/feedback/game-flow.ts';
 import { ParticleVFX } from './modules/feedback/particle-vfx.ts';
@@ -140,6 +142,8 @@ export function createModuleRegistry(): ModuleRegistry {
 
   // Tween
   registry.register('Tween', Tween as unknown as ModuleConstructor);
+  // Physics2D
+  registry.register('Physics2D', Physics2D as unknown as ModuleConstructor);
 
   // Feedback modules
   registry.register('GameFlow', GameFlow as unknown as ModuleConstructor);

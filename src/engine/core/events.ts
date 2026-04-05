@@ -313,6 +313,23 @@ export const SKILL_COOLDOWN = 'skill:cooldown';
 export interface SkillPayload { skillId: string; name: string }
 export interface SkillCooldownPayload { skillId: string; remaining: number; total: number }
 
+// ── Physics2D ──────────────────────────────────────────────
+export const PHYSICS2D_CONTACT_BEGIN = 'physics2d:contact-begin';
+export const PHYSICS2D_CONTACT_END = 'physics2d:contact-end';
+export const PHYSICS2D_ADD_BODY = 'physics2d:add-body';
+export const PHYSICS2D_REMOVE_BODY = 'physics2d:remove-body';
+
+export interface Physics2DContactPayload {
+  entityIdA: string;
+  entityIdB: string;
+  tagA?: string;
+  tagB?: string;
+  pointX: number;
+  pointY: number;
+  normalX: number;
+  normalY: number;
+}
+
 // ── Tween ──────────────────────────────────────────────────
 export const TWEEN_START = 'tween:start';
 export const TWEEN_COMPLETE = 'tween:complete';

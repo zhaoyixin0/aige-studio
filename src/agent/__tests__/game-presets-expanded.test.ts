@@ -37,9 +37,9 @@ describe('Expanded Game Presets', () => {
     }
   });
 
-  it('at least 19 types are marked supportedToday', () => {
+  it('at least 29 types are marked supportedToday', () => {
     const supported = Object.values(GAME_TYPE_META).filter((m) => m.supportedToday);
-    expect(supported.length).toBeGreaterThanOrEqual(19);
+    expect(supported.length).toBeGreaterThanOrEqual(29);
   });
 
   it('every entry has tags array', () => {
