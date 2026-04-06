@@ -81,6 +81,8 @@ export const ALL_MODULES = [
   'Tween',
   // Mechanic — Physics2D
   'Physics2D',
+  // Mechanic — ScrollingLayers
+  'ScrollingLayers',
   // Feedback
   'GameFlow', 'CameraFollow', 'ParticleVFX', 'SoundFX', 'UIOverlay', 'ResultScreen',
 ];

@@ -347,6 +347,11 @@ const PRESETS: Partial<Record<GameType, GamePreset>> = {
   runner: {
     GameFlow:     { countdown: 3, onFinish: 'show_result' },
     Runner:       { speed: 400, laneCount: 3, acceleration: 15, maxSpeed: 900 },
+    ScrollingLayers: { axis: 'horizontal', baseSpeed: 200, direction: -1, layers: [
+      { textureId: 'bg_far', ratio: 0.2 },
+      { textureId: 'bg_mid', ratio: 0.5 },
+      { textureId: 'bg_near', ratio: 1.0 },
+    ] },
     Spawner:      {
       frequency: 1.0, maxCount: 10,
       speed: { min: 200, max: 300 },
@@ -972,6 +977,11 @@ const PRESETS: Partial<Record<GameType, GamePreset>> = {
   racing: {
     GameFlow:        { countdown: 3, onFinish: 'show_result' },
     PlayerMovement:  { mode: 'follow', speed: 600, lerp: 0.15 },
+    ScrollingLayers: { axis: 'horizontal', baseSpeed: 300, direction: -1, layers: [
+      { textureId: 'bg_far', ratio: 0.2 },
+      { textureId: 'bg_mid', ratio: 0.5 },
+      { textureId: 'bg_near', ratio: 1.0 },
+    ] },
     Spawner:         { frequency: 1.0, maxCount: 4, speed: { min: 300, max: 500 }, direction: 'down',
       items: [{ asset: 'good_1', weight: 2 }, { asset: 'bad_1', weight: 3, layer: 'obstacles' }],
       spawnArea: { x: 100, y: 0, width: 880, height: 0 } },
@@ -1048,6 +1058,11 @@ const PRESETS: Partial<Record<GameType, GamePreset>> = {
     GameFlow:        { countdown: 3, onFinish: 'show_result' },
     Gravity:         { g: 2.0, pixelsPerMeter: 33.33 },
     PlayerMovement:  { mode: 'follow', speed: 300, lerp: 0.1 },
+    ScrollingLayers: { axis: 'vertical', baseSpeed: 150, direction: -1, layers: [
+      { textureId: 'bg_deep', ratio: 0.2 },
+      { textureId: 'bg_water', ratio: 0.5 },
+      { textureId: 'bg_surface', ratio: 0.9 },
+    ] },
     Spawner:         { frequency: 1.0, maxCount: 4, speed: { min: 100, max: 250 }, direction: 'horizontal',
       items: [{ asset: 'good_1', weight: 2 }, { asset: 'bad_1', weight: 2, layer: 'obstacles' }],
       spawnArea: { x: 0, y: 200, width: 0, height: 1400 } },

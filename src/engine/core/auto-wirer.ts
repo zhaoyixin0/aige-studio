@@ -222,6 +222,19 @@ const BRIDGE_RULES: WiringRule[] = [
     },
   },
   {
+    // Runner + ScrollingLayers: sync runner speed to parallax scrolling speed
+    requires: ['Runner', 'ScrollingLayers'],
+    setup: (engine, _modules, on) => {
+      on('runner:distance', (data?: unknown) => {
+        const d = asRecord(data);
+        const speed = Number(d.speed);
+        if (Number.isFinite(speed)) {
+          engine.eventBus.emit('scrolling:set-speed', { speed });
+        }
+      });
+    },
+  },
+  {
     // WaveSpawner + EnemyAI: spawn enemies into AI system
     requires: ['WaveSpawner', 'EnemyAI'],
     setup: (_engine, modules, on) => {

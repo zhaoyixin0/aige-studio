@@ -9,6 +9,7 @@ import { SoundSynth } from './sound-synth';
 import { ShooterRenderer } from './shooter-renderer';
 import { RPGOverlayRenderer } from './rpg-overlay-renderer';
 import { PhysicsDebugRenderer } from './physics-debug-renderer';
+import { ParallaxRenderer } from './parallax-renderer';
 import { getTheme, type GameTheme } from './theme-registry';
 
 export class PixiRenderer {
@@ -25,6 +26,7 @@ export class PixiRenderer {
   private shooterRenderer: ShooterRenderer | null = null;
   private rpgOverlayRenderer: RPGOverlayRenderer | null = null;
   private physicsDebugRenderer: PhysicsDebugRenderer | null = null;
+  private parallaxRenderer: ParallaxRenderer | null = null;
   private initialized = false;
   private currentThemeId: string | null = null;
   private connectedEngine: Engine | null = null;
@@ -58,6 +60,9 @@ export class PixiRenderer {
     // Background goes behind everything
     this.backgroundGraphics = new Graphics();
     this.app.stage.addChild(this.backgroundGraphics);
+
+    // Parallax layer between background and camera/game layers
+    this.parallaxRenderer = new ParallaxRenderer(this.app.stage, width, height);
 
     this.app.stage.addChild(this.cameraLayer, this.gameLayer, this.hudLayer);
 
@@ -248,6 +253,7 @@ export class PixiRenderer {
     this.shooterRenderer?.reset();
     this.rpgOverlayRenderer?.reset();
     this.physicsDebugRenderer?.reset();
+    this.parallaxRenderer?.reset();
 
     // Create sound synth
     if (!this.soundSynth) {
@@ -265,6 +271,15 @@ export class PixiRenderer {
 
     // Wire physics debug renderer events
     this.physicsDebugRenderer?.wire(listen);
+
+    // Scrolling parallax updates
+    listen('scrolling:update', (data?: any) => {
+      const layers = data?.layers as ReadonlyArray<{ textureId: string; ratio: number; offsetX: number; offsetY: number }> | undefined;
+      if (layers && this.parallaxRenderer) {
+        const assets = engine.getConfig().assets ?? {};
+        this.parallaxRenderer.updateFromStates(layers, assets);
+      }
+    });
 
     listen('collision:hit', (data?: any) => {
       const x = data?.x ?? 540;
@@ -434,6 +449,7 @@ export class PixiRenderer {
     if (this.currentThemeId) {
       this.drawBackground(getTheme(this.currentThemeId));
     }
+    this.parallaxRenderer?.resize(width, height);
   }
 
   /** Sync Physics2D body positions into GameObjectRenderer before sprite layout */
@@ -477,6 +493,8 @@ export class PixiRenderer {
     this.rpgOverlayRenderer = null;
     this.physicsDebugRenderer?.destroy();
     this.physicsDebugRenderer = null;
+    this.parallaxRenderer?.destroy();
+    this.parallaxRenderer = null;
     this.particleRenderer?.destroy();
     this.particleRenderer = null;
     this.floatTextRenderer?.destroy();
