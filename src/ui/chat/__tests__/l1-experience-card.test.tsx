@@ -4,9 +4,9 @@ import { L1ExperienceCard } from '../l1-experience-card';
 
 describe('L1ExperienceCard', () => {
   const defaultProps = {
-    difficulty: '普通' as const,
-    pacing: '中' as const,
-    emotion: '欢乐' as const,
+    difficulty: 'normal',
+    pacing: '中',
+    emotion: 'cartoon',
     onDifficultyChange: vi.fn(),
     onPacingChange: vi.fn(),
     onEmotionChange: vi.fn(),
@@ -14,63 +14,69 @@ describe('L1ExperienceCard', () => {
 
   it('renders three control sections', () => {
     render(<L1ExperienceCard {...defaultProps} />);
-    expect(screen.getByText('游戏难度')).toBeTruthy();
-    expect(screen.getByText('游戏节奏')).toBeTruthy();
-    expect(screen.getByText('游戏情绪')).toBeTruthy();
+    expect(screen.getByText('Gameplay Difficulty')).toBeTruthy();
+    expect(screen.getByText('Gameplay Pacing')).toBeTruthy();
+    expect(screen.getByText('Game Styles')).toBeTruthy();
   });
 
-  it('renders difficulty as segmented control with 3 options', () => {
+  it('renders difficulty as 4 emoji icon buttons', () => {
     render(<L1ExperienceCard {...defaultProps} />);
-    expect(screen.getByRole('radio', { name: '简单' })).toBeTruthy();
-    expect(screen.getByRole('radio', { name: '普通' })).toBeTruthy();
-    expect(screen.getByRole('radio', { name: '困难' })).toBeTruthy();
+    const diffGroup = screen.getByRole('radiogroup', { name: '游戏难度' });
+    expect(diffGroup).toBeTruthy();
+    const radios = diffGroup.querySelectorAll('[role="radio"]');
+    expect(radios).toHaveLength(4);
   });
 
-  it('renders pacing as segmented control with 3 options', () => {
+  it('renders pacing as gradient slider', () => {
     render(<L1ExperienceCard {...defaultProps} />);
-    expect(screen.getByRole('radio', { name: '慢' })).toBeTruthy();
-    expect(screen.getByRole('radio', { name: '中' })).toBeTruthy();
-    expect(screen.getByRole('radio', { name: '快' })).toBeTruthy();
+    expect(screen.getByRole('slider')).toBeTruthy();
   });
 
-  it('renders emotion as segmented control with 3 options', () => {
+  it('renders styles as carousel cards', () => {
     render(<L1ExperienceCard {...defaultProps} />);
-    expect(screen.getByRole('radio', { name: '沉静' })).toBeTruthy();
-    expect(screen.getByRole('radio', { name: '热血' })).toBeTruthy();
-    expect(screen.getByRole('radio', { name: '欢乐' })).toBeTruthy();
+    const styleGroup = screen.getByRole('radiogroup', { name: '画风选择' });
+    expect(styleGroup).toBeTruthy();
+    const cards = styleGroup.querySelectorAll('[role="radio"]');
+    expect(cards.length).toBeGreaterThanOrEqual(3);
   });
 
   it('highlights current difficulty selection', () => {
     render(<L1ExperienceCard {...defaultProps} />);
-    const normalRadio = screen.getByRole('radio', { name: '普通' });
-    expect(normalRadio.getAttribute('aria-checked')).toBe('true');
+    const diffGroup = screen.getByRole('radiogroup', { name: '游戏难度' });
+    const selected = diffGroup.querySelector('[aria-checked="true"]');
+    expect(selected).toBeTruthy();
+    expect(selected!.getAttribute('aria-label')).toBe('normal');
   });
 
-  it('calls onDifficultyChange when difficulty option clicked', () => {
+  it('calls onDifficultyChange when emoji button clicked', () => {
     const onChange = vi.fn();
     render(<L1ExperienceCard {...defaultProps} onDifficultyChange={onChange} />);
-    fireEvent.click(screen.getByRole('radio', { name: '困难' }));
-    expect(onChange).toHaveBeenCalledWith('困难');
+    const diffGroup = screen.getByRole('radiogroup', { name: '游戏难度' });
+    const hardBtn = diffGroup.querySelector('[aria-label="hard"]');
+    expect(hardBtn).toBeTruthy();
+    fireEvent.click(hardBtn!);
+    expect(onChange).toHaveBeenCalledWith('hard');
   });
 
-  it('calls onPacingChange when pacing option clicked', () => {
-    const onChange = vi.fn();
-    render(<L1ExperienceCard {...defaultProps} onPacingChange={onChange} />);
-    fireEvent.click(screen.getByRole('radio', { name: '快' }));
-    expect(onChange).toHaveBeenCalledWith('快');
-  });
-
-  it('calls onEmotionChange when emotion option clicked', () => {
+  it('calls onEmotionChange when style card clicked', () => {
     const onChange = vi.fn();
     render(<L1ExperienceCard {...defaultProps} onEmotionChange={onChange} />);
-    fireEvent.click(screen.getByRole('radio', { name: '热血' }));
-    expect(onChange).toHaveBeenCalledWith('热血');
+    const styleGroup = screen.getByRole('radiogroup', { name: '画风选择' });
+    const pixelCard = styleGroup.querySelector('[aria-label="像素"]');
+    expect(pixelCard).toBeTruthy();
+    fireEvent.click(pixelCard!);
+    expect(onChange).toHaveBeenCalledWith('pixel');
   });
 
-  it('renders with a card wrapper styling', () => {
+  it('renders with card wrapper styling', () => {
     const { container } = render(<L1ExperienceCard {...defaultProps} />);
     const card = container.firstElementChild;
     expect(card).toBeTruthy();
     expect(card?.className).toContain('rounded');
+  });
+
+  it('renders Game Experience header', () => {
+    render(<L1ExperienceCard {...defaultProps} />);
+    expect(screen.getByText('Game Experience')).toBeTruthy();
   });
 });

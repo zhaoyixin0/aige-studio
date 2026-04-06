@@ -52,7 +52,16 @@ export function SuggestionChips({ onChipClick }: Props) {
           className={chipClasses(chip.type ?? 'game_type')}
           style={{ animationDelay: `${index * 100}ms` }}
         >
-          {chip.emoji && <span className="text-base">{chip.emoji}</span>}
+          {chip.thumbnail && (
+            <img
+              src={chip.thumbnail}
+              alt=""
+              className="w-[28px] h-[24px] object-cover rounded shrink-0"
+              data-testid="chip-thumbnail"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+          )}
+          {!chip.thumbnail && chip.emoji && <span className="text-base">{chip.emoji}</span>}
           <span>{chip.label}</span>
         </button>
       ))}

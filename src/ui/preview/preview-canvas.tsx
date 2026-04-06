@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { PreviewToolbar } from './preview-toolbar.tsx';
+import { StepIndicator } from './step-indicator.tsx';
+import type { PreviewPhase } from '@/store/editor-store.ts';
 import { useEngineContext, CANVAS_WIDTH, CANVAS_HEIGHT } from '@/app/hooks/use-engine.ts';
 import { useCamera } from '@/app/hooks/use-camera.ts';
 import { useGameLoop } from '@/app/hooks/use-game-loop.ts';
@@ -11,11 +13,13 @@ import type { PreviewMode } from '@/store/editor-store.ts';
 /** Stable selectors — extracted to module scope so function references never change. */
 const selectPreviewMode = (s: { previewMode: PreviewMode }) => s.previewMode;
 const selectSetPreviewMode = (s: { setPreviewMode: (mode: PreviewMode) => void }) => s.setPreviewMode;
+const selectPreviewPhase = (s: { previewPhase: PreviewPhase }) => s.previewPhase;
 
 export function PreviewCanvas() {
   const { engineRef, rendererRef, setMountEl, loadConfig, ready: engineReady } = useEngineContext();
   const previewMode = useEditorStore(selectPreviewMode);
   const setPreviewMode = useEditorStore(selectSetPreviewMode);
+  const previewPhase = useEditorStore(selectPreviewPhase);
 
   // Acquire camera + face tracker + actual video dimensions
   const { videoRef, trackerRef, videoDimensionsRef, ready: cameraReady } = useCamera();
@@ -93,6 +97,13 @@ export function PreviewCanvas() {
           data-canvas-mount="true"
         />
       </div>
+
+      {/* Step progress indicator */}
+      {!isPlayOrFullscreen && (
+        <div className="border-t border-white/5">
+          <StepIndicator phase={previewPhase} />
+        </div>
+      )}
 
       {/* Exit button overlay in play mode */}
       {previewMode === 'play' && (

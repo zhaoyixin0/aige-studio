@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { ValidationReport } from '@/engine/core/config-validator';
 
 export type PreviewMode = 'edit' | 'play' | 'fullscreen';
+export type PreviewPhase = 'tuning' | 'playing' | 'success' | 'fail';
 
 export interface L1State {
   difficulty: 'easy' | 'normal' | 'hard' | 'very_hard' | 'extreme';
@@ -49,6 +50,7 @@ export interface Chip {
   paramId?: string;
   category?: string;
   action?: string;
+  thumbnail?: string; // Optional 28x24px image URL for rich chips
 }
 
 /** Extract preset ID from a preset chip, or null if not a preset chip. */
@@ -100,6 +102,7 @@ export interface GameFeelState {
 interface EditorStore {
   selectedModuleId: string | null;
   previewMode: PreviewMode;
+  previewPhase: PreviewPhase;
   chatMessages: ChatMessage[];
   isChatLoading: boolean;
   validationReport: ValidationReport | null;
@@ -115,6 +118,7 @@ interface EditorStore {
 
   selectModule: (id: string | null) => void;
   setPreviewMode: (mode: PreviewMode) => void;
+  setPreviewPhase: (phase: PreviewPhase) => void;
   addChatMessage: (message: ChatMessage) => void;
   truncateChatAfter: (messageId: string) => void;
   setChatLoading: (loading: boolean) => void;
@@ -131,6 +135,7 @@ interface EditorStore {
 export const useEditorStore = create<EditorStore>((set) => ({
   selectedModuleId: null,
   previewMode: 'edit',
+  previewPhase: 'tuning',
   chatMessages: [],
   isChatLoading: false,
   validationReport: null,
@@ -144,6 +149,7 @@ export const useEditorStore = create<EditorStore>((set) => ({
   selectModule: (id) => set({ selectedModuleId: id }),
 
   setPreviewMode: (mode) => set({ previewMode: mode }),
+  setPreviewPhase: (phase) => set({ previewPhase: phase }),
 
   addChatMessage: (message) =>
     set((state) => ({
