@@ -5,6 +5,7 @@ import { WebExporter } from '@/exporters/web-exporter.ts';
 import { ApjsExporter } from '@/exporters/apjs-exporter.ts';
 import { useGameStore } from '@/store/game-store.ts';
 import type { GameConfig } from '@/engine/core';
+import { encodeConfig } from '@/utils/config-codec';
 
 const EMPTY_CAPABILITIES: string[] = [];
 
@@ -36,9 +37,7 @@ export function ExportDialog({ open, onOpenChange }: ExportDialogProps) {
 
   const handleShare = async () => {
     if (!config) return;
-    const bytes = new TextEncoder().encode(JSON.stringify(config));
-    const binary = Array.from(bytes, (b) => String.fromCharCode(b)).join('');
-    const encoded = btoa(binary);
+    const encoded = encodeConfig(config);
     const url = `${window.location.origin}${window.location.pathname}#config=${encoded}`;
     await navigator.clipboard.writeText(url);
     setCopied(true);

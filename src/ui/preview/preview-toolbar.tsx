@@ -32,7 +32,9 @@ export function PreviewToolbar() {
             onClick={() => {
               if (mode === 'fullscreen' && !document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(() => {
-                  // Fallback: still enter fullscreen preview mode even if API fails
+                  // Fullscreen API may fail in iframes or restricted contexts.
+                  // Fall back to play mode instead of leaving UI in a broken state.
+                  setPreviewMode('play');
                 });
               }
               setPreviewMode(mode);
