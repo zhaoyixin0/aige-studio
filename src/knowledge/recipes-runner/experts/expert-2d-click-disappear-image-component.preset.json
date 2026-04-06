@@ -1,0 +1,109 @@
+{
+  "id": "expert-2d-click-disappear-image-component",
+  "title": "2D Click Disappear Image Component",
+  "description": "Create a 2D interactive component with a parent TwoDNewObject containing two ScreenImageEntity children that disappear when clicked. The component responds to screen taps or clicks by hiding both image entities, creating an interactive element that can be used for popup messages, temporary notifications, or interactive UI elements that need to be dismissed by user interaction. [source: 2D_Click_Disappear_Image_Component.json]",
+  "gameType": "tap",
+  "tags": [
+    "expert-import",
+    "sequence",
+    "confidence:0.75"
+  ],
+  "params": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "size",
+      "type": "vec2"
+    },
+    {
+      "name": "image1_texture",
+      "type": "assetId"
+    },
+    {
+      "name": "image2_texture",
+      "type": "assetId"
+    }
+  ],
+  "sequence": {
+    "id": "expert-2d-click-disappear-image-component",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "2D_Click_Disappear_Image_Component.json",
+          "description": "Create a 2D interactive component with a parent TwoDNewObject containing two ScreenImageEntity children that disappear when clicked. The component responds to screen taps or clicks by hiding both image entities, creating an interactive element that can be used for popup messages, temporary notifications, or interactive UI elements that need to be dismissed by user interaction.",
+          "gameTypeHint": ""
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "${image1_texture}"
+        },
+        "comment": "Asset: ${image1_texture}"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "${image2_texture}"
+        },
+        "comment": "Asset: ${image2_texture}"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

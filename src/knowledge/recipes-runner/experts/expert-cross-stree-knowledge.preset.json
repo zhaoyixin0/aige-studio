@@ -1,0 +1,309 @@
+{
+  "id": "expert-cross-stree-knowledge",
+  "title": "cross stree knowledge",
+  "description": "The player controls the character to cross the street, and avoids oncoming obstacles. [source: cross_stree_knowledge.json]",
+  "gameType": "cross-road",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:2d_cross_stree_game",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-cross-stree-knowledge",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "cross_stree_knowledge.json",
+          "description": "The player controls the character to cross the street, and avoids oncoming obstacles.",
+          "gameTypeHint": "2d_cross_stree_game"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Assets/Scripts/CrossStreet.ts"
+        },
+        "comment": "Asset: Assets/Scripts/CrossStreet.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Assets/Textures/69910backgroundimagevisual1.png"
+        },
+        "comment": "Asset: Assets/Textures/69910backgroundimagevisual1.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Assets/CrossStreetUI/CrossStreetUI/PortraitSegmentation/Materials/Segmentation Material.omtl"
+        },
+        "comment": "Asset: Assets/CrossStreetUI/CrossStreetUI/PortraitSegmentation/Materials/Segmentation Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001544/FaceMaskOutput.oCaptureFrameJSA"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001544/FaceMaskOutput.oCaptureFrameJSA"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "Assets/CrossStreetUI/CrossStreetUI/PortraitSegmentation/Textures/Portrait Segmentation Texture.OSegmentationJSA"
+        },
+        "comment": "Asset: Assets/CrossStreetUI/CrossStreetUI/PortraitSegmentation/Textures/Portrait Segmentation Texture.OSegmentationJSA"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "Assets/CrossStreetUI/CrossStreetUI/Textures/52666enemygreenbusvisualnone9.png"
+        },
+        "comment": "Asset: Assets/CrossStreetUI/CrossStreetUI/Textures/52666enemygreenbusvisualnone9.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "Assets/CrossStreetUI/CrossStreetUI/Textures/46455enemyyellowmotorcyclevisualnone8.png"
+        },
+        "comment": "Asset: Assets/CrossStreetUI/CrossStreetUI/Textures/46455enemyyellowmotorcyclevisualnone8.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "Assets/CrossStreetUI/CrossStreetUI/MainEntity/Shadow/Textures/character_shadow.png"
+        },
+        "comment": "Asset: Assets/CrossStreetUI/CrossStreetUI/MainEntity/Shadow/Textures/character_shadow.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-11",
+          "type": "image",
+          "src": "Assets/CrossStreetSubgraph/Textures/29484crossstreetcharactersidenone5.png"
+        },
+        "comment": "Asset: Assets/CrossStreetSubgraph/Textures/29484crossstreetcharactersidenone5.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-12",
+          "type": "image",
+          "src": "Assets/CrossStreetUI/CrossStreetUI/WinAreaObject/WinGlowingAnimation/Animated Textures/Anim_Win Glow.OseqJSA"
+        },
+        "comment": "Asset: Assets/CrossStreetUI/CrossStreetUI/WinAreaObject/WinGlowingAnimation/Animated Textures/Anim_Win Glow.OseqJSA"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-13",
+          "type": "image",
+          "src": "Assets/Textures/21285winProptexture2.png"
+        },
+        "comment": "Asset: Assets/Textures/21285winProptexture2.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-14",
+          "type": "image",
+          "src": "Assets/CrossStreetUI/CrossStreetUI/ArrowKeysUI/Textures/DPAD_BG.png"
+        },
+        "comment": "Asset: Assets/CrossStreetUI/CrossStreetUI/ArrowKeysUI/Textures/DPAD_BG.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-15",
+          "type": "image",
+          "src": "Assets/CrossStreetUI/CrossStreetUI/ArrowKeysUI/Textures/DPAD_Arrow.png"
+        },
+        "comment": "Asset: Assets/CrossStreetUI/CrossStreetUI/ArrowKeysUI/Textures/DPAD_Arrow.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-16",
+          "type": "image",
+          "src": "Assets/CrossStreetUI/CrossStreetUI/Instructions/Instructions/Textures/info_button.png"
+        },
+        "comment": "Asset: Assets/CrossStreetUI/CrossStreetUI/Instructions/Instructions/Textures/info_button.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-17",
+          "type": "image",
+          "src": "Assets/CrossStreetUI/CrossStreetUI/Instructions/Instructions/Textures/info_box.png"
+        },
+        "comment": "Asset: Assets/CrossStreetUI/CrossStreetUI/Instructions/Instructions/Textures/info_box.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-18",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-19",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-20",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-21",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-22",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-23",
+          "type": "image",
+          "src": "Assets/CrossStreetUI/CrossStreetUI/GameEndUI/GameWinTrophy/Textures/Trophy.png"
+        },
+        "comment": "Asset: Assets/CrossStreetUI/CrossStreetUI/GameEndUI/GameWinTrophy/Textures/Trophy.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-24",
+          "type": "image",
+          "src": "Assets/CrossStreetUI/CrossStreetUI/GameEndUI/GameLoseTrophy/Textures/Broken_Trophy.png"
+        },
+        "comment": "Asset: Assets/CrossStreetUI/CrossStreetUI/GameEndUI/GameLoseTrophy/Textures/Broken_Trophy.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-25",
+          "type": "image",
+          "src": "Assets/CrossStreetUI/CrossStreetUI/GameEndUI/PlayAgainButton/Textures/PlayAgain.png"
+        },
+        "comment": "Asset: Assets/CrossStreetUI/CrossStreetUI/GameEndUI/PlayAgainButton/Textures/PlayAgain.png"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

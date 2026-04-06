@@ -1,0 +1,174 @@
+{
+  "id": "expert-timeline-f",
+  "title": "timeline f",
+  "description": "Create a 2D interactive timeline game where users arrange, manage, or navigate through chronological events. This game features a visual timeline interface, draggable event elements, and mechanics that respond to user actions affecting timeline progression, causality, or historical accuracy. [source: timeline_f.json]",
+  "gameType": "tap",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:2D_Timeline_Event_Arrangement",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-timeline-f",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "timeline_f.json",
+          "description": "Create a 2D interactive timeline game where users arrange, manage, or navigate through chronological events. This game features a visual timeline interface, draggable event elements, and mechanics that respond to user actions affecting timeline progression, causality, or historical accuracy.",
+          "gameTypeHint": "2D_Timeline_Event_Arrangement"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Assets/Scripts/MyFutureMilestones.ts"
+        },
+        "comment": "Asset: Assets/Scripts/MyFutureMilestones.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Assets/Prefabs/Milestone Item.prefab"
+        },
+        "comment": "Asset: Assets/Prefabs/Milestone Item.prefab"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "Assets/Textures/Dot Texture.png"
+        },
+        "comment": "Asset: Assets/Textures/Dot Texture.png"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

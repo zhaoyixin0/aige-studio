@@ -1,0 +1,183 @@
+{
+  "id": "expert-emojf",
+  "title": "emojf",
+  "description": "Create a 2D interactive graph visualization featuring a week-based timeline and emoji trajectory mechanics. The scene includes a text title, a line graph with days of the week as X-axis labels, and vertical dotted lines marking each day. Users initiate recording to activate a moving emoji dot that cycles through various emojis based on Y-axis input values. The dot travels horizontally with random vertical vectors, leaving behind emoji markers when passing each dotted day line. The final result displays 7 emojis connected by line segments, creating a visual trajectory across the weekly graph. The game may include Y-axis input controls, emoji selection systems, line styling options, and animation effects for smooth transitions between points. [source: emojf.json]",
+  "gameType": "tap",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:2D_Emoji_Graph_Trajectory_Game",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-emojf",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "emojf.json",
+          "description": "Create a 2D interactive graph visualization featuring a week-based timeline and emoji trajectory mechanics. The scene includes a text title, a line graph with days of the week as X-axis labels, and vertical dotted lines marking each day. Users initiate recording to activate a moving emoji dot that cycles through various emojis based on Y-axis input values. The dot travels horizontally with random vertical vectors, leaving behind emoji markers when passing each dotted day line. The final result displays 7 emojis connected by line segments, creating a visual trajectory across the weekly graph. The game may include Y-axis input controls, emoji selection systems, line styling options, and animation effects for smooth transitions between points.",
+          "gameTypeHint": "2D_Emoji_Graph_Trajectory_Game"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Assets/Scripts/MyMoodChart.ts"
+        },
+        "comment": "Asset: Assets/Scripts/MyMoodChart.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "Assets/Textures/Line Texture.png"
+        },
+        "comment": "Asset: Assets/Textures/Line Texture.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000006b/None.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000006b/None.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-11",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001543/White_Texture.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001543/White_Texture.png"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

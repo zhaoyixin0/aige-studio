@@ -1,0 +1,147 @@
+{
+  "id": "expert-blinkf",
+  "title": "blinkf",
+  "description": "Create an interactive ranking game with random pause mechanics where players sort or rank options based on given criteria. The game features a BlinkRank component with 10 option textures and a prefab system, face binding for head tracking, and randomization functionality. Players interact with the ranking system, which includes random pause points to add challenge and unpredictability. The Head Tracker with FaceBinding provides potential for head movement-based controls, while the Randomizer component manages the random pause intervals during the sorting process. [source: blinkf.json]",
+  "gameType": "tap",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:Random_Pause_Sorting_Game",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-blinkf",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "blinkf.json",
+          "description": "Create an interactive ranking game with random pause mechanics where players sort or rank options based on given criteria. The game features a BlinkRank component with 10 option textures and a prefab system, face binding for head tracking, and randomization functionality. Players interact with the ranking system, which includes random pause points to add challenge and unpredictability. The Head Tracker with FaceBinding provides potential for head movement-based controls, while the Randomizer component manages the random pause intervals during the sorting process.",
+          "gameTypeHint": "Random_Pause_Sorting_Game"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Assets/Scripts/BlinkRank.ts"
+        },
+        "comment": "Asset: Assets/Scripts/BlinkRank.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Assets/Prefabs/Option.prefab"
+        },
+        "comment": "Asset: Assets/Prefabs/Option.prefab"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000c0/Default_Texture.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000c0/Default_Texture.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001543/White_Texture.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001543/White_Texture.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "Assets/BlindRankAssets/Textures/UI/TapScreen_AnimTex.OseqJSA"
+        },
+        "comment": "Asset: Assets/BlindRankAssets/Textures/UI/TapScreen_AnimTex.OseqJSA"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

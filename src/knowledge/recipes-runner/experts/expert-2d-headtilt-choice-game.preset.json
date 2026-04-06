@@ -1,0 +1,123 @@
+{
+  "id": "expert-2d-headtilt-choice-game",
+  "title": "2D HeadTilt Choice Game",
+  "description": "Create a 2D interactive scene with a central topic display and two choice options positioned above the user's head. Users control selection by tilting their head left or right, with real-time head position tracking to detect intended choices. The game features visual indicators for selected options, smooth transition animations, and a scoring system that leads to a final winning answer determined by cumulative selections or immediate validation. [source: 2D_HeadTilt_Choice_Game.json]",
+  "gameType": "head-tilt",
+  "tags": [
+    "expert-import",
+    "sequence",
+    "confidence:1.00"
+  ],
+  "params": [
+    {
+      "name": "text",
+      "type": "string"
+    },
+    {
+      "name": "position",
+      "type": "vec2"
+    },
+    {
+      "name": "texture",
+      "type": "assetId"
+    }
+  ],
+  "sequence": {
+    "id": "expert-2d-headtilt-choice-game",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "2D_HeadTilt_Choice_Game.json",
+          "description": "Create a 2D interactive scene with a central topic display and two choice options positioned above the user's head. Users control selection by tilting their head left or right, with real-time head position tracking to detect intended choices. The game features visual indicators for selected options, smooth transition animations, and a scoring system that leads to a final winning answer determined by cumulative selections or immediate validation.",
+          "gameTypeHint": ""
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "background_image"
+        },
+        "comment": "Asset: background_image"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "left_icon"
+        },
+        "comment": "Asset: left_icon"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "left_frame"
+        },
+        "comment": "Asset: left_frame"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "right_icon"
+        },
+        "comment": "Asset: right_icon"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

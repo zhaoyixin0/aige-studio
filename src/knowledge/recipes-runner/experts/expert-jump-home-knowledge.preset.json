@@ -1,0 +1,282 @@
+{
+  "id": "expert-jump-home-knowledge",
+  "title": "jump home knowledge",
+  "description": "The player controls a character by tapping the arrows on the screen, and makes the character jump on unsafe boards and safety boards. If the character steps on the unsafe boards, it will fall down. If the character jumps on the safety boards step by step until reaching the final board, the player wins the game. [source: jump_home_knowledge.json]",
+  "gameType": "tap",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:3D_platform_jump",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-jump-home-knowledge",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "jump_home_knowledge.json",
+          "description": "The player controls a character by tapping the arrows on the screen, and makes the character jump on unsafe boards and safety boards. If the character steps on the unsafe boards, it will fall down. If the character jumps on the safety boards step by step until reaching the final board, the player wins the game.",
+          "gameTypeHint": "3D_platform_jump"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Assets/Scripts/JumpHome.ts"
+        },
+        "comment": "Asset: Assets/Scripts/JumpHome.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000805/default_env_map_v2.hdr"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000805/default_env_map_v2.hdr"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000900/default.animaz"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000900/default.animaz"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000006/Error.mesh"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000006/Error.mesh"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "9f1ede8d-435a-d60a-f193-6fe9cd3c14fe"
+        },
+        "comment": "Asset: 9f1ede8d-435a-d60a-f193-6fe9cd3c14fe"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "870b21dd-49ae-4553-578f-8de977178319"
+        },
+        "comment": "Asset: 870b21dd-49ae-4553-578f-8de977178319"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "fbd40dfb-9c8f-cc11-e9fa-d563b40d2c21"
+        },
+        "comment": "Asset: fbd40dfb-9c8f-cc11-e9fa-d563b40d2c21"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "7f54031f-03d0-1d75-9809-e11929d0444e"
+        },
+        "comment": "Asset: 7f54031f-03d0-1d75-9809-e11929d0444e"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "0317fb1d-dba6-4eb0-3d7f-5fc571198c02"
+        },
+        "comment": "Asset: 0317fb1d-dba6-4eb0-3d7f-5fc571198c02"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-11",
+          "type": "image",
+          "src": "b36a084b-6767-7eec-b2a9-cf2775a67955"
+        },
+        "comment": "Asset: b36a084b-6767-7eec-b2a9-cf2775a67955"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-12",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000072/Cube.mesh"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000072/Cube.mesh"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-13",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000002/Plane.mesh"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000002/Plane.mesh"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-14",
+          "type": "image",
+          "src": "Assets/Audio/Glass Broken.mp3"
+        },
+        "comment": "Asset: Assets/Audio/Glass Broken.mp3"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-15",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-16",
+          "type": "image",
+          "src": "Assets/Animation texture/Fireworks.animTex"
+        },
+        "comment": "Asset: Assets/Animation texture/Fireworks.animTex"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-17",
+          "type": "image",
+          "src": "Assets/Texture/Arrow.png"
+        },
+        "comment": "Asset: Assets/Texture/Arrow.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-18",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-19",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-20",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-21",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-22",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

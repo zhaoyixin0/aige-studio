@@ -1,0 +1,201 @@
+{
+  "id": "expert-assembleme-knowledge",
+  "title": "AssembleMe knowledge",
+  "description": "A game where the player clicks the screen in sequence to lock the X/Y coordinates of continuously moving robot body parts, aiming to align them perfectly to assemble a complete robot. [source: AssembleMe_knowledge.json]",
+  "gameType": "puzzle",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:Puzzle_Assemble",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-assembleme-knowledge",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "AssembleMe_knowledge.json",
+          "description": "A game where the player clicks the screen in sequence to lock the X/Y coordinates of continuously moving robot body parts, aiming to align them perfectly to assemble a complete robot.",
+          "gameTypeHint": "Puzzle_Assemble"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Assets/AssembleMeAssets/Script/GameController.ts"
+        },
+        "comment": "Asset: Assets/AssembleMeAssets/Script/GameController.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Assets/AssembleMeAssets/Textures/GridPattern_Tex.png"
+        },
+        "comment": "Asset: Assets/AssembleMeAssets/Textures/GridPattern_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Assets/AssembleMeAssets/Textures/RobotBlueprint_Tex.png"
+        },
+        "comment": "Asset: Assets/AssembleMeAssets/Textures/RobotBlueprint_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "Assets/AssembleMeAssets/Textures/LeftLeg_Tex.png"
+        },
+        "comment": "Asset: Assets/AssembleMeAssets/Textures/LeftLeg_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "Assets/AssembleMeAssets/Textures/RightLeg_Tex.png"
+        },
+        "comment": "Asset: Assets/AssembleMeAssets/Textures/RightLeg_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "Assets/AssembleMeAssets/Textures/LeftArm_Tex.png"
+        },
+        "comment": "Asset: Assets/AssembleMeAssets/Textures/LeftArm_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "Assets/AssembleMeAssets/Textures/RightArm_Tex.png"
+        },
+        "comment": "Asset: Assets/AssembleMeAssets/Textures/RightArm_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "Assets/AssembleMeAssets/Textures/Body_Tex.png"
+        },
+        "comment": "Asset: Assets/AssembleMeAssets/Textures/Body_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-11",
+          "type": "image",
+          "src": "Assets/AssembleMeAssets/Textures/Face_Tex.png"
+        },
+        "comment": "Asset: Assets/AssembleMeAssets/Textures/Face_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-12",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001543/White_Texture.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001543/White_Texture.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-13",
+          "type": "image",
+          "src": "Assets/AssembleMeAssets/Textures/UiPrompt/TapScreen_AnimTex.OseqJSA"
+        },
+        "comment": "Asset: Assets/AssembleMeAssets/Textures/UiPrompt/TapScreen_AnimTex.OseqJSA"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 60,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 100
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

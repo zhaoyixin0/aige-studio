@@ -1,0 +1,108 @@
+{
+  "id": "expert-2d-head-following-text-selector",
+  "title": "2D Head Following Text Selector",
+  "description": "Create a 2D interactive head-following text selector positioned above the user's head. The selector consists of a decorative border frame, a title text display, and a random text generator that cycles through multiple text options. The component tracks the user's head movement, ensuring it stays positioned correctly above the user at all times. [source: 2D_Head_Following_Text_Selector.json]",
+  "gameType": "tap",
+  "tags": [
+    "expert-import",
+    "sequence",
+    "confidence:0.75"
+  ],
+  "params": [
+    {
+      "name": "frame_texture",
+      "type": "assetId"
+    },
+    {
+      "name": "position",
+      "type": "vec2"
+    },
+    {
+      "name": "title_text",
+      "type": "string"
+    },
+    {
+      "name": "random_text",
+      "type": "string"
+    },
+    {
+      "name": "font_size",
+      "type": "vec2"
+    },
+    {
+      "name": "color",
+      "type": "color"
+    }
+  ],
+  "sequence": {
+    "id": "expert-2d-head-following-text-selector",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "2D_Head_Following_Text_Selector.json",
+          "description": "Create a 2D interactive head-following text selector positioned above the user's head. The selector consists of a decorative border frame, a title text display, and a random text generator that cycles through multiple text options. The component tracks the user's head movement, ensuring it stays positioned correctly above the user at all times.",
+          "gameTypeHint": ""
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "${frame_texture}"
+        },
+        "comment": "Asset: ${frame_texture}"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

@@ -1,0 +1,381 @@
+{
+  "id": "expert-grabf",
+  "title": "grabf",
+  "description": "Create a 2D physics-based interactive scene featuring random object dropping mechanics and target slot systems. Objects fall from above with randomized trajectories, bounce off surfaces, and land in designated slots. The game may include physics components for realistic movement, collision detection for slot entry, visual indicators for valid/invalid slots, and scoring systems based on slot accuracy. Users can observe object physics in action, predict landing positions, and earn points when objects successfully land in the correct slots. These components work together to create engaging physics challenges, puzzle mechanics, or collection gameplay experiences. [source: grabf.json]",
+  "gameType": "tap",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:2D_Random_Drop_Slot_Game",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-grabf",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "grabf.json",
+          "description": "Create a 2D physics-based interactive scene featuring random object dropping mechanics and target slot systems. Objects fall from above with randomized trajectories, bounce off surfaces, and land in designated slots. The game may include physics components for realistic movement, collision detection for slot entry, visual indicators for valid/invalid slots, and scoring systems based on slot accuracy. Users can observe object physics in action, predict landing positions, and earn points when objects successfully land in the correct slots. These components work together to create engaging physics challenges, puzzle mechanics, or collection gameplay experiences.",
+          "gameTypeHint": "2D_Random_Drop_Slot_Game"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Assets/Scripts/GrabMyDescribeMe.ts"
+        },
+        "comment": "Asset: Assets/Scripts/GrabMyDescribeMe.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Textures/Block_Tex.png"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Textures/Block_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Profile Info/Profile Info 1/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Profile Info/Profile Info 1/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Profile Info/Profile Info 1/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Profile Info/Profile Info 1/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Profile Info/Profile Info 2/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Profile Info/Profile Info 2/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Profile Info/Profile Info 2/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Profile Info/Profile Info 2/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Profile Info/Profile Info 3/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Profile Info/Profile Info 3/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Profile Info/Profile Info 3/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Profile Info/Profile Info 3/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-11",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Profile Info/Profile Info 4/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Profile Info/Profile Info 4/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-12",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Profile Info/Profile Info 4/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Profile Info/Profile Info 4/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-13",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Profile Info/Profile Info 5/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Profile Info/Profile Info 5/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-14",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Profile Info/Profile Info 5/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Profile Info/Profile Info 5/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-15",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Profile Info/Profile Info 6/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Profile Info/Profile Info 6/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-16",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Profile Info/Profile Info 6/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Profile Info/Profile Info 6/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-17",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Profile Info/Profile Info 7/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Profile Info/Profile Info 7/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-18",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Profile Info/Profile Info 7/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Profile Info/Profile Info 7/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-19",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Profile Info/Profile Info 8/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Profile Info/Profile Info 8/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-20",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Profile Info/Profile Info 8/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Profile Info/Profile Info 8/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-21",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Textures/Divider_Tex.png"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Textures/Divider_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-22",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Physics Matters/BouncyMatter.phyxMat"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Physics Matters/BouncyMatter.phyxMat"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-23",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Textures/Bottom Wall_Tex.png"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Textures/Bottom Wall_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-24",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Textures/Crewleg_Tex.png"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Textures/Crewleg_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-25",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Textures/Crew_Tex.png"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Textures/Crew_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-26",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Textures/Heart_Tex.png"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Textures/Heart_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-27",
+          "type": "image",
+          "src": "Assets/GrabMyNextDateAssets/Textures/Obstacle_Tex.png"
+        },
+        "comment": "Asset: Assets/GrabMyNextDateAssets/Textures/Obstacle_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-28",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000006b/None.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000006b/None.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-29",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-30",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-31",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-32",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-33",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

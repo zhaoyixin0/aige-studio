@@ -1,0 +1,91 @@
+{
+  "id": "expert-2d-swipe-car-racing-game",
+  "title": "2D Swipe Car Racing Game",
+  "description": "Create a 2D interactive car racing game where the camera dynamically follows the car's movement. The game features a Sky Racer controller with third-person camera following system positioned at [0, 16, 25] behind the car. As the car moves left and right on the highway in response to player swipe controls, the camera automatically adjusts its position to maintain a consistent following view, providing an immersive racing experience by keeping the car centered in the frame while preserving depth perception through proper camera positioning. [source: 2D_Swipe_Car_Racing_Game.json]",
+  "gameType": "racing",
+  "tags": [
+    "expert-import",
+    "sequence",
+    "confidence:0.85"
+  ],
+  "params": [
+    {
+      "name": "radius",
+      "type": "number"
+    },
+    {
+      "name": "localPosition",
+      "type": "vec2"
+    },
+    {
+      "name": "localRotation",
+      "type": "string"
+    },
+    {
+      "name": "localScale",
+      "type": "vec2"
+    }
+  ],
+  "sequence": {
+    "id": "expert-2d-swipe-car-racing-game",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "2D_Swipe_Car_Racing_Game.json",
+          "description": "Create a 2D interactive car racing game where the camera dynamically follows the car's movement. The game features a Sky Racer controller with third-person camera following system positioned at [0, 16, 25] behind the car. As the car moves left and right on the highway in response to player swipe controls, the camera automatically adjusts its position to maintain a consistent following view, providing an immersive racing experience by keeping the car centered in the frame while preserving depth perception through proper camera positioning.",
+          "gameTypeHint": ""
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 60,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

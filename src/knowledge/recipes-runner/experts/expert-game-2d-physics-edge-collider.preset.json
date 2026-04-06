@@ -1,0 +1,104 @@
+{
+  "id": "expert-game-2d-physics-edge-collider",
+  "title": "game 2d physics edge collider",
+  "description": "Follow this tutorial to create a 2D edge collider with physics interaction, collision detection, and connected line segment definitions. This knowledge is used for creating platform boundaries, obstacle edges, and terrain collision barriers in 2D platformer games, side-scrolling shooters, and physics-based puzzle games where precise edge collision detection is required. [source: game_2d_physics_edge_collider.json]",
+  "gameType": "tap",
+  "tags": [
+    "expert-import",
+    "sequence",
+    "confidence:0.75"
+  ],
+  "params": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "position",
+      "type": "vec2"
+    },
+    {
+      "name": "size",
+      "type": "vec2"
+    },
+    {
+      "name": "sprite_description",
+      "type": "assetId"
+    },
+    {
+      "name": "sprite_style",
+      "type": "assetId"
+    }
+  ],
+  "sequence": {
+    "id": "expert-game-2d-physics-edge-collider",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "game_2d_physics_edge_collider.json",
+          "description": "Follow this tutorial to create a 2D edge collider with physics interaction, collision detection, and connected line segment definitions. This knowledge is used for creating platform boundaries, obstacle edges, and terrain collision barriers in 2D platformer games, side-scrolling shooters, and physics-based puzzle games where precise edge collision detection is required.",
+          "gameTypeHint": ""
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "path/to/the/collider/sprite/generated/by/step3"
+        },
+        "comment": "Asset: path/to/the/collider/sprite/generated/by/step3"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

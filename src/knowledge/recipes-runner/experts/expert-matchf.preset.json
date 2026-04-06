@@ -1,0 +1,354 @@
+{
+  "id": "expert-matchf",
+  "title": "matchf",
+  "description": "Create a 2D interactive scene featuring a spinning wheel with categorized segments and a set of selectable options. Users spin the wheel to generate a target category, then choose the best matching option from the available choices. The game may include visual indicators for the selected category, comparison mechanics between wheel results and options, validation systems for matching accuracy, and scoring based on matching quality. Users must analyze the wheel result, evaluate the available options, and make strategic selections to achieve the best match. These components work together to create engaging memory challenges, knowledge quizzes, or strategic decision-making gameplay. [source: matchf.json]",
+  "gameType": "random-wheel",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:2D_Spinning_Wheel_Match_Game",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-matchf",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "matchf.json",
+          "description": "Create a 2D interactive scene featuring a spinning wheel with categorized segments and a set of selectable options. Users spin the wheel to generate a target category, then choose the best matching option from the available choices. The game may include visual indicators for the selected category, comparison mechanics between wheel results and options, validation systems for matching accuracy, and scoring based on matching quality. Users must analyze the wheel result, evaluate the available options, and make strategic selections to achieve the best match. These components work together to create engaging memory challenges, knowledge quizzes, or strategic decision-making gameplay.",
+          "gameTypeHint": "2D_Spinning_Wheel_Match_Game"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Assets/Scripts/MyBestMatch.ts"
+        },
+        "comment": "Asset: Assets/Scripts/MyBestMatch.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/Textures/backcircle.png"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/Textures/backcircle.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000c0/Default_Texture.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000c0/Default_Texture.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 1/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 1/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 1/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 1/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 2/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 2/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 2/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 2/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 3/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 3/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-11",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 3/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 3/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-12",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 4/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 4/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-13",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 4/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 4/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-14",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 5/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 5/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-15",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 5/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 5/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-16",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 6/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 6/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-17",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 6/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 6/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-18",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 7/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 7/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-19",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 7/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 7/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-20",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 8/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 8/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-21",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 8/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 8/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-22",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 9/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 9/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-23",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 9/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 9/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-24",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 10/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 10/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-25",
+          "type": "image",
+          "src": "Assets/MyBestMatchAssets/ProfileInfo/Profile Info 10/Username.jssktexturett"
+        },
+        "comment": "Asset: Assets/MyBestMatchAssets/ProfileInfo/Profile Info 10/Username.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-26",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-27",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-28",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-29",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-30",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

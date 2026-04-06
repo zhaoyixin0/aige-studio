@@ -33,3 +33,22 @@ export function createHeroRegistry(): _PresetRegistry {
   registry.registerAll(HERO_PRESETS);
   return registry;
 }
+
+// ── Expert Presets ──
+
+const expertPresetFiles = import.meta.glob(
+  '/src/knowledge/recipes-runner/experts/*.preset.json',
+  { eager: true, import: 'default' },
+);
+
+export const EXPERT_PRESETS: readonly PresetTemplate[] =
+  Object.values(expertPresetFiles) as PresetTemplate[];
+
+/**
+ * Create a PresetRegistry pre-loaded with all expert presets.
+ */
+export function createExpertRegistry(): _PresetRegistry {
+  const registry = new _PresetRegistry();
+  registry.registerAll(EXPERT_PRESETS);
+  return registry;
+}

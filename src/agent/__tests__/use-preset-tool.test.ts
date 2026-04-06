@@ -37,17 +37,18 @@ describe('use_preset tool schema', () => {
     expect(required).not.toContain('params');
   });
 
-  it('preset_id enum contains all hero presets from HERO_PRESET_IDS', () => {
+  it('preset_id description mentions all hero presets from HERO_PRESET_IDS', () => {
     const tool = TOOLS.find((t) => t.name === 'use_preset');
     const schema = tool!.input_schema as Record<string, unknown>;
     const props = schema.properties as Record<string, unknown>;
     const presetIdSchema = props.preset_id as Record<string, unknown>;
-    const enumValues = presetIdSchema.enum as string[];
+    const desc = presetIdSchema.description as string;
 
-    expect(enumValues).toHaveLength(HERO_PRESET_IDS.length);
     for (const id of HERO_PRESET_IDS) {
-      expect(enumValues).toContain(id);
+      expect(desc).toContain(id);
     }
+    // Should also mention expert presets
+    expect(desc).toContain('expert-');
   });
 });
 

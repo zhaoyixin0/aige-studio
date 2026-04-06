@@ -1,0 +1,113 @@
+{
+  "id": "expert-2d-interactive-click-button-component",
+  "title": "2D Interactive Click Button Component",
+  "description": "Create an interactive 2D button component with a container base image, icon border, and text number. When clicked, the button enlarges, the number disappears, and the base image switches to a target image. The component features smooth scaling animation, text removal, and texture replacement, creating an engaging interactive element for games or applications. [source: 2D_Interactive_Click_Button_Component.json]",
+  "gameType": "tap",
+  "tags": [
+    "expert-import",
+    "sequence",
+    "confidence:0.75"
+  ],
+  "params": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "size",
+      "type": "vec2"
+    },
+    {
+      "name": "base_texture",
+      "type": "assetId"
+    },
+    {
+      "name": "frame_texture",
+      "type": "assetId"
+    },
+    {
+      "name": "number_text",
+      "type": "string"
+    }
+  ],
+  "sequence": {
+    "id": "expert-2d-interactive-click-button-component",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "2D_Interactive_Click_Button_Component.json",
+          "description": "Create an interactive 2D button component with a container base image, icon border, and text number. When clicked, the button enlarges, the number disappears, and the base image switches to a target image. The component features smooth scaling animation, text removal, and texture replacement, creating an engaging interactive element for games or applications.",
+          "gameTypeHint": ""
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "${base_texture}"
+        },
+        "comment": "Asset: ${base_texture}"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "${frame_texture}"
+        },
+        "comment": "Asset: ${frame_texture}"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

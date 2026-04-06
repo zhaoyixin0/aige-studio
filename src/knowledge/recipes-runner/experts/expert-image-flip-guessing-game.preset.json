@@ -1,0 +1,96 @@
+{
+  "id": "expert-image-flip-guessing-game",
+  "title": "Image Flip Guessing Game",
+  "description": "Create a 2D interactive image flip guessing game where players reveal hidden content by flipping images, testing memory or deduction skills. Features configurable screen image cards that flip to show different content, with interactive click/tap controls.  [source: Image_Flip_Guessing_Game.json]",
+  "gameType": "flip-guess",
+  "tags": [
+    "expert-import",
+    "sequence",
+    "confidence:1.00"
+  ],
+  "params": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "rotation",
+      "type": "string"
+    },
+    {
+      "name": "texture",
+      "type": "assetId"
+    }
+  ],
+  "sequence": {
+    "id": "expert-image-flip-guessing-game",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "Image_Flip_Guessing_Game.json",
+          "description": "Create a 2D interactive image flip guessing game where players reveal hidden content by flipping images, testing memory or deduction skills. Features configurable screen image cards that flip to show different content, with interactive click/tap controls. ",
+          "gameTypeHint": ""
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "${image_asset}"
+        },
+        "comment": "Asset: ${image_asset}"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

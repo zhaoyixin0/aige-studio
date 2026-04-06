@@ -1,0 +1,282 @@
+{
+  "id": "expert-let-the-crow-drank-knowledge",
+  "title": "let the crow drank knowledge",
+  "description": "The player controls three stones and makes them fall into a water-filled bottle. [source: let_the_crow_drank_knowledge.json]",
+  "gameType": "tap",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:2d_let_crow_drink_water_game",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-let-the-crow-drank-knowledge",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "let_the_crow_drank_knowledge.json",
+          "description": "The player controls three stones and makes them fall into a water-filled bottle.",
+          "gameTypeHint": "2d_let_crow_drink_water_game"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Assets/Scripts/LetTheCrowDrink.ts"
+        },
+        "comment": "Asset: Assets/Scripts/LetTheCrowDrink.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001543/White_Texture.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001543/White_Texture.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Assets/Texture/Grass.png"
+        },
+        "comment": "Asset: Assets/Texture/Grass.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "Assets/Texture/Trees.png"
+        },
+        "comment": "Asset: Assets/Texture/Trees.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "Assets/Texture/Background Stone.png"
+        },
+        "comment": "Asset: Assets/Texture/Background Stone.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "Assets/Texture/Ground.png"
+        },
+        "comment": "Asset: Assets/Texture/Ground.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "Assets/Texture/​​Cloud.png"
+        },
+        "comment": "Asset: Assets/Texture/​​Cloud.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "Assets/Texture/Bottle.png"
+        },
+        "comment": "Asset: Assets/Texture/Bottle.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-11",
+          "type": "image",
+          "src": "Assets/Texture/Water.png"
+        },
+        "comment": "Asset: Assets/Texture/Water.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-12",
+          "type": "image",
+          "src": "Assets/Texture/Pipe.png"
+        },
+        "comment": "Asset: Assets/Texture/Pipe.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-13",
+          "type": "image",
+          "src": "Assets/Texture/Crow.png"
+        },
+        "comment": "Asset: Assets/Texture/Crow.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-14",
+          "type": "image",
+          "src": "Assets/Texture/Text box.png"
+        },
+        "comment": "Asset: Assets/Texture/Text box.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-15",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-16",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-17",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-18",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-19",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-20",
+          "type": "image",
+          "src": "Assets/Texture/Stone.png"
+        },
+        "comment": "Asset: Assets/Texture/Stone.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-21",
+          "type": "image",
+          "src": "Assets/Texture/Reflection and stripes.png"
+        },
+        "comment": "Asset: Assets/Texture/Reflection and stripes.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-22",
+          "type": "image",
+          "src": "Assets/Audio/Water Splash.mp3"
+        },
+        "comment": "Asset: Assets/Audio/Water Splash.mp3"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

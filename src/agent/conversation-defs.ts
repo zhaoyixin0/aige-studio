@@ -9,6 +9,7 @@ import { ALL_GAME_TYPES } from './game-presets.ts';
 import { DEFAULT_THEME_FOR_GAME } from './wizard.ts';
 import { PARAMETER_REGISTRY, type ParamCategory } from '@/data/parameter-registry.ts';
 import type { ExpertInsightPayload, ModuleTuningPayload } from '@/store/editor-store.ts';
+import { EXPERT_PRESETS } from '@/engine/systems/recipe-runner/index.ts';
 
 /* ------------------------------------------------------------------ */
 /*  Public types                                                       */
@@ -255,6 +256,10 @@ ${HERO_PRESET_IDS.map((id) => `- ${id}: ${HERO_PRESET_DESCRIPTIONS[id]}`).join('
 
 当用户意图明确匹配以上模板时，优先使用 use_preset 而非 create_game。
 
+## 专家模板（实验性）
+以下 ${EXPERT_PRESETS.length} 款专家模板从专业游戏中提取，标记为 expert-import，可通过 use_preset 工具使用。
+当用户描述的游戏类型匹配专家模板时，可推荐使用。专家模板质量因数据来源不同可能有差异。
+
 ## 行为准则（V2 — 立即创建优先）
 
 ### 路径A — 意图明确（用户提到了具体游戏类型或玩法）
@@ -428,8 +433,7 @@ export const TOOLS: Anthropic.Messages.Tool[] = [
       properties: {
         preset_id: {
           type: 'string',
-          description: '预设模板 ID',
-          enum: [...HERO_PRESET_IDS],
+          description: `预设模板 ID。精选模板: ${HERO_PRESET_IDS.join(', ')}。也可使用 expert- 前缀的专家模板 ID。`,
         },
         params: {
           type: 'object',

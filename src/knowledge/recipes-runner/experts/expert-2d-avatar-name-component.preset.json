@@ -1,0 +1,121 @@
+{
+  "id": "expert-2d-avatar-name-component",
+  "title": "2D Avatar Name Component",
+  "description": "Follow this tutorial to create interactive 2D components including avatar characters, decorative photo frames, and customizable name display elements for game UI production. [source: 2D_Avatar_Name_Component.json]",
+  "gameType": "avatar-frame",
+  "tags": [
+    "expert-import",
+    "sequence",
+    "confidence:1.00"
+  ],
+  "params": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "position",
+      "type": "vec2"
+    },
+    {
+      "name": "size",
+      "type": "vec2"
+    },
+    {
+      "name": "drawMode",
+      "type": "string"
+    },
+    {
+      "name": "fontSize",
+      "type": "vec2"
+    },
+    {
+      "name": "texture",
+      "type": "assetId"
+    },
+    {
+      "name": "text",
+      "type": "string"
+    }
+  ],
+  "sequence": {
+    "id": "expert-2d-avatar-name-component",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "2D_Avatar_Name_Component.json",
+          "description": "Follow this tutorial to create interactive 2D components including avatar characters, decorative photo frames, and customizable name display elements for game UI production.",
+          "gameTypeHint": ""
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "${Profile_Photo_texture}"
+        },
+        "comment": "Asset: ${Profile_Photo_texture}"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "${Outline_texture}"
+        },
+        "comment": "Asset: ${Outline_texture}"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

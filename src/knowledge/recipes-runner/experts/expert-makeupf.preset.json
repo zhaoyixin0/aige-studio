@@ -1,0 +1,642 @@
+{
+  "id": "expert-makeupf",
+  "title": "makeupf",
+  "description": "Create a 2D interactive makeup random matching system featuring a face mask setup and dynamic makeup component selection. The system includes a Makeup Controller that manages multiple makeup categories (contour, blush, eyebrows, eyelashes, eyeliner, eyeshadow, lipstick, and extras), randomly generating cohesive makeup combinations. It features carousel functionality with adjustable interval (0.1) and duration (2) for previewing makeup options, integrated with a face mask camera system for real-time application visualization. The system provides users with randomly matched makeup looks that can be previewed, selected, and applied to the face mask. [source: makeupf.json]",
+  "gameType": "dress-up",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:2D_Makeup_Random_Match_System",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-makeupf",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "makeupf.json",
+          "description": "Create a 2D interactive makeup random matching system featuring a face mask setup and dynamic makeup component selection. The system includes a Makeup Controller that manages multiple makeup categories (contour, blush, eyebrows, eyelashes, eyeliner, eyeshadow, lipstick, and extras), randomly generating cohesive makeup combinations. It features carousel functionality with adjustable interval (0.1) and duration (2) for previewing makeup options, integrated with a face mask camera system for real-time application visualization. The system provides users with randomly matched makeup looks that can be previewed, selected, and applied to the face mask.",
+          "gameTypeHint": "2D_Makeup_Random_Match_System"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Assets/MakeupController.ts"
+        },
+        "comment": "Asset: Assets/MakeupController.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000e6/FaceMaskWhole.mesh"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000e6/FaceMaskWhole.mesh"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/CT8_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/CT8_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001e/defaultErrorTex.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001e/defaultErrorTex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000ed/defaultFaceMaskOpacity.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000ed/defaultFaceMaskOpacity.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/Contour_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/Contour_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/CT7_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/CT7_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/BL7_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/BL7_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/BL13_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/BL13_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-11",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/BL2_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/BL2_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-12",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/EB9_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/EB9_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-13",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/ScurveBrow_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/ScurveBrow_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-14",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/EB13_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/EB13_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-15",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/EB6_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/EB6_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-16",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000e8/FaceMaskEyeLash.mesh"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000e8/FaceMaskEyeLash.mesh"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-17",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/Eyelashes_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/Eyelashes_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-18",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000d1/defaultEyelashesOpacity.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000d1/defaultEyelashesOpacity.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-19",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000fb/defaultEyeOpacityMask.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000fb/defaultEyeOpacityMask.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-20",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/CatEyeLashes_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/CatEyeLashes_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-21",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/LA20_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/LA20_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-22",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000e7/FaceMaskEyepart.mesh"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000e7/FaceMaskEyepart.mesh"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-23",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/MediumFlickBrownEyeliner_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/MediumFlickBrownEyeliner_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-24",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000ef/defaultEyeShadowOpacity.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000ef/defaultEyeShadowOpacity.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-25",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/UltraFineEyeliner_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/UltraFineEyeliner_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-26",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/CatEyeEyeliner_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/CatEyeEyeliner_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-27",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/ES16_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/ES16_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-28",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/FullGlamEyeMakeup_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/FullGlamEyeMakeup_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-29",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/ES6_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/ES6_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-30",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/BlueEyeMakeup_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/BlueEyeMakeup_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-31",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/ES5_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/ES5_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-32",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000e9/FaceMaskLips.mesh"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000e9/FaceMaskLips.mesh"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-33",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/LP23_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/LP23_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-34",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000d4/defaultLipsOpacity.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000d4/defaultLipsOpacity.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-35",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000af/defaultLipsOpen.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000af/defaultLipsOpen.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-36",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000fc/defaultLipsOpacityMask.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000fc/defaultLipsOpacityMask.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-37",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050AC/defaultLipsPearlEnvMask.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050AC/defaultLipsPearlEnvMask.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-38",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050B0/defaultLipsPearlBloomMask.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050B0/defaultLipsPearlBloomMask.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-39",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050A6/defaultLipsVelvetNOPM.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050A6/defaultLipsVelvetNOPM.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-40",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050B4/defaultLipsVelvetNormal.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050B4/defaultLipsVelvetNormal.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-41",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050A5/defaultLipsNormalStd.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050A5/defaultLipsNormalStd.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-42",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050B5/defaultLipsVelvetEnv1.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050B5/defaultLipsVelvetEnv1.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-43",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050B6/defaultLipsVelvetEnvMask.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050B6/defaultLipsVelvetEnvMask.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-44",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050B9/defaultLipsMatteNOPM.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050B9/defaultLipsMatteNOPM.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-45",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050B1/defaultLipsMatteNormal.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050B1/defaultLipsMatteNormal.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-46",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050B2/defaultLipsMatteEnv1.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050B2/defaultLipsMatteEnv1.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-47",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050B3/defaultLipsMatteEnvMask.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000200050B3/defaultLipsMatteEnvMask.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-48",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/Freckles_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/Freckles_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-49",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/MidFaceFreckles_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/MidFaceFreckles_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-50",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/MO1_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/MO1_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-51",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/MO10_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/MO10_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-52",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000585/FaceMask_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000585/FaceMask_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-53",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000581/BlurX_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000581/BlurX_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-54",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000582/BlurY_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000582/BlurY_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-55",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000583/Down2_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000583/Down2_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-56",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000584/Down8_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000584/Down8_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-57",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000586/Sba_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000586/Sba_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-58",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000587/SbaMean_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000587/SbaMean_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-59",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000588/Final_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000588/Final_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-60",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000589/face3d.mesh"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000589/face3d.mesh"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-61",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-62",
+          "type": "image",
+          "src": "Assets/MakeupControllerAssets/Textures/MyMakeupMatch_Tex.png"
+        },
+        "comment": "Asset: Assets/MakeupControllerAssets/Textures/MyMakeupMatch_Tex.png"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

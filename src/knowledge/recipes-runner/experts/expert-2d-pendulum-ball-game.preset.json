@@ -1,0 +1,116 @@
+{
+  "id": "expert-2d-pendulum-ball-game",
+  "title": "2D Pendulum Ball Game",
+  "description": "Follow this tutorial to create interactive 2D pendulum game components with a swinging arm and an attached ball for physics-based gameplay. This includes pendulum swing mechanics, gravity and momentum simulation, collision detection for the ball, and visual feedback systems for game UI production. [source: 2D_Pendulum_Ball_Game.json]",
+  "gameType": "bouncing",
+  "tags": [
+    "expert-import",
+    "sequence",
+    "confidence:1.00"
+  ],
+  "params": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "position",
+      "type": "vec2"
+    },
+    {
+      "name": "size",
+      "type": "vec2"
+    },
+    {
+      "name": "texture",
+      "type": "assetId"
+    },
+    {
+      "name": "pivot",
+      "type": "string"
+    },
+    {
+      "name": "rotation",
+      "type": "string"
+    },
+    {
+      "name": "gravity",
+      "type": "string"
+    },
+    {
+      "name": "mass",
+      "type": "string"
+    }
+  ],
+  "sequence": {
+    "id": "expert-2d-pendulum-ball-game",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "2D_Pendulum_Ball_Game.json",
+          "description": "Follow this tutorial to create interactive 2D pendulum game components with a swinging arm and an attached ball for physics-based gameplay. This includes pendulum swing mechanics, gravity and momentum simulation, collision detection for the ball, and visual feedback systems for game UI production.",
+          "gameTypeHint": ""
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "${texture}"
+        },
+        "comment": "Asset: ${texture}"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

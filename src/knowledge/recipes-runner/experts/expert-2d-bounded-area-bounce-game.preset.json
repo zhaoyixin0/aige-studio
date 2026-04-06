@@ -1,0 +1,104 @@
+{
+  "id": "expert-2d-bounded-area-bounce-game",
+  "title": "2D Bounded Area Bounce Game",
+  "description": "Follow this tutorial to create interactive 2D bounded area game components with collision walls (left, right, top, bottom),and a central obstacle. This includes collision wall setup, obstacle placement, and visual feedback systems for game UI production. [source: 2D_Bounded_Area_Bounce_Game.json]",
+  "gameType": "bouncing",
+  "tags": [
+    "expert-import",
+    "sequence",
+    "confidence:1.00"
+  ],
+  "params": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "position",
+      "type": "vec2"
+    },
+    {
+      "name": "size",
+      "type": "vec2"
+    },
+    {
+      "name": "texture",
+      "type": "assetId"
+    },
+    {
+      "name": "rotation",
+      "type": "string"
+    }
+  ],
+  "sequence": {
+    "id": "expert-2d-bounded-area-bounce-game",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "2D_Bounded_Area_Bounce_Game.json",
+          "description": "Follow this tutorial to create interactive 2D bounded area game components with collision walls (left, right, top, bottom),and a central obstacle. This includes collision wall setup, obstacle placement, and visual feedback systems for game UI production.",
+          "gameTypeHint": ""
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "${texture}"
+        },
+        "comment": "Asset: ${texture}"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

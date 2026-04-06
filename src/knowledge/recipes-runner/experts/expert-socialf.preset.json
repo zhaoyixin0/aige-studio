@@ -1,0 +1,228 @@
+{
+  "id": "expert-socialf",
+  "title": "socialf",
+  "description": "Create a social interactive flip-and-guess game where players guess which friend would reveal the funniest secret or complete the given social prompt. The game features a title question, 10 user profiles with photos and usernames, and a flip mechanism to reveal answers. Players interact by selecting friends and flipping to see results, encouraging social engagement and friendly competition. The SocialFlipReveal component manages the game flow with customizable prompts and user profile display. [source: socialf.json]",
+  "gameType": "flip-guess",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:Social_Friend_Flip_Guessing_Game",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-socialf",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "socialf.json",
+          "description": "Create a social interactive flip-and-guess game where players guess which friend would reveal the funniest secret or complete the given social prompt. The game features a title question, 10 user profiles with photos and usernames, and a flip mechanism to reveal answers. Players interact by selecting friends and flipping to see results, encouraging social engagement and friendly competition. The SocialFlipReveal component manages the game flow with customizable prompts and user profile display.",
+          "gameTypeHint": "Social_Friend_Flip_Guessing_Game"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Assets/Scripts/SocialFlipReveal.ts"
+        },
+        "comment": "Asset: Assets/Scripts/SocialFlipReveal.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "Assets/SocialFlipReveal/SocialFlipReveal/SocialFlipReveal/Textures/1 (1).png"
+        },
+        "comment": "Asset: Assets/SocialFlipReveal/SocialFlipReveal/SocialFlipReveal/Textures/1 (1).png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "Assets/SocialFlipReveal/SocialFlipReveal/SocialFlipReveal/Textures/1 (2).png"
+        },
+        "comment": "Asset: Assets/SocialFlipReveal/SocialFlipReveal/SocialFlipReveal/Textures/1 (2).png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-11",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000006b/None.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000006b/None.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-12",
+          "type": "image",
+          "src": "Assets/SocialFlipReveal/SocialFlipReveal/SocialFlipReveal/Materials/RoundedEdges.omtl"
+        },
+        "comment": "Asset: Assets/SocialFlipReveal/SocialFlipReveal/SocialFlipReveal/Materials/RoundedEdges.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-13",
+          "type": "image",
+          "src": "Assets/SocialFlipReveal/SocialFlipReveal/SocialFlipReveal/Textures/1.png"
+        },
+        "comment": "Asset: Assets/SocialFlipReveal/SocialFlipReveal/SocialFlipReveal/Textures/1.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-14",
+          "type": "image",
+          "src": "Assets/SocialFlipReveal/SocialFlipReveal/SocialFlipReveal/Textures/image_square_Outline_Only.png"
+        },
+        "comment": "Asset: Assets/SocialFlipReveal/SocialFlipReveal/SocialFlipReveal/Textures/image_square_Outline_Only.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-15",
+          "type": "image",
+          "src": "Assets/SocialFlipReveal/SocialFlipReveal/SocialFlipReveal/Textures/2.png"
+        },
+        "comment": "Asset: Assets/SocialFlipReveal/SocialFlipReveal/SocialFlipReveal/Textures/2.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-16",
+          "type": "image",
+          "src": "Assets/SocialFlipReveal/SocialFlipReveal/SocialFlipReveal/Textures/3.png"
+        },
+        "comment": "Asset: Assets/SocialFlipReveal/SocialFlipReveal/SocialFlipReveal/Textures/3.png"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

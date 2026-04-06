@@ -1,0 +1,273 @@
+{
+  "id": "expert-slash-match-knowledge",
+  "title": "slash match knowledge",
+  "description": "Player should drag the characters to the corresponding foods by swap screen. [source: slash_match_knowledge.json]",
+  "gameType": "tap",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:2d_match_linl_game",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-slash-match-knowledge",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "slash_match_knowledge.json",
+          "description": "Player should drag the characters to the corresponding foods by swap screen.",
+          "gameTypeHint": "2d_match_linl_game"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Assets/Scripts/SlashMatch.ts"
+        },
+        "comment": "Asset: Assets/Scripts/SlashMatch.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/MatchIcons(RightSide)/Bone_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/MatchIcons(RightSide)/Bone_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/MatchIcons(RightSide)/Carrot_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/MatchIcons(RightSide)/Carrot_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/MatchIcons(RightSide)/Banana_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/MatchIcons(RightSide)/Banana_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/MatchIcons(RightSide)/Batteries_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/MatchIcons(RightSide)/Batteries_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/MatchIcons(RightSide)/Trash_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/MatchIcons(RightSide)/Trash_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/MatchIcons(RightSide)/Leaves_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/MatchIcons(RightSide)/Leaves_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/MatchIcons(LeftSide)/Dog_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/MatchIcons(LeftSide)/Dog_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-11",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/MatchIcons(LeftSide)/Bunny_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/MatchIcons(LeftSide)/Bunny_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-12",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/MatchIcons(LeftSide)/Monkey_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/MatchIcons(LeftSide)/Monkey_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-13",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/MatchIcons(LeftSide)/Robot_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/MatchIcons(LeftSide)/Robot_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-14",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/MatchIcons(LeftSide)/Racoon_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/MatchIcons(LeftSide)/Racoon_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-15",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/MatchIcons(LeftSide)/Giraffe_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/MatchIcons(LeftSide)/Giraffe_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-16",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/Correct_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/Correct_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-17",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/Incorrect_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/Incorrect_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-18",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/TimerBackground_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/TimerBackground_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-19",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/TimerFill_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/TimerFill_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-20",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/BlackBG_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/BlackBG_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-21",
+          "type": "image",
+          "src": "Assets/Slash Match Assets/Textures/GreatJob_Tex.png"
+        },
+        "comment": "Asset: Assets/Slash Match Assets/Textures/GreatJob_Tex.png"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

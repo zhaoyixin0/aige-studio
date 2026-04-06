@@ -1,0 +1,362 @@
+[
+  {
+    "source": "2026f.json",
+    "presetId": "expert-2026f",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "2D_AngryBirds_Slingshot_Game.json",
+    "presetId": "expert-2d-angrybirds-slingshot-game",
+    "gameType": "slingshot",
+    "confidence": 0.65
+  },
+  {
+    "source": "2D_Avatarf.json",
+    "presetId": "expert-2d-avatarf",
+    "gameType": "avatar-frame",
+    "confidence": 0.75
+  },
+  {
+    "source": "2D_Avatar_Name_Component.json",
+    "presetId": "expert-2d-avatar-name-component",
+    "gameType": "avatar-frame",
+    "confidence": 1
+  },
+  {
+    "source": "2D_Bounded_Area_Bounce_Game.json",
+    "presetId": "expert-2d-bounded-area-bounce-game",
+    "gameType": "bouncing",
+    "confidence": 1
+  },
+  {
+    "source": "2D_Click_Disappear_Image_Component.json",
+    "presetId": "expert-2d-click-disappear-image-component",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "2D_HeadTilt_Choice_Game.json",
+    "presetId": "expert-2d-headtilt-choice-game",
+    "gameType": "head-tilt",
+    "confidence": 1
+  },
+  {
+    "source": "2D_Head_Following_Text_Selector.json",
+    "presetId": "expert-2d-head-following-text-selector",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "2D_Interactive_Click_Button_Component.json",
+    "presetId": "expert-2d-interactive-click-button-component",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "2D_Overhead_Random_Carousel_Selector.json",
+    "presetId": "expert-2d-overhead-random-carousel-selector",
+    "gameType": "random-wheel",
+    "confidence": 1
+  },
+  {
+    "source": "2D_Pendulum_Ball_Game.json",
+    "presetId": "expert-2d-pendulum-ball-game",
+    "gameType": "bouncing",
+    "confidence": 1
+  },
+  {
+    "source": "2D_Rope_Cutting_Friend_Rescue_Game.json",
+    "presetId": "expert-2d-rope-cutting-friend-rescue-game",
+    "gameType": "rope-cutting",
+    "confidence": 1
+  },
+  {
+    "source": "2D_Rope_Cutting_Friend_Rescue_Game_1.json",
+    "presetId": "expert-2d-rope-cutting-friend-rescue-game-1",
+    "gameType": "rope-cutting",
+    "confidence": 1
+  },
+  {
+    "source": "2D_Spinning_Wheel_Pointer_Game.json",
+    "presetId": "expert-2d-spinning-wheel-pointer-game",
+    "gameType": "random-wheel",
+    "confidence": 1
+  },
+  {
+    "source": "2D_Swipe_Car_Racing_Game.json",
+    "presetId": "expert-2d-swipe-car-racing-game",
+    "gameType": "racing",
+    "confidence": 0.85
+  },
+  {
+    "source": "2D_Timeline_Event_Arrangement.json",
+    "presetId": "expert-2d-timeline-event-arrangement",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "3D_Jump_Jump_Camera_Game.json",
+    "presetId": "expert-3d-jump-jump-camera-game",
+    "gameType": "platformer",
+    "confidence": 0.85
+  },
+  {
+    "source": "3D_Parkour_Ground.json",
+    "presetId": "expert-3d-parkour-ground",
+    "gameType": "platformer",
+    "confidence": 0.85
+  },
+  {
+    "source": "AssembleMe_knowledge.json",
+    "presetId": "expert-assembleme-knowledge",
+    "gameType": "puzzle",
+    "confidence": 0.75
+  },
+  {
+    "source": "birdf.json",
+    "presetId": "expert-birdf",
+    "gameType": "slingshot",
+    "confidence": 0.4
+  },
+  {
+    "source": "BiscuitChallenge_knowledge.json",
+    "presetId": "expert-biscuitchallenge-knowledge",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "blinkf.json",
+    "presetId": "expert-blinkf",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "CardMatching_knowledge.json",
+    "presetId": "expert-cardmatching-knowledge",
+    "gameType": "puzzle",
+    "confidence": 0.75
+  },
+  {
+    "source": "champion_header_knowledge.json",
+    "presetId": "expert-champion-header-knowledge",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "CharacterDress_knowledge.json",
+    "presetId": "expert-characterdress-knowledge",
+    "gameType": "dress-up",
+    "confidence": 0.75
+  },
+  {
+    "source": "ClearBlocks_knowledge.json",
+    "presetId": "expert-clearblocks-knowledge",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "cross_stree_knowledge.json",
+    "presetId": "expert-cross-stree-knowledge",
+    "gameType": "cross-road",
+    "confidence": 0.75
+  },
+  {
+    "source": "decisionMakerf.json",
+    "presetId": "expert-decisionmakerf",
+    "gameType": "head-tilt",
+    "confidence": 0.75
+  },
+  {
+    "source": "dessertf.json",
+    "presetId": "expert-dessertf",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "edge_collider.json",
+    "presetId": "expert-edge-collider",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "emojf.json",
+    "presetId": "expert-emojf",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "game_2d_physics_edge_collider.json",
+    "presetId": "expert-game-2d-physics-edge-collider",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "grabf.json",
+    "presetId": "expert-grabf",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "GuessTheAnimal_knowledge.json",
+    "presetId": "expert-guesstheanimal-knowledge",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "health_bar.json",
+    "presetId": "expert-health-bar",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "Image_Flip_Guessing_Game.json",
+    "presetId": "expert-image-flip-guessing-game",
+    "gameType": "flip-guess",
+    "confidence": 1
+  },
+  {
+    "source": "jump_home_knowledge.json",
+    "presetId": "expert-jump-home-knowledge",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "let_the_crow_drank_knowledge.json",
+    "presetId": "expert-let-the-crow-drank-knowledge",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "makeupf.json",
+    "presetId": "expert-makeupf",
+    "gameType": "dress-up",
+    "confidence": 0.75
+  },
+  {
+    "source": "Makeup_Selector.json",
+    "presetId": "expert-makeup-selector",
+    "gameType": "dress-up",
+    "confidence": 0.85
+  },
+  {
+    "source": "master_of_carving_knowledge.json",
+    "presetId": "expert-master-of-carving-knowledge",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "master_of_locks_knowledge.json",
+    "presetId": "expert-master-of-locks-knowledge",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "matchf.json",
+    "presetId": "expert-matchf",
+    "gameType": "random-wheel",
+    "confidence": 0.75
+  },
+  {
+    "source": "MazeChase_knowledge.json",
+    "presetId": "expert-mazechase-knowledge",
+    "gameType": "dodge",
+    "confidence": 0.75
+  },
+  {
+    "source": "mole_whack_knowledge.json",
+    "presetId": "expert-mole-whack-knowledge",
+    "gameType": "whack-a-mole",
+    "confidence": 0.75
+  },
+  {
+    "source": "parkourf.json",
+    "presetId": "expert-parkourf",
+    "gameType": "platformer",
+    "confidence": 0.75
+  },
+  {
+    "source": "perfect_pitch_knowledge.json",
+    "presetId": "expert-perfect-pitch-knowledge",
+    "gameType": "scale-matching",
+    "confidence": 0.75
+  },
+  {
+    "source": "puzzle_painting_knowledge.json",
+    "presetId": "expert-puzzle-painting-knowledge",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "racerf.json",
+    "presetId": "expert-racerf",
+    "gameType": "rope-cutting",
+    "confidence": 0.75
+  },
+  {
+    "source": "racerf_1.json",
+    "presetId": "expert-racerf-1",
+    "gameType": "racing",
+    "confidence": 0.75
+  },
+  {
+    "source": "racerf_2.json",
+    "presetId": "expert-racerf-2",
+    "gameType": "rope-cutting",
+    "confidence": 0.75
+  },
+  {
+    "source": "randomPickerf.json",
+    "presetId": "expert-randompickerf",
+    "gameType": "random-wheel",
+    "confidence": 0.75
+  },
+  {
+    "source": "slash_match_knowledge.json",
+    "presetId": "expert-slash-match-knowledge",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "SlidingPuzzle_knowledge.json",
+    "presetId": "expert-slidingpuzzle-knowledge",
+    "gameType": "jigsaw",
+    "confidence": 0.75
+  },
+  {
+    "source": "socialf.json",
+    "presetId": "expert-socialf",
+    "gameType": "flip-guess",
+    "confidence": 0.75
+  },
+  {
+    "source": "SugarInsertingChallenge_knowledge.json",
+    "presetId": "expert-sugarinsertingchallenge-knowledge",
+    "gameType": "sugar-insert",
+    "confidence": 0.75
+  },
+  {
+    "source": "TheOddOne_knowledge.json",
+    "presetId": "expert-theoddone-knowledge",
+    "gameType": "puzzle",
+    "confidence": 0.75
+  },
+  {
+    "source": "timeline_f.json",
+    "presetId": "expert-timeline-f",
+    "gameType": "tap",
+    "confidence": 0.75
+  },
+  {
+    "source": "WaterBlaster_knowledge.json",
+    "presetId": "expert-waterblaster-knowledge",
+    "gameType": "shooting",
+    "confidence": 0.75
+  },
+  {
+    "source": "wheelf.json",
+    "presetId": "expert-wheelf",
+    "gameType": "random-wheel",
+    "confidence": 0.75
+  }
+]

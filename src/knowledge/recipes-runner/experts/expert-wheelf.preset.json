@@ -1,0 +1,309 @@
+{
+  "id": "expert-wheelf",
+  "title": "wheelf",
+  "description": "Create a 2D interactive scene featuring a spinning wheel divided into segmented answer zones and a stationary pointer. Users initiate wheel spin mechanics, with physics-based rotation that gradually slows to a stop, allowing the pointer to select a random answer. The game includes visual feedback for spin initiation, smooth rotation animations with friction effects, answer zone highlighting, and result validation systems. It may feature customizable wheel segments, pointer designs, sound effects, and prize/reward systems based on the selected answers. [source: wheelf.json]",
+  "gameType": "random-wheel",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:2D_Spinning_Wheel_Pointer_Game",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-wheelf",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "wheelf.json",
+          "description": "Create a 2D interactive scene featuring a spinning wheel divided into segmented answer zones and a stationary pointer. Users initiate wheel spin mechanics, with physics-based rotation that gradually slows to a stop, allowing the pointer to select a random answer. The game includes visual feedback for spin initiation, smooth rotation animations with friction effects, answer zone highlighting, and result validation systems. It may feature customizable wheel segments, pointer designs, sound effects, and prize/reward systems based on the selected answers.",
+          "gameTypeHint": "2D_Spinning_Wheel_Pointer_Game"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Assets/Scripts/WheelOfFriends.ts"
+        },
+        "comment": "Asset: Assets/Scripts/WheelOfFriends.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "Assets/Textures/Wheel Texture.png"
+        },
+        "comment": "Asset: Assets/Textures/Wheel Texture.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "Assets/Textures/Circle Texture.png"
+        },
+        "comment": "Asset: Assets/Textures/Circle Texture.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-11",
+          "type": "image",
+          "src": "Assets/Assets/Profiles/Profile Info 1/Profile Photo 1.jssktexturett"
+        },
+        "comment": "Asset: Assets/Assets/Profiles/Profile Info 1/Profile Photo 1.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-12",
+          "type": "image",
+          "src": "Assets/Textures/Border Texture.png"
+        },
+        "comment": "Asset: Assets/Textures/Border Texture.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-13",
+          "type": "image",
+          "src": "Assets/Assets/Profiles/Profile Info 2/Profile Photo 2.jssktexturett"
+        },
+        "comment": "Asset: Assets/Assets/Profiles/Profile Info 2/Profile Photo 2.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-14",
+          "type": "image",
+          "src": "Assets/Assets/Profiles/Profile Info 3/Profile Photo 3.jssktexturett"
+        },
+        "comment": "Asset: Assets/Assets/Profiles/Profile Info 3/Profile Photo 3.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-15",
+          "type": "image",
+          "src": "Assets/Assets/Profiles/Profile Info 4/Profile Photo 4.jssktexturett"
+        },
+        "comment": "Asset: Assets/Assets/Profiles/Profile Info 4/Profile Photo 4.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-16",
+          "type": "image",
+          "src": "Assets/Assets/Profiles/Profile Info 5/Profile Photo 5.jssktexturett"
+        },
+        "comment": "Asset: Assets/Assets/Profiles/Profile Info 5/Profile Photo 5.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-17",
+          "type": "image",
+          "src": "Assets/Assets/Profiles/Profile Info 6/Profile Photo 6.jssktexturett"
+        },
+        "comment": "Asset: Assets/Assets/Profiles/Profile Info 6/Profile Photo 6.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-18",
+          "type": "image",
+          "src": "Assets/Assets/Profiles/Profile Info 7/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/Assets/Profiles/Profile Info 7/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-19",
+          "type": "image",
+          "src": "Assets/Assets/Profiles/Profile Info 8/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/Assets/Profiles/Profile Info 8/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-20",
+          "type": "image",
+          "src": "Assets/Assets/Profiles/Profile Info 9/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/Assets/Profiles/Profile Info 9/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-21",
+          "type": "image",
+          "src": "Assets/Assets/Profiles/Profile Info 10/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/Assets/Profiles/Profile Info 10/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-22",
+          "type": "image",
+          "src": "Assets/Assets/Profiles/Profile Info 11/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/Assets/Profiles/Profile Info 11/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-23",
+          "type": "image",
+          "src": "Assets/Assets/Profiles/Profile Info 12/Profile Photo.jssktexturett"
+        },
+        "comment": "Asset: Assets/Assets/Profiles/Profile Info 12/Profile Photo.jssktexturett"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-24",
+          "type": "image",
+          "src": "Assets/Textures/Spinner Texture.png"
+        },
+        "comment": "Asset: Assets/Textures/Spinner Texture.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-25",
+          "type": "image",
+          "src": "Assets/Textures/Heart Texture.png"
+        },
+        "comment": "Asset: Assets/Textures/Heart Texture.png"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

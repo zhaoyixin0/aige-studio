@@ -1,0 +1,113 @@
+{
+  "id": "expert-2d-angrybirds-slingshot-game",
+  "title": "2D AngryBirds Slingshot Game",
+  "description": "Follow this tutorial to create interactive 2D slingshot game components with a slingshot base, elastic bands, and a launchable ball. This includes slingshot pull mechanics, elastic band stretching structure, ball placement, and real-time physics updates for game UI production. [source: 2D_AngryBirds_Slingshot_Game.json]",
+  "gameType": "slingshot",
+  "tags": [
+    "expert-import",
+    "sequence",
+    "confidence:0.65"
+  ],
+  "params": [
+    {
+      "name": "position",
+      "type": "vec2"
+    },
+    {
+      "name": "size",
+      "type": "vec2"
+    },
+    {
+      "name": "texture",
+      "type": "assetId"
+    },
+    {
+      "name": "velocity",
+      "type": "number"
+    },
+    {
+      "name": "opacity",
+      "type": "number"
+    },
+    {
+      "name": "radius",
+      "type": "number"
+    }
+  ],
+  "sequence": {
+    "id": "expert-2d-angrybirds-slingshot-game",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "2D_AngryBirds_Slingshot_Game.json",
+          "description": "Follow this tutorial to create interactive 2D slingshot game components with a slingshot base, elastic bands, and a launchable ball. This includes slingshot pull mechanics, elastic band stretching structure, ball placement, and real-time physics updates for game UI production.",
+          "gameTypeHint": ""
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "${slingshot_base_texture}"
+        },
+        "comment": "Asset: ${slingshot_base_texture}"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "${elastic_band_texture}"
+        },
+        "comment": "Asset: ${elastic_band_texture}"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "${ball_texture}"
+        },
+        "comment": "Asset: ${ball_texture}"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 100
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Scorer"
+  ]
+}

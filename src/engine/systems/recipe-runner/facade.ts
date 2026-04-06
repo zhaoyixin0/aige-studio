@@ -1,18 +1,23 @@
 // src/engine/systems/recipe-runner/facade.ts
 // Single entry point: PresetRegistry → RecipeExecutor → GameConfig output.
 
-import { createHeroRegistry } from './index';
+import { createHeroRegistry, createExpertRegistry } from './index';
 import { RecipeExecutor } from './recipe-executor';
 import type { PresetRegistry } from './preset-registry';
 import type { PresetTemplate } from './types';
 import type { GameConfig } from '../../core/types';
 
-// ── Lazy singleton (safe for HMR — initialized once, reset only in tests) ──
+// ── Lazy singletons (safe for HMR — initialized once, reset only in tests) ──
 
 let _registry: PresetRegistry = createHeroRegistry();
+let _expertRegistry: PresetRegistry = createExpertRegistry();
 
 function getHeroRegistry(): PresetRegistry {
   return _registry;
+}
+
+function getExpertRegistry(): PresetRegistry {
+  return _expertRegistry;
 }
 
 // ── Types ──
@@ -34,17 +39,30 @@ export interface PresetResult {
 
 export function resolvePreset(input: PresetInput): PresetTemplate | null {
   const registry = getHeroRegistry();
+  const expert = getExpertRegistry();
 
+  // Hero registry first (curated, higher quality)
   if (input.presetId) {
-    return registry.get(input.presetId) ?? null;
+    const hero = registry.get(input.presetId);
+    if (hero) return hero;
+    // Fallback to expert registry
+    const exp = expert.get(input.presetId);
+    if (exp) return exp;
+    return null;
   }
   if (input.gameType) {
-    const matches = registry.findByGameType(input.gameType);
-    if (matches.length > 0) return matches[0];
+    const heroMatches = registry.findByGameType(input.gameType);
+    if (heroMatches.length > 0) return heroMatches[0];
+    // Fallback to expert registry
+    const expMatches = expert.findByGameType(input.gameType);
+    if (expMatches.length > 0) return expMatches[0];
   }
   if (input.tags?.length) {
-    const matches = registry.findByTags([...input.tags]);
-    if (matches.length > 0) return matches[0];
+    const heroMatches = registry.findByTags([...input.tags]);
+    if (heroMatches.length > 0) return heroMatches[0];
+    // Fallback to expert registry
+    const expMatches = expert.findByTags([...input.tags]);
+    if (expMatches.length > 0) return expMatches[0];
   }
   return null;
 }
@@ -86,9 +104,10 @@ export function runPresetToConfig(
   };
 }
 
-/** Reset registry — test-only. No-op in production. */
+/** Reset registries — test-only. No-op in production. */
 export function _resetRegistry(): void {
   if (import.meta.env.MODE === 'test') {
     _registry = createHeroRegistry();
+    _expertRegistry = createExpertRegistry();
   }
 }

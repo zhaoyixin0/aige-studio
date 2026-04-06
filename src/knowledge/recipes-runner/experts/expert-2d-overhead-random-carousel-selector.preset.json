@@ -1,0 +1,105 @@
+{
+  "id": "expert-2d-overhead-random-carousel-selector",
+  "title": "2D Overhead Random Carousel Selector",
+  "description": "Create a 2D interactive overhead random carousel selector positioned above the user's head. The carousel consists of a decorative border frame and a central image that cycles through multiple options randomly. Users can trigger selection events, with visual feedback and smooth transition animations between carousel items. The component tracks the user's head movement, ensuring it stays positioned correctly above the user at all times. [source: 2D_Overhead_Random_Carousel_Selector.json]",
+  "gameType": "random-wheel",
+  "tags": [
+    "expert-import",
+    "sequence",
+    "confidence:1.00"
+  ],
+  "params": [
+    {
+      "name": "frame_texture",
+      "type": "assetId"
+    },
+    {
+      "name": "position",
+      "type": "vec2"
+    },
+    {
+      "name": "item_texture",
+      "type": "assetId"
+    }
+  ],
+  "sequence": {
+    "id": "expert-2d-overhead-random-carousel-selector",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "2D_Overhead_Random_Carousel_Selector.json",
+          "description": "Create a 2D interactive overhead random carousel selector positioned above the user's head. The carousel consists of a decorative border frame and a central image that cycles through multiple options randomly. Users can trigger selection events, with visual feedback and smooth transition animations between carousel items. The component tracks the user's head movement, ensuring it stays positioned correctly above the user at all times.",
+          "gameTypeHint": ""
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "${frame_texture}"
+        },
+        "comment": "Asset: ${frame_texture}"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "${item_texture}"
+        },
+        "comment": "Asset: ${item_texture}"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

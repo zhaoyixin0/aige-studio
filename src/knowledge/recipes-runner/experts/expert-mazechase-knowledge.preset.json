@@ -1,0 +1,356 @@
+{
+  "id": "expert-mazechase-knowledge",
+  "title": "MazeChase knowledge",
+  "description": "Create a 2D obstacle dodging game where players control a character within a maze to evade chasing enemies, achieving victory after surviving for a specific duration. [source: MazeChase_knowledge.json]",
+  "gameType": "dodge",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:Obstacle_Dodge_Game",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-mazechase-knowledge",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "MazeChase_knowledge.json",
+          "description": "Create a 2D obstacle dodging game where players control a character within a maze to evade chasing enemies, achieving victory after surviving for a specific duration.",
+          "gameTypeHint": "Obstacle_Dodge_Game"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Assets/MazeChaseAssets/Script/GameController.ts"
+        },
+        "comment": "Asset: Assets/MazeChaseAssets/Script/GameController.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Assets/MazeChaseAssets/Textures/Maze Background.png"
+        },
+        "comment": "Asset: Assets/MazeChaseAssets/Textures/Maze Background.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000c0/Default_Texture.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000c0/Default_Texture.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "Assets/MazeChaseAssets/Textures/ObstacleChair1.png"
+        },
+        "comment": "Asset: Assets/MazeChaseAssets/Textures/ObstacleChair1.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "Assets/MazeChaseAssets/Textures/ObstacleChair2.png"
+        },
+        "comment": "Asset: Assets/MazeChaseAssets/Textures/ObstacleChair2.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "Assets/MazeChaseAssets/Textures/ObstacleSandCastle.png"
+        },
+        "comment": "Asset: Assets/MazeChaseAssets/Textures/ObstacleSandCastle.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "Assets/MazeChaseAssets/Textures/ObstacleBucket.png"
+        },
+        "comment": "Asset: Assets/MazeChaseAssets/Textures/ObstacleBucket.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "Assets/MazeChaseAssets/Textures/ObstacleTree.png"
+        },
+        "comment": "Asset: Assets/MazeChaseAssets/Textures/ObstacleTree.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-11",
+          "type": "image",
+          "src": "Assets/MazeChaseAssets/Textures/ObstacleSurfShop.png"
+        },
+        "comment": "Asset: Assets/MazeChaseAssets/Textures/ObstacleSurfShop.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-12",
+          "type": "image",
+          "src": "Assets/MazeChaseAssets/Textures/ObstacleIcecreamShop.png"
+        },
+        "comment": "Asset: Assets/MazeChaseAssets/Textures/ObstacleIcecreamShop.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-13",
+          "type": "image",
+          "src": "Assets/MazeChaseAssets/Textures/ObstacleBoomBox.png"
+        },
+        "comment": "Asset: Assets/MazeChaseAssets/Textures/ObstacleBoomBox.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-14",
+          "type": "image",
+          "src": "Assets/MazeChaseAssets/Textures/ObstacleSwimStuff.png"
+        },
+        "comment": "Asset: Assets/MazeChaseAssets/Textures/ObstacleSwimStuff.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-15",
+          "type": "image",
+          "src": "Assets/MazeChaseAssets/Textures/ObstacleChair3.png"
+        },
+        "comment": "Asset: Assets/MazeChaseAssets/Textures/ObstacleChair3.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-16",
+          "type": "image",
+          "src": "Assets/MazeChaseAssets/Textures/ObstacleChair4.png"
+        },
+        "comment": "Asset: Assets/MazeChaseAssets/Textures/ObstacleChair4.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-17",
+          "type": "image",
+          "src": "Assets/MazeChaseAssets/Textures/Sun.png"
+        },
+        "comment": "Asset: Assets/MazeChaseAssets/Textures/Sun.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-18",
+          "type": "image",
+          "src": "Assets/MazeChaseAssets/Textures/Icecream.png"
+        },
+        "comment": "Asset: Assets/MazeChaseAssets/Textures/Icecream.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-19",
+          "type": "image",
+          "src": "Assets/MazeChaseAssets/Textures/ArrowStatic.png"
+        },
+        "comment": "Asset: Assets/MazeChaseAssets/Textures/ArrowStatic.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-20",
+          "type": "image",
+          "src": "Assets/MazeChaseAssets/Textures/TimerBoard.png"
+        },
+        "comment": "Asset: Assets/MazeChaseAssets/Textures/TimerBoard.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-21",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-22",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-23",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-24",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-25",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "spawner_1",
+          "type": "Spawner",
+          "params": {
+            "frequency": 1.2,
+            "maxCount": 6,
+            "direction": "down"
+          }
+        },
+        "comment": "Base module: Spawner"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "collision_1",
+          "type": "Collision",
+          "params": {
+            "rules": [
+              {
+                "a": "player",
+                "b": "items",
+                "event": "damage",
+                "destroy": [
+                  "b"
+                ]
+              }
+            ]
+          }
+        },
+        "comment": "Base module: Collision"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "scorePerSecond": 1
+          }
+        },
+        "comment": "Base module: Scorer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "lives_1",
+          "type": "Lives",
+          "params": {
+            "count": 3
+          }
+        },
+        "comment": "Base module: Lives"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Spawner",
+    "Collision",
+    "Scorer",
+    "Timer",
+    "Lives"
+  ]
+}

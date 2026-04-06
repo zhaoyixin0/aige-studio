@@ -1,0 +1,309 @@
+{
+  "id": "expert-dessertf",
+  "title": "dessertf",
+  "description": "Create a 3D interactive game where players slide the screen to control a ball's left/right/forward/backward movement on irregular terrain, rolling towards the finish line. The game features a third-person camera system positioned at (0, 10.4, 32) with a smooth ride factor of 0.6 for steady camera follow. A push force of 9.9 provides responsive ball movement, while the irregular terrain creates challenging rolling physics. Players navigate through坎坷 surfaces, using sliding gestures to maintain control and momentum, with the goal of reaching the end of each level. The DessertDash component manages game mechanics, camera positioning, and ball physics for an engaging rolling experience. [source: dessertf.json]",
+  "gameType": "tap",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:3D_Sliding_Ball_Terrain_Rolling_Game",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-dessertf",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "dessertf.json",
+          "description": "Create a 3D interactive game where players slide the screen to control a ball's left/right/forward/backward movement on irregular terrain, rolling towards the finish line. The game features a third-person camera system positioned at (0, 10.4, 32) with a smooth ride factor of 0.6 for steady camera follow. A push force of 9.9 provides responsive ball movement, while the irregular terrain creates challenging rolling physics. Players navigate through坎坷 surfaces, using sliding gestures to maintain control and momentum, with the goal of reaching the end of each level. The DessertDash component manages game mechanics, camera positioning, and ball physics for an engaging rolling experience.",
+          "gameTypeHint": "3D_Sliding_Ball_Terrain_Rolling_Game"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Assets/Scripts/DessertDash.ts"
+        },
+        "comment": "Asset: Assets/Scripts/DessertDash.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000072/Cube.mesh"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000072/Cube.mesh"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Assets/DessertDashAssets/Textures/UI_Textures/EnvironmentMap_Tex.exr"
+        },
+        "comment": "Asset: Assets/DessertDashAssets/Textures/UI_Textures/EnvironmentMap_Tex.exr"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "af8622ef-7f37-7c83-2620-ba02df75e2b7"
+        },
+        "comment": "Asset: af8622ef-7f37-7c83-2620-ba02df75e2b7"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "f11d8616-c5af-2323-978e-ac72567b40b1"
+        },
+        "comment": "Asset: f11d8616-c5af-2323-978e-ac72567b40b1"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "ce44399f-1efd-c503-b959-96b281358cd1"
+        },
+        "comment": "Asset: ce44399f-1efd-c503-b959-96b281358cd1"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000002/Plane.mesh"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000002/Plane.mesh"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "a2c1fd66-6759-6214-bc12-fb49ac97c66f"
+        },
+        "comment": "Asset: a2c1fd66-6759-6214-bc12-fb49ac97c66f"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "6db8c79b-55b3-083f-4584-eeaedaf8d60d"
+        },
+        "comment": "Asset: 6db8c79b-55b3-083f-4584-eeaedaf8d60d"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-11",
+          "type": "image",
+          "src": "59566e6f-bb46-1dfd-a37c-f3ab92928282"
+        },
+        "comment": "Asset: 59566e6f-bb46-1dfd-a37c-f3ab92928282"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-12",
+          "type": "image",
+          "src": "9688699e-c0cd-ae64-1ba7-ce1d45203a44"
+        },
+        "comment": "Asset: 9688699e-c0cd-ae64-1ba7-ce1d45203a44"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-13",
+          "type": "image",
+          "src": "29ad1469-75b1-5e5e-8bc9-69e9e8158a01"
+        },
+        "comment": "Asset: 29ad1469-75b1-5e5e-8bc9-69e9e8158a01"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-14",
+          "type": "image",
+          "src": "591a79b8-2bbb-119e-799b-a85e2ef6f05d"
+        },
+        "comment": "Asset: 591a79b8-2bbb-119e-799b-a85e2ef6f05d"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-15",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-16",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-17",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-18",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-19",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-20",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-21",
+          "type": "image",
+          "src": "Assets/DessertDashAssets/Textures/UI_Textures/Star_Tex.png"
+        },
+        "comment": "Asset: Assets/DessertDashAssets/Textures/UI_Textures/Star_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-22",
+          "type": "image",
+          "src": "Assets/DessertDashAssets/Textures/UI_Textures/WIN_Tex.png"
+        },
+        "comment": "Asset: Assets/DessertDashAssets/Textures/UI_Textures/WIN_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-23",
+          "type": "image",
+          "src": "Assets/DessertDashAssets/Textures/UI_Textures/GO_Tex.png"
+        },
+        "comment": "Asset: Assets/DessertDashAssets/Textures/UI_Textures/GO_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-24",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001543/White_Texture.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001543/White_Texture.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-25",
+          "type": "image",
+          "src": "Assets/DessertDashAssets/Textures/UI_Textures/TouchScreenPrompt_Tex.png"
+        },
+        "comment": "Asset: Assets/DessertDashAssets/Textures/UI_Textures/TouchScreenPrompt_Tex.png"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

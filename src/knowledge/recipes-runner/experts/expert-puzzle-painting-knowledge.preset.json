@@ -1,0 +1,201 @@
+{
+  "id": "expert-puzzle-painting-knowledge",
+  "title": "puzzle painting knowledge",
+  "description": "The player controls four paint rollers and completes the painting according to the reference image. [source: puzzle_painting_knowledge.json]",
+  "gameType": "tap",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:2d_puzzle_painting_game",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-puzzle-painting-knowledge",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "puzzle_painting_knowledge.json",
+          "description": "The player controls four paint rollers and completes the painting according to the reference image.",
+          "gameTypeHint": "2d_puzzle_painting_game"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Assets/PuzzlePaintingAssets/Textures/RenderTextures/Canvas_RenderTex.rt"
+        },
+        "comment": "Asset: Assets/PuzzlePaintingAssets/Textures/RenderTextures/Canvas_RenderTex.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Assets/PuzzlePaintingAssets/Textures/WhiteCanvas_Tex.png"
+        },
+        "comment": "Asset: Assets/PuzzlePaintingAssets/Textures/WhiteCanvas_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Assets/PuzzlePaintingAssets/Materials/PuzzlePainting_Mat [EDIT].mg"
+        },
+        "comment": "Asset: Assets/PuzzlePaintingAssets/Materials/PuzzlePainting_Mat [EDIT].mg"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "Assets/PuzzlePaintingAssets/Textures/ChameleonMask_Tex.png"
+        },
+        "comment": "Asset: Assets/PuzzlePaintingAssets/Textures/ChameleonMask_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "Assets/PuzzlePaintingAssets/Textures/PaintRollerHandle_Tex.png"
+        },
+        "comment": "Asset: Assets/PuzzlePaintingAssets/Textures/PaintRollerHandle_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "Assets/PuzzlePaintingAssets/Textures/PaintRollerBrush_Tex.png"
+        },
+        "comment": "Asset: Assets/PuzzlePaintingAssets/Textures/PaintRollerBrush_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "Assets/PuzzlePaintingAssets/Textures/ReferenceBox_Tex.png"
+        },
+        "comment": "Asset: Assets/PuzzlePaintingAssets/Textures/ReferenceBox_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "Assets/PuzzlePaintingAssets/Textures/ReferenceImage_Tex.png"
+        },
+        "comment": "Asset: Assets/PuzzlePaintingAssets/Textures/ReferenceImage_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-11",
+          "type": "image",
+          "src": "Assets/PuzzlePaintingAssets/Textures/Confetti_AnimatedTex.OseqJSA"
+        },
+        "comment": "Asset: Assets/PuzzlePaintingAssets/Textures/Confetti_AnimatedTex.OseqJSA"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-12",
+          "type": "image",
+          "src": "Assets/PuzzlePaintingAssets/Textures/YouWin_Tex.png"
+        },
+        "comment": "Asset: Assets/PuzzlePaintingAssets/Textures/YouWin_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-13",
+          "type": "image",
+          "src": "Assets/PuzzlePaintingAssets/Textures/YouLose_Tex.png"
+        },
+        "comment": "Asset: Assets/PuzzlePaintingAssets/Textures/YouLose_Tex.png"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

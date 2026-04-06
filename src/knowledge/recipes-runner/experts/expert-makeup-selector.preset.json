@@ -1,0 +1,83 @@
+{
+  "id": "expert-makeup-selector",
+  "title": "Makeup Selector",
+  "description": "Create a 2D interactive makeup random selector. The selector consists of multiple makeup options.You can trigger selection events, with visual feedback and smooth transition animations between makeup items and control the selected item enabled. [source: Makeup_Selector.json]",
+  "gameType": "dress-up",
+  "tags": [
+    "expert-import",
+    "sequence",
+    "confidence:0.85"
+  ],
+  "params": [
+    {
+      "name": "intensity",
+      "type": "string"
+    },
+    {
+      "name": "makeupTexture",
+      "type": "assetId"
+    }
+  ],
+  "sequence": {
+    "id": "expert-makeup-selector",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "Makeup_Selector.json",
+          "description": "Create a 2D interactive makeup random selector. The selector consists of multiple makeup options.You can trigger selection events, with visual feedback and smooth transition animations between makeup items and control the selected item enabled.",
+          "gameTypeHint": ""
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

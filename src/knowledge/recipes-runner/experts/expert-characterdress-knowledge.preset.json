@@ -1,0 +1,174 @@
+{
+  "id": "expert-characterdress-knowledge",
+  "title": "CharacterDress knowledge",
+  "description": "Implements a scanning line moving from top to bottom. As it moves, the position it passes freezes the current frame and applies a Warp effect. Users can warp the view in front of the camera to 'draw' a dress for a character in the scene. It uses a camera to render a Render Texture (RT), and uses this RT as the input for another Image. This technique is generally used to render the entire screen to an RT and output it to an Image, enabling Picture-in-Picture effects or split-screen comparisons between post-processed and raw visuals. [source: CharacterDress_knowledge.json]",
+  "gameType": "dress-up",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:Action_Micro_Control",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-characterdress-knowledge",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "CharacterDress_knowledge.json",
+          "description": "Implements a scanning line moving from top to bottom. As it moves, the position it passes freezes the current frame and applies a Warp effect. Users can warp the view in front of the camera to 'draw' a dress for a character in the scene. It uses a camera to render a Render Texture (RT), and uses this RT as the input for another Image. This technique is generally used to render the entire screen to an RT and output it to an Image, enabling Picture-in-Picture effects or split-screen comparisons between post-processed and raw visuals.",
+          "gameTypeHint": "Action_Micro_Control"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Assets/CharacterDressAssets/Textures/RenderTextures/Mask_RenderTex.rt"
+        },
+        "comment": "Asset: Assets/CharacterDressAssets/Textures/RenderTextures/Mask_RenderTex.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Assets/CharacterDressAssets/Textures/White_Tex.png"
+        },
+        "comment": "Asset: Assets/CharacterDressAssets/Textures/White_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Assets/CharacterDressAssets/Materials/WarpMask_Mat.mg"
+        },
+        "comment": "Asset: Assets/CharacterDressAssets/Materials/WarpMask_Mat.mg"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Assets/CharacterDressAssets/Textures/RenderTextures/Warp_RenderTex.rt"
+        },
+        "comment": "Asset: Assets/CharacterDressAssets/Textures/RenderTextures/Warp_RenderTex.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "Assets/Script/GameController.ts"
+        },
+        "comment": "Asset: Assets/Script/GameController.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "Assets/CharacterDressAssets/Materials/Output_Mat.mg"
+        },
+        "comment": "Asset: Assets/CharacterDressAssets/Materials/Output_Mat.mg"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000c0/Default_Texture.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000c0/Default_Texture.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "Assets/CharacterDressAssets/Textures/Character_Tex.png"
+        },
+        "comment": "Asset: Assets/CharacterDressAssets/Textures/Character_Tex.png"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

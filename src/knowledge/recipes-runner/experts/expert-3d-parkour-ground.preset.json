@@ -1,0 +1,112 @@
+{
+  "id": "expert-3d-parkour-ground",
+  "title": "3D Parkour Ground",
+  "description": "Create a 3D ground surface for a parkour game that provides a stable platform for player movement and navigation. The ground features a flat, textured surface with proper collision detection to support running, jumping, and other parkour maneuvers. It is designed to be easily scalable and customizable to fit different parkour course layouts and environments. [source: 3D_Parkour_Ground.json]",
+  "gameType": "platformer",
+  "tags": [
+    "expert-import",
+    "sequence",
+    "confidence:0.85"
+  ],
+  "params": [
+    {
+      "name": "localPosition",
+      "type": "vec2"
+    },
+    {
+      "name": "localScale",
+      "type": "vec2"
+    },
+    {
+      "name": "localRotation",
+      "type": "string"
+    },
+    {
+      "name": "groundTexture",
+      "type": "assetId"
+    }
+  ],
+  "sequence": {
+    "id": "expert-3d-parkour-ground",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "3D_Parkour_Ground.json",
+          "description": "Create a 3D ground surface for a parkour game that provides a stable platform for player movement and navigation. The ground features a flat, textured surface with proper collision detection to support running, jumping, and other parkour maneuvers. It is designed to be easily scalable and customizable to fit different parkour course layouts and environments.",
+          "gameTypeHint": ""
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gravity_1",
+          "type": "Gravity",
+          "params": {
+            "g": 980
+          }
+        },
+        "comment": "Base module: Gravity"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "playermovement_1",
+          "type": "PlayerMovement",
+          "params": {
+            "speed": 300
+          }
+        },
+        "comment": "Base module: PlayerMovement"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "jump_1",
+          "type": "Jump",
+          "params": {
+            "force": 500
+          }
+        },
+        "comment": "Base module: Jump"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "collision_1",
+          "type": "Collision",
+          "params": {}
+        },
+        "comment": "Base module: Collision"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Gravity",
+    "PlayerMovement",
+    "Jump",
+    "Collision"
+  ]
+}

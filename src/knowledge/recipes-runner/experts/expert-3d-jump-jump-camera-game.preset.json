@@ -1,0 +1,108 @@
+{
+  "id": "expert-3d-jump-jump-camera-game",
+  "title": "3D Jump Jump Camera Game",
+  "description": "Create a 3D jump-jump game with a moving camera system that follows a sinusoidal trajectory. The camera moves forward at a constant speed along the z-axis, with y-axis rotation controlled by left/right touch swipes. The camera's y-position follows a sin curve (0-5 range) to simulate jumping between ground platforms placed at intervals along the z-axis, with each gap between platforms representing one jump. [source: 3D_Jump_Jump_Camera_Game.json]",
+  "gameType": "platformer",
+  "tags": [
+    "expert-import",
+    "sequence",
+    "confidence:0.85"
+  ],
+  "params": [
+    {
+      "name": "position",
+      "type": "vec2"
+    },
+    {
+      "name": "rotation",
+      "type": "string"
+    },
+    {
+      "name": "scale",
+      "type": "vec2"
+    }
+  ],
+  "sequence": {
+    "id": "expert-3d-jump-jump-camera-game",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "3D_Jump_Jump_Camera_Game.json",
+          "description": "Create a 3D jump-jump game with a moving camera system that follows a sinusoidal trajectory. The camera moves forward at a constant speed along the z-axis, with y-axis rotation controlled by left/right touch swipes. The camera's y-position follows a sin curve (0-5 range) to simulate jumping between ground platforms placed at intervals along the z-axis, with each gap between platforms representing one jump.",
+          "gameTypeHint": ""
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gravity_1",
+          "type": "Gravity",
+          "params": {
+            "g": 980
+          }
+        },
+        "comment": "Base module: Gravity"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "playermovement_1",
+          "type": "PlayerMovement",
+          "params": {
+            "speed": 300
+          }
+        },
+        "comment": "Base module: PlayerMovement"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "jump_1",
+          "type": "Jump",
+          "params": {
+            "force": 500
+          }
+        },
+        "comment": "Base module: Jump"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "collision_1",
+          "type": "Collision",
+          "params": {}
+        },
+        "comment": "Base module: Collision"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Gravity",
+    "PlayerMovement",
+    "Jump",
+    "Collision"
+  ]
+}

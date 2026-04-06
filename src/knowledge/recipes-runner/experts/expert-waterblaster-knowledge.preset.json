@@ -1,0 +1,261 @@
+{
+  "id": "expert-waterblaster-knowledge",
+  "title": "WaterBlaster knowledge",
+  "description": "Swipe the screen left and right to rotate the laser for aiming at objects. Release your finger to eliminate the object targeted by the laser. [source: WaterBlaster_knowledge.json]",
+  "gameType": "shooting",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:Shooting_Game",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-waterblaster-knowledge",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "WaterBlaster_knowledge.json",
+          "description": "Swipe the screen left and right to rotate the laser for aiming at objects. Release your finger to eliminate the object targeted by the laser.",
+          "gameTypeHint": "Shooting_Game"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Assets/WaterBlasterAssets/Textures/Splash_AnimationTex.OseqJSA"
+        },
+        "comment": "Asset: Assets/WaterBlasterAssets/Textures/Splash_AnimationTex.OseqJSA"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Assets/WaterBlasterAssets/Script/GameController.ts"
+        },
+        "comment": "Asset: Assets/WaterBlasterAssets/Script/GameController.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Assets/WaterBlasterAssets/Materials/ProgressBar_Mat.mg"
+        },
+        "comment": "Asset: Assets/WaterBlasterAssets/Materials/ProgressBar_Mat.mg"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "Assets/Prefabs/Seed.prefab"
+        },
+        "comment": "Asset: Assets/Prefabs/Seed.prefab"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000c0/Default_Texture.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000c0/Default_Texture.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "Assets/WaterBlasterAssets/Textures/CountdownFrame_Tex.png"
+        },
+        "comment": "Asset: Assets/WaterBlasterAssets/Textures/CountdownFrame_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "Assets/WaterBlasterAssets/Textures/Laser_AnimationTex.OseqJSA"
+        },
+        "comment": "Asset: Assets/WaterBlasterAssets/Textures/Laser_AnimationTex.OseqJSA"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "Assets/WaterBlasterAssets/Textures/FairyCannon.png"
+        },
+        "comment": "Asset: Assets/WaterBlasterAssets/Textures/FairyCannon.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-11",
+          "type": "image",
+          "src": "Assets/WaterBlasterAssets/Textures/ScoreBG.png"
+        },
+        "comment": "Asset: Assets/WaterBlasterAssets/Textures/ScoreBG.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-12",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-13",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-14",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-15",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-16",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-17",
+          "type": "image",
+          "src": "Assets/WaterBlasterAssets/Textures/SwipeHint_AnimationTex.OseqJSA"
+        },
+        "comment": "Asset: Assets/WaterBlasterAssets/Textures/SwipeHint_AnimationTex.OseqJSA"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "projectile_1",
+          "type": "Projectile",
+          "params": {
+            "speed": 500
+          }
+        },
+        "comment": "Base module: Projectile"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "wavespawner_1",
+          "type": "WaveSpawner",
+          "params": {
+            "waveDuration": 15,
+            "maxEnemiesPerWave": 5
+          }
+        },
+        "comment": "Base module: WaveSpawner"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "health_1",
+          "type": "Health",
+          "params": {
+            "maxHP": 100
+          }
+        },
+        "comment": "Base module: Health"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Projectile",
+    "WaveSpawner",
+    "Health",
+    "Scorer"
+  ]
+}

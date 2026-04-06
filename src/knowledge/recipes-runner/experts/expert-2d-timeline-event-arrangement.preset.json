@@ -1,0 +1,113 @@
+{
+  "id": "expert-2d-timeline-event-arrangement",
+  "title": "2D Timeline Event Arrangement",
+  "description": "Follow this tutorial to create interactive 2D timeline bars with chronological markers, event slots, and progression indicators for game UI production. [source: 2D_Timeline_Event_Arrangement.json]",
+  "gameType": "tap",
+  "tags": [
+    "expert-import",
+    "sequence",
+    "confidence:0.75"
+  ],
+  "params": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "position",
+      "type": "vec2"
+    },
+    {
+      "name": "size",
+      "type": "vec2"
+    },
+    {
+      "name": "texture",
+      "type": "assetId"
+    },
+    {
+      "name": "input",
+      "type": "string"
+    }
+  ],
+  "sequence": {
+    "id": "expert-2d-timeline-event-arrangement",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "2D_Timeline_Event_Arrangement.json",
+          "description": "Follow this tutorial to create interactive 2D timeline bars with chronological markers, event slots, and progression indicators for game UI production.",
+          "gameTypeHint": ""
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "${line}"
+        },
+        "comment": "Asset: ${line}"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "${point}"
+        },
+        "comment": "Asset: ${point}"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

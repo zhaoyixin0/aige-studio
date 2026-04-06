@@ -1,0 +1,228 @@
+{
+  "id": "expert-decisionmakerf",
+  "title": "decisionMakerf",
+  "description": "Create a 2D interactive scene with a central topic display and two choice options positioned above the user's head. Users control selection by tilting their head left or right, with real-time head position tracking to detect intended choices. The game features visual indicators for selected options, smooth transition animations, and a scoring system that leads to a final winning answer determined by cumulative selections or immediate validation. [source: decisionMakerf.json]",
+  "gameType": "head-tilt",
+  "tags": [
+    "expert-import",
+    "knowledge",
+    "eh:2D_HeadTilt_Choice_Game",
+    "confidence:0.75"
+  ],
+  "params": [],
+  "sequence": {
+    "id": "expert-decisionmakerf",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "decisionMakerf.json",
+          "description": "Create a 2D interactive scene with a central topic display and two choice options positioned above the user's head. Users control selection by tilting their head left or right, with real-time head position tracking to detect intended choices. The game features visual indicators for selected options, smooth transition animations, and a scoring system that leads to a final winning answer determined by cumulative selections or immediate validation.",
+          "gameTypeHint": "2D_HeadTilt_Choice_Game"
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "00000000-0000-0000-0000-00000000004b"
+        },
+        "comment": "Asset: 00000000-0000-0000-0000-00000000004b"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000009/Final Render Output.rt"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000805/default_env_map_v2.hdr"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000805/default_env_map_v2.hdr"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-3",
+          "type": "image",
+          "src": "Assets/DecisionMakerScript.ts"
+        },
+        "comment": "Asset: Assets/DecisionMakerScript.ts"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-4",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001c/defaultWhite.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-5",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000008000/None.oart"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-6",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000001d/defaultBlack.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-7",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001559/textGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-8",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000001568/textNeonGlow_Material.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-9",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-000000000132/Image_Default_Normal_MaterialNOPM.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-10",
+          "type": "image",
+          "src": "Assets/SocialDecisionMaker/SocialDecisionMaker/SocialDecisionMaker/Assets/Textures/WhiteBorderGreyCenter.png"
+        },
+        "comment": "Asset: Assets/SocialDecisionMaker/SocialDecisionMaker/SocialDecisionMaker/Assets/Textures/WhiteBorderGreyCenter.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-11",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000006b/None.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-00000000006b/None.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-12",
+          "type": "image",
+          "src": "Assets/SocialDecisionMaker/SocialDecisionMaker/SocialDecisionMaker/Assets/Materials/RoundedEdges.omtl"
+        },
+        "comment": "Asset: Assets/SocialDecisionMaker/SocialDecisionMaker/SocialDecisionMaker/Assets/Materials/RoundedEdges.omtl"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-13",
+          "type": "image",
+          "src": "Assets/SocialDecisionMaker/SocialDecisionMaker/SocialDecisionMaker/Assets/Textures/WhiteBorder.png"
+        },
+        "comment": "Asset: Assets/SocialDecisionMaker/SocialDecisionMaker/SocialDecisionMaker/Assets/Textures/WhiteBorder.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-14",
+          "type": "image",
+          "src": "Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000c0/Default_Texture.png"
+        },
+        "comment": "Asset: Shared/Cache/BuiltInAssets/00000000-0000-0000-0000-0000000000c0/Default_Texture.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-15",
+          "type": "image",
+          "src": "Assets/SocialDecisionMaker/SocialDecisionMaker/SocialDecisionMaker/Assets/Textures/TopBoxCrown_Tex.png"
+        },
+        "comment": "Asset: Assets/SocialDecisionMaker/SocialDecisionMaker/SocialDecisionMaker/Assets/Textures/TopBoxCrown_Tex.png"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-16",
+          "type": "image",
+          "src": "Assets/SocialDecisionMaker/SocialDecisionMaker/SocialDecisionMaker/Animated Textures/Star_AnimTex.OseqJSA"
+        },
+        "comment": "Asset: Assets/SocialDecisionMaker/SocialDecisionMaker/SocialDecisionMaker/Animated Textures/Star_AnimTex.OseqJSA"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}

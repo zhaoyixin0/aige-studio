@@ -1,0 +1,126 @@
+{
+  "id": "expert-2d-spinning-wheel-pointer-game",
+  "title": "2D Spinning Wheel Pointer Game",
+  "description": "Follow this tutorial to create interactive 2D spinning wheel game components with segmented answer zones and a stationary pointer for selecting objects/answers. This includes physics-based rotation mechanics, smooth spin animations, pointer collision detection, and visual feedback systems for game UI production. [source: 2D_Spinning_Wheel_Pointer_Game.json]",
+  "gameType": "random-wheel",
+  "tags": [
+    "expert-import",
+    "sequence",
+    "confidence:1.00"
+  ],
+  "params": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "position",
+      "type": "vec2"
+    },
+    {
+      "name": "size",
+      "type": "vec2"
+    },
+    {
+      "name": "texture",
+      "type": "assetId"
+    },
+    {
+      "name": "pivot",
+      "type": "string"
+    },
+    {
+      "name": "rotation",
+      "type": "string"
+    }
+  ],
+  "sequence": {
+    "id": "expert-2d-spinning-wheel-pointer-game",
+    "commands": [
+      {
+        "name": "setMeta",
+        "args": {
+          "sourcePath": "2D_Spinning_Wheel_Pointer_Game.json",
+          "description": "Follow this tutorial to create interactive 2D spinning wheel game components with segmented answer zones and a stationary pointer for selecting objects/answers. This includes physics-based rotation mechanics, smooth spin animations, pointer collision detection, and visual feedback systems for game UI production.",
+          "gameTypeHint": ""
+        },
+        "comment": "Expert preset metadata"
+      },
+      {
+        "name": "configureCanvas",
+        "args": {
+          "width": 1080,
+          "height": 1920
+        },
+        "comment": "AIGE standard canvas"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-0",
+          "type": "image",
+          "src": "${Circle_texture}"
+        },
+        "comment": "Asset: ${Circle_texture}"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-1",
+          "type": "image",
+          "src": "${Profile_texture}"
+        },
+        "comment": "Asset: ${Profile_texture}"
+      },
+      {
+        "name": "addAsset",
+        "args": {
+          "assetId": "asset-2",
+          "type": "image",
+          "src": "${Pointer_texture}"
+        },
+        "comment": "Asset: ${Pointer_texture}"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "gameflow_1",
+          "type": "GameFlow",
+          "params": {
+            "countdown": 3,
+            "onFinish": "show_result"
+          }
+        },
+        "comment": "Base module: GameFlow"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "timer_1",
+          "type": "Timer",
+          "params": {
+            "duration": 30,
+            "mode": "countdown"
+          }
+        },
+        "comment": "Base module: Timer"
+      },
+      {
+        "name": "addModule",
+        "args": {
+          "id": "scorer_1",
+          "type": "Scorer",
+          "params": {
+            "perHit": 10
+          }
+        },
+        "comment": "Base module: Scorer"
+      }
+    ]
+  },
+  "requiredModules": [
+    "GameFlow",
+    "Timer",
+    "Scorer"
+  ]
+}
