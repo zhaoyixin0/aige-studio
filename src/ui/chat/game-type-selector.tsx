@@ -1,4 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
+import { EXPERT_PRESETS } from '@/engine/systems/recipe-runner/index.ts';
+import { countByGameType } from '@/ui/experts/expert-utils.ts';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -24,11 +26,12 @@ export interface GameTypeSelectorProps {
 interface CardProps {
   readonly option: GameTypeOption;
   readonly isHovered: boolean;
+  readonly expertCount: number;
   readonly onHover: (id: string | null) => void;
   readonly onConfirm: (id: string) => void;
 }
 
-function GameTypeCard({ option, isHovered, onHover, onConfirm }: CardProps) {
+function GameTypeCard({ option, isHovered, expertCount, onHover, onConfirm }: CardProps) {
   const baseClasses =
     'flex flex-col items-center gap-2 rounded-xl p-4 transition-all duration-200 border cursor-pointer';
   const stateClasses = isHovered
@@ -52,6 +55,14 @@ function GameTypeCard({ option, isHovered, onHover, onConfirm }: CardProps) {
       {option.supportedToday === false && (
         <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-600/50 text-gray-400">
           Coming Soon
+        </span>
+      )}
+      {expertCount > 0 && (
+        <span
+          className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-400/30 text-purple-300"
+          data-testid="expert-badge"
+        >
+          {expertCount} 款专家模板
         </span>
       )}
       <button
@@ -119,6 +130,8 @@ export function GameTypeSelector({ options, onSelect }: GameTypeSelectorProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const COLLAPSED_COUNT = 6;
+
+  const expertCounts = useMemo(() => countByGameType(EXPERT_PRESETS), []);
 
   const categories = useMemo(() => {
     const cats = new Set<string>();
@@ -191,6 +204,7 @@ export function GameTypeSelector({ options, onSelect }: GameTypeSelectorProps) {
             key={option.id}
             option={option}
             isHovered={hoveredId === option.id}
+            expertCount={expertCounts.get(option.id) ?? 0}
             onHover={handleHover}
             onConfirm={handleConfirm}
           />

@@ -36,7 +36,7 @@ describe('PresetSuggestionBlock', () => {
     expect(container.textContent).not.toContain('素材待生成');
   });
 
-  it('renders "基于模板创建" header', () => {
+  it('renders "基于模板创建" header for hero presets', () => {
     render(
       <PresetSuggestionBlock
         presetId="hero-shooter-wave"
@@ -45,5 +45,42 @@ describe('PresetSuggestionBlock', () => {
       />,
     );
     expect(screen.getByText('基于模板创建')).toBeDefined();
+  });
+
+  it('renders "基于专家模板创建" header for expert presets', () => {
+    render(
+      <PresetSuggestionBlock
+        presetId="expert-cardmatching-knowledge"
+        title="CardMatching knowledge"
+        pendingAssets={0}
+      />,
+    );
+    expect(screen.getByText('基于专家模板创建')).toBeDefined();
+  });
+
+  it('shows metadata for expert presets', () => {
+    render(
+      <PresetSuggestionBlock
+        presetId="expert-cardmatching-knowledge"
+        title="CardMatching knowledge"
+        pendingAssets={0}
+      />,
+    );
+    const meta = screen.queryByTestId('expert-metadata');
+    expect(meta).not.toBeNull();
+    expect(meta!.textContent).toContain('来源:');
+    expect(meta!.textContent).toContain('置信度:');
+    expect(meta!.textContent).toContain('模块:');
+  });
+
+  it('hides metadata for hero presets', () => {
+    render(
+      <PresetSuggestionBlock
+        presetId="hero-catch-fruit"
+        title="经典接水果"
+        pendingAssets={0}
+      />,
+    );
+    expect(screen.queryByTestId('expert-metadata')).toBeNull();
   });
 });

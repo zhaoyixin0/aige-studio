@@ -5,6 +5,7 @@ import { type ChatMessage, type Chip, getPresetIdFromChip } from '@/store/editor
 import { useGameStore } from '@/store/game-store';
 import { useEngineContext } from '@/app/hooks/use-engine';
 import { SuggestionChips } from '@/ui/chat/suggestion-chips';
+import { FeaturedExpertChip } from '@/ui/experts/featured-expert-chip';
 import type { ConversationResult } from '@/agent/conversation-agent';
 import { getConversationAgent } from '@/agent/singleton';
 import { AssetAgent } from '@/services/asset-agent';
@@ -243,6 +244,11 @@ export function LandingPage() {
         {/* Suggestion chips */}
         <div className="w-full mt-3">
           <SuggestionChips onChipClick={handleChipClick} />
+          {chatMessages.length === 0 && (
+            <div className="flex justify-center mt-2">
+              <FeaturedExpertChip onUse={(id) => handleSubmit(`使用模板 ${id}`)} />
+            </div>
+          )}
         </div>
       </div>
     </div>
