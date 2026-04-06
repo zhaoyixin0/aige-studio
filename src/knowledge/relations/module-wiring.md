@@ -563,7 +563,8 @@ PlayerMovement 添加墙跳反弹速度
 | `dressup:complete` | DressUpEngine | GameFlow |
 | `plane:detected` | PlaneDetection | Spawner |
 | `plane:anchor` | PlaneDetection | Collision |
-| `projectile:fire` | Projectile | Collision(注册弹丸碰撞体), ParticleVFX, SoundFX |
+| `projectile:fire` | Projectile | BulletPattern(方向计算), Collision(注册弹丸碰撞体), ParticleVFX, SoundFX |
+| `bulletpattern:fire` | BulletPattern | Projectile(按方向数组创建弹丸) |
 | `projectile:destroyed` | Projectile | Collision(移除碰撞体) |
 | `aim:update` | Aim | Projectile(更新射击方向) |
 | `wave:start` | WaveSpawner | UIOverlay, SoundFX |
@@ -596,6 +597,24 @@ PlayerMovement 添加墙跳反弹速度
 ---
 
 ## 射击/战斗事件流
+
+### 32b. BulletPattern 事件流：弹幕模式
+
+```
+Projectile ──→ projectile:fire { dx, dy }
+    ↓
+BulletPattern 监听 projectile:fire
+    ↓ 根据 pattern 计算方向向量数组:
+    │   single:  1 方向（直射）
+    │   spread:  N 方向（扇形展开 spreadAngle 度）
+    │   spiral:  1 方向（每帧旋转 spiralSpeed 度）
+    │   burst:   1 方向 × N 次（每次间隔 burstDelay ms）
+    │   random:  N 方向（基础方向 ± 随机偏移）
+    ↓
+bulletpattern:fire { directions: [{dx,dy}, ...] }
+    ↓
+Projectile 监听 bulletpattern:fire → 为每个方向创建一颗弹丸
+```
 
 ### 33. Projectile 事件流：射击 → 碰撞 → 销毁
 

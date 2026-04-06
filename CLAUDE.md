@@ -292,6 +292,5 @@ Lesson: Batch 2/3 modules passed unit tests but failed in real games because the
 ## Known Issues / Next Steps
 - Gemini API key exposed in frontend (fine for internal use, need proxy for public)
 - Comprehensive mobile touch testing needed
-- Knowledge skill files need updating for 13 new modules
 - GuidedCreator conversation could benefit from streaming responses
 - Code duplication in game-object-renderer (syncShooterPlayer vs syncPlayer) — extract shared createPlayerContainer method

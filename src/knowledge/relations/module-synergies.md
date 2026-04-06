@@ -489,6 +489,7 @@ EnemyDrop → drop:spawn { type: 'equipment' }
 | ExpressionDetector + Scorer + ComboSystem | ★★★★☆ | 表情游戏特色组合 |
 | QuizEngine + UIOverlay | ★★★★☆ | 答题类必备 |
 | Projectile + Aim + Collision | ★★★★★ | 射击核心循环 |
+| Projectile + BulletPattern | ★★★★☆ | 弹幕模式扩展（扇形/螺旋/连射） |
 | EnemyAI + WaveSpawner + Collision | ★★★★★ | 敌人系统核心 |
 | LevelUp + EnemyDrop + Health | ★★★★★ | RPG 成长核心循环 |
 | Health + Shield + IFrames + Knockback | ★★★★☆ | 防御四件套 |

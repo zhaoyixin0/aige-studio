@@ -8,7 +8,7 @@
 
 ### 1. 游戏类型 (`game-types/`)
 
-定义 14 种游戏类型的核心玩法、必需模块、推荐模块和示例配置：
+定义 16 种游戏类型的核心玩法、必需模块、推荐模块和示例配置：
 
 | 文件 | 游戏类型 | 核心输入 |
 |------|---------|---------|
@@ -26,10 +26,12 @@
 | `world-ar.md` | 世界AR类 | BodyInput |
 | `dress-up.md` | 换装/贴纸类 | FaceInput + TouchInput |
 | `narrative.md` | 分支叙事类 | TouchInput |
+| `platformer.md` | 平台跳跃类 | TouchInput |
+| `action-rpg.md` | 动作RPG类 | TouchInput |
 
 ### 2. 模块技能 (`modules/`)
 
-详细描述 19 个引擎模块的参数、事件和连接方式：
+详细描述 56 个引擎模块的参数、事件和连接方式：
 
 #### 输入模块 (`modules/input/`)
 - `face-input.md` — 面部追踪输入
@@ -39,7 +41,7 @@
 - `device-input.md` — 设备传感器输入
 - `audio-input.md` — 麦克风音频输入
 
-#### 机制模块 (`modules/mechanic/`)
+#### 机制模块 (`modules/mechanic/`) — 基础
 - `spawner.md` — 物体生成器
 - `collision.md` — 碰撞检测
 - `scorer.md` — 计分系统
@@ -48,6 +50,58 @@
 - `difficulty-ramp.md` — 难度递增
 - `randomizer.md` — 随机抽取器
 - `quiz-engine.md` — 答题引擎
+- `runner.md` — 跑酷滚动
+- `jump.md` — 跳跃
+- `combo-system.md` — 连击系统
+- `power-up.md` — 增益道具
+- `player-movement.md` — 玩家移动
+
+#### 机制模块 — 平台跳跃
+- `gravity.md` — 重力系统
+- `static-platform.md` — 静态平台
+- `moving-platform.md` — 移动平台
+- `one-way-platform.md` — 单向平台
+- `crumbling-platform.md` — 碎裂平台
+- `collectible.md` — 收集物
+- `hazard.md` — 危险物
+- `checkpoint.md` — 检查点
+- `inventory.md` — 背包
+- `wall-detect.md` — 墙壁检测
+- `dash.md` — 冲刺
+- `coyote-time.md` — 土狼时间
+- `i-frames.md` — 无敌帧
+- `knockback.md` — 击退
+
+#### 机制模块 — 射击/战斗
+- `projectile.md` — 弹丸系统
+- `aim.md` — 瞄准系统
+- `bullet-pattern.md` — 弹幕模式
+- `enemy-ai.md` — 敌人AI
+- `wave-spawner.md` — 波次生成器
+- `health.md` — 血量系统
+- `shield.md` — 护盾系统
+
+#### 机制模块 — RPG
+- `level-up.md` — 升级系统
+- `status-effect.md` — 状态效果
+- `equipment-slot.md` — 装备栏
+- `enemy-drop.md` — 敌人掉落
+- `skill-tree.md` — 技能树
+- `dialogue-system.md` — 对话系统
+
+#### 机制模块 — 引擎扩展
+- `tween.md` — 补间动画
+- `physics2d.md` — 2D刚体物理
+- `scrolling-layers.md` — 视差滚动背景
+
+#### 机制模块 — 特殊玩法
+- `beat-map.md` — 节拍映射
+- `expression-detector.md` — 表情检测
+- `gesture-match.md` — 手势匹配
+- `match-engine.md` — 配对引擎
+- `branch-state-machine.md` — 分支状态机
+- `dress-up-engine.md` — 换装引擎
+- `plane-detection.md` — 平面检测(AR)
 
 #### 反馈模块 (`modules/feedback/`)
 - `game-flow.md` — 游戏流程控制
@@ -55,6 +109,7 @@
 - `sound-fx.md` — 音效系统
 - `ui-overlay.md` — HUD 叠加层
 - `result-screen.md` — 结算画面
+- `camera-follow.md` — 相机跟随
 
 ### 3. 模块关系 (`relations/`)
 
