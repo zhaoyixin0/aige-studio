@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { SendHorizontal } from 'lucide-react';
 import { useEditorStore } from '@/store/editor-store';
-import type { ChatMessage, Chip } from '@/store/editor-store';
+import { type ChatMessage, type Chip, getPresetIdFromChip } from '@/store/editor-store';
 import { useConversationManager } from '@/app/hooks/use-conversation-manager';
 import { MessageList } from './message-list';
 import { SuggestionChips } from './suggestion-chips';
@@ -65,6 +65,12 @@ export function StudioChatPanel() {
       }
       if (chip.type === 'action' && chip.action) {
         void submitMessage(`执行操作: ${chip.label} [${chip.action}]`);
+        return;
+      }
+      // For preset chips, send as "使用模板 <presetId>"
+      const presetId = getPresetIdFromChip(chip);
+      if (presetId) {
+        void submitMessage(`使用模板 ${presetId}`);
         return;
       }
       // For game_type chips, generate a GameTypeSelector message

@@ -18,6 +18,7 @@ import { ContractRegistry } from '@/engine/core/contract-registry.ts';
 import { createModuleRegistry } from '@/engine/module-setup.ts';
 import { resolveInputProfile } from '@/engine/core/profiles.ts';
 import { ALL_GAME_TYPES, GAME_TYPE_META, getGamePreset, getModuleParams } from './game-presets.ts';
+import { runPresetToConfig, _resetRegistry as _resetPresetRegistry } from '@/engine/systems/recipe-runner/facade.ts';
 import { SkillLoader } from './skill-loader.ts';
 import {
   type ConversationMessage,
@@ -389,6 +390,7 @@ export class ConversationAgent {
       let parameterCard: ParameterCardPayload | undefined;
       let expertInsight: ConversationResult['expertInsight'];
       let moduleTuning: ConversationResult['moduleTuning'];
+      let presetUsed: ConversationResult['presetUsed'];
       let createdThisTurn = false;
 
       for (const block of response.content) {
@@ -424,6 +426,41 @@ export class ConversationAgent {
                   reply += `\n\n检测到 ${vReport.errors.length} 个配置问题，请查看预览工具栏的诊断提示。`;
                 } else if (vReport.fixes.length > 0) {
                   reply += `\n\n已自动修正 ${vReport.fixes.length} 项配置参数。`;
+                }
+              }
+              break;
+            }
+
+            case 'use_preset': {
+              const input = block.input as {
+                preset_id: string;
+                params?: Record<string, unknown>;
+                game_type?: string;
+              };
+              try {
+                const baseConfig = this.buildBaseConfigForPreset(input.game_type);
+                const result = runPresetToConfig(
+                  { presetId: input.preset_id, params: input.params, gameType: input.game_type },
+                  baseConfig,
+                );
+                config = result.config;
+                chips = generateV2CreationChips(input.game_type ?? 'catch');
+                createdThisTurn = true;
+                presetUsed = {
+                  presetId: result.presetId,
+                  title: result.presetId,
+                  pendingAssets: result.pendingAssets.length,
+                };
+                if (!reply) {
+                  reply = `已使用模板「${result.presetId}」创建游戏`;
+                  if (result.pendingAssets.length > 0) {
+                    reply += `，${result.pendingAssets.length} 个素材待生成`;
+                  }
+                  reply += '！';
+                }
+              } catch {
+                if (!reply) {
+                  reply = '模板加载失败，请重试或手动描述你想要的游戏';
                 }
               }
               break;
@@ -551,7 +588,7 @@ export class ConversationAgent {
       // Determine if we still need more info
       const needsMoreInfo = !config && !chips && !parameterCard;
 
-      return { reply, config, chips, needsMoreInfo, parameterCard, expertInsight, moduleTuning };
+      return { reply, config, chips, needsMoreInfo, parameterCard, expertInsight, moduleTuning, presetUsed };
     } catch (error) {
       const errMsg = error instanceof Error ? error.message : String(error);
       return {
@@ -699,6 +736,24 @@ export class ConversationAgent {
     this._lastValidationReport = report;
 
     return report.fixes.length > 0 ? applyFixes(config, report.fixes) : config;
+  }
+
+  private buildBaseConfigForPreset(gameType?: string): GameConfig {
+    const themeId = DEFAULT_THEME[gameType ?? 'catch'] ?? 'fruit';
+    return {
+      version: '1.0.0',
+      meta: {
+        name: '',
+        description: '',
+        thumbnail: null,
+        createdAt: new Date().toISOString(),
+        theme: themeId,
+        artStyle: 'cartoon',
+      },
+      canvas: { width: 1080, height: 1920 },
+      modules: [],
+      assets: {},
+    };
   }
 
   private applyChanges(

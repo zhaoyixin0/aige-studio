@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SendHorizontal, Loader2 } from 'lucide-react';
 import { useEditorStore } from '@/store/editor-store';
-import type { ChatMessage, Chip } from '@/store/editor-store';
+import { type ChatMessage, type Chip, getPresetIdFromChip } from '@/store/editor-store';
 import { useGameStore } from '@/store/game-store';
 import { useEngineContext } from '@/app/hooks/use-engine';
 import { SuggestionChips } from '@/ui/chat/suggestion-chips';
@@ -140,7 +140,12 @@ export function LandingPage() {
 
   const handleChipClick = useCallback(
     (chip: Chip) => {
-      handleSubmit(chip.label);
+      const presetId = getPresetIdFromChip(chip);
+      if (presetId) {
+        handleSubmit(`使用模板 ${presetId}`);
+      } else {
+        handleSubmit(chip.label);
+      }
     },
     [handleSubmit],
   );

@@ -21,6 +21,8 @@ const STYLE_BY_TYPE: Record<ChipType, string> = {
     'bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/30 hover:border-amber-400/50 text-amber-300 hover:text-amber-100',
   action:
     'bg-green-500/10 hover:bg-green-500/20 border border-green-400/30 hover:border-green-400/50 text-green-300 hover:text-green-100',
+  preset:
+    'bg-purple-500/10 hover:bg-purple-500/20 border border-purple-400/30 hover:border-purple-400/50 text-purple-300 hover:text-purple-100',
 };
 
 function chipClasses(type: ChipType): string {

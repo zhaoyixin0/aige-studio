@@ -56,13 +56,13 @@ describe('ChatMessage gameTypeOptions', () => {
 });
 
 describe('DEFAULT_CHIPS type field', () => {
-  it('all DEFAULT_CHIPS have type === "game_type"', () => {
+  it('all DEFAULT_CHIPS have valid type', () => {
     for (const chip of DEFAULT_CHIPS) {
-      expect(chip.type).toBe('game_type');
+      expect(['game_type', 'preset']).toContain(chip.type);
     }
   });
 
   it('DEFAULT_CHIPS count matches expected length', () => {
-    expect(DEFAULT_CHIPS.length).toBe(14);
+    expect(DEFAULT_CHIPS.length).toBe(17);
   });
 });

@@ -35,10 +35,11 @@ export interface ChatMessage {
   l1Controls?: boolean;
   expertInsight?: ExpertInsightPayload;
   moduleTuning?: ModuleTuningPayload;
+  presetUsed?: { presetId: string; title: string; pendingAssets: number };
   timestamp: number;
 }
 
-export type ChipType = 'game_type' | 'param' | 'action' | 'board_mode';
+export type ChipType = 'game_type' | 'param' | 'action' | 'board_mode' | 'preset';
 
 export interface Chip {
   id: string;
@@ -48,6 +49,13 @@ export interface Chip {
   paramId?: string;
   category?: string;
   action?: string;
+}
+
+/** Extract preset ID from a preset chip, or null if not a preset chip. */
+export function getPresetIdFromChip(chip: Chip): string | null {
+  return chip.type === 'preset' && chip.id.startsWith('preset:')
+    ? chip.id.slice('preset:'.length)
+    : null;
 }
 
 export const DEFAULT_CHIPS: Chip[] = [
@@ -65,6 +73,10 @@ export const DEFAULT_CHIPS: Chip[] = [
   { id: 'slingshot', label: '弹弓发射', emoji: '🏹', type: 'game_type' as const },
   { id: 'water-pipe', label: '水管连接', emoji: '🚰', type: 'game_type' as const },
   { id: 'cross-road', label: '过马路', emoji: '🚗', type: 'game_type' as const },
+  // Preset quick-start chips
+  { id: 'preset:hero-catch-fruit', label: '快速开始：接水果', emoji: '\u26A1', type: 'preset' as const },
+  { id: 'preset:hero-shooter-wave', label: '快速开始：射击', emoji: '\u26A1', type: 'preset' as const },
+  { id: 'preset:hero-platformer-basic', label: '快速开始：平台跳跃', emoji: '\u26A1', type: 'preset' as const },
 ];
 
 export interface GameFeelSuggestion {

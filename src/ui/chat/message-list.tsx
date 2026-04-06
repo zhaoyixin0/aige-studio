@@ -10,6 +10,7 @@ import { GuiParamCard } from './gui-param-card';
 import { GameTypeSelector } from './game-type-selector';
 import { ExpertInsightBlock } from './expert-insight-block';
 import { ModuleCombinationCard } from './module-combination-card';
+import { PresetSuggestionBlock } from './preset-suggestion-block';
 import { applyL1Preset } from '@/engine/core/composite-mapper';
 import {
   getLiveValuesForParams,
@@ -215,6 +216,14 @@ function MessageBubble({
           <ModuleCombinationCard
             tuning={message.moduleTuning}
             onApply={() => onApplyTuning(message.moduleTuning!)}
+          />
+        )}
+
+        {!isUser && message.presetUsed && (
+          <PresetSuggestionBlock
+            presetId={message.presetUsed.presetId}
+            title={message.presetUsed.title}
+            pendingAssets={message.presetUsed.pendingAssets}
           />
         )}
       </div>

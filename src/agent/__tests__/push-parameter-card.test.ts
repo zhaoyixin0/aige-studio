@@ -47,8 +47,8 @@ describe('TOOLS includes push_parameter_card', () => {
     for (const name of existingNames) {
       expect(TOOLS.find((t) => t.name === name)).toBeDefined();
     }
-    // Total tools should be 5 now (create_game, modify_game, suggest_enhancements, push_parameter_card, push_expert_insight)
-    expect(TOOLS.length).toBe(5);
+    // Total tools: create_game, modify_game, suggest_enhancements, push_parameter_card, use_preset, push_expert_insight
+    expect(TOOLS.length).toBe(6);
   });
 });
 
