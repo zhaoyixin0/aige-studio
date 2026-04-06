@@ -78,13 +78,13 @@ export function GuiParamCard({
 /*  Tombstone (collapsed read-only summary)                            */
 /* ------------------------------------------------------------------ */
 
-interface TombstoneCardProps {
+export interface TombstoneCardProps {
   readonly title: string;
   readonly params: readonly ParameterMeta[];
   readonly values?: Readonly<Record<string, unknown>>;
 }
 
-function TombstoneCard({ title, params, values = {} }: TombstoneCardProps) {
+export function TombstoneCard({ title, params, values = {} }: TombstoneCardProps) {
   const summary = params
     .map((p) => `${p.name}=${formatDefaultValue(values[p.id] ?? p.defaultValue)}`)
     .join(', ');
@@ -104,13 +104,13 @@ function TombstoneCard({ title, params, values = {} }: TombstoneCardProps) {
 /*  Parameter Row — label + control                                    */
 /* ------------------------------------------------------------------ */
 
-interface ParamRowProps {
+export interface ParamRowProps {
   readonly param: ParameterMeta;
   readonly value?: unknown;
   readonly onParamChange?: (paramId: string, value: unknown) => void;
 }
 
-function ParamRow({ param, value, onParamChange }: ParamRowProps) {
+export function ParamRow({ param, value, onParamChange }: ParamRowProps) {
   const handleChange = useCallback(
     (value: unknown) => onParamChange?.(param.id, value),
     [param.id, onParamChange],
@@ -285,12 +285,12 @@ function InputFieldControl({
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 
-function formatDefaultValue(value: unknown): string {
+export function formatDefaultValue(value: unknown): string {
   if (typeof value === 'boolean') return value ? '开启' : '关闭';
   return String(value);
 }
 
-function categoryLabel(category: string): string {
+export function categoryLabel(category: string): string {
   const labels: Record<string, string> = {
     abstract: '抽象层',
     game_mechanics: '游戏机制',

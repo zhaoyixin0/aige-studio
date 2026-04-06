@@ -48,8 +48,8 @@ vi.mock('../l1-experience-card', () => ({
   ),
 }));
 
-vi.mock('../gui-param-card', () => ({
-  GuiParamCard: (props: any) => (
+vi.mock('../bespoke-cards', () => ({
+  BespokeParamCard: (props: any) => (
     <div
       data-testid="gui-param-card-mock"
       data-category={props.category}

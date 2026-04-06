@@ -6,7 +6,7 @@ import type { GameConfig } from '@/engine/core';
 import { useEditorStore } from '@/store/editor-store';
 import { useGameStore } from '@/store/game-store';
 import { L1ExperienceCard } from './l1-experience-card';
-import { GuiParamCard } from './gui-param-card';
+import { BespokeParamCard } from './bespoke-cards';
 import { GameTypeSelector } from './game-type-selector';
 import { ExpertInsightBlock } from './expert-insight-block';
 import { ModuleCombinationCard } from './module-combination-card';
@@ -189,7 +189,7 @@ function MessageBubble({
         )}
 
         {!isUser && message.parameterCard && (
-          <GuiParamCard
+          <BespokeParamCard
             category={message.parameterCard.category}
             paramIds={message.parameterCard.paramIds}
             title={message.parameterCard.title}
