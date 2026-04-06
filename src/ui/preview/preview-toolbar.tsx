@@ -29,7 +29,14 @@ export function PreviewToolbar() {
         {modes.map(({ mode, icon: Icon, label }) => (
           <button
             key={mode}
-            onClick={() => setPreviewMode(mode)}
+            onClick={() => {
+              if (mode === 'fullscreen' && !document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {
+                  // Fallback: still enter fullscreen preview mode even if API fails
+                });
+              }
+              setPreviewMode(mode);
+            }}
             className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium transition-colors ${
               previewMode === mode
                 ? 'bg-blue-600 text-white'

@@ -81,12 +81,12 @@ function DiagnosticPopover({
         </div>
 
         <div className="divide-y divide-white/5">
-          {allIssues.map((issue) => {
+          {allIssues.map((issue, idx) => {
             const translated = translateIssue(issue);
             const isError = translated.severity === 'error';
 
             return (
-              <div key={`${issue.moduleId}-${issue.category}`} className="px-3 py-2">
+              <div key={`${issue.moduleId}-${issue.category}-${idx}`} className="px-3 py-2">
                 <div className="flex items-center gap-1.5">
                   <span
                     className={`inline-block w-1.5 h-1.5 rounded-full ${

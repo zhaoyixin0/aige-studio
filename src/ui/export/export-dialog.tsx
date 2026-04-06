@@ -36,7 +36,9 @@ export function ExportDialog({ open, onOpenChange }: ExportDialogProps) {
 
   const handleShare = async () => {
     if (!config) return;
-    const encoded = btoa(JSON.stringify(config));
+    const bytes = new TextEncoder().encode(JSON.stringify(config));
+    const binary = Array.from(bytes, (b) => String.fromCharCode(b)).join('');
+    const encoded = btoa(binary);
     const url = `${window.location.origin}${window.location.pathname}#config=${encoded}`;
     await navigator.clipboard.writeText(url);
     setCopied(true);

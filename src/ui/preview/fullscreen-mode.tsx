@@ -17,19 +17,10 @@ export function FullscreenMode() {
   const setPreviewMode = useEditorStore(selectSetPreviewMode);
 
   useEffect(() => {
-    const enter = async () => {
-      try {
-        if (!document.fullscreenElement) {
-          await document.documentElement.requestFullscreen();
-        }
-      } catch {
-        // Fullscreen request may fail (e.g. user gesture requirement).
-        // Fall back to edit mode so the UI doesn't get stuck.
-        setPreviewMode('edit');
-      }
-    };
-
-    enter();
+    // Fullscreen is requested synchronously in the toolbar onClick handler
+    // to satisfy the browser's user-gesture requirement. This component only
+    // monitors the fullscreenchange event to sync state when the user exits
+    // (e.g. pressing ESC).
 
     const handleChange = () => {
       // If fullscreen was exited (e.g. user pressed ESC), reset to edit mode.
