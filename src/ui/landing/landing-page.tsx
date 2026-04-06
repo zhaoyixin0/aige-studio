@@ -6,6 +6,7 @@ import { useGameStore } from '@/store/game-store';
 import { useEngineContext } from '@/app/hooks/use-engine';
 import { SuggestionChips } from '@/ui/chat/suggestion-chips';
 import { FeaturedExpertChip } from '@/ui/experts/featured-expert-chip';
+import { ExpertBrowser } from '@/ui/experts/expert-browser';
 import type { ConversationResult } from '@/agent/conversation-agent';
 import { getConversationAgent } from '@/agent/singleton';
 import { AssetAgent } from '@/services/asset-agent';
@@ -25,6 +26,9 @@ export function LandingPage() {
   const setLayoutPhase = useEditorStore((s) => s.setLayoutPhase);
   const setSuggestionChips = useEditorStore((s) => s.setSuggestionChips);
   const setChatLoading = useEditorStore((s) => s.setChatLoading);
+  const expertBrowserOpen = useEditorStore((s) => s.expertBrowserOpen);
+  const expertBrowserGameType = useEditorStore((s) => s.expertBrowserGameType);
+  const setExpertBrowserOpen = useEditorStore((s) => s.setExpertBrowserOpen);
 
   const setConfig = useGameStore((s) => s.setConfig);
   const batchUpdateAssets = useGameStore((s) => s.batchUpdateAssets);
@@ -245,12 +249,33 @@ export function LandingPage() {
         <div className="w-full mt-3">
           <SuggestionChips onChipClick={handleChipClick} />
           {chatMessages.length === 0 && (
-            <div className="flex justify-center mt-2">
+            <div className="flex flex-col items-center gap-2 mt-2">
               <FeaturedExpertChip onUse={(id) => handleSubmit(`使用模板 ${id}`)} />
+              <button
+                type="button"
+                onClick={() => setExpertBrowserOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm
+                  text-purple-400 hover:text-purple-200 hover:bg-purple-500/10
+                  border border-purple-500/20 hover:border-purple-400/40
+                  transition-colors duration-200"
+              >
+                浏览全部专家模板
+              </button>
             </div>
           )}
         </div>
       </div>
+
+      {/* Expert Browser Modal */}
+      <ExpertBrowser
+        isOpen={expertBrowserOpen}
+        onClose={() => setExpertBrowserOpen(false)}
+        onUsePreset={(id) => {
+          setExpertBrowserOpen(false);
+          handleSubmit(`使用模板 ${id}`);
+        }}
+        initialGameType={expertBrowserGameType ?? undefined}
+      />
     </div>
   );
 }

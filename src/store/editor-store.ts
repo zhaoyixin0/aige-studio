@@ -114,6 +114,9 @@ interface EditorStore {
   l1State: L1State;
   boardModeOpen: boolean;
 
+  expertBrowserOpen: boolean;
+  expertBrowserGameType: string | null;
+
   gameFeel: GameFeelState;
 
   selectModule: (id: string | null) => void;
@@ -129,6 +132,7 @@ interface EditorStore {
   setValidationReport: (report: ValidationReport | null) => void;
   setL1State: (partial: Partial<L1State>) => void;
   setBoardModeOpen: (open: boolean) => void;
+  setExpertBrowserOpen: (open: boolean, gameType?: string | null) => void;
   setGameFeel: (partial: Partial<GameFeelState>) => void;
 }
 
@@ -144,6 +148,8 @@ export const useEditorStore = create<EditorStore>((set) => ({
   editorExpanded: false,
   l1State: { difficulty: 'normal', pacing: 50, emotion: 'cartoon' },
   boardModeOpen: false,
+  expertBrowserOpen: false,
+  expertBrowserGameType: null,
   gameFeel: { score: 0, dimensions: {}, suggestions: [], badge: null },
 
   selectModule: (id) => set({ selectedModuleId: id }),
@@ -174,6 +180,11 @@ export const useEditorStore = create<EditorStore>((set) => ({
   setL1State: (partial) =>
     set((state) => ({ l1State: { ...state.l1State, ...partial } })),
   setBoardModeOpen: (open) => set({ boardModeOpen: open }),
+  setExpertBrowserOpen: (open, gameType) =>
+    set({
+      expertBrowserOpen: open,
+      expertBrowserGameType: open ? (gameType ?? null) : null,
+    }),
   setGameFeel: (partial) =>
     set((state) => ({ gameFeel: { ...state.gameFeel, ...partial } })),
 }));

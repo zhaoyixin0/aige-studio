@@ -6,6 +6,7 @@ import { useConversationManager } from '@/app/hooks/use-conversation-manager';
 import { MessageList } from './message-list';
 import { L3PillsPanel } from './l3-pills-panel';
 import { SuggestionChips } from './suggestion-chips';
+import { ExpertBrowser } from '@/ui/experts/expert-browser';
 
 /* ------------------------------------------------------------------ */
 /*  Stable Zustand selectors                                           */
@@ -26,6 +27,9 @@ export function StudioChatPanel() {
   const isChatLoading = useEditorStore(selectIsChatLoading);
   const chips = useEditorStore(selectSuggestionChips);
   const addChatMessage = useEditorStore(selectAddChatMessage);
+  const expertBrowserOpen = useEditorStore((s) => s.expertBrowserOpen);
+  const expertBrowserGameType = useEditorStore((s) => s.expertBrowserGameType);
+  const setExpertBrowserOpen = useEditorStore((s) => s.setExpertBrowserOpen);
 
   const { submitMessage } = useConversationManager();
 
@@ -141,6 +145,17 @@ export function StudioChatPanel() {
           </button>
         </div>
       </div>
+
+      {/* Expert Browser Modal */}
+      <ExpertBrowser
+        isOpen={expertBrowserOpen}
+        onClose={() => setExpertBrowserOpen(false)}
+        onUsePreset={(id) => {
+          setExpertBrowserOpen(false);
+          void submitMessage(`使用模板 ${id}`);
+        }}
+        initialGameType={expertBrowserGameType ?? undefined}
+      />
     </div>
   );
 }

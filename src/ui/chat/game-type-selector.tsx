@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { EXPERT_PRESETS } from '@/engine/systems/recipe-runner/index.ts';
 import { countByGameType } from '@/ui/experts/expert-utils.ts';
+import { useEditorStore } from '@/store/editor-store';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -29,9 +30,10 @@ interface CardProps {
   readonly expertCount: number;
   readonly onHover: (id: string | null) => void;
   readonly onConfirm: (id: string) => void;
+  readonly onBadgeClick: (gameType: string) => void;
 }
 
-function GameTypeCard({ option, isHovered, expertCount, onHover, onConfirm }: CardProps) {
+function GameTypeCard({ option, isHovered, expertCount, onHover, onConfirm, onBadgeClick }: CardProps) {
   const baseClasses =
     'flex flex-col items-center gap-2 rounded-xl p-4 transition-all duration-200 border cursor-pointer';
   const stateClasses = isHovered
@@ -58,12 +60,19 @@ function GameTypeCard({ option, isHovered, expertCount, onHover, onConfirm }: Ca
         </span>
       )}
       {expertCount > 0 && (
-        <span
-          className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-400/30 text-purple-300"
+        <button
+          type="button"
+          aria-label={`浏览 ${option.name} 专家模板`}
+          className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-400/30 text-purple-300
+            hover:bg-purple-500/25 hover:border-purple-400/50 hover:text-purple-200 transition-colors cursor-pointer"
           data-testid="expert-badge"
+          onClick={(e) => {
+            e.stopPropagation();
+            onBadgeClick(option.id);
+          }}
         >
           {expertCount} 款专家模板
-        </span>
+        </button>
       )}
       <button
         type="button"
@@ -128,6 +137,7 @@ export function GameTypeSelector({ options, onSelect }: GameTypeSelectorProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const setExpertBrowserOpen = useEditorStore((s) => s.setExpertBrowserOpen);
 
   const COLLAPSED_COUNT = 6;
 
@@ -207,6 +217,7 @@ export function GameTypeSelector({ options, onSelect }: GameTypeSelectorProps) {
             expertCount={expertCounts.get(option.id) ?? 0}
             onHover={handleHover}
             onConfirm={handleConfirm}
+            onBadgeClick={(gt) => setExpertBrowserOpen(true, gt)}
           />
         ))}
       </div>
