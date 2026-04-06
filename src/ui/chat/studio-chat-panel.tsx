@@ -4,6 +4,7 @@ import { useEditorStore } from '@/store/editor-store';
 import { type ChatMessage, type Chip, getPresetIdFromChip } from '@/store/editor-store';
 import { useConversationManager } from '@/app/hooks/use-conversation-manager';
 import { MessageList } from './message-list';
+import { L3PillsPanel } from './l3-pills-panel';
 import { SuggestionChips } from './suggestion-chips';
 
 /* ------------------------------------------------------------------ */
@@ -112,6 +113,9 @@ export function StudioChatPanel() {
 
       {/* Messages */}
       <MessageList messages={chatMessages} isLoading={isChatLoading} />
+
+      {/* L3 parameter pills */}
+      <L3PillsPanel />
 
       {/* Suggestion chips */}
       <SuggestionChips onChipClick={handleChipClick} />
