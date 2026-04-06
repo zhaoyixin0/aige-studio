@@ -72,6 +72,9 @@ export { WaveSpawner } from './mechanic/wave-spawner';
 // Mechanic — Tween
 export { Tween } from './mechanic/tween';
 
+// Mechanic — Physics2D
+export { Physics2D } from './mechanic/physics2d';
+
 // Feedback
 export { GameFlow } from './feedback/game-flow';
 export { ParticleVFX } from './feedback/particle-vfx';

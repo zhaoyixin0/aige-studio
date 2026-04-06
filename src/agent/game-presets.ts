@@ -807,12 +807,17 @@ const PRESETS: Partial<Record<GameType, GamePreset>> = {
   slingshot: {
     GameFlow:       { countdown: 3, onFinish: 'show_result' },
     Gravity:        { g: 9.8, pixelsPerMeter: 33.33 },
+    Physics2D:      { gravityX: 0, gravityY: 9.81, pixelsPerMeter: 33.33 },
     Aim:            { mode: 'drag', sensitivity: 1.0 },
     Projectile:     { speed: 800, gravityScale: 1.0, autoFire: false },
     Collision:      { rules: [{ a: 'projectile', b: 'items', event: 'hit', destroy: ['b'] }] },
     Scorer:         { perHit: 15 },
     Timer:          { duration: 60, mode: 'countdown' },
     DifficultyRamp: { mode: 'time', rules: [] },
+    Tween:          { clips: [
+      { id: 'hit', duration: 0.15, tracks: [{ property: 'alpha', from: 0.3, to: 1.0, easing: 'Linear' }] },
+      { id: 'spawn-in', duration: 0.3, tracks: [{ property: 'scaleX', from: 0, to: 1, easing: 'BounceOut' }, { property: 'scaleY', from: 0, to: 1, easing: 'BounceOut' }] },
+    ] },
     ParticleVFX:    { events: { 'collision:hit': 'sparkle' } },
     SoundFX:        { events: { 'collision:hit': 'pop' } },
     UIOverlay:      {},
@@ -866,6 +871,7 @@ const PRESETS: Partial<Record<GameType, GamePreset>> = {
   bouncing: {
     GameFlow:        { countdown: 3, onFinish: 'show_result' },
     Gravity:         { g: 5.0, pixelsPerMeter: 33.33 },
+    Physics2D:       { gravityX: 0, gravityY: 5.0, pixelsPerMeter: 33.33 },
     PlayerMovement:  { mode: 'follow', speed: 400, lerp: 0.12 },
     Spawner:         { frequency: 1.2, maxCount: 5, speed: { min: 50, max: 150 }, direction: 'random',
       items: [{ asset: 'good_1', weight: 3 }, { asset: 'good_2', weight: 2 }],
@@ -874,6 +880,10 @@ const PRESETS: Partial<Record<GameType, GamePreset>> = {
     Scorer:          { perHit: 10, combo: { enabled: true, window: 2000, multiplier: [1, 1.5, 2] } },
     Timer:           { duration: 60, mode: 'countdown' },
     DifficultyRamp:  { mode: 'time', rules: [] },
+    Tween:           { clips: [
+      { id: 'hit', duration: 0.15, tracks: [{ property: 'alpha', from: 0.3, to: 1.0, easing: 'Linear' }] },
+      { id: 'spawn-in', duration: 0.3, tracks: [{ property: 'scaleX', from: 0, to: 1, easing: 'BounceOut' }, { property: 'scaleY', from: 0, to: 1, easing: 'BounceOut' }] },
+    ] },
     UIOverlay:       {},
     ResultScreen:    { show: ['score'], rating: { '3star': 150, '2star': 80, '1star': 30 } },
     TouchInput:      { playerSize: 64 },

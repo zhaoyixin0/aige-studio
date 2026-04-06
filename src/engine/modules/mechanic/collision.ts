@@ -102,6 +102,10 @@ export class Collision extends BaseModule {
     this.objects.delete(id);
   }
 
+  getObjectIds(): string[] {
+    return Array.from(this.objects.keys());
+  }
+
   addPreUpdateHook(hook: PreUpdateHook): void {
     this.preUpdateHooks = [...this.preUpdateHooks, hook];
   }

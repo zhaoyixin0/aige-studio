@@ -167,6 +167,61 @@ const BRIDGE_RULES: WiringRule[] = [
     },
   },
   {
+    // Spawner + Physics2D: auto-create/remove physics bodies for spawned objects
+    requires: ['Spawner', 'Physics2D'],
+    setup: (engine, modules, on) => {
+      const sp = modules.get('Spawner') as any;
+      on('spawner:created', (data?: unknown) => {
+        const d = asRecord(data);
+        if (d.id != null && d.x != null && d.y != null) {
+          // Read spriteSize at spawn time (not wire time) so runtime param edits take effect
+          const currentSpriteSize = (sp.getParams().spriteSize ?? 48) as number;
+          engine.eventBus.emit('physics2d:add-body', {
+            entityId: String(d.id),
+            body: { type: 'dynamic', linearDamping: 0.1, fixedRotation: false },
+            colliders: [{ shape: { kind: 'Circle', radius: currentSpriteSize * 0.5 }, restitution: 0.6, friction: 0.2 }],
+            x: Number(d.x), y: Number(d.y),
+          });
+        }
+      });
+      on('spawner:destroyed', (data?: unknown) => {
+        const d = asRecord(data);
+        if (d.id != null) {
+          engine.eventBus.emit('physics2d:remove-body', { entityId: String(d.id) });
+        }
+      });
+    },
+  },
+  {
+    // Physics2D + Collision: mirror physics positions into Collision for hit detection
+    requires: ['Physics2D', 'Collision'],
+    setup: (_engine, modules) => {
+      const phys = modules.get('Physics2D') as any;
+      const collision = modules.get('Collision') as any;
+      collision.addPreUpdateHook(() => {
+        const ids: string[] = collision.getObjectIds?.() ?? [];
+        for (const id of ids) {
+          const p = phys.getBodyPosition(id);
+          if (p) collision.updateObject(id, { x: p.x, y: p.y });
+        }
+      });
+    },
+  },
+  {
+    // Physics2D + Tween: contact feedback (only when Collision is absent)
+    requires: ['Physics2D', 'Tween'],
+    setup: (engine, modules, on) => {
+      if (modules.has('Collision')) return;
+      on('physics2d:contact-begin', (data?: unknown) => {
+        const d = asRecord(data);
+        const entityId = d.entityIdB ?? d.entityIdA;
+        if (entityId != null) {
+          engine.eventBus.emit('tween:trigger', { clipId: 'hit', entityId: String(entityId) });
+        }
+      });
+    },
+  },
+  {
     // WaveSpawner + EnemyAI: spawn enemies into AI system
     requires: ['WaveSpawner', 'EnemyAI'],
     setup: (_engine, modules, on) => {

@@ -8,6 +8,7 @@ import { FloatTextRenderer } from './float-text-renderer';
 import { SoundSynth } from './sound-synth';
 import { ShooterRenderer } from './shooter-renderer';
 import { RPGOverlayRenderer } from './rpg-overlay-renderer';
+import { PhysicsDebugRenderer } from './physics-debug-renderer';
 import { getTheme, type GameTheme } from './theme-registry';
 
 export class PixiRenderer {
@@ -23,6 +24,7 @@ export class PixiRenderer {
   private soundSynth: SoundSynth | null = null;
   private shooterRenderer: ShooterRenderer | null = null;
   private rpgOverlayRenderer: RPGOverlayRenderer | null = null;
+  private physicsDebugRenderer: PhysicsDebugRenderer | null = null;
   private initialized = false;
   private currentThemeId: string | null = null;
   private connectedEngine: Engine | null = null;
@@ -71,6 +73,7 @@ export class PixiRenderer {
     this.hudRenderer = new HudRenderer(this.hudLayer, width, height);
     this.particleRenderer = new ParticleRenderer(this.gameLayer);
     this.floatTextRenderer = new FloatTextRenderer(this.gameLayer);
+    this.physicsDebugRenderer = new PhysicsDebugRenderer(this.gameLayer);
 
     // Draw default background
     this.drawBackground(getTheme('fruit'));
@@ -212,10 +215,16 @@ export class PixiRenderer {
       }
     }
 
+    // Sync Physics2D body positions to game object renderer before sprite layout
+    this.syncPhysics2DPositions(engine);
+
     this.gameObjectRenderer?.sync(engine);
     this.shooterRenderer?.sync(engine, dtMs);
     this.hudRenderer?.sync(engine, dtMs);
     this.rpgOverlayRenderer?.sync(engine, dtMs);
+
+    // Physics debug overlay
+    this.physicsDebugRenderer?.sync(engine);
 
     // Update particle and float text systems
     this.particleRenderer?.update(dtSec);
@@ -238,6 +247,7 @@ export class PixiRenderer {
     this.gameObjectRenderer?.reset();
     this.shooterRenderer?.reset();
     this.rpgOverlayRenderer?.reset();
+    this.physicsDebugRenderer?.reset();
 
     // Create sound synth
     if (!this.soundSynth) {
@@ -252,6 +262,9 @@ export class PixiRenderer {
 
     // Wire iframes visual feedback to game object renderer (tracked for cleanup)
     this.gameObjectRenderer?.wireIFramesEvents(listen);
+
+    // Wire physics debug renderer events
+    this.physicsDebugRenderer?.wire(listen);
 
     listen('collision:hit', (data?: any) => {
       const x = data?.x ?? 540;
@@ -423,6 +436,22 @@ export class PixiRenderer {
     }
   }
 
+  /** Sync Physics2D body positions into GameObjectRenderer before sprite layout */
+  private syncPhysics2DPositions(engine: Engine): void {
+    const physics2d = engine.getModulesByType('Physics2D')[0] as any;
+    if (!physics2d || !this.gameObjectRenderer) return;
+    const spawners = engine.getModulesByType('Spawner');
+    for (const spawner of spawners) {
+      const objects = (spawner as any).getObjects?.() ?? [];
+      for (const obj of objects) {
+        const pos = physics2d.getBodyPosition(obj.id);
+        if (pos) {
+          this.gameObjectRenderer.applyPhysicsPosition(obj.id, pos.x, pos.y);
+        }
+      }
+    }
+  }
+
   destroy(): void {
     if (!this.initialized) return;
     this.initialized = false;
@@ -446,6 +475,8 @@ export class PixiRenderer {
     this.shooterRenderer = null;
     this.rpgOverlayRenderer?.destroy();
     this.rpgOverlayRenderer = null;
+    this.physicsDebugRenderer?.destroy();
+    this.physicsDebugRenderer = null;
     this.particleRenderer?.destroy();
     this.particleRenderer = null;
     this.floatTextRenderer?.destroy();

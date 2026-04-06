@@ -29,6 +29,8 @@ export class GameObjectRenderer {
   private iframesStartTime = 0;
   /** Pending tween offsets applied during sync() */
   private tweenOffsets = new Map<string, Partial<Record<string, number>>>();
+  /** Physics2D body position overrides */
+  private physicsPositions = new Map<string, { x: number; y: number }>();
 
   constructor(container: Container) {
     this.container = container;
@@ -36,6 +38,7 @@ export class GameObjectRenderer {
 
   destroy(): void {
     this.tweenOffsets.clear();
+    this.physicsPositions.clear();
     for (const tex of this.textureCache.values()) {
       tex.destroy(true);
     }
@@ -70,6 +73,19 @@ export class GameObjectRenderer {
   /** Remove all tween offsets for an entity. */
   clearTweenOffset(entityId: string): void {
     this.tweenOffsets.delete(entityId);
+  }
+
+  /** Store physics body position override for an entity. Returns false if sprite not found. */
+  applyPhysicsPosition(entityId: string, x: number, y: number): boolean {
+    const sprite = this.sprites.get(entityId) ?? (entityId === 'player_1' ? this.playerSprite : null);
+    if (!sprite) return false;
+    this.physicsPositions.set(entityId, { x, y });
+    return true;
+  }
+
+  /** Remove physics position override for an entity. */
+  clearPhysicsPosition(entityId: string): void {
+    this.physicsPositions.delete(entityId);
   }
 
   sync(engine: Engine): void {
@@ -183,8 +199,15 @@ export class GameObjectRenderer {
           this.container.addChild(wrapper);
           this.sprites.set(obj.id, wrapper);
         }
-        wrapper.x = obj.x;
-        wrapper.y = obj.y;
+        // Physics2D position override (if body exists), else use Spawner position
+        const physPos = this.physicsPositions.get(obj.id);
+        if (physPos) {
+          wrapper.x = physPos.x;
+          wrapper.y = physPos.y;
+        } else {
+          wrapper.x = obj.x;
+          wrapper.y = obj.y;
+        }
         wrapper.rotation = obj.rotation ?? 0;
       }
     }
@@ -196,6 +219,7 @@ export class GameObjectRenderer {
         sprite.destroy();
         this.sprites.delete(id);
         this.tweenOffsets.delete(id);
+        this.physicsPositions.delete(id);
       }
     }
   }
@@ -538,6 +562,7 @@ export class GameObjectRenderer {
     this.iframesActive = false;
     this.iframesStartTime = 0;
     this.tweenOffsets.clear();
+    this.physicsPositions.clear();
     for (const sprite of this.sprites.values()) {
       this.container.removeChild(sprite);
       sprite.destroy();

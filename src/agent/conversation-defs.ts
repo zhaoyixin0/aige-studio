@@ -79,6 +79,8 @@ export const ALL_MODULES = [
   'EnemyDrop', 'LevelUp', 'StatusEffect', 'SkillTree', 'EquipmentSlot', 'DialogueSystem',
   // Mechanic — Tween
   'Tween',
+  // Mechanic — Physics2D
+  'Physics2D',
   // Feedback
   'GameFlow', 'CameraFollow', 'ParticleVFX', 'SoundFX', 'UIOverlay', 'ResultScreen',
 ];
