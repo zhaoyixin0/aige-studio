@@ -1,4 +1,4 @@
-import { Container, Graphics, Texture, TilingSprite } from 'pixi.js';
+import { Container, Texture, TilingSprite } from 'pixi.js';
 import type { LayerState } from '@/engine/systems/scrolling-layers/types';
 
 const TILE_SIZE = 256;
@@ -81,21 +81,25 @@ export class ParallaxRenderer {
       const cached = this.textureCache.get(src);
       if (cached) return cached;
 
-      // Load via canvas (same pattern as game-object-renderer)
-      const canvas = document.createElement('canvas');
-      canvas.width = TILE_SIZE;
-      canvas.height = TILE_SIZE;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        const img = new window.Image();
-        img.onload = () => {
-          ctx.drawImage(img, 0, 0, TILE_SIZE, TILE_SIZE);
-        };
-        img.src = src;
-      }
-      const tex = Texture.from(canvas);
-      this.textureCache.set(src, tex);
-      return tex;
+      // Return procedural placeholder immediately; async-load real texture
+      const placeholder = this.buildProceduralTile(textureId);
+      const capturedSrc = src;
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = TILE_SIZE;
+        canvas.height = TILE_SIZE;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.drawImage(img, 0, 0, TILE_SIZE, TILE_SIZE);
+        const tex = Texture.from(canvas);
+        this.textureCache.set(capturedSrc, tex);
+        // Update existing sprite if it was created with the placeholder
+        const sprite = this.layerSprites.get(textureId);
+        if (sprite) sprite.texture = tex;
+      };
+      img.src = src;
+      return placeholder;
     }
 
     // Procedural fallback: semi-transparent diagonal stripes
@@ -107,28 +111,30 @@ export class ParallaxRenderer {
     const cached = this.textureCache.get(cacheKey);
     if (cached) return cached;
 
-    const g = new Graphics();
-    // Hash seed to get a subtle color variation
-    const hash = seed.split('').reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0);
-    const hue = Math.abs(hash) % 360;
-    const r = Math.round(128 + 40 * Math.cos(hue * Math.PI / 180));
-    const gv = Math.round(128 + 40 * Math.cos((hue + 120) * Math.PI / 180));
-    const b = Math.round(128 + 40 * Math.cos((hue + 240) * Math.PI / 180));
-    const color = (r << 16) | (gv << 8) | b;
-
-    // Draw diagonal stripes
-    for (let i = -TILE_SIZE; i < TILE_SIZE * 2; i += 32) {
-      g.moveTo(i, 0).lineTo(i + TILE_SIZE, TILE_SIZE)
-        .stroke({ color, width: 2, alpha: 0.15 });
-    }
-
+    // Draw directly to Canvas 2D API (not PixiJS Graphics)
     const canvas = document.createElement('canvas');
     canvas.width = TILE_SIZE;
     canvas.height = TILE_SIZE;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      // Hash seed for subtle color variation
+      const hash = seed.split('').reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0);
+      const hue = Math.abs(hash) % 360;
+      const r = Math.round(128 + 40 * Math.cos(hue * Math.PI / 180));
+      const gv = Math.round(128 + 40 * Math.cos((hue + 120) * Math.PI / 180));
+      const b = Math.round(128 + 40 * Math.cos((hue + 240) * Math.PI / 180));
+      ctx.strokeStyle = `rgba(${r},${gv},${b},0.15)`;
+      ctx.lineWidth = 2;
+      for (let i = -TILE_SIZE; i < TILE_SIZE * 2; i += 32) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i + TILE_SIZE, TILE_SIZE);
+        ctx.stroke();
+      }
+    }
 
     const tex = Texture.from(canvas);
     this.textureCache.set(cacheKey, tex);
-    g.destroy();
     return tex;
   }
 }
