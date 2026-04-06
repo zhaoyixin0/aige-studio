@@ -343,6 +343,10 @@ export class ConversationAgent {
     message: string,
     currentConfig?: GameConfig,
   ): Promise<ConversationResult> {
+    // Deterministic preset interception — works with or without API key
+    const presetResult = this.tryPresetDirect(message);
+    if (presetResult) return presetResult;
+
     // No API key — fall back to pattern matching
     if (!this.client) {
       return this.processWithoutApi(message);
@@ -794,9 +798,51 @@ export class ConversationAgent {
       };
     }
 
-    // Could not detect — return chips for game type selection (V2: type field)
-    // Show up to 12 supported types from GAME_TYPE_META
-    const typeChips: Chip[] = ALL_GAME_TYPES
+    // Could not detect — return chips for game type selection
+    return {
+      reply: '没有检测到具体游戏类型，请选择一种游戏类型开始创建：',
+      chips: this.getGameTypeChips(),
+      needsMoreInfo: true,
+    };
+  }
+
+  /* ---------------------------------------------------------------- */
+  /*  Private: deterministic preset interception                       */
+  /* ---------------------------------------------------------------- */
+
+  private tryPresetDirect(message: string): ConversationResult | null {
+    const match =
+      message.trim().match(/^(?:使用|用|采用|应用)\s*模板\s+(\S+)/i) ??
+      message.trim().match(/^use\s+(?:preset|template)\s+(\S+)/i);
+    if (!match) return null;
+
+    const presetId = match[1];
+    try {
+      const base = this.buildBaseConfigForPreset();
+      const result = runPresetToConfig({ presetId }, base);
+      const gt = this.inferGameType(result.config);
+      const chips = generateV2CreationChips(gt);
+      return {
+        reply: `已使用模板「${result.presetId}」创建游戏${result.pendingAssets.length > 0 ? `，${result.pendingAssets.length} 个素材待生成` : ''}！`,
+        config: result.config,
+        chips,
+        presetUsed: {
+          presetId: result.presetId,
+          title: result.presetId,
+          pendingAssets: result.pendingAssets.length,
+        },
+      };
+    } catch {
+      return {
+        reply: `模板「${presetId}」加载失败，请重试或手动描述你想要的游戏。`,
+        chips: this.getGameTypeChips(),
+        needsMoreInfo: true,
+      };
+    }
+  }
+
+  private getGameTypeChips(): Chip[] {
+    return ALL_GAME_TYPES
       .filter((id) => GAME_TYPE_META[id].supportedToday !== false)
       .slice(0, 12)
       .map((id) => ({
@@ -805,12 +851,6 @@ export class ConversationAgent {
         emoji: GAME_TYPE_META[id].emoji,
         type: 'game_type' as const,
       }));
-
-    return {
-      reply: '没有检测到具体游戏类型，请选择一种游戏类型开始创建：',
-      chips: typeChips,
-      needsMoreInfo: true,
-    };
   }
 
   /* ---------------------------------------------------------------- */
