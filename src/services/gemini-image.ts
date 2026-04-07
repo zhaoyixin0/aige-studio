@@ -1,8 +1,6 @@
 // src/services/gemini-image.ts
 // Nano Banana Pro (gemini-3-pro-image-preview) image generation service.
-
-const NANO_BANANA_PRO_ENDPOINT =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent';
+// Calls /api/gemini serverless proxy — API key stays server-side.
 
 export type ImageStyle = 'cartoon' | 'pixel' | 'flat' | 'realistic' | 'watercolor' | 'chibi';
 
@@ -21,66 +19,43 @@ export interface ImageGenOptions {
 }
 
 export class GeminiImageService {
-  private apiKey: string;
-
-  constructor(apiKey: string) {
-    this.apiKey = apiKey;
-  }
-
-  /**
-   * Generate an image with style hints injected into the prompt.
-   * Used by the manual AI generate dialog.
-   */
   async generateImage(prompt: string, style: ImageStyle = 'cartoon', options?: ImageGenOptions): Promise<string> {
     const styleHint = STYLE_PROMPTS[style] ?? STYLE_PROMPTS.cartoon;
     const fullPrompt = `Game sprite asset: ${prompt}. Simple, clean icon for a mobile game. ${styleHint}`;
     return this.callAPI(fullPrompt, options);
   }
 
-  /**
-   * Send a prompt as-is without adding style hints.
-   * Used by AssetAgent with PromptBuilder's complete prompt.
-   */
   async generateImageRaw(prompt: string, options?: ImageGenOptions): Promise<string> {
     return this.callAPI(prompt, options);
   }
 
-  /** Call Nano Banana Pro generateContent API */
   private async callAPI(promptText: string, options?: ImageGenOptions): Promise<string> {
-    const aspectRatio = options?.aspectRatio ?? '1:1';
-    const imageSize = options?.imageSize ?? '1K';
-
-    const response = await fetch(`${NANO_BANANA_PRO_ENDPOINT}?key=${this.apiKey}`, {
+    const response = await fetch('/api/gemini', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{
-          parts: [{ text: promptText }],
-        }],
-        generationConfig: {
-          responseModalities: ['TEXT', 'IMAGE'],
-          imageConfig: {
-            aspectRatio,
-            imageSize,
-          },
-        },
+        prompt: promptText,
+        aspectRatio: options?.aspectRatio,
+        imageSize: options?.imageSize,
       }),
     });
 
     if (!response.ok) {
-      const errorBody = await response.text().catch(() => '');
+      const err = await response.json().catch(() => ({ error: response.statusText }));
       throw new Error(
-        `Imagen API error: ${response.status}${errorBody ? ` — ${errorBody.slice(0, 200)}` : ''}`,
+        `Imagen API error: ${response.status} — ${(err as Record<string, string>).error ?? 'unknown'}`,
       );
     }
 
     const data = await response.json();
 
     // Parse generateContent response: candidates[0].content.parts[]
-    const parts = data.candidates?.[0]?.content?.parts;
-    if (Array.isArray(parts)) {
-      for (const part of parts) {
-        const inline = part.inlineData ?? part.inline_data;
+    const parts = (data as Record<string, unknown[]>).candidates?.[0] as Record<string, unknown> | undefined;
+    const contentParts = (parts?.content as Record<string, unknown[]>)?.parts;
+    if (Array.isArray(contentParts)) {
+      for (const part of contentParts) {
+        const inline = (part as Record<string, Record<string, string>>).inlineData
+          ?? (part as Record<string, Record<string, string>>).inline_data;
         if (inline?.data) {
           const mime = inline.mimeType ?? inline.mime_type ?? 'image/png';
           return `data:${mime};base64,${inline.data}`;
@@ -96,11 +71,7 @@ let _instance: GeminiImageService | null = null;
 
 export function getGeminiImageService(): GeminiImageService {
   if (!_instance) {
-    const key = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
-    if (!key) {
-      throw new Error('VITE_GEMINI_API_KEY is not configured in .env');
-    }
-    _instance = new GeminiImageService(key);
+    _instance = new GeminiImageService();
   }
   return _instance;
 }

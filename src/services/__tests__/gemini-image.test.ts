@@ -1,16 +1,15 @@
 // src/services/__tests__/gemini-image.test.ts
-// TDD RED: Tests for Nano Banana Pro API upgrade
+// Tests for GeminiImageService via /api/gemini proxy
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// We test the class directly; constructor takes an API key
 import { GeminiImageService } from '../gemini-image';
 
-describe('GeminiImageService (Nano Banana Pro)', () => {
+describe('GeminiImageService (proxy)', () => {
   let service: GeminiImageService;
   let fetchSpy: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    service = new GeminiImageService('test-api-key');
+    service = new GeminiImageService();
     fetchSpy = vi.fn();
     vi.stubGlobal('fetch', fetchSpy);
   });
@@ -19,8 +18,8 @@ describe('GeminiImageService (Nano Banana Pro)', () => {
     vi.restoreAllMocks();
   });
 
-  describe('API endpoint', () => {
-    it('should call Nano Banana Pro generateContent endpoint', async () => {
+  describe('proxy endpoint', () => {
+    it('should call /api/gemini proxy', async () => {
       fetchSpy.mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({
@@ -36,15 +35,10 @@ describe('GeminiImageService (Nano Banana Pro)', () => {
 
       expect(fetchSpy).toHaveBeenCalledOnce();
       const url = fetchSpy.mock.calls[0][0] as string;
-      expect(url).toContain('gemini-3-pro-image-preview');
-      expect(url).toContain('generateContent');
-      expect(url).not.toContain('imagen-4.0');
-      expect(url).not.toContain(':predict');
+      expect(url).toBe('/api/gemini');
     });
-  });
 
-  describe('request format', () => {
-    it('should use generateContent body format with contents array', async () => {
+    it('should send prompt in request body', async () => {
       fetchSpy.mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({
@@ -59,36 +53,12 @@ describe('GeminiImageService (Nano Banana Pro)', () => {
       await service.generateImageRaw('a cute robot');
 
       const body = JSON.parse(fetchSpy.mock.calls[0][1].body);
-      // New format: contents array
-      expect(body.contents).toBeDefined();
-      expect(body.contents[0].parts[0].text).toBe('a cute robot');
-      // Should NOT have old format
-      expect(body.instances).toBeUndefined();
-      expect(body.parameters).toBeUndefined();
-    });
-
-    it('should include responseModalities IMAGE in generationConfig', async () => {
-      fetchSpy.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({
-          candidates: [{
-            content: {
-              parts: [{ inlineData: { mimeType: 'image/png', data: 'base64data' } }],
-            },
-          }],
-        }),
-      });
-
-      await service.generateImageRaw('test');
-
-      const body = JSON.parse(fetchSpy.mock.calls[0][1].body);
-      expect(body.generationConfig).toBeDefined();
-      expect(body.generationConfig.responseModalities).toContain('IMAGE');
+      expect(body.prompt).toBe('a cute robot');
     });
   });
 
   describe('aspectRatio and imageSize', () => {
-    it('should default to 1:1 aspectRatio and 1K imageSize', async () => {
+    it('should pass custom aspectRatio for backgrounds', async () => {
       fetchSpy.mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({
@@ -100,34 +70,13 @@ describe('GeminiImageService (Nano Banana Pro)', () => {
         }),
       });
 
-      await service.generateImageRaw('test');
+      await service.generateImageRaw('background scene', { aspectRatio: '9:16' });
 
       const body = JSON.parse(fetchSpy.mock.calls[0][1].body);
-      expect(body.generationConfig.imageConfig.aspectRatio).toBe('1:1');
-      expect(body.generationConfig.imageConfig.imageSize).toBe('1K');
+      expect(body.aspectRatio).toBe('9:16');
     });
 
-    it('should accept custom aspectRatio for backgrounds', async () => {
-      fetchSpy.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({
-          candidates: [{
-            content: {
-              parts: [{ inlineData: { mimeType: 'image/png', data: 'base64data' } }],
-            },
-          }],
-        }),
-      });
-
-      await service.generateImageRaw('background scene', {
-        aspectRatio: '9:16',
-      });
-
-      const body = JSON.parse(fetchSpy.mock.calls[0][1].body);
-      expect(body.generationConfig.imageConfig.aspectRatio).toBe('9:16');
-    });
-
-    it('should accept custom imageSize', async () => {
+    it('should pass custom imageSize', async () => {
       fetchSpy.mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({
@@ -142,12 +91,12 @@ describe('GeminiImageService (Nano Banana Pro)', () => {
       await service.generateImageRaw('high res', { imageSize: '2K' });
 
       const body = JSON.parse(fetchSpy.mock.calls[0][1].body);
-      expect(body.generationConfig.imageConfig.imageSize).toBe('2K');
+      expect(body.imageSize).toBe('2K');
     });
   });
 
   describe('response parsing', () => {
-    it('should parse new generateContent response format', async () => {
+    it('should parse generateContent response format', async () => {
       fetchSpy.mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({
@@ -166,15 +115,13 @@ describe('GeminiImageService (Nano Banana Pro)', () => {
       expect(result).toBe('data:image/png;base64,abc123base64');
     });
 
-    it('should handle response with only image part (no text)', async () => {
+    it('should handle response with only image part', async () => {
       fetchSpy.mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({
           candidates: [{
             content: {
-              parts: [
-                { inlineData: { mimeType: 'image/png', data: 'onlyimage' } },
-              ],
+              parts: [{ inlineData: { mimeType: 'image/png', data: 'onlyimage' } }],
             },
           }],
         }),
@@ -199,11 +146,11 @@ describe('GeminiImageService (Nano Banana Pro)', () => {
       await expect(service.generateImageRaw('test')).rejects.toThrow('No image');
     });
 
-    it('should throw on API error with status', async () => {
+    it('should throw on API error', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,
         status: 429,
-        text: () => Promise.resolve('Rate limit exceeded'),
+        json: () => Promise.resolve({ error: 'Rate limit exceeded' }),
       });
 
       await expect(service.generateImageRaw('test')).rejects.toThrow('429');
@@ -211,7 +158,7 @@ describe('GeminiImageService (Nano Banana Pro)', () => {
   });
 
   describe('generateImage (with style)', () => {
-    it('should inject style hint and pass options', async () => {
+    it('should inject style hint into prompt', async () => {
       fetchSpy.mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({
@@ -226,9 +173,8 @@ describe('GeminiImageService (Nano Banana Pro)', () => {
       await service.generateImage('a cute cat', 'pixel');
 
       const body = JSON.parse(fetchSpy.mock.calls[0][1].body);
-      const promptText = body.contents[0].parts[0].text;
-      expect(promptText).toContain('a cute cat');
-      expect(promptText).toContain('pixel');
+      expect(body.prompt).toContain('a cute cat');
+      expect(body.prompt).toContain('pixel');
     });
   });
 });
