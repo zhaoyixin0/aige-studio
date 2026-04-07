@@ -2,10 +2,9 @@ import { ConversationAgent } from './conversation-agent';
 
 /** Shared ConversationAgent instance, stored on window to survive HMR. */
 export function getConversationAgent(): ConversationAgent {
-  const w = window as any;
+  const w = window as Record<string, unknown>;
   if (!w.__conversationAgent) {
-    const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY as string | undefined;
-    w.__conversationAgent = new ConversationAgent(apiKey);
+    w.__conversationAgent = new ConversationAgent();
   }
-  return w.__conversationAgent;
+  return w.__conversationAgent as ConversationAgent;
 }

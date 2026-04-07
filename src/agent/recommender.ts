@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { createClaudeClient } from '@/services/claude-proxy.ts';
 import type { GameConfig } from '@/engine/core/index.ts';
 
 export interface Suggestion {
@@ -7,10 +7,10 @@ export interface Suggestion {
 }
 
 export class Recommender {
-  private client: Anthropic;
+  private client: ReturnType<typeof createClaudeClient>;
 
-  constructor(apiKey: string) {
-    this.client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+  constructor() {
+    this.client = createClaudeClient();
   }
 
   async suggest(config: GameConfig, skills: string): Promise<Suggestion[]> {
@@ -54,7 +54,9 @@ Knowledge: ${skills}`,
       tool_choice: { type: 'tool', name: 'suggest_modules' },
     });
 
-    const toolBlock = response.content.find((b) => b.type === 'tool_use');
+    type ContentBlock = { type: string; input?: unknown };
+    const content = response.content as ContentBlock[];
+    const toolBlock = content.find((b) => b.type === 'tool_use');
     if (toolBlock && toolBlock.type === 'tool_use') {
       return (toolBlock.input as { suggestions: Suggestion[] }).suggestions;
     }

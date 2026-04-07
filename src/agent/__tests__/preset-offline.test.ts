@@ -33,9 +33,10 @@ describe('Preset offline fallback (no API key)', () => {
     expect(result.reply).toContain('已使用模板');
   });
 
-  it('preset interception works even without API key', async () => {
-    // Verify agent has no API client
-    expect((agent as any).client).toBeNull();
+  it('preset interception works without server-side API key', async () => {
+    // Proxy client is always present; preset interception is regex-based
+    // and never touches the API — works regardless of server key config.
+    expect((agent as any).client).toBeDefined();
     const result = await agent.process('使用模板 hero-catch-fruit');
     expect(result.config).toBeDefined();
     expect(result.config!.modules.length).toBeGreaterThan(0);

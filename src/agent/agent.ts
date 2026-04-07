@@ -157,15 +157,13 @@ export class Agent {
   private intentParser: IntentParser;
   private recipeGenerator: RecipeGenerator;
   private recommender: Recommender;
-  private guidedCreator: GuidedCreator | null = null;
+  private guidedCreator: GuidedCreator;
   private wizard = new GameWizard();
-  constructor(apiKey: string) {
-    this.intentParser = new IntentParser(apiKey);
-    this.recipeGenerator = new RecipeGenerator(apiKey);
-    this.recommender = new Recommender(apiKey);
-    if (apiKey) {
-      this.guidedCreator = new GuidedCreator(apiKey);
-    }
+  constructor() {
+    this.intentParser = new IntentParser();
+    this.recipeGenerator = new RecipeGenerator();
+    this.recommender = new Recommender();
+    this.guidedCreator = new GuidedCreator();
   }
 
   /** Start the wizard flow and return the first question. */
@@ -259,18 +257,23 @@ export class Agent {
     if (!suggestion) return null;
 
     if (suggestion.moduleType) {
-      // Add the module to the config
+      // Add the module to the config (immutable)
       const gameType = this.detectGameTypeFromConfig(currentConfig);
-      const newConfig = JSON.parse(JSON.stringify(currentConfig)) as GameConfig;
       const moduleType = suggestion.moduleType;
-      const existingCount = newConfig.modules.filter((m) => m.type === moduleType).length;
+      const existingCount = currentConfig.modules.filter((m) => m.type === moduleType).length;
       const id = `${moduleType.toLowerCase()}_${existingCount + 1}`;
-      newConfig.modules.push({
-        id,
-        type: moduleType,
-        enabled: true,
-        params: getModuleParams(gameType, moduleType),
-      });
+      const newConfig: GameConfig = {
+        ...currentConfig,
+        modules: [
+          ...currentConfig.modules,
+          {
+            id,
+            type: moduleType,
+            enabled: true,
+            params: getModuleParams(gameType, moduleType),
+          },
+        ],
+      };
 
       return {
         message: `${suggestion.emoji} \u5DF2\u6DFB\u52A0\u300C${suggestion.label}\u300D\uFF01`,
@@ -323,10 +326,6 @@ export class Agent {
 
   /** Continue LLM-guided game creation conversation */
   private async continueGuidedCreation(userMessage: string): Promise<AgentResponse> {
-    if (!this.guidedCreator) {
-      return this.startWizard();
-    }
-
     const result = await this.guidedCreator.chat(userMessage);
 
     const response: AgentResponse = {
@@ -379,30 +378,19 @@ export class Agent {
     }
 
     // If guided creator is in an active conversation, continue it
-    if (this.guidedCreator?.isActive()) {
+    if (this.guidedCreator.isActive()) {
       return this.continueGuidedCreation(userMessage);
     }
 
-    // Check if user wants to create a game
+    // Check if user wants to create a game — use LLM-guided creation
     if (looksLikeCreateGame(userMessage)) {
-      // If API key available, use LLM-guided creation
-      if (this.guidedCreator) {
-        return this.continueGuidedCreation(userMessage);
-      }
-      // No API key — fall back to wizard
-      return this.startWizard();
+      return this.continueGuidedCreation(userMessage);
     }
 
     // Mode B: detect game type from free-text description
     const gameType = detectGameType(userMessage);
     if (gameType) {
-      if (this.guidedCreator) {
-        // LLM-guided: start conversation with the game description
-        return this.continueGuidedCreation(userMessage);
-      }
-      // No API key: redirect to wizard with game type pre-filled
-      const modeBResult = this.tryModeBAutoBuild(userMessage);
-      if (modeBResult) return modeBResult;
+      return this.continueGuidedCreation(userMessage);
     }
 
     // Step 0: Local pattern match (no API call)

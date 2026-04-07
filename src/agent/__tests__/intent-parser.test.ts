@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { IntentParser } from '../intent-parser.ts';
 import type { ParsedIntent } from '../intent-parser.ts';
 
-// Mock the Anthropic SDK with a class
-vi.mock('@anthropic-ai/sdk', () => {
-  class MockAnthropic {
-    messages = {
+// Mock the proxy client
+vi.mock('@/services/claude-proxy.ts', () => ({
+  createClaudeClient: () => ({
+    messages: {
       create: vi.fn().mockResolvedValue({
         content: [
           {
@@ -19,16 +19,15 @@ vi.mock('@anthropic-ai/sdk', () => {
           },
         ],
       }),
-    };
-  }
-  return { default: MockAnthropic };
-});
+    },
+  }),
+}));
 
 describe('IntentParser', () => {
   let parser: IntentParser;
 
   beforeEach(() => {
-    parser = new IntentParser('test-api-key');
+    parser = new IntentParser();
   });
 
   it('should be instantiable', () => {

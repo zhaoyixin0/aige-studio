@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { createClaudeClient } from '@/services/claude-proxy.ts';
 import type { GameConfig } from '@/engine/core/index.ts';
 import type { ParsedIntent } from './intent-parser.ts';
 
@@ -8,10 +8,10 @@ export interface RecipeResult {
 }
 
 export class RecipeGenerator {
-  private client: Anthropic;
+  private client: ReturnType<typeof createClaudeClient>;
 
-  constructor(apiKey: string) {
-    this.client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+  constructor() {
+    this.client = createClaudeClient();
   }
 
   async generate(
@@ -95,7 +95,9 @@ Current config: ${currentConfig ? JSON.stringify(currentConfig) : 'none'}`,
       tool_choice: { type: 'tool', name: 'output_game_config' },
     });
 
-    const toolBlock = response.content.find((b) => b.type === 'tool_use');
+    type ContentBlock = { type: string; input?: unknown };
+    const content = response.content as ContentBlock[];
+    const toolBlock = content.find((b) => b.type === 'tool_use');
     if (toolBlock && toolBlock.type === 'tool_use') {
       const input = toolBlock.input as { config: GameConfig; message: string };
       return { config: input.config, message: input.message };

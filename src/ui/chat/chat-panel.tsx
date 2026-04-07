@@ -9,14 +9,10 @@ import { AssetAgent } from '@/services/asset-agent.ts';
 
 import type { GameConfig, AssetEntry } from '@/engine/core';
 
-const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY as string | undefined;
-
 let agentInstance: Agent | null = null;
 function getAgent(): Agent {
   if (agentInstance) return agentInstance;
-  // Wizard-only flows don't need an API key, so we always create the agent.
-  // The API key can be empty — it only matters for Claude API calls.
-  agentInstance = new Agent(apiKey ?? '');
+  agentInstance = new Agent();
   return agentInstance;
 }
 
@@ -57,7 +53,6 @@ export function ChatPanel() {
 
   /** Fire-and-forget: generate assets for a newly created config. */
   const triggerAssetFulfillment = useCallback((newConfig: GameConfig) => {
-    console.log('[ChatPanel] triggerAssetFulfillment config.assets keys:', Object.keys(newConfig.assets));
     const assetAgent = new AssetAgent();
 
     addChatMessage({
@@ -67,8 +62,8 @@ export function ChatPanel() {
       timestamp: Date.now(),
     });
 
-    assetAgent.fulfillAssets(newConfig, (progress) => {
-      console.log(`[AssetAgent] ${progress.key}: ${progress.status} (${progress.current}/${progress.total})`);
+    assetAgent.fulfillAssets(newConfig, () => {
+      // Progress callback — UI feedback handled via chat messages
     }).then((assets) => {
       const count = Object.keys(assets).length;
       if (count > 0) {
@@ -93,8 +88,7 @@ export function ChatPanel() {
           timestamp: Date.now(),
         });
       }
-    }).catch((err) => {
-      console.error('Asset fulfillment failed:', err);
+    }).catch((err: unknown) => {
       addChatMessage({
         id: crypto.randomUUID(),
         role: 'assistant',
@@ -353,20 +347,7 @@ export function ChatPanel() {
       return;
     }
 
-    // Non-wizard path — use API-based agent
-    if (!apiKey) {
-      addChatMessage({
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: 'API key 未配置。请在 .env 文件中设置 VITE_ANTHROPIC_API_KEY。\n\n你仍然可以使用向导创建游戏 — 点击"开始创建游戏"按钮。',
-        wizardChoices: [
-          { id: '__start_wizard__', label: '开始创建游戏', emoji: '\u{1F680}' },
-        ],
-        timestamp: Date.now(),
-      });
-      return;
-    }
-
+    // API-based agent (proxy handles auth server-side)
     setChatLoading(true);
     try {
       const response = await agent.process(text, config);

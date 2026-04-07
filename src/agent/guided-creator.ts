@@ -4,7 +4,7 @@
  * and asks step-by-step questions to confirm each decision.
  * When all requirements are gathered, generates the final GameConfig.
  */
-import Anthropic from '@anthropic-ai/sdk';
+import { createClaudeClient } from '@/services/claude-proxy.ts';
 import type { GameConfig, ModuleConfig } from '@/engine/core/index.ts';
 import { DEFAULT_THEME_FOR_GAME } from './wizard.ts';
 import { ALL_GAME_TYPES, getModuleParams } from './game-presets.ts';
@@ -126,11 +126,11 @@ canvas: { width: 1080, height: 1920 }（竖屏）
 每个 module 需要 id（类型小写+_1）、type、enabled: true、params（从预设获取）`;
 
 export class GuidedCreator {
-  private client: Anthropic;
+  private client: ReturnType<typeof createClaudeClient>;
   private history: ConversationMessage[] = [];
 
-  constructor(apiKey: string) {
-    this.client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+  constructor() {
+    this.client = createClaudeClient();
   }
 
   /** Reset conversation for a new game creation session */
@@ -218,7 +218,9 @@ export class GuidedCreator {
     });
 
     // Process response
-    for (const block of response.content) {
+    type ContentBlock = { type: string; name?: string; input?: unknown; text?: string };
+    const content = response.content as ContentBlock[];
+    for (const block of content) {
       if (block.type === 'tool_use' && block.name === 'generate_config') {
         const input = block.input as {
           gameType: string;
@@ -257,7 +259,7 @@ export class GuidedCreator {
         };
       }
 
-      if (block.type === 'text') {
+      if (block.type === 'text' && block.text) {
         this.history.push({ role: 'assistant', content: block.text });
         return { message: block.text, config: null };
       }
