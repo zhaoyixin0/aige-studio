@@ -62,34 +62,42 @@ export function ParamCard({ block, disabled }: ParamCardProps) {
   );
 }
 
+function SliderField({ field, onChange }: { field: Extract<ParamCardField, { kind: 'slider' }>; onChange: (key: string, value: unknown) => void }) {
+  return (
+    <Slider.Root
+      className="relative flex items-center select-none touch-none w-full h-5"
+      value={[field.value]}
+      min={field.min}
+      max={field.max}
+      step={field.step ?? 1}
+      onValueChange={([v]) => onChange(field.key, v)}
+    >
+      <Slider.Track className="bg-white/10 relative grow rounded-full h-1">
+        <Slider.Range className="absolute bg-blue-500 rounded-full h-full" />
+      </Slider.Track>
+      <Slider.Thumb className="block w-3.5 h-3.5 bg-white rounded-full shadow-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" />
+    </Slider.Root>
+  );
+}
+
+function ToggleField({ field, onChange }: { field: Extract<ParamCardField, { kind: 'toggle' }>; onChange: (key: string, value: unknown) => void }) {
+  return (
+    <Switch.Root
+      checked={Boolean(field.value)}
+      onCheckedChange={(checked) => onChange(field.key, checked)}
+      className="w-9 h-5 bg-white/10 rounded-full relative data-[state=checked]:bg-blue-600 transition-colors"
+    >
+      <Switch.Thumb className="block w-4 h-4 bg-white rounded-full transition-transform translate-x-0.5 data-[state=checked]:translate-x-[18px]" />
+    </Switch.Root>
+  );
+}
+
 function renderField(field: ParamCardField, onChange: (key: string, value: unknown) => void) {
   switch (field.kind) {
     case 'slider':
-      return (
-        <Slider.Root
-          className="relative flex items-center select-none touch-none w-full h-5"
-          value={[field.value ?? field.min ?? 0]}
-          min={field.min}
-          max={field.max}
-          step={field.step ?? 1}
-          onValueChange={([v]) => onChange(field.key, v)}
-        >
-          <Slider.Track className="bg-white/10 relative grow rounded-full h-1">
-            <Slider.Range className="absolute bg-blue-500 rounded-full h-full" />
-          </Slider.Track>
-          <Slider.Thumb className="block w-3.5 h-3.5 bg-white rounded-full shadow-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" />
-        </Slider.Root>
-      );
+      return <SliderField field={field} onChange={onChange} />;
     case 'toggle':
-      return (
-        <Switch.Root
-          checked={Boolean(field.value)}
-          onCheckedChange={(checked) => onChange(field.key, checked)}
-          className="w-9 h-5 bg-white/10 rounded-full relative data-[state=checked]:bg-blue-600 transition-colors"
-        >
-          <Switch.Thumb className="block w-4 h-4 bg-white rounded-full transition-transform translate-x-0.5 data-[state=checked]:translate-x-[18px]" />
-        </Switch.Root>
-      );
+      return <ToggleField field={field} onChange={onChange} />;
     case 'asset':
       return <AssetField field={field} />;
     default:

@@ -34,12 +34,12 @@ export class ResultScreen extends BaseModule {
         default: ['retry', 'share'],
       },
       showAnimation: {
-        type: 'toggle',
+        type: 'boolean',
         label: '胜负动画',
         default: true,
       },
       showText: {
-        type: 'toggle',
+        type: 'boolean',
         label: '胜负文字',
         default: true,
       },

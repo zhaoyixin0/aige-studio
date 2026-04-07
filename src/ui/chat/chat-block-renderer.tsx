@@ -34,12 +34,8 @@ function ChatBlockItem({ block, interactive }: { block: ChatBlock; interactive: 
         ? <UploadRequestBlock block={block} />
         : null;
     default: {
-      const _exhaustive: never = block;
-      return (
-        <div className="text-xs text-white/30 p-2">
-          Unsupported block: {(block as { kind: string }).kind}
-        </div>
-      );
+      // Exhaustive check — compile error if a ChatBlock kind is unhandled
+      return block satisfies never;
     }
   }
 }

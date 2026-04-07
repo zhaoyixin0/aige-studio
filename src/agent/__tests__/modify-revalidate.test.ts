@@ -16,7 +16,7 @@ function makeConfig(): GameConfig {
 
 describe('ConversationAgent modify re-validation', () => {
   it('applies validation fixes after applyChanges (e.g., clamp invalid Timer)', () => {
-    const agent = new ConversationAgent(undefined);
+    const agent = new ConversationAgent();
     const cfg = makeConfig();
 
     // Intentionally set invalid Timer duration via modify change

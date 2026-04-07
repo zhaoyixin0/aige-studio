@@ -3,7 +3,9 @@ import { MainLayout } from '@/ui/layout/main-layout.tsx';
 import { loadConfigFromHash } from '@/utils/config-codec';
 import { useGameStore } from '@/store/game-store';
 
-const selectSetConfig = (s: { setConfig: (c: Parameters<typeof s.setConfig>[0]) => void }) =>
+import type { GameConfig } from '@/engine/core';
+
+const selectSetConfig = (s: { setConfig: (c: GameConfig) => void }) =>
   s.setConfig;
 
 export function App() {

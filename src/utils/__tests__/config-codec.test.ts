@@ -3,7 +3,9 @@ import { encodeConfig, decodeConfig, loadConfigFromHash } from '../config-codec'
 import type { GameConfig } from '@/engine/core';
 
 const makeConfig = (name: string): GameConfig => ({
-  meta: { name, description: '', gameType: 'catch' },
+  version: '1.0',
+  meta: { name, description: '', thumbnail: null, createdAt: '' },
+  canvas: { width: 1080, height: 1920 },
   modules: [],
   assets: {},
 });

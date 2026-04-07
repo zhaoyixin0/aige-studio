@@ -49,7 +49,7 @@ describe('Catch game full collision→scoring', () => {
     const itemEntry = collisionEntries.find(([, obj]) => obj.layer === 'items');
     expect(itemEntry).toBeDefined();
 
-    const [itemId, itemCollision] = itemEntry!;
+    const [itemId] = itemEntry!;
 
     // Find the matching spawner object so we set pm to its CURRENT position
     // (the pre-update hook will sync both sides on the next tick)
