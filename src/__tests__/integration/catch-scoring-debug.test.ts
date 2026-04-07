@@ -41,28 +41,30 @@ describe('Catch game full collision→scoring', () => {
     // Run frames to let spawner create items
     for (let i = 0; i < 200; i++) engine.tick(16);
 
-    const objects = spawner.getObjects();
-    expect(objects.length).toBeGreaterThan(0);
+    // Find an items-layer collision object (not obstacles-layer).
+    // The catch preset has bad_1 items on the 'obstacles' layer — those emit
+    // collision:damage, not collision:hit, so we must target an 'items'-layer object.
+    const collisionEntries = [...(collision as any).objects.entries()] as
+      Array<[string, { layer: string; x: number; y: number }]>;
+    const itemEntry = collisionEntries.find(([, obj]) => obj.layer === 'items');
+    expect(itemEntry).toBeDefined();
 
-    // Move player directly on top of first item
-    const firstItem = objects[0];
-    (pm as any).x = firstItem.x;
-    (pm as any).y = firstItem.y;
+    const [itemId, itemCollision] = itemEntry!;
+
+    // Find the matching spawner object so we set pm to its CURRENT position
+    // (the pre-update hook will sync both sides on the next tick)
+    const matchingSpawnObj = spawner.getObjects().find((o) => o.id === itemId);
+    expect(matchingSpawnObj).toBeDefined();
+
+    // Move player directly on top of this items-layer object
+    (pm as any).x = matchingSpawnObj!.x;
+    (pm as any).y = matchingSpawnObj!.y;
 
     const hitHandler = vi.fn();
     engine.eventBus.on('collision:hit', hitHandler);
 
     // One more frame — collision should detect overlap
     engine.tick(16);
-
-    console.log('Player pos:', (pm as any).x, (pm as any).y);
-    console.log('Item pos:', firstItem.x, firstItem.y);
-    const allObjs = [...(collision as any).objects.entries()];
-    for (const [id, obj] of allObjs) {
-      console.log(`  Collision obj: ${id} layer=${obj.layer} x=${obj.x} y=${obj.y} r=${obj.radius}`);
-    }
-    console.log('Hits:', hitHandler.mock.calls.length);
-    console.log('Score:', scorer.getScore());
 
     expect(hitHandler).toHaveBeenCalled();
     expect(scorer.getScore()).toBeGreaterThan(0);
