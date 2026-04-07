@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { ValidationReport } from '@/engine/core/config-validator';
+import type { ChatBlock, Attachment } from '@/agent/conversation-defs';
 
 export type PreviewMode = 'edit' | 'play' | 'fullscreen';
 export type PreviewPhase = 'tuning' | 'playing' | 'success' | 'fail';
@@ -38,6 +39,8 @@ export interface ChatMessage {
   moduleTuning?: ModuleTuningPayload;
   presetUsed?: { presetId: string; title: string; pendingAssets: number };
   timestamp: number;
+  blocks?: ChatBlock[];
+  attachments?: Attachment[];
 }
 
 export type ChipType = 'game_type' | 'param' | 'action' | 'board_mode' | 'preset';
@@ -119,6 +122,8 @@ interface EditorStore {
 
   gameFeel: GameFeelState;
 
+  pendingAttachments: Attachment[];
+
   selectModule: (id: string | null) => void;
   setPreviewMode: (mode: PreviewMode) => void;
   setPreviewPhase: (phase: PreviewPhase) => void;
@@ -134,6 +139,8 @@ interface EditorStore {
   setBoardModeOpen: (open: boolean) => void;
   setExpertBrowserOpen: (open: boolean, gameType?: string | null) => void;
   setGameFeel: (partial: Partial<GameFeelState>) => void;
+  addPendingAttachment: (attachment: Attachment) => void;
+  clearPendingAttachments: () => void;
 }
 
 export const useEditorStore = create<EditorStore>((set) => ({
@@ -151,6 +158,7 @@ export const useEditorStore = create<EditorStore>((set) => ({
   expertBrowserOpen: false,
   expertBrowserGameType: null,
   gameFeel: { score: 0, dimensions: {}, suggestions: [], badge: null },
+  pendingAttachments: [],
 
   selectModule: (id) => set({ selectedModuleId: id }),
 
@@ -187,4 +195,11 @@ export const useEditorStore = create<EditorStore>((set) => ({
     }),
   setGameFeel: (partial) =>
     set((state) => ({ gameFeel: { ...state.gameFeel, ...partial } })),
+
+  addPendingAttachment: (attachment) =>
+    set((state) => ({
+      pendingAttachments: [...state.pendingAttachments, attachment],
+    })),
+
+  clearPendingAttachments: () => set({ pendingAttachments: [] }),
 }));

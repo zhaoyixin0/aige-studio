@@ -533,6 +533,48 @@ export const KEYWORD_MAP: Array<{ pattern: RegExp; gameType: string }> = [
 /*  Pure function: detect game type from user message                  */
 /* ------------------------------------------------------------------ */
 
+// ── P0 ChatBlock Types ──────────────────────────────────────────
+
+export interface AssetPreviewItem {
+  key: string;
+  label: string;
+  src: string;
+  source: 'ai' | 'user';
+}
+
+export interface ProgressEntry {
+  key: string;
+  status: 'pending' | 'generating' | 'removing-bg' | 'done' | 'skipped' | 'error';
+  message: string;
+}
+
+export interface Attachment {
+  id: string;
+  type: 'image' | 'audio';
+  src: string;
+  from: 'user' | 'ai';
+  target?: string;
+  name?: string;
+}
+
+export type ParamCardField =
+  | { kind: 'slider'; key: string; label: string; min: number; max: number; step?: number; value: number; unit?: string }
+  | { kind: 'toggle'; key: string; label: string; value: boolean }
+  | { kind: 'asset'; key: string; label: string; thumbnail?: string; accept?: Array<'image' | 'audio'> };
+
+export type UIAction =
+  | { type: 'REQUEST_ASSETS_GENERATE'; keys?: string[]; showPreview?: boolean }
+  | { type: 'REQUEST_ASSET_REPLACE'; target: string; accept?: Array<'image' | 'audio'>; preferredSource?: 'ai' | 'upload' }
+  | { type: 'SHOW_ASSET_PREVIEWS'; items: AssetPreviewItem[] };
+
+export type ChatBlock =
+  | { kind: 'asset-preview'; items: AssetPreviewItem[]; allowApplyAll?: boolean }
+  | { kind: 'param-card'; title?: string; fields: ParamCardField[] }
+  | { kind: 'progress-log'; entries: ProgressEntry[] }
+  | { kind: 'upload-request'; target: string; accept: Array<'image' | 'audio'>; hint?: string };
+
+/* ------------------------------------------------------------------ */
+
 export function detectGameTypeFromMessage(message: string): string | null {
   for (const { pattern, gameType } of KEYWORD_MAP) {
     if (pattern.test(message)) return gameType;

@@ -1,6 +1,16 @@
 import { create } from 'zustand';
 import type { AssetEntry, GameConfig, ModuleConfig } from '@/engine/core';
 
+// Module-scope accumulators for RAF micro-batching
+const liveAccumulator = new Map<string, Record<string, unknown>>();
+let liveScheduled = false;
+
+/** Reset accumulator state — for tests and HMR only */
+export function __resetLiveAccumulator(): void {
+  liveAccumulator.clear();
+  liveScheduled = false;
+}
+
 interface GameStore {
   config: GameConfig | null;
   /** Monotonically increasing version — incremented on every config mutation */
@@ -25,6 +35,8 @@ interface GameStore {
   batchUpdateParams: (
     updates: Array<{ moduleId: string; changes: Record<string, unknown> }>
   ) => void;
+
+  updateModuleParamLive: (moduleId: string, param: string, value: unknown) => void;
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -180,6 +192,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
         configVersion: state.configVersion + 1,
       };
     }),
+
+  updateModuleParamLive: (moduleId, param, value) => {
+    const existing = liveAccumulator.get(moduleId) ?? {};
+    liveAccumulator.set(moduleId, { ...existing, [param]: value });
+
+    if (!liveScheduled) {
+      liveScheduled = true;
+      requestAnimationFrame(() => {
+        const updates = Array.from(liveAccumulator.entries()).map(
+          ([modId, changes]) => ({ moduleId: modId, changes })
+        );
+        liveAccumulator.clear();
+        liveScheduled = false;
+
+        if (updates.length > 0) {
+          get().batchUpdateParams(updates);
+        }
+      });
+    }
+  },
 }));
 
 // Expose store for renderer access (background sync)

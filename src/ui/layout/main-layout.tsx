@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { LandingPage } from '@/ui/landing/landing-page.tsx';
 import { StudioChatPanel } from '@/ui/chat/studio-chat-panel.tsx';
 import { PreviewCanvas } from '@/ui/preview/preview-canvas.tsx';
@@ -12,6 +12,7 @@ import {
   planUpdatesForParamChange,
 } from '@/data/registry-binding.ts';
 import { FullscreenMode } from '@/ui/preview/fullscreen-mode.tsx';
+import { setupUIActionExecutor } from '@/ui/chat/ui-action-executor.ts';
 import type { PreviewMode } from '@/store/editor-store.ts';
 import { PanelRight, PanelRightClose } from 'lucide-react';
 import { useResizeDivider } from '@/app/hooks/use-resize-divider.ts';
@@ -37,6 +38,12 @@ export function MainLayout() {
     onMouseDown: handleMouseDown,
     onTouchStart: handleTouchStart,
   } = useResizeDivider(480);
+
+  // Wire UIAction executor (global event handler)
+  useEffect(() => {
+    const cleanup = setupUIActionExecutor();
+    return cleanup;
+  }, []);
 
   // Board Mode: live config bindings
   const config = useGameStore((s) => s.config);
