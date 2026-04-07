@@ -10,7 +10,9 @@ const MINIMAL_CONFIG: GameConfig = {
     { id: 'timer-1', type: 'Timer', enabled: true, params: { duration: 30 } },
     { id: 'scorer-1', type: 'Scorer', enabled: true, params: { hitEvent: 'collision:hit' } },
   ],
-  assets: {},
+  assets: {
+    player: { type: 'sprite' as const, src: 'old.png' },
+  },
 };
 
 describe('GameStore configVersion', () => {
@@ -58,6 +60,35 @@ describe('GameStore configVersion', () => {
     const v1 = useGameStore.getState().configVersion;
 
     store.toggleModule('timer-1');
+    expect(useGameStore.getState().configVersion).toBeGreaterThan(v1);
+  });
+
+  it('updateAsset should increment configVersion', () => {
+    const store = useGameStore.getState();
+    store.setConfig(MINIMAL_CONFIG);
+    const v1 = useGameStore.getState().configVersion;
+
+    store.updateAsset('player', 'new.png');
+    expect(useGameStore.getState().configVersion).toBeGreaterThan(v1);
+  });
+
+  it('addAsset should increment configVersion', () => {
+    const store = useGameStore.getState();
+    store.setConfig(MINIMAL_CONFIG);
+    const v1 = useGameStore.getState().configVersion;
+
+    store.addAsset('enemy', { type: 'sprite' as const, src: 'enemy.png' });
+    expect(useGameStore.getState().configVersion).toBeGreaterThan(v1);
+  });
+
+  it('batchUpdateAssets should increment configVersion', () => {
+    const store = useGameStore.getState();
+    store.setConfig(MINIMAL_CONFIG);
+    const v1 = useGameStore.getState().configVersion;
+
+    store.batchUpdateAssets({
+      player: { type: 'sprite' as const, src: 'updated.png' },
+    });
     expect(useGameStore.getState().configVersion).toBeGreaterThan(v1);
   });
 });

@@ -31,6 +31,17 @@ export function buildConfigChanges(
     const oldMod = oldModules.get(newMod.id);
     if (!oldMod) continue;
 
+    // Detect enabled/disabled state change
+    if (oldMod.enabled !== newMod.enabled) {
+      changes.push({
+        op: newMod.enabled ? 'enable_module' : 'disable_module',
+        moduleId: newMod.id,
+        id: newMod.id,
+        type: newMod.type,
+        params: newMod.params,
+      });
+    }
+
     const changedParams: Record<string, unknown> = {};
     let hasChanges = false;
 

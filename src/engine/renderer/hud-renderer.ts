@@ -235,15 +235,20 @@ export class HudRenderer {
     const gameFlow = engine.getModulesByType('GameFlow')[0] as GameFlow | undefined;
     const flowState = gameFlow?.getState() ?? 'playing';
     const hudVisible = flowState === 'playing';
-    this.scoreText.visible = hudVisible;
-    this.timerText.visible = hudVisible;
-    this.livesText.visible = hudVisible;
-    this.comboText.visible = hudVisible;
-    this.scoreBg.visible = hudVisible;
-    this.timerBg.visible = hudVisible;
-    this.livesBg.visible = hudVisible;
 
     const overlay = engine.getModulesByType('UIOverlay')[0] as UIOverlay | undefined;
+
+    // Read UIOverlay params for per-element visibility
+    const showScore = (overlay?.getParams()?.showScore as boolean) ?? true;
+    const showLives = (overlay?.getParams()?.showLives as boolean) ?? true;
+
+    this.scoreText.visible = hudVisible && showScore;
+    this.scoreBg.visible = hudVisible && showScore;
+    this.timerText.visible = hudVisible;
+    this.timerBg.visible = hudVisible;
+    this.livesText.visible = hudVisible && showLives;
+    this.livesBg.visible = hudVisible && showLives;
+    this.comboText.visible = hudVisible && showScore;
     if (overlay) {
       const hud = overlay.getHudState();
 

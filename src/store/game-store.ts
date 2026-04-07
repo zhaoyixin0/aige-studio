@@ -102,6 +102,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             [assetId]: { ...existing, src },
           },
         },
+        configVersion: state.configVersion + 1,
       };
     }),
 
@@ -116,6 +117,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             [assetId]: entry,
           },
         },
+        configVersion: state.configVersion + 1,
       };
     }),
 
@@ -175,6 +177,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             ...assets,
           },
         },
+        configVersion: state.configVersion + 1,
       };
     }),
 }));

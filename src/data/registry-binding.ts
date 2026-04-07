@@ -51,32 +51,28 @@ export const PARAM_TO_MODULE_MAP: Record<string, ParamMapping> = {
   visual_audio_003: { kind: 'meta', metaKey: 'artStyle' },
 
   // L3 direct param mappings (selected high-priority ones)
-  // Scorer params
-  game_mechanics_009: { kind: 'module', moduleType: 'Scorer', paramKey: 'perHit' },
-  game_mechanics_010: { kind: 'module', moduleType: 'Scorer', paramKey: 'comboWindow' },
-  game_mechanics_011: { kind: 'module', moduleType: 'Scorer', paramKey: 'comboMultiplierStep' },
-
   // Spawner params
-  game_mechanics_013: { kind: 'module', moduleType: 'Spawner', paramKey: 'frequency' },
   game_mechanics_014: { kind: 'module', moduleType: 'Spawner', paramKey: 'speed' },
-  game_mechanics_015: { kind: 'module', moduleType: 'Spawner', paramKey: 'maxCount' },
-
-  // Lives params
-  game_mechanics_022: { kind: 'module', moduleType: 'Lives', paramKey: 'count' },
-
-  // Timer params
-  visual_audio_005: { kind: 'module', moduleType: 'Timer', paramKey: 'duration' },
 
   // Collision params
   game_mechanics_016: { kind: 'module', moduleType: 'Collision', paramKey: 'hitboxScale' },
 
-  // Jump params
-  game_mechanics_025: { kind: 'module', moduleType: 'Jump', paramKey: 'jumpForce' },
-  game_mechanics_026: { kind: 'module', moduleType: 'Jump', paramKey: 'doubleJump' },
+  // Lives params (018 = 生命值)
+  game_mechanics_018: { kind: 'module', moduleType: 'Lives', paramKey: 'count' },
 
-  // Runner params
-  game_mechanics_033: { kind: 'module', moduleType: 'Runner', paramKey: 'laneCount' },
-  game_mechanics_034: { kind: 'module', moduleType: 'Runner', paramKey: 'speed' },
+  // Jump params (021 = 二段跳)
+  game_mechanics_021: { kind: 'module', moduleType: 'Jump', paramKey: 'doubleJump' },
+
+  // Timer params
+  visual_audio_005: { kind: 'module', moduleType: 'Timer', paramKey: 'duration' },
+
+  // HUD visibility toggles
+  visual_audio_004: { kind: 'module', moduleType: 'UIOverlay', paramKey: 'showScore' },
+  visual_audio_010: { kind: 'module', moduleType: 'UIOverlay', paramKey: 'showLives' },
+
+  // Result screen toggles
+  visual_audio_011: { kind: 'module', moduleType: 'ResultScreen', paramKey: 'showAnimation' },
+  visual_audio_012: { kind: 'module', moduleType: 'ResultScreen', paramKey: 'showText' },
 };
 
 // --- Read: get live values from config for given paramIds ---

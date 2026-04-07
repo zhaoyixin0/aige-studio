@@ -48,8 +48,34 @@ export function MainLayout() {
     (paramId: string, value: unknown) => {
       if (!config) return;
       const plan = planUpdatesForParamChange(paramId, value, config);
-      if (plan.meta) setConfig({ ...config, meta: { ...config.meta, ...plan.meta } });
-      if (plan.params.length > 0) batchUpdateParams(plan.params);
+
+      // Separate _enabled toggles from regular param updates
+      const enableOps = plan.params.filter((p) => '_enabled' in p.changes);
+      const paramOps = plan.params.filter((p) => !('_enabled' in p.changes));
+
+      // Build a single merged config update for meta + enableOps to avoid stale closure
+      if (plan.meta || enableOps.length > 0) {
+        let next = config;
+        if (plan.meta) {
+          next = { ...next, meta: { ...next.meta, ...plan.meta } };
+        }
+        if (enableOps.length > 0) {
+          next = {
+            ...next,
+            modules: next.modules.map((m) => {
+              const op = enableOps.find((e) => e.moduleId === m.id);
+              if (!op) return m;
+              return { ...m, enabled: Boolean(op.changes._enabled) };
+            }),
+          };
+        }
+        setConfig(next);
+      }
+
+      // Handle regular param updates
+      if (paramOps.length > 0) {
+        batchUpdateParams(paramOps);
+      }
     },
     [config, setConfig, batchUpdateParams],
   );

@@ -102,6 +102,75 @@ describe('use-engine-bridge', () => {
       expect(changes[0].params).toEqual({ frequency: 5 });
       expect(changes[0].params).not.toHaveProperty('speed');
     });
+
+    it('emits disable_module when enabled changes true→false', () => {
+      const oldConfig = makeConfig();
+      const newConfig: GameConfig = {
+        ...oldConfig,
+        modules: oldConfig.modules.map((m) =>
+          m.id === 'spawner' ? { ...m, enabled: false } : m,
+        ),
+      };
+
+      const changes = buildConfigChanges(oldConfig, newConfig);
+      expect(changes).toContainEqual(
+        expect.objectContaining({
+          op: 'disable_module',
+          moduleId: 'spawner',
+        }),
+      );
+    });
+
+    it('emits enable_module when enabled changes false→true', () => {
+      const oldConfig = makeConfig();
+      const disabledConfig: GameConfig = {
+        ...oldConfig,
+        modules: oldConfig.modules.map((m) =>
+          m.id === 'spawner' ? { ...m, enabled: false } : m,
+        ),
+      };
+      const reenabledConfig: GameConfig = {
+        ...disabledConfig,
+        modules: disabledConfig.modules.map((m) =>
+          m.id === 'spawner'
+            ? { ...m, enabled: true }
+            : m,
+        ),
+      };
+
+      const changes = buildConfigChanges(disabledConfig, reenabledConfig);
+      expect(changes).toContainEqual(
+        expect.objectContaining({
+          op: 'enable_module',
+          moduleId: 'spawner',
+          type: 'Spawner',
+          params: expect.objectContaining({ frequency: 1, speed: 200 }),
+        }),
+      );
+    });
+
+    it('emits both enable/disable and update_param when both change simultaneously', () => {
+      const oldConfig = makeConfig();
+      const newConfig: GameConfig = {
+        ...oldConfig,
+        modules: oldConfig.modules.map((m) =>
+          m.id === 'spawner'
+            ? { ...m, enabled: false, params: { ...m.params, frequency: 10 } }
+            : m,
+        ),
+      };
+
+      const changes = buildConfigChanges(oldConfig, newConfig);
+      const disableChange = changes.find((c) => c.op === 'disable_module');
+      const paramChange = changes.find((c) => c.op === 'update_param');
+
+      expect(disableChange).toBeDefined();
+      expect(disableChange!.moduleId).toBe('spawner');
+
+      expect(paramChange).toBeDefined();
+      expect(paramChange!.moduleId).toBe('spawner');
+      expect(paramChange!.params).toEqual({ frequency: 10 });
+    });
   });
 
   describe('createEngineBridge', () => {

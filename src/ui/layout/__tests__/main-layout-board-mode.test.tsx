@@ -166,7 +166,7 @@ describe('MainLayout — Board Mode integration', () => {
       },
       canvas: { width: 1080, height: 1920 },
       modules: [
-        { id: 'scorer_1', type: 'Scorer', enabled: true, params: { perHit: 10 } },
+        { id: 'spawner_1', type: 'Spawner', enabled: true, params: { speed: 200 } },
       ],
       assets: {},
     };
@@ -178,8 +178,8 @@ describe('MainLayout — Board Mode integration', () => {
     expect(values).toBeInstanceOf(Map);
     // artStyle is mapped via visual_audio_003 → meta.artStyle
     expect(values.get('visual_audio_003')).toBe('pixel');
-    // Scorer perHit is mapped via game_mechanics_009 → Scorer.perHit
-    expect(values.get('game_mechanics_009')).toBe(10);
+    // Spawner speed is mapped via game_mechanics_014 → Spawner.speed
+    expect(values.get('game_mechanics_014')).toBe(200);
   });
 
   it('passes a working onParamChange that updates the store', () => {
@@ -194,7 +194,7 @@ describe('MainLayout — Board Mode integration', () => {
       },
       canvas: { width: 1080, height: 1920 },
       modules: [
-        { id: 'scorer_1', type: 'Scorer', enabled: true, params: { perHit: 10 } },
+        { id: 'spawner_1', type: 'Spawner', enabled: true, params: { speed: 200 } },
       ],
       assets: {},
     };
@@ -211,9 +211,43 @@ describe('MainLayout — Board Mode integration', () => {
     handleParamChange('visual_audio_003', 'pixel');
     expect(useGameStore.getState().config?.meta.artStyle).toBe('pixel');
 
-    // Change scorer perHit via module param mapping
-    handleParamChange('game_mechanics_009', 20);
+    // Change Spawner speed via module param mapping
+    handleParamChange('game_mechanics_014', 400);
+    const spawner = useGameStore.getState().config?.modules.find((m) => m.type === 'Spawner');
+    expect(spawner?.params.speed).toBe(400);
+  });
+
+  it('routes L2 _enabled toggle to module.enabled, not module.params._enabled', () => {
+    const config: GameConfig = {
+      version: '1.0',
+      meta: {
+        name: 'Catch',
+        description: 'A catch game',
+        thumbnail: null,
+        createdAt: '2026-01-01',
+      },
+      canvas: { width: 1080, height: 1920 },
+      modules: [
+        { id: 'scorer_1', type: 'Scorer', enabled: true, params: { perHit: 10 } },
+      ],
+      assets: {},
+    };
+    useGameStore.setState({ config });
+    setStoreState({ boardModeOpen: true });
+    render(<MainLayout />);
+
+    const handleParamChange = capturedBoardModeProps.onParamChange as (
+      paramId: string,
+      value: unknown,
+    ) => void;
+
+    // game_mechanics_001 maps to Scorer._enabled (L2 toggle)
+    handleParamChange('game_mechanics_001', false);
+
     const scorer = useGameStore.getState().config?.modules.find((m) => m.type === 'Scorer');
-    expect(scorer?.params.perHit).toBe(20);
+    // enabled should be set on the module itself
+    expect(scorer?.enabled).toBe(false);
+    // _enabled should NOT leak into params
+    expect(scorer?.params).not.toHaveProperty('_enabled');
   });
 });
