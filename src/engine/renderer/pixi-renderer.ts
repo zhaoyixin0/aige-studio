@@ -35,6 +35,11 @@ export class PixiRenderer {
   private bgSrc: string | null = null;
   private engineEventHandlers: Array<{ event: string; handler: (data?: any) => void }> = [];
 
+  // Float text toggle — scoring popups only; system announcements bypass this.
+  // Cached per-frame from UIOverlay.showFloatText in sync() to avoid repeated module lookups.
+  private floatTextEnabled = true;
+  private overlayModuleRef: { getParams: () => Record<string, unknown> } | null = null;
+
   // Juice: Screen Shake & Impact Flash
   private shakeAmount = 0;
   private shakeDuration = 0;
@@ -220,6 +225,9 @@ export class PixiRenderer {
       }
     }
 
+    // Read float text toggle from cached UIOverlay ref (scoring popups only)
+    this.floatTextEnabled = (this.overlayModuleRef?.getParams()?.showFloatText as boolean) ?? true;
+
     // Sync Physics2D body positions to game object renderer before sprite layout
     this.syncPhysics2DPositions(engine);
 
@@ -247,6 +255,10 @@ export class PixiRenderer {
     }
     this.engineEventHandlers = [];
     this.connectedEngine = engine;
+
+    // Cache UIOverlay module ref (resolved once per engine connect, used per-frame in sync)
+    this.overlayModuleRef = engine.getModulesByType('UIOverlay')[0] as
+      { getParams: () => Record<string, unknown> } | undefined ?? null;
 
     // Reset game object renderer so player gets re-registered with collision
     this.gameObjectRenderer?.reset();
@@ -285,7 +297,9 @@ export class PixiRenderer {
       const x = data?.x ?? 540;
       const y = data?.y ?? 960;
       this.particleRenderer?.burst(x, y, 0xFFD700, 8);
-      this.floatTextRenderer?.spawn(x, y - 30, '+10', 0xFFD700);
+      if (this.floatTextEnabled) {
+        this.floatTextRenderer?.spawn(x, y - 30, '+10', 0xFFD700);
+      }
       this.soundSynth?.playScore();
       // Screen shake on hit
       this.shakeAmount = 5;
@@ -305,7 +319,7 @@ export class PixiRenderer {
 
     listen('scorer:update', (data?: any) => {
       const combo = data?.combo ?? 0;
-      if (combo > 1) {
+      if (combo > 1 && this.floatTextEnabled) {
         this.floatTextRenderer?.spawn(540, 700, `\u{1F525} x${combo} COMBO!`, 0xff6b9d);
         this.soundSynth?.playCombo(combo);
         // Small shake on combo
@@ -342,7 +356,9 @@ export class PixiRenderer {
       const x = data?.x ?? 540;
       const y = data?.y ?? 960;
       this.particleRenderer?.burst(x, y, 0xFF6B6B, 12);
-      this.floatTextRenderer?.spawn(x, y - 30, 'KILL!', 0xFF4500);
+      if (this.floatTextEnabled) {
+        this.floatTextRenderer?.spawn(x, y - 30, 'KILL!', 0xFF4500);
+      }
       this.soundSynth?.playScore();
       // Shake on enemy death
       this.shakeAmount = 10;

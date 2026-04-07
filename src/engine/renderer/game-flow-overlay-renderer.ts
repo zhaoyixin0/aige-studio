@@ -250,6 +250,14 @@ export class GameFlowOverlayRenderer {
     this.resultContainer.visible = true;
 
     const resultScreen = engine.getModulesByType('ResultScreen')[0] as ResultScreen | undefined;
+    const rsParams = resultScreen?.getParams() ?? {};
+    const showAnimation = (rsParams.showAnimation ?? true) as boolean;
+    const showText = (rsParams.showText ?? true) as boolean;
+
+    // Apply showText visibility
+    this.resultTitleText.visible = showText;
+    this.resultHintText.visible = showText;
+
     if (resultScreen) {
       const results = resultScreen.getResults();
       const score = results.stats.score ?? 0;
@@ -257,7 +265,14 @@ export class GameFlowOverlayRenderer {
       const stars = results.starRating;
 
       this.targetScore = score;
-      // resultScoreText will be updated in sync() during count-up
+
+      // showAnimation=false: skip count-up, show final score immediately
+      if (!showAnimation) {
+        this.displayedScore = score;
+        this.resultScoreText.text = `\u2b50 \u5F97\u5206: ${score}`;
+      }
+      // resultScoreText will be updated in sync() during count-up when showAnimation=true
+
       this.resultStarsText.text = '\u2B50'.repeat(stars) + '\u2606'.repeat(Math.max(0, 3 - stars));
       this.resultTimeText.text = time != null ? `\u23f1 \u7528\u65f6: ${Math.ceil(time)}s` : '';
     } else {
@@ -267,6 +282,11 @@ export class GameFlowOverlayRenderer {
         const scorer = scorers[0] as { getScore?: () => number };
         const score = scorer.getScore?.() ?? 0;
         this.targetScore = score;
+
+        if (!showAnimation) {
+          this.displayedScore = score;
+          this.resultScoreText.text = `\u2b50 \u5F97\u5206: ${score}`;
+        }
       }
       this.resultStarsText.text = '';
       this.resultTimeText.text = '';

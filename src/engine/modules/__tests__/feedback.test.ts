@@ -76,4 +76,22 @@ describe('ResultScreen', () => {
 
     expect(result.isVisible()).toBe(true);
   });
+
+  it('getSchema() should include showAnimation with default true', () => {
+    const result = new ResultScreen('result-schema-1', {});
+    const schema = result.getSchema();
+
+    expect(schema.showAnimation).toBeDefined();
+    expect(schema.showAnimation.type).toBe('toggle');
+    expect(schema.showAnimation.default).toBe(true);
+  });
+
+  it('getSchema() should include showText with default true', () => {
+    const result = new ResultScreen('result-schema-2', {});
+    const schema = result.getSchema();
+
+    expect(schema.showText).toBeDefined();
+    expect(schema.showText.type).toBe('toggle');
+    expect(schema.showText.default).toBe(true);
+  });
 });

@@ -130,6 +130,14 @@ describe('registry-binding', () => {
         paramKey: 'showText',
       });
     });
+
+    it('maps visual_audio_028 to UIOverlay.showFloatText', () => {
+      expect(PARAM_TO_MODULE_MAP['visual_audio_028']).toEqual({
+        kind: 'module',
+        moduleType: 'UIOverlay',
+        paramKey: 'showFloatText',
+      });
+    });
   });
 
   describe('getLiveValuesForParams', () => {

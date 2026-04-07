@@ -14,6 +14,7 @@ interface ModuleMapping {
   kind: 'module';
   moduleType: string;
   paramKey: string; // '_enabled' for L2 toggles, actual param name for L3
+  valueMap?: Record<string, unknown>; // optional UI label → engine value transform
 }
 
 interface MetaMapping {
@@ -35,6 +36,13 @@ export const PARAM_TO_MODULE_MAP: Record<string, ParamMapping> = {
   game_mechanics_001: { kind: 'module', moduleType: 'Scorer', paramKey: '_enabled' },
   game_mechanics_002: { kind: 'module', moduleType: 'Collision', paramKey: '_enabled' },
   game_mechanics_003: { kind: 'module', moduleType: 'TouchInput', paramKey: '_enabled' },
+  // Touch input mode selector (单击→tap, 滑动→swipe, 倾斜→tap: no tilt support yet, falls back to tap)
+  game_mechanics_004: {
+    kind: 'module',
+    moduleType: 'TouchInput',
+    paramKey: 'gesture',
+    valueMap: { '单击': 'tap', '滑动': 'swipe', '倾斜': 'tap' },
+  },
   game_mechanics_005: { kind: 'module', moduleType: 'DifficultyRamp', paramKey: '_enabled' },
   game_mechanics_006: { kind: 'module', moduleType: 'Lives', paramKey: '_enabled' },
   game_mechanics_007: { kind: 'module', moduleType: 'Spawner', paramKey: '_enabled' },
@@ -73,6 +81,9 @@ export const PARAM_TO_MODULE_MAP: Record<string, ParamMapping> = {
   // Result screen toggles
   visual_audio_011: { kind: 'module', moduleType: 'ResultScreen', paramKey: 'showAnimation' },
   visual_audio_012: { kind: 'module', moduleType: 'ResultScreen', paramKey: 'showText' },
+
+  // Float text toggle (scoring popups only, not system announcements)
+  visual_audio_028: { kind: 'module', moduleType: 'UIOverlay', paramKey: 'showFloatText' },
 };
 
 // --- Read: get live values from config for given paramIds ---
@@ -97,7 +108,13 @@ export function getLiveValuesForParams(
     } else {
       const mod = config.modules.find((m) => m.type === mapping.moduleType);
       if (mod) {
-        result[paramId] = mod.params[mapping.paramKey];
+        const engineValue = mod.params[mapping.paramKey];
+        if (mapping.valueMap) {
+          const entry = Object.entries(mapping.valueMap).find(([, v]) => v === engineValue);
+          result[paramId] = entry ? entry[0] : engineValue;
+        } else {
+          result[paramId] = engineValue;
+        }
       }
     }
   }
@@ -141,8 +158,13 @@ export function planUpdatesForParamChange(
   const mod = config.modules.find((m) => m.type === mapping.moduleType);
   if (!mod) return { params: [] };
 
+  // Apply valueMap transform if present
+  const finalValue = mapping.valueMap
+    ? (mapping.valueMap[String(value)] ?? value)
+    : value;
+
   return {
-    params: [{ moduleId: mod.id, changes: { [mapping.paramKey]: value } }],
+    params: [{ moduleId: mod.id, changes: { [mapping.paramKey]: finalValue } }],
   };
 }
 
@@ -164,7 +186,13 @@ export function extractRegistryValueMap(
     } else {
       const mod = config.modules.find((m) => m.type === mapping.moduleType);
       if (mod) {
-        result.set(paramId, mod.params[mapping.paramKey]);
+        const engineValue = mod.params[mapping.paramKey];
+        if (mapping.valueMap) {
+          const entry = Object.entries(mapping.valueMap).find(([, v]) => v === engineValue);
+          result.set(paramId, entry ? entry[0] : engineValue);
+        } else {
+          result.set(paramId, engineValue);
+        }
       }
     }
   }

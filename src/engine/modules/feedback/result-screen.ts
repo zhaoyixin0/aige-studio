@@ -33,6 +33,16 @@ export class ResultScreen extends BaseModule {
         options: ['retry', 'share', 'home'],
         default: ['retry', 'share'],
       },
+      showAnimation: {
+        type: 'toggle',
+        label: '胜负动画',
+        default: true,
+      },
+      showText: {
+        type: 'toggle',
+        label: '胜负文字',
+        default: true,
+      },
     };
   }
 
