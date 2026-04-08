@@ -98,7 +98,9 @@ export function LandingPage() {
           setLayoutPhase('studio');
 
           // Fulfill assets in background
-          fulfillAssetsInBackground(result.config);
+          fulfillAssetsInBackground(result.config).catch((err) => {
+            console.warn('[LandingPage] Background asset fulfillment crashed:', err);
+          });
         }
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : String(err);

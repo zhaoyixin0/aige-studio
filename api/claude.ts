@@ -7,6 +7,9 @@
  */
 import Anthropic from '@anthropic-ai/sdk';
 
+export const config = { runtime: 'nodejs20.x' };
+export const maxDuration = 60;
+
 interface ProxyRequest {
   method: string;
   body: {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { LandingPage } from '@/ui/landing/landing-page.tsx';
 import { StudioChatPanel } from '@/ui/chat/studio-chat-panel.tsx';
 import { PreviewCanvas } from '@/ui/preview/preview-canvas.tsx';
@@ -51,6 +51,19 @@ export function MainLayout() {
   const setConfig = useGameStore((s) => s.setConfig);
   const gameType = config?.meta?.name?.toLowerCase() ?? 'catch';
   const values = useMemo(() => extractRegistryValueMap(config), [config]);
+
+  // Debounce engine reload during high-frequency Board Mode param changes (slider drags).
+  // 150ms is below human perception threshold yet coalesces ~10 frames of slider events.
+  const reloadTimeoutRef = useRef<number | null>(null);
+  useEffect(() => {
+    return () => {
+      if (reloadTimeoutRef.current !== null) {
+        window.clearTimeout(reloadTimeoutRef.current);
+        reloadTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
   const handleParamChange = useCallback(
     (paramId: string, value: unknown) => {
       if (!config) return;
@@ -83,8 +96,20 @@ export function MainLayout() {
       if (paramOps.length > 0) {
         batchUpdateParams(paramOps);
       }
+
+      // Debounced engine reload — coalesces rapid slider events into a single reload
+      if (reloadTimeoutRef.current !== null) {
+        window.clearTimeout(reloadTimeoutRef.current);
+      }
+      reloadTimeoutRef.current = window.setTimeout(() => {
+        const latest = useGameStore.getState().config;
+        if (latest) {
+          engine.loadConfig(latest);
+        }
+        reloadTimeoutRef.current = null;
+      }, 150);
     },
-    [config, setConfig, batchUpdateParams],
+    [config, setConfig, batchUpdateParams, engine],
   );
 
   const handleBoardModeClose = useCallback(
@@ -111,7 +136,7 @@ export function MainLayout() {
                 <div
                   data-testid="board-mode-container"
                   className={[
-                    'absolute inset-0 z-30 transition-transform duration-300 ease-in-out',
+                    'absolute top-0 left-0 right-0 bottom-[80px] z-30 transition-transform duration-300 ease-in-out',
                     boardModeOpen ? 'translate-x-0' : '-translate-x-full pointer-events-none',
                   ].join(' ')}
                 >
