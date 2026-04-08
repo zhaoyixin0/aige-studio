@@ -123,7 +123,9 @@ export function LandingPage() {
     async (config: import('@/engine/core').GameConfig) => {
       try {
         const assetAgent = new AssetAgent();
+        const capturedVersion = useGameStore.getState().configVersion;
         const assets = await assetAgent.fulfillAssets(config);
+        if (useGameStore.getState().configVersion !== capturedVersion) return;
         if (Object.keys(assets).length > 0) {
           batchUpdateAssets(assets);
           // Reload engine config with updated assets

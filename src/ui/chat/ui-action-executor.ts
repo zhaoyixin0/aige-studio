@@ -21,6 +21,7 @@ export function setupUIActionExecutor() {
         if (!config) return;
 
         const assetAgent = new AssetAgent();
+        const capturedVersion = useGameStore.getState().configVersion;
         let progressEntries: ProgressEntry[] = [];
         const messageId = `gen-${Date.now()}`;
 
@@ -49,6 +50,8 @@ export function setupUIActionExecutor() {
               )
             }));
           });
+
+          if (useGameStore.getState().configVersion !== capturedVersion) return;
 
           if (Object.keys(assets).length > 0) {
             gameStore.batchUpdateAssets(assets);

@@ -57,6 +57,7 @@ export function useConversationManager(): ConversationManagerResult {
   const triggerAssetFulfillment = useCallback(
     (newConfig: GameConfig) => {
       const assetAgent = new AssetAgent();
+      const capturedVersion = useGameStore.getState().configVersion;
 
       addChatMessage({
         id: crypto.randomUUID(),
@@ -71,6 +72,7 @@ export function useConversationManager(): ConversationManagerResult {
           void progress;
         })
         .then((assets) => {
+          if (useGameStore.getState().configVersion !== capturedVersion) return;
           const count = Object.keys(assets).length;
           if (count > 0) {
             batchUpdateAssets(assets);

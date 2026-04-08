@@ -54,6 +54,7 @@ export function ChatPanel() {
   /** Fire-and-forget: generate assets for a newly created config. */
   const triggerAssetFulfillment = useCallback((newConfig: GameConfig) => {
     const assetAgent = new AssetAgent();
+    const capturedVersion = useGameStore.getState().configVersion;
 
     addChatMessage({
       id: crypto.randomUUID(),
@@ -65,14 +66,15 @@ export function ChatPanel() {
     assetAgent.fulfillAssets(newConfig, () => {
       // Progress callback — UI feedback handled via chat messages
     }).then((assets) => {
+      if (useGameStore.getState().configVersion !== capturedVersion) return;
       const count = Object.keys(assets).length;
       if (count > 0) {
         batchUpdateAssets(assets);
         // Update engine config so renderer picks up new sprites
         const engine = engineRef.current;
         if (engine) {
-          const engineConfig = engine.getConfig();
-          engineConfig.assets = { ...engineConfig.assets, ...assets };
+          const prev = engine.getConfig();
+          engine.loadConfig({ ...prev, assets: { ...prev.assets, ...assets } });
         }
         addChatMessage({
           id: crypto.randomUUID(),
