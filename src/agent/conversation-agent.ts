@@ -315,6 +315,66 @@ export class ConversationAgent {
               }
               break;
             }
+
+            case 'request_assets_generate': {
+              const input = block.input as {
+                keys?: string[];
+                show_preview?: boolean;
+              };
+              if (typeof window !== 'undefined') {
+                const { dispatchUIAction } = await import('@/ui/chat/ui-action-executor');
+                dispatchUIAction({
+                  type: 'REQUEST_ASSETS_GENERATE',
+                  keys: input.keys,
+                  showPreview: input.show_preview ?? true,
+                });
+              }
+              if (!reply) {
+                reply = '正在生成素材...';
+              }
+              break;
+            }
+
+            case 'request_asset_replace': {
+              const input = block.input as {
+                target: string;
+                preferred_source?: 'ai' | 'upload';
+              };
+              if (typeof window !== 'undefined') {
+                const { dispatchUIAction } = await import('@/ui/chat/ui-action-executor');
+                dispatchUIAction({
+                  type: 'REQUEST_ASSET_REPLACE',
+                  target: input.target,
+                  preferredSource: input.preferred_source ?? 'ai',
+                });
+              }
+              if (!reply) {
+                reply = '正在处理素材替换...';
+              }
+              break;
+            }
+
+            case 'show_asset_previews': {
+              const input = block.input as {
+                items: Array<{
+                  key: string;
+                  label: string;
+                  src: string;
+                  source: 'ai' | 'user';
+                }>;
+              };
+              if (typeof window !== 'undefined') {
+                const { dispatchUIAction } = await import('@/ui/chat/ui-action-executor');
+                dispatchUIAction({
+                  type: 'SHOW_ASSET_PREVIEWS',
+                  items: input.items,
+                });
+              }
+              if (!reply) {
+                reply = '已展示素材预览。';
+              }
+              break;
+            }
           }
         }
       }

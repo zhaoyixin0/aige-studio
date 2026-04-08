@@ -277,6 +277,9 @@ ${HERO_PRESET_IDS.map((id) => `- ${id}: ${HERO_PRESET_DESCRIPTIONS[id]}`).join('
 - 不要主动调用 suggest_enhancements，除非用户明确要求"加功能"或"增强"
 - 用户通过自然语言调整参数时，使用 push_parameter_card 推送参数卡片
 - 用户通过自然语言修改游戏时，使用 modify_game
+- 创建游戏后如需补齐素材，调用 request_assets_generate（省略 keys 表示全部缺失项）
+- 用户要求更换某个素材时，调用 request_asset_replace 并指定 target
+- 需要展示已有素材供用户选择时，调用 show_asset_previews
 
 ### 通用规则
 - 始终用中文回复
@@ -477,6 +480,67 @@ export const TOOLS: Anthropic.Messages.Tool[] = [
         },
       },
       required: ['title'],
+    },
+  },
+  {
+    name: 'request_assets_generate',
+    description: '请求 UI 生成游戏素材。省略 keys 表示生成所有缺失素材。创建游戏后如需补齐素材时使用。',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        keys: {
+          type: 'array',
+          items: { type: 'string' },
+          description: '要生成的素材 key 列表（如 good_1, player, background）。省略则生成全部缺失素材。',
+        },
+        show_preview: {
+          type: 'boolean',
+          description: '生成后是否展示预览（默认 true）',
+        },
+      },
+    },
+  },
+  {
+    name: 'request_asset_replace',
+    description: '请求替换指定素材。用户要求更换某个素材时使用。',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        target: {
+          type: 'string',
+          description: '要替换的素材 key（如 player, good_1, background）',
+        },
+        preferred_source: {
+          type: 'string',
+          enum: ['ai', 'upload'],
+          description: '首选来源（ai=AI生成, upload=用户上传）',
+        },
+      },
+      required: ['target'],
+    },
+  },
+  {
+    name: 'show_asset_previews',
+    description: '展示素材预览卡片供用户确认或应用。',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        items: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              key: { type: 'string' },
+              label: { type: 'string' },
+              src: { type: 'string' },
+              source: { type: 'string', enum: ['ai', 'user'] },
+            },
+            required: ['key', 'label', 'src', 'source'],
+          },
+          description: '预览项列表',
+        },
+      },
+      required: ['items'],
     },
   },
 ];

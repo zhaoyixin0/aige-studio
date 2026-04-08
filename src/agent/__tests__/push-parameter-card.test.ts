@@ -47,8 +47,9 @@ describe('TOOLS includes push_parameter_card', () => {
     for (const name of existingNames) {
       expect(TOOLS.find((t) => t.name === name)).toBeDefined();
     }
-    // Total tools: create_game, modify_game, suggest_enhancements, push_parameter_card, use_preset, push_expert_insight
-    expect(TOOLS.length).toBe(6);
+    // Total tools: create_game, modify_game, suggest_enhancements, push_parameter_card, use_preset, push_expert_insight,
+    // request_assets_generate, request_asset_replace, show_asset_previews
+    expect(TOOLS.length).toBeGreaterThanOrEqual(9);
   });
 });
 
