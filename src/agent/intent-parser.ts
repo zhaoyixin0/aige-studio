@@ -1,5 +1,6 @@
 import { createClaudeClient } from '@/services/claude-proxy.ts';
 import type { GameConfig } from '@/engine/core/index.ts';
+import { tryLocalMatch, type LocalMatch } from './local-patterns.ts';
 
 export type IntentType =
   | 'create_game'
@@ -18,6 +19,38 @@ export interface ParsedIntent {
   rawText: string;
 }
 
+function localMatchToParsedIntent(
+  match: LocalMatch,
+  rawText: string,
+  config: GameConfig,
+): ParsedIntent {
+  const module = config.modules.find((m) => m.id === match.moduleId);
+  const targetModule = module?.type;
+
+  switch (match.type) {
+    case 'update_param':
+      return {
+        intent: 'modify_param',
+        targetModule,
+        targetParam: match.param,
+        targetValue: match.value,
+        rawText,
+      };
+    case 'enable_module':
+      return {
+        intent: 'add_module',
+        targetModule,
+        rawText,
+      };
+    case 'disable_module':
+      return {
+        intent: 'remove_module',
+        targetModule,
+        rawText,
+      };
+  }
+}
+
 export class IntentParser {
   private client: ReturnType<typeof createClaudeClient>;
 
@@ -29,6 +62,13 @@ export class IntentParser {
     userMessage: string,
     currentConfig?: GameConfig | null,
   ): Promise<ParsedIntent> {
+    if (currentConfig) {
+      const localMatch = tryLocalMatch(userMessage, currentConfig);
+      if (localMatch) {
+        return localMatchToParsedIntent(localMatch, userMessage, currentConfig);
+      }
+    }
+
     const configSummary = currentConfig
       ? `Current game: "${currentConfig.meta.name}", modules: ${currentConfig.modules.map((m) => m.type).join(', ')}`
       : 'No game loaded yet.';

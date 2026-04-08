@@ -389,11 +389,15 @@ export class ConversationAgent {
         }
       }
 
-      // Inject warning-derived chips if no tool produced chips and we have warnings
-      if (!chips && this._lastValidationReport && this._lastValidationReport.warnings.length > 0) {
-        const warningChips = mapWarningsToChips(this._lastValidationReport.warnings);
+      // Append warning-derived chips to existing chips (deduplicated by id)
+      if (this._lastValidationReport && this._lastValidationReport.warnings.length > 0) {
+        const warningChips = mapWarningsToChips(this._lastValidationReport.warnings, 2);
         if (warningChips.length > 0) {
-          chips = warningChips;
+          const existingIds = new Set((chips ?? []).map((c) => c.id));
+          const newWarningChips = warningChips.filter((c) => !existingIds.has(c.id));
+          if (newWarningChips.length > 0) {
+            chips = [...(chips ?? []), ...newWarningChips];
+          }
         }
       }
 

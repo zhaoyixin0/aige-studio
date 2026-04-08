@@ -51,6 +51,17 @@ export function DiagnosticBadge() {
   );
 }
 
+const FIXABLE_CATEGORIES = new Set([
+  'event-chain-break',
+  'invalid-param',
+  'module-conflict',
+  'missing-input',
+] as const);
+
+function isFixable(category: string): boolean {
+  return FIXABLE_CATEGORIES.has(category as 'event-chain-break');
+}
+
 function DiagnosticPopover({
   report,
   onClose,
@@ -59,6 +70,14 @@ function DiagnosticPopover({
   onClose: () => void;
 }) {
   const allIssues = [...report.errors, ...report.warnings];
+  const setBoardModeOpen = useEditorStore((s) => s.setBoardModeOpen);
+
+  const handleQuickFix = (category: string) => {
+    if (isFixable(category)) {
+      setBoardModeOpen(true);
+      onClose();
+    }
+  };
 
   return (
     <>
@@ -102,6 +121,14 @@ function DiagnosticPopover({
                 <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
                   {translated.description}
                 </p>
+                {isFixable(issue.category) && (
+                  <button
+                    onClick={() => handleQuickFix(issue.category)}
+                    className="mt-1.5 text-[10px] text-blue-400 hover:text-blue-300 hover:underline"
+                  >
+                    快速修复 →
+                  </button>
+                )}
               </div>
             );
           })}
