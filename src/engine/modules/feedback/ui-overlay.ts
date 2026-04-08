@@ -72,6 +72,7 @@ export class UIOverlay extends BaseModule {
   }
 
   update(dt: number): void {
+    if (this.gameflowPaused) return;
     // Advance combo popup fade timer
     if (this.hudState.combo.fadeTimer > 0) {
       this.hudState.combo.fadeTimer = Math.max(

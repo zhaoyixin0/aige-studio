@@ -140,6 +140,9 @@ describe('TouchInput', () => {
     });
     touch.setCanvas(canvas);
 
+    // Resume game flow so update() is not a no-op
+    engine.eventBus.emit('gameflow:resume');
+
     // Pointer down sets position
     canvas.dispatchEvent(
       new PointerEvent('pointerdown', { clientX: 300, clientY: 400 }),
@@ -151,6 +154,37 @@ describe('TouchInput', () => {
     expect(handler).toHaveBeenCalledWith(
       expect.objectContaining({ x: 300, y: 400 }),
     );
+  });
+
+  it('update() does not emit input:touch:hold or input:touch:position when gameflowPaused', () => {
+    const { engine, touch } = setup();
+
+    const canvas = document.createElement('canvas');
+    Object.defineProperty(canvas, 'width', { value: 800 });
+    Object.defineProperty(canvas, 'height', { value: 600 });
+    canvas.getBoundingClientRect = () => ({
+      left: 0, top: 0, right: 800, bottom: 600,
+      width: 800, height: 600, x: 0, y: 0, toJSON: () => '',
+    });
+    touch.setCanvas(canvas);
+
+    // Resume so pointer events are live, simulate a pointer down to set hold state
+    engine.eventBus.emit('gameflow:resume');
+    canvas.dispatchEvent(new PointerEvent('pointerdown', { clientX: 200, clientY: 300 }));
+
+    // Now pause
+    engine.eventBus.emit('gameflow:pause');
+
+    const holdHandler = vi.fn();
+    const posHandler = vi.fn();
+    engine.eventBus.on('input:touch:hold', holdHandler);
+    engine.eventBus.on('input:touch:position', posHandler);
+
+    // update() while paused must be a no-op
+    touch.update(16);
+
+    expect(holdHandler).not.toHaveBeenCalled();
+    expect(posHandler).not.toHaveBeenCalled();
   });
 
   it('should clean up event listeners on destroy', () => {

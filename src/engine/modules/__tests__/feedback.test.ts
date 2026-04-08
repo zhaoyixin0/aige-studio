@@ -60,6 +60,28 @@ describe('UIOverlay', () => {
     const hud = overlay.getHudState();
     expect(hud.score).toBe(42);
   });
+
+  it('update() does not advance combo fade timer when gameflowPaused', () => {
+    const engine = new Engine();
+    const overlay = new UIOverlay('overlay-1');
+    engine.addModule(overlay);
+
+    // Resume so the combo event listener fires, then pause again
+    engine.eventBus.emit('gameflow:resume');
+    engine.eventBus.emit('scorer:combo:3', { combo: 3 });
+
+    const beforeUpdate = overlay.getHudState().combo.fadeTimer;
+    expect(beforeUpdate).toBeGreaterThan(0);
+
+    // Pause the game flow
+    engine.eventBus.emit('gameflow:pause');
+
+    // Call update — timer must not advance while paused
+    overlay.update(500);
+
+    const afterUpdate = overlay.getHudState().combo.fadeTimer;
+    expect(afterUpdate).toBe(beforeUpdate);
+  });
 });
 
 describe('ResultScreen', () => {

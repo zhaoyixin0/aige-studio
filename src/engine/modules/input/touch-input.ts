@@ -243,6 +243,7 @@ export class TouchInput extends BaseModule {
   }
 
   update(_dt: number): void {
+    if (this.gameflowPaused) return;
     // Re-emit hold + position events every frame while pointer is down
     if (this.pointerState && this.currentPosition && this.canvas) {
       const canvasWidth = (this.canvas as HTMLCanvasElement)?.width ?? 800;
