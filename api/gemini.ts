@@ -6,7 +6,6 @@
  * server-side GEMINI_API_KEY. The API key is NEVER exposed to the browser.
  */
 
-export const config = { runtime: 'nodejs20.x' };
 export const maxDuration = 60;
 
 const NANO_BANANA_PRO_ENDPOINT =
