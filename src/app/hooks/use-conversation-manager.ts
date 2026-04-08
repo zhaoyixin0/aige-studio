@@ -133,6 +133,7 @@ export function useConversationManager(): ConversationManagerResult {
           ...(result.expertInsight ? { expertInsight: result.expertInsight } : {}),
           ...(result.moduleTuning ? { moduleTuning: result.moduleTuning } : {}),
           ...(result.presetUsed ? { presetUsed: result.presetUsed } : {}),
+          ...(result.blocks ? { blocks: result.blocks } : {}),
         };
 
         // A3: Detect vague intent response and inject gameTypeOptions

@@ -4,6 +4,7 @@
  */
 import type { GameConfig } from '@/engine/core/index.ts';
 import type { AssetEntry } from '@/engine/core/types.ts';
+import type { ChatBlock, ParamCardField } from './conversation-defs.ts';
 import type { ValidationIssue } from '@/engine/core/config-validator.ts';
 import { getModuleParams } from './game-presets.ts';
 import { SkillLoader } from './skill-loader.ts';
@@ -320,4 +321,71 @@ export function mapWarningsToChips(
   }
 
   return chips;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Pure function: build param-card ChatBlock from live GameConfig     */
+/* ------------------------------------------------------------------ */
+
+export function mapConfigToParamCard(
+  config: GameConfig,
+  category?: string,
+): Extract<ChatBlock, { kind: 'param-card' }> {
+  const fields: ParamCardField[] = [];
+
+  // Timer duration
+  const timer = config.modules.find((m) => m.type === 'Timer');
+  if (timer && typeof timer.params?.duration === 'number') {
+    fields.push({
+      kind: 'slider',
+      key: 'Timer:duration',
+      label: '时长',
+      value: timer.params.duration,
+      min: 10, max: 120, step: 5, unit: '秒',
+    });
+  }
+
+  // Spawner interval
+  const spawner = config.modules.find((m) => m.type === 'Spawner');
+  if (spawner && typeof spawner.params?.spawnInterval === 'number') {
+    fields.push({
+      kind: 'slider',
+      key: 'Spawner:spawnInterval',
+      label: '生成间隔',
+      value: spawner.params.spawnInterval,
+      min: 200, max: 3000, step: 100, unit: 'ms',
+    });
+  }
+
+  // PlayerMovement speed
+  const pm = config.modules.find((m) => m.type === 'PlayerMovement');
+  if (pm && typeof pm.params?.speed === 'number') {
+    fields.push({
+      kind: 'slider',
+      key: 'PlayerMovement:speed',
+      label: '玩家速度',
+      value: pm.params.speed,
+      min: 100, max: 1500, step: 50,
+    });
+  }
+
+  // Asset fields for common keys
+  const assets = config.assets ?? {};
+  for (const assetKey of ['player', 'good_1', 'background']) {
+    if (assetKey in assets) {
+      fields.push({
+        kind: 'asset',
+        key: assetKey,
+        label: assetKey,
+        thumbnail: assets[assetKey]?.src ?? '',
+        accept: ['image'],
+      });
+    }
+  }
+
+  return {
+    kind: 'param-card',
+    title: category ? `${category} 参数` : '游戏参数',
+    fields,
+  };
 }

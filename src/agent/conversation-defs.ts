@@ -45,6 +45,7 @@ export interface ConversationResult {
   expertInsight?: ExpertInsightPayload;
   moduleTuning?: ModuleTuningPayload;
   presetUsed?: { presetId: string; title: string; pendingAssets: number };
+  blocks?: ChatBlock[];
 }
 
 export interface ConfigChange {

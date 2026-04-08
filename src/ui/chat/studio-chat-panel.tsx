@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { SendHorizontal } from 'lucide-react';
 import { useEditorStore } from '@/store/editor-store';
+import { useChatInputPaste } from '@/app/hooks/use-chat-input-paste';
 import { type ChatMessage, type Chip, getPresetIdFromChip } from '@/store/editor-store';
 import { useConversationManager } from '@/app/hooks/use-conversation-manager';
 import { MessageList } from './message-list';
@@ -99,6 +100,8 @@ export function StudioChatPanel() {
     [isChatLoading, submitMessage, chips, addChatMessage],
   );
 
+  const paste = useChatInputPaste();
+
   /* ---------------------------------------------------------------- */
   /*  Render                                                           */
   /* ---------------------------------------------------------------- */
@@ -126,13 +129,23 @@ export function StudioChatPanel() {
 
       {/* Input */}
       <div className="p-3 border-t border-white/5">
-        <div className="flex items-end gap-2 bg-white/5 rounded-lg border border-white/10 px-3 py-2">
+        <div
+          role="region"
+          aria-label="输入框 — 可拖放或粘贴图片"
+          className={`flex items-end gap-2 bg-white/5 rounded-lg border px-3 py-2 ${
+            paste.isDragging ? 'border-blue-500/60 ring-1 ring-blue-500/40' : 'border-white/10'
+          }`}
+          onDragOver={paste.handleDragOver}
+          onDragLeave={paste.handleDragLeave}
+          onDrop={paste.handleDrop}
+        >
           <textarea
             className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 resize-none focus:outline-none max-h-24"
             placeholder="输入修改建议..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
+            onPaste={paste.handlePaste}
             rows={1}
             disabled={isChatLoading}
           />

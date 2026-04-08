@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SendHorizontal, Loader2 } from 'lucide-react';
 import { useEditorStore } from '@/store/editor-store';
+import { useChatInputPaste } from '@/app/hooks/use-chat-input-paste';
 import { type ChatMessage, type Chip, getPresetIdFromChip } from '@/store/editor-store';
 import { useGameStore } from '@/store/game-store';
 import { useEngineContext } from '@/app/hooks/use-engine';
@@ -81,6 +82,7 @@ export function LandingPage() {
           role: 'assistant',
           content: result.reply,
           timestamp: Date.now(),
+          ...(result.blocks ? { blocks: result.blocks } : {}),
         };
         addChatMessage(assistantMsg);
 
@@ -171,6 +173,8 @@ export function LandingPage() {
     [input, handleSubmit],
   );
 
+  const paste = useChatInputPaste();
+
   /* ---------------------------------------------------------------- */
   /*  Render                                                           */
   /* ---------------------------------------------------------------- */
@@ -222,13 +226,23 @@ export function LandingPage() {
         )}
 
         {/* Input area */}
-        <div className="w-full rounded-2xl border border-white/10 bg-white/5 p-3 focus-within:border-white/20 transition-colors">
+        <div
+          role="region"
+          aria-label="输入框 — 可拖放或粘贴图片"
+          className={`w-full rounded-2xl border bg-white/5 p-3 focus-within:border-white/20 transition-colors ${
+            paste.isDragging ? 'border-blue-500/60 ring-1 ring-blue-500/40' : 'border-white/10'
+          }`}
+          onDragOver={paste.handleDragOver}
+          onDragLeave={paste.handleDragLeave}
+          onDrop={paste.handleDrop}
+        >
           <div className="flex items-end gap-2">
             <textarea
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
+              onPaste={paste.handlePaste}
               placeholder="描述你想做的游戏..."
               rows={1}
               className="flex-1 bg-transparent text-white placeholder-gray-500 text-sm resize-none outline-none min-h-[36px] max-h-[160px] py-1.5"

@@ -25,6 +25,7 @@ import {
   buildSystemPrompt,
   applyConfigChanges,
   mapWarningsToChips,
+  mapConfigToParamCard,
 } from './conversation-helpers.ts';
 import {
   type ConversationMessage,
@@ -32,6 +33,7 @@ import {
   type ConversationResult,
   type ConfigChange,
   type ParameterCardPayload,
+  type ChatBlock,
   MAX_HISTORY,
   ART_STYLES,
   GAME_TYPE_DESCRIPTIONS,
@@ -44,7 +46,7 @@ import {
 // Re-export public types and functions so external consumers don't need to change imports
 export type { Chip, ConversationResult, ConfigChange, ConversationMessage, ParameterCardPayload };
 export { detectGameTypeFromMessage };
-export { generateV2CreationChips, generateSuggestions, buildSystemPrompt, applyConfigChanges, mapWarningsToChips };
+export { generateV2CreationChips, generateSuggestions, buildSystemPrompt, applyConfigChanges, mapWarningsToChips, mapConfigToParamCard };
 
 /* ------------------------------------------------------------------ */
 /*  ConversationAgent                                                  */
@@ -132,6 +134,7 @@ export class ConversationAgent {
       let expertInsight: ConversationResult['expertInsight'];
       let moduleTuning: ConversationResult['moduleTuning'];
       let presetUsed: ConversationResult['presetUsed'];
+      let blocks: ChatBlock[] | undefined;
       let createdThisTurn = false;
 
       const content = response.content as Array<{
@@ -161,6 +164,9 @@ export class ConversationAgent {
               config = this.buildGameConfig(input);
               // V2: use creation chips (board_mode + L1 params) instead of old module suggestions
               chips = generateV2CreationChips(input.game_type);
+              if (config) {
+                blocks = [mapConfigToParamCard(config, input.game_type)];
+              }
               createdThisTurn = true;
               if (!reply) {
                 const desc = GAME_TYPE_DESCRIPTIONS[input.game_type] ?? input.game_type;
@@ -237,6 +243,9 @@ export class ConversationAgent {
                       assetDescriptions: input.asset_descriptions,
                     },
                   };
+                }
+                if (config) {
+                  blocks = [mapConfigToParamCard(config, this.inferGameType(config))];
                 }
                 if (!reply) {
                   reply = `已完成修改！共应用了 ${input.changes.length} 项更改。`;
@@ -403,7 +412,7 @@ export class ConversationAgent {
       // Determine if we still need more info
       const needsMoreInfo = !config && !chips && !parameterCard;
 
-      return { reply, config, chips, needsMoreInfo, parameterCard, expertInsight, moduleTuning, presetUsed };
+      return { reply, config, chips, needsMoreInfo, parameterCard, expertInsight, moduleTuning, presetUsed, blocks };
     } catch (error) {
       const errMsg = error instanceof Error ? error.message : String(error);
       return {

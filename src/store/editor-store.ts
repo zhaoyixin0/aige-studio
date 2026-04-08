@@ -206,7 +206,16 @@ export const useEditorStore = create<EditorStore>((set) => ({
       pendingAttachments: [...state.pendingAttachments, attachment],
     })),
 
-  clearPendingAttachments: () => set({ pendingAttachments: [] }),
+  clearPendingAttachments: () =>
+    set((state) => {
+      // Revoke blob URLs to prevent memory leak
+      for (const att of state.pendingAttachments) {
+        if (att.src.startsWith('blob:')) {
+          URL.revokeObjectURL(att.src);
+        }
+      }
+      return { pendingAttachments: [] };
+    }),
 
   setShowFpsOverlay: (v) => set({ showFpsOverlay: v }),
 }));
