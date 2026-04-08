@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { PreviewToolbar } from './preview-toolbar.tsx';
 import { StepIndicator } from './step-indicator.tsx';
+import { FpsOverlay } from './fps-overlay.tsx';
 import type { PreviewPhase } from '@/store/editor-store.ts';
 import { useEngineContext, CANVAS_WIDTH, CANVAS_HEIGHT } from '@/app/hooks/use-engine.ts';
 import { useCamera } from '@/app/hooks/use-camera.ts';
@@ -14,18 +15,20 @@ import type { PreviewMode } from '@/store/editor-store.ts';
 const selectPreviewMode = (s: { previewMode: PreviewMode }) => s.previewMode;
 const selectSetPreviewMode = (s: { setPreviewMode: (mode: PreviewMode) => void }) => s.setPreviewMode;
 const selectPreviewPhase = (s: { previewPhase: PreviewPhase }) => s.previewPhase;
+const selectShowFpsOverlay = (s: { showFpsOverlay: boolean }) => s.showFpsOverlay;
 
 export function PreviewCanvas() {
   const { engineRef, rendererRef, setMountEl, loadConfig, ready: engineReady } = useEngineContext();
   const previewMode = useEditorStore(selectPreviewMode);
   const setPreviewMode = useEditorStore(selectSetPreviewMode);
   const previewPhase = useEditorStore(selectPreviewPhase);
+  const showFpsOverlay = useEditorStore(selectShowFpsOverlay);
 
   // Acquire camera + face tracker + actual video dimensions
   const { videoRef, trackerRef, videoDimensionsRef, ready: cameraReady } = useCamera();
 
   // Set up render loop (tracking + PixiJS rendering)
-  const { start: startLoop, stop: stopLoop } = useGameLoop({
+  const { start: startLoop, stop: stopLoop, fpsRef } = useGameLoop({
     engineRef,
     rendererRef,
     trackerRef,
@@ -104,6 +107,9 @@ export function PreviewCanvas() {
           <StepIndicator phase={previewPhase} />
         </div>
       )}
+
+      {/* FPS overlay — shown when enabled, positioned inside the canvas area */}
+      {showFpsOverlay && <FpsOverlay fpsRef={fpsRef} />}
 
       {/* Exit button overlay in play mode */}
       {previewMode === 'play' && (

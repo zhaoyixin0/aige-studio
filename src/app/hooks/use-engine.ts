@@ -7,6 +7,8 @@ import { createModuleRegistry } from '@/engine/module-setup.ts';
 import type { GameConfig, ModuleSchema } from '@/engine/core/types.ts';
 import { EventRecorder, ModuleDiagnostics } from '@/engine/diagnostics';
 import { useEditorStore } from '@/store/editor-store.ts';
+import { validateConfig, applyFixes } from '@/engine/core/config-validator';
+import { ContractRegistry } from '@/engine/core/contract-registry';
 
 // --- Engine Context ---
 
@@ -169,15 +171,17 @@ export function useEngine() {
     const loader = loaderRef.current;
     if (!engine || !loader) return;
 
+    // Auto-fix config before loading (immutable)
+    const contracts = ContractRegistry.fromRegistry(createModuleRegistry());
+    const report = validateConfig(config, contracts);
+    const fixedConfig = report.fixes.length > 0 ? applyFixes(config, report.fixes) : config;
+
     engine.restart();
-    loader.load(engine, config);
+    loader.load(engine, fixedConfig);
     engine.start();
 
     // Publish validation report to editor store for UI feedback
-    const report = loader.getLastValidationReport();
-    if (report) {
-      useEditorStore.getState().setValidationReport(report);
-    }
+    useEditorStore.getState().setValidationReport(report);
 
     // Wire sub-renderers (particles, float text, sound) to engine events
     const renderer = rendererRef.current;

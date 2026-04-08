@@ -24,6 +24,7 @@ import {
   generateSuggestions,
   buildSystemPrompt,
   applyConfigChanges,
+  mapWarningsToChips,
 } from './conversation-helpers.ts';
 import {
   type ConversationMessage,
@@ -43,7 +44,7 @@ import {
 // Re-export public types and functions so external consumers don't need to change imports
 export type { Chip, ConversationResult, ConfigChange, ConversationMessage, ParameterCardPayload };
 export { detectGameTypeFromMessage };
-export { generateV2CreationChips, generateSuggestions, buildSystemPrompt, applyConfigChanges };
+export { generateV2CreationChips, generateSuggestions, buildSystemPrompt, applyConfigChanges, mapWarningsToChips };
 
 /* ------------------------------------------------------------------ */
 /*  ConversationAgent                                                  */
@@ -376,6 +377,14 @@ export class ConversationAgent {
               break;
             }
           }
+        }
+      }
+
+      // Inject warning-derived chips if no tool produced chips and we have warnings
+      if (!chips && this._lastValidationReport && this._lastValidationReport.warnings.length > 0) {
+        const warningChips = mapWarningsToChips(this._lastValidationReport.warnings);
+        if (warningChips.length > 0) {
+          chips = warningChips;
         }
       }
 

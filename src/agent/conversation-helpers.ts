@@ -4,6 +4,7 @@
  */
 import type { GameConfig } from '@/engine/core/index.ts';
 import type { AssetEntry } from '@/engine/core/types.ts';
+import type { ValidationIssue } from '@/engine/core/config-validator.ts';
 import { getModuleParams } from './game-presets.ts';
 import { SkillLoader } from './skill-loader.ts';
 import {
@@ -271,4 +272,52 @@ function applySingleChange(
     default:
       return config;
   }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Pure function: map validation warnings to actionable chips         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Convert ValidationIssue warnings into actionable Chip suggestions.
+ * Each chip gives the user a one-click path to resolve the issue.
+ *
+ * @param warnings - Readonly array of validation warnings
+ * @param maxChips - Maximum number of chips to return (default 3)
+ */
+export function mapWarningsToChips(
+  warnings: readonly ValidationIssue[],
+  maxChips = 3,
+): Chip[] {
+  const chips: Chip[] = [];
+  const seen = new Set<string>();
+
+  for (const w of warnings) {
+    if (chips.length >= maxChips) break;
+
+    let chip: Chip | null = null;
+    switch (w.category) {
+      case 'missing-input':
+        chip = { id: 'add:TouchInput', label: '添加输入模块', emoji: '👆' };
+        break;
+      case 'event-chain-break':
+        chip = { id: 'fix:event-chain', type: 'board_mode' as const, label: '打开调试面板', emoji: '🔧' };
+        break;
+      case 'module-conflict':
+        chip = { id: `remove:${w.moduleId}`, label: '移除重复模块', emoji: '🗑️' };
+        break;
+      case 'invalid-param':
+        chip = { id: 'fix:params', type: 'board_mode' as const, label: '调整参数', emoji: '🎛️' };
+        break;
+      default:
+        break;
+    }
+
+    if (chip && !seen.has(chip.id)) {
+      seen.add(chip.id);
+      chips.push(chip);
+    }
+  }
+
+  return chips;
 }

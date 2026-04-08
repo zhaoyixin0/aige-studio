@@ -124,6 +124,8 @@ interface EditorStore {
 
   pendingAttachments: Attachment[];
 
+  showFpsOverlay: boolean;
+
   selectModule: (id: string | null) => void;
   setPreviewMode: (mode: PreviewMode) => void;
   setPreviewPhase: (phase: PreviewPhase) => void;
@@ -141,6 +143,8 @@ interface EditorStore {
   setGameFeel: (partial: Partial<GameFeelState>) => void;
   addPendingAttachment: (attachment: Attachment) => void;
   clearPendingAttachments: () => void;
+
+  setShowFpsOverlay: (v: boolean) => void;
 }
 
 export const useEditorStore = create<EditorStore>((set) => ({
@@ -159,6 +163,7 @@ export const useEditorStore = create<EditorStore>((set) => ({
   expertBrowserGameType: null,
   gameFeel: { score: 0, dimensions: {}, suggestions: [], badge: null },
   pendingAttachments: [],
+  showFpsOverlay: false,
 
   selectModule: (id) => set({ selectedModuleId: id }),
 
@@ -202,4 +207,6 @@ export const useEditorStore = create<EditorStore>((set) => ({
     })),
 
   clearPendingAttachments: () => set({ pendingAttachments: [] }),
+
+  setShowFpsOverlay: (v) => set({ showFpsOverlay: v }),
 }));

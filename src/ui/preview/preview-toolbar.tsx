@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pencil, Play, Maximize, Download } from 'lucide-react';
+import { Pencil, Play, Maximize, Download, Activity } from 'lucide-react';
 import { useEditorStore } from '@/store/editor-store.ts';
 import type { PreviewMode } from '@/store/editor-store.ts';
 import { ExportDialog } from '@/ui/export/export-dialog.tsx';
@@ -14,10 +14,14 @@ const modes: Array<{ mode: PreviewMode; icon: typeof Pencil; label: string }> = 
 /** Stable selectors — extracted to module scope so function references never change. */
 const selectPreviewMode = (s: { previewMode: PreviewMode }) => s.previewMode;
 const selectSetPreviewMode = (s: { setPreviewMode: (mode: PreviewMode) => void }) => s.setPreviewMode;
+const selectShowFpsOverlay = (s: { showFpsOverlay: boolean }) => s.showFpsOverlay;
+const selectSetShowFpsOverlay = (s: { setShowFpsOverlay: (v: boolean) => void }) => s.setShowFpsOverlay;
 
 export function PreviewToolbar() {
   const previewMode = useEditorStore(selectPreviewMode);
   const setPreviewMode = useEditorStore(selectSetPreviewMode);
+  const showFpsOverlay = useEditorStore(selectShowFpsOverlay);
+  const setShowFpsOverlay = useEditorStore(selectSetShowFpsOverlay);
   const [exportOpen, setExportOpen] = useState(false);
 
   return (
@@ -54,6 +58,19 @@ export function PreviewToolbar() {
 
       <div className="ml-auto flex items-center gap-1">
         <DiagnosticBadge />
+        <button
+          onClick={() => setShowFpsOverlay(!showFpsOverlay)}
+          aria-pressed={showFpsOverlay}
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium transition-colors ${
+            showFpsOverlay
+              ? 'bg-green-700 text-white'
+              : 'text-gray-400 hover:text-white hover:bg-white/5'
+          }`}
+          title="Toggle FPS Overlay"
+        >
+          <Activity size={14} />
+          FPS
+        </button>
         <button
           onClick={() => setExportOpen(true)}
           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-colors"

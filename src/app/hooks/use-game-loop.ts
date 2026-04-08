@@ -27,6 +27,7 @@ export function useGameLoop({ engineRef, rendererRef, trackerRef, videoRef, vide
   const rafRef = useRef<number | null>(null);
   const runningRef = useRef(false);
   const lastTimeRef = useRef(0);
+  const fpsRef = useRef(0);
 
   const loop = useCallback(
     (timestamp: number) => {
@@ -35,6 +36,9 @@ export function useGameLoop({ engineRef, rendererRef, trackerRef, videoRef, vide
       // Calculate dt in milliseconds
       const dt = lastTimeRef.current > 0 ? timestamp - lastTimeRef.current : 16;
       lastTimeRef.current = timestamp;
+
+      // Sliding-average FPS: weighted towards recent frames (α = 0.1)
+      fpsRef.current = 0.9 * fpsRef.current + 0.1 * (1000 / Math.max(dt, 1));
 
       const engine = engineRef.current;
       const renderer = rendererRef.current;
@@ -93,5 +97,5 @@ export function useGameLoop({ engineRef, rendererRef, trackerRef, videoRef, vide
     };
   }, [stop]);
 
-  return { start, stop };
+  return { start, stop, fpsRef };
 }
