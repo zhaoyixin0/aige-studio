@@ -358,3 +358,14 @@ export const DIALOGUE_END = 'dialogue:end';
 
 export interface DialogueNodePayload { nodeId: string; speaker: string; text: string }
 export interface DialogueChoicePayload { nodeId: string; choiceIndex: number; text: string }
+
+// ── Assets (streaming fulfillment hot-swap) ────────────────
+export const ASSETS_UPDATED = 'assets:updated';
+
+export interface AssetsUpdatedPayload {
+  updates: Array<{
+    key: string;
+    src: string;
+    type: 'sprite' | 'background';
+  }>;
+}

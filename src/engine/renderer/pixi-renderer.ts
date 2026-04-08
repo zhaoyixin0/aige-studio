@@ -1,6 +1,7 @@
 import { Application, Container, Graphics, Sprite, Texture } from 'pixi.js';
 import type { Engine } from '@/engine/core/engine';
 import type { GameFlow } from '@/engine/modules/feedback/game-flow';
+import type { AssetsUpdatedPayload } from '@/engine/core/events';
 import { GameObjectRenderer } from './game-object-renderer';
 import { HudRenderer } from './hud-renderer';
 import { ParticleRenderer } from './particle-renderer';
@@ -283,6 +284,21 @@ export class PixiRenderer {
 
     // Wire physics debug renderer events
     this.physicsDebugRenderer?.wire(listen);
+
+    // Streaming asset hot-swap: when AssetAgent delivers a new sprite mid-game,
+    // swap the texture in-place without waiting for a full engine reload.
+    listen('assets:updated', (data?: any) => {
+      const payload = data as AssetsUpdatedPayload | undefined;
+      if (!payload?.updates) return;
+      for (const update of payload.updates) {
+        if (update.type === 'background') {
+          // Force immediate background sync (skips per-frame store poll)
+          this.syncBackgroundImage(engine);
+        } else {
+          this.gameObjectRenderer?.applyAssetUpdate?.(update.key, update.src);
+        }
+      }
+    });
 
     // Scrolling parallax updates
     listen('scrolling:update', (data?: any) => {

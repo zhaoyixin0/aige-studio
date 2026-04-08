@@ -5,12 +5,12 @@ import { useChatInputPaste } from '@/app/hooks/use-chat-input-paste';
 import { type ChatMessage, type Chip, getPresetIdFromChip } from '@/store/editor-store';
 import { useGameStore } from '@/store/game-store';
 import { useEngineContext } from '@/app/hooks/use-engine';
+import { useStreamingAssetFulfillment } from '@/app/hooks/use-streaming-asset-fulfillment';
 import { SuggestionChips } from '@/ui/chat/suggestion-chips';
 import { FeaturedExpertChip } from '@/ui/experts/featured-expert-chip';
 import { ExpertBrowser } from '@/ui/experts/expert-browser';
 import type { ConversationResult } from '@/agent/conversation-agent';
 import { getConversationAgent } from '@/agent/singleton';
-import { AssetAgent } from '@/services/asset-agent';
 
 /* ------------------------------------------------------------------ */
 /*  Landing Page                                                       */
@@ -32,10 +32,10 @@ export function LandingPage() {
   const setExpertBrowserOpen = useEditorStore((s) => s.setExpertBrowserOpen);
 
   const setConfig = useGameStore((s) => s.setConfig);
-  const batchUpdateAssets = useGameStore((s) => s.batchUpdateAssets);
   const currentConfig = useGameStore((s) => s.config);
 
   const { loadConfig } = useEngineContext();
+  const { triggerStreamingFulfillment } = useStreamingAssetFulfillment();
 
   // Auto-scroll messages into view
   useEffect(() => {
@@ -97,10 +97,8 @@ export function LandingPage() {
           loadConfig(result.config);
           setLayoutPhase('studio');
 
-          // Fulfill assets in background
-          fulfillAssetsInBackground(result.config).catch((err) => {
-            console.warn('[LandingPage] Background asset fulfillment crashed:', err);
-          });
+          // Streaming asset fulfillment (per-sprite hot-swap)
+          triggerStreamingFulfillment(result.config);
         }
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : String(err);
@@ -116,33 +114,7 @@ export function LandingPage() {
         setChatLoading(false);
       }
     },
-    [loading, currentConfig, addChatMessage, setConfig, loadConfig, setLayoutPhase, setSuggestionChips, setChatLoading],
-  );
-
-  /* ---------------------------------------------------------------- */
-  /*  Asset fulfillment (background)                                   */
-  /* ---------------------------------------------------------------- */
-
-  const fulfillAssetsInBackground = useCallback(
-    async (config: import('@/engine/core').GameConfig) => {
-      try {
-        const assetAgent = new AssetAgent();
-        const capturedVersion = useGameStore.getState().configVersion;
-        const assets = await assetAgent.fulfillAssets(config);
-        if (useGameStore.getState().configVersion !== capturedVersion) return;
-        if (Object.keys(assets).length > 0) {
-          batchUpdateAssets(assets);
-          // Reload engine config with updated assets
-          const updatedConfig = useGameStore.getState().config;
-          if (updatedConfig) {
-            loadConfig(updatedConfig);
-          }
-        }
-      } catch (err) {
-        console.warn('[LandingPage] Asset fulfillment failed:', err);
-      }
-    },
-    [batchUpdateAssets, loadConfig],
+    [loading, currentConfig, addChatMessage, setConfig, loadConfig, setLayoutPhase, setSuggestionChips, setChatLoading, triggerStreamingFulfillment],
   );
 
   /* ---------------------------------------------------------------- */

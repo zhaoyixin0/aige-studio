@@ -130,6 +130,7 @@ interface EditorStore {
   setPreviewMode: (mode: PreviewMode) => void;
   setPreviewPhase: (phase: PreviewPhase) => void;
   addChatMessage: (message: ChatMessage) => void;
+  updateChatMessage: (id: string, updater: (msg: ChatMessage) => ChatMessage) => void;
   truncateChatAfter: (messageId: string) => void;
   setChatLoading: (loading: boolean) => void;
   clearChat: () => void;
@@ -174,6 +175,15 @@ export const useEditorStore = create<EditorStore>((set) => ({
     set((state) => ({
       chatMessages: [...state.chatMessages, message],
     })),
+
+  updateChatMessage: (id, updater) =>
+    set((state) => {
+      const idx = state.chatMessages.findIndex((m) => m.id === id);
+      if (idx === -1) return state;
+      const next = state.chatMessages.slice();
+      next[idx] = updater(state.chatMessages[idx]);
+      return { chatMessages: next };
+    }),
 
   truncateChatAfter: (messageId) =>
     set((state) => {

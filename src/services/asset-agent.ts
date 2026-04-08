@@ -18,6 +18,30 @@ export interface AssetFulfillProgress {
 }
 
 /**
+ * Streaming callbacks for fulfillAssets. All callbacks are optional.
+ *
+ * - `onProgress` fires for every phase transition (generating/removing-bg/done/error).
+ * - `onAsset` fires exactly once per successfully-delivered asset, AFTER the
+ *   library.save() has completed and BEFORE the for loop continues to the
+ *   next key. It is awaited so consumers can write to store / emit events
+ *   synchronously relative to the generation loop.
+ * - `onError` fires when a single key's generation throws (loop continues).
+ */
+export interface FulfillOptions {
+  onProgress?: (p: AssetFulfillProgress) => void;
+  onAsset?: (
+    key: string,
+    entry: AssetEntry,
+    ctx: { index: number; total: number },
+  ) => void | Promise<void>;
+  onError?: (
+    key: string,
+    err: unknown,
+    ctx: { index: number; total: number },
+  ) => void;
+}
+
+/**
  * Extract all asset keys referenced by the game config.
  *
  * Strategy: walk every module's params. Any module that has an `items`
@@ -129,8 +153,14 @@ export class AssetAgent {
    */
   async fulfillAssets(
     config: GameConfig,
-    onProgress?: (p: AssetFulfillProgress) => void,
+    opts?: FulfillOptions | ((p: AssetFulfillProgress) => void),
   ): Promise<Record<string, AssetEntry>> {
+    // Normalize legacy function form → FulfillOptions
+    const options: FulfillOptions =
+      typeof opts === 'function' ? { onProgress: opts } : (opts ?? {});
+    const onProgress = options.onProgress;
+    const onAsset = options.onAsset;
+    const onError = options.onError;
     // Cancel any previous run
     this.abortController?.abort();
     this.abortController = new AbortController();
@@ -190,6 +220,14 @@ export class AssetAgent {
           try { src = await this.resizeImage(src, spriteSize, spriteSize); } catch { /* keep original */ }
         }
         result[key] = { type: cached.type, src };
+        if (signal.aborted) return result;
+        if (onAsset) {
+          try {
+            await onAsset(key, result[key], { index: i, total });
+          } catch (err) {
+            console.warn('[AssetAgent] onAsset callback threw:', err);
+          }
+        }
         onProgress?.({ current: i + 1, total, key, status: 'done' });
         continue;
       }
@@ -247,10 +285,22 @@ export class AssetAgent {
         });
 
         result[key] = { type: assetType, src: dataUrl };
+
+        if (signal.aborted) return result;
+        if (onAsset) {
+          try {
+            await onAsset(key, result[key], { index: i, total });
+          } catch (err) {
+            console.warn('[AssetAgent] onAsset callback threw:', err);
+            // Do not rethrow — let the applier decide via its own race guard
+          }
+        }
+
         onProgress?.({ current: i + 1, total, key, status: 'done' });
       } catch (err) {
         console.error(`[AssetAgent] ❌ Generation FAILED for "${key}" (role: ${PromptBuilder.inferRole(key)}):`, err);
         onProgress?.({ current: i + 1, total, key, status: 'error' });
+        onError?.(key, err, { index: i, total });
       }
     }
 

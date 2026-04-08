@@ -31,6 +31,16 @@ export class GameObjectRenderer {
   private tweenOffsets = new Map<string, Partial<Record<string, number>>>();
   /** Physics2D body position overrides */
   private physicsPositions = new Map<string, { x: number; y: number }>();
+  /** Streaming hot-swap support: spriteId → asset key (so applyAssetUpdate can find targets). */
+  private spriteAssetKeys = new Map<string, string>();
+  /** Streaming hot-swap support: asset key → last known src (so we can invalidate stale cache entries). */
+  private assetKeyToSrc = new Map<string, string>();
+  /** Streaming hot-swap support: asset key currently bound to the player sprite. */
+  private playerAssetKey: string | null = null;
+  /** Default sprite size used by hot-swap when a sprite is rebuilt. Updated by sync() as spawners are processed. */
+  private lastSpriteSize = 48;
+  /** Default player size used by hot-swap. Updated by player sync paths. */
+  private lastPlayerSize = 64;
 
   constructor(container: Container) {
     this.container = container;
@@ -39,6 +49,9 @@ export class GameObjectRenderer {
   destroy(): void {
     this.tweenOffsets.clear();
     this.physicsPositions.clear();
+    this.spriteAssetKeys.clear();
+    this.assetKeyToSrc.clear();
+    this.playerAssetKey = null;
     for (const tex of this.textureCache.values()) {
       tex.destroy(true);
     }
@@ -99,6 +112,9 @@ export class GameObjectRenderer {
           sprite.destroy();
         }
         this.sprites.clear();
+        this.spriteAssetKeys.clear();
+        this.assetKeyToSrc.clear();
+        this.playerAssetKey = null;
         if (this.playerSprite) {
           this.container.removeChild(this.playerSprite);
           this.playerSprite.destroy();
@@ -173,6 +189,7 @@ export class GameObjectRenderer {
 
     for (const spawner of spawners) {
       const spriteSize = (spawner as Spawner).getParams().spriteSize as number ?? 48;
+      this.lastSpriteSize = spriteSize;
       const objects = (spawner as Spawner).getObjects();
       for (const obj of objects) {
         activeIds.add(obj.id);
@@ -186,6 +203,7 @@ export class GameObjectRenderer {
             // Use real image sprite
             const sprite = this.createSpriteFromDataUrl(assetEntry.src, spriteSize);
             wrapper.addChild(sprite);
+            this.assetKeyToSrc.set(obj.asset, assetEntry.src);
           } else {
             // Fallback to emoji, scale font size proportionally
             const emoji = assetToEmoji(obj.asset, theme);
@@ -198,6 +216,7 @@ export class GameObjectRenderer {
           }
           this.container.addChild(wrapper);
           this.sprites.set(obj.id, wrapper);
+          this.spriteAssetKeys.set(obj.id, obj.asset);
         }
         // Physics2D position override (if body exists), else use Spawner position
         const physPos = this.physicsPositions.get(obj.id);
@@ -220,6 +239,7 @@ export class GameObjectRenderer {
         this.sprites.delete(id);
         this.tweenOffsets.delete(id);
         this.physicsPositions.delete(id);
+        this.spriteAssetKeys.delete(id);
       }
     }
   }
@@ -264,11 +284,13 @@ export class GameObjectRenderer {
       // Read playerSize from input module params
       const inputMod = (faceInput ?? handInput ?? touchInput) as { getParams: () => Record<string, unknown> } | undefined;
       const playerSize = (inputMod?.getParams()?.playerSize as number) ?? 64;
+      this.lastPlayerSize = playerSize;
 
       if (!this.playerSprite) {
         const configAssets = engine.getConfig().assets ?? {};
         const playerAsset = configAssets['player'];
         const hasPlayerImage = playerAsset?.src?.startsWith('data:');
+        this.playerAssetKey = 'player';
 
         if (isTapStyle) {
           // Crosshair style for tap games
@@ -286,6 +308,7 @@ export class GameObjectRenderer {
           const imgSprite = this.createSpriteFromDataUrl(playerAsset.src, playerSize);
           playerContainer.addChild(imgSprite);
           this.playerSprite = playerContainer;
+          this.assetKeyToSrc.set('player', playerAsset.src);
         } else {
           // Emoji player with shadow
           const playerContainer = new Container();
@@ -357,12 +380,14 @@ export class GameObjectRenderer {
     const py = playerMovement.getY();
     const touchInput = engine.getModulesByType('TouchInput')[0] as TouchInput | undefined;
     const playerSize = (touchInput?.getParams()?.playerSize as number) ?? 64;
+    this.lastPlayerSize = playerSize;
 
     if (!this.playerSprite) {
       const playerContainer = new Container();
       const configAssets = engine.getConfig().assets ?? {};
       const playerAsset = configAssets['player'];
       const hasPlayerImage = playerAsset?.src?.startsWith('data:');
+      this.playerAssetKey = 'player';
 
       if (hasPlayerImage) {
         const shadow = new Graphics();
@@ -370,6 +395,7 @@ export class GameObjectRenderer {
         playerContainer.addChild(shadow);
         const imgSprite = this.createSpriteFromDataUrl(playerAsset.src, playerSize);
         playerContainer.addChild(imgSprite);
+        this.assetKeyToSrc.set('player', playerAsset.src);
       } else {
         const shadow = new Graphics();
         shadow.ellipse(0, playerSize * 0.3, playerSize * 0.4, 8).fill({ color: 0x000000, alpha: 0.3 });
@@ -435,6 +461,7 @@ export class GameObjectRenderer {
     const px = playerMovement.getX();
     const py = jump ? jump.getY() * canvas.height : canvas.height * 0.8;
     const playerSize = (touchInput?.getParams()?.playerSize as number) ?? 48;
+    this.lastPlayerSize = playerSize;
     const screenX = px + camOffsetX;
     const screenY = py + camOffsetY;
 
@@ -445,10 +472,12 @@ export class GameObjectRenderer {
       const configAssets = engine.getConfig().assets ?? {};
       const playerAsset = configAssets['player'];
       const hasPlayerImage = playerAsset?.src?.startsWith('data:');
+      this.playerAssetKey = 'player';
 
       if (hasPlayerImage) {
         const imgSprite = this.createSpriteFromDataUrl(playerAsset.src, playerSize);
         playerContainer.addChild(imgSprite);
+        this.assetKeyToSrc.set('player', playerAsset.src);
       } else {
         const emojiText = new Text({
           text: theme.playerEmoji,
@@ -563,6 +592,9 @@ export class GameObjectRenderer {
     this.iframesStartTime = 0;
     this.tweenOffsets.clear();
     this.physicsPositions.clear();
+    this.spriteAssetKeys.clear();
+    this.assetKeyToSrc.clear();
+    this.playerAssetKey = null;
     for (const sprite of this.sprites.values()) {
       this.container.removeChild(sprite);
       sprite.destroy();
@@ -584,5 +616,63 @@ export class GameObjectRenderer {
     }
     this.textureCache.clear();
     this.lastAssetsRef = null;
+  }
+
+  /**
+   * Hot-swap an asset's texture in all live sprites that reference this key.
+   * Called when streaming asset fulfillment delivers a new sprite mid-game,
+   * so users see the new image without waiting for a full engine reload.
+   *
+   * Preserves container x/y/rotation — only the inner child sprite is rebuilt.
+   */
+  applyAssetUpdate(key: string, src: string): void {
+    // 1. Invalidate any cached texture for the previous src of this key.
+    const prevSrc = this.assetKeyToSrc.get(key);
+    if (prevSrc && prevSrc !== src) {
+      const cachedTexture = this.textureCache.get(prevSrc);
+      if (cachedTexture) {
+        try {
+          cachedTexture.destroy();
+        } catch {
+          // Already destroyed or test mock — ignore
+        }
+        this.textureCache.delete(prevSrc);
+      }
+    }
+
+    // 2. Iterate all live spawned sprites and rebuild those matching the key.
+    for (const [spriteId, wrapper] of this.sprites) {
+      if (this.spriteAssetKeys.get(spriteId) !== key) continue;
+      this.rebuildWrapperChild(wrapper, src, this.lastSpriteSize);
+    }
+
+    // 3. Swap player sprite if it is bound to this key.
+    if (this.playerSprite && this.playerAssetKey === key) {
+      this.rebuildWrapperChild(this.playerSprite, src, this.lastPlayerSize);
+    }
+
+    // 4. Remember the new src so future updates can invalidate correctly.
+    this.assetKeyToSrc.set(key, src);
+  }
+
+  /**
+   * Replace the first child of a wrapper container with a newly-built image
+   * sprite from the given data URL. Does NOT touch wrapper.x/y/rotation/scale.
+   */
+  private rebuildWrapperChild(wrapper: Container, src: string, size: number): void {
+    // Remove and destroy ALL existing children (emoji Text, old Sprite, old shadow).
+    // The first child that matches is typically the image/emoji; keeping shadows
+    // would be a nice-to-have but we prioritize correctness over ornamentation.
+    while (wrapper.children.length > 0) {
+      const child = wrapper.children[0];
+      wrapper.removeChild(child);
+      try {
+        child.destroy({ children: true });
+      } catch {
+        // Best-effort cleanup — ignore if already destroyed
+      }
+    }
+    const newChild = this.createSpriteFromDataUrl(src, size);
+    wrapper.addChild(newChild);
   }
 }
