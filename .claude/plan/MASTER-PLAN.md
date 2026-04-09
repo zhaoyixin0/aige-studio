@@ -1,22 +1,12 @@
 # AIGE Studio — 未完成任务总表
 
 > 整合自 42 个计划文件，仅保留经验证尚未完成的任务。
-> 更新日期：2026-04-08（审计 + `fe7826b` 流式资产落地后二次收敛）
-> **审计累计移除 20 项已实现条目**（17 项 2026-04-08 审计 + 3 项 `fe7826b` 流式资产完成），详见底部"审计存档"
+> 更新日期：2026-04-09（5.6/7.2/5.2/4.1 四任务落地后三次收敛）
+> **审计累计移除 24 项已实现条目**（17 项 2026-04-08 审计 + 3 项 `fe7826b` 流式资产 + 4 项 2026-04-09 四任务），详见底部"审计存档"
 
 ---
 
 ## 四、交互设计剩余阶段 (Interaction Redesign P1-P3)
-
-### 4.1 P1: Three-View Layout + Paste/Drop
-**来源：** interaction-redesign-p0-p3-v2.md P1
-**状态：** 未开始（无 chat-preview-page.tsx / sandbox-page.tsx；layoutPhase 仅 'landing'|'studio'）
-**新文件：** `chat-preview-page.tsx`, `sandbox-page.tsx`
-**修改文件：** `main-layout.tsx`, `landing-page.tsx`, `editor-store.ts`, `studio-chat-panel.tsx`, `asset-browser.tsx`
-**内容：**
-- 三视图布局（Chat + Preview + Editor 可独立切换）
-- 图片粘贴/拖拽到聊天输入框 → 自动附加为 Attachment
-- Asset browser 面板与聊天集成
 
 ### 4.2 P2: Context-Aware Suggestions
 **来源：** interaction-redesign-p0-p3-v2.md P2
@@ -42,16 +32,6 @@
 
 ## 五、UI 增强 (UI Enhancements)
 
-### 5.2 GameTypeSelector 搜索 & 分类
-**来源：** m0-execution-plan.md F2-F3
-**状态：** 未开始（无 game-search-bar.tsx）
-**新文件：** `src/ui/chat/game-search-bar.tsx`
-**修改文件：** `src/ui/chat/game-type-selector.tsx`
-**操作：**
-- 搜索栏（Tailwind 圆角输入框）+ 8 分类标签横向滚动
-- 默认显示 Top 6，"Show More (32)" 展开按钮
-- 缩略图卡片 + "Supported"/"Coming Soon" 徽章
-
 ### 5.3 L2 Bespoke 参数卡片（设计可能已收敛）
 **来源：** figma-alignment.md Step 5-6
 **状态：** ⚠️ PARTIAL — 已存在 `src/ui/chat/bespoke-cards/`，含 `game-mechanics-card.tsx` + `visual-audio-card.tsx` 两个大类卡片，但原计划列的 6 个细分卡片（game-conditions, player-actor, enemy-actor, sfx, visual-styles, feedback-effect）未实现
@@ -60,12 +40,6 @@
 - 新文件：`src/ui/chat/bespoke-cards/{game-conditions,player-actor,enemy-actor,sfx,visual-styles,feedback-effect}.tsx`
 - 路由：`card-shell.tsx` 中根据 category 分发到专属组件
 - 每卡片含特定控件组合（Slider+Dropdown+Toggle+ImagePicker）
-
-### 5.6 Chat 验证反馈
-**来源：** game-quality-validation.md Step 7
-**状态：** 未完成（ValidationReport 已在 useEngine 处理但未注入 chat 消息）
-**文件：** `src/ui/chat/studio-chat-panel.tsx`
-**操作：** 配置生成后如有 ValidationReport warnings → 添加 assistant 消息 + suggestion chips（"修正这个" / "我了解了"）
 
 ---
 
@@ -89,44 +63,24 @@
 ## 七、AI 生成 UX 优化 (AI Generation UX)
 
 > 来源：E2E V2 investigation 2026-04-08。原 memory 误报"AI 链路崩溃 8/100"实际是后端正常但前端反馈缺失的 UX 问题。
-> **7.1 + 7.3 + 1.3（加强版）已在 `fe7826b` 一次性完成**。剩下的 7.2 仍在本章。
-
-### 7.2 AI 请求 Cancel 按钮
-**来源：** E2E V2 investigation 2026-04-08
-**Why:** 用户中途想放弃只能刷新页面，丢失输入和已生成素材。
-**文件：**
-- `src/services/gemini-image.ts` — `callAPI` 接受 `AbortSignal`
-- `src/services/claude-proxy.ts` — `messages.create` 接受 `AbortSignal`
-- `src/services/asset-agent.ts` — 持有 AbortController + 暴露 `cancel()`
-- `src/ui/chat/studio-chat-panel.tsx` — 进行中显示"取消生成"按钮
-**操作：**
-1. 所有 fetch 调用透传 AbortSignal
-2. asset-agent 单实例化 AbortController per generation session
-3. cancel 后保留之前已成功的 sprite，只丢弃未完成的
-4. UI 显示"已取消，保留 N 张素材"提示
-**测试：** mock fetch + AbortController 测试取消后 promise rejects with AbortError 且已生成的 sprite 保留
-**注：** 现在已有 `fe7826b` 的流式 fulfillment 基础设施，取消按钮可以直接接 `useStreamingAssetFulfillment` 已暴露的生命周期。
+> **7.1 + 7.2 + 7.3 + 1.3（加强版）全部落地**（`fe7826b` + `62b9825`）。本章已清空。
 
 ---
 
-## 优先级排序（`fe7826b` 完成 3 项后）
+## 优先级排序（2026-04-09 四任务落地后）
 
 | 优先级 | 任务 | 估算 | 风险/价值 |
 |--------|------|------|----------|
-| **P1-Medium** | 5.6 Chat 验证反馈 | 1h | 闭环 ConfigValidator |
-| **P2-Medium** | 7.2 AI 请求 Cancel 按钮 | 1h | 用户控制权 |
-| **P2-Medium** | 4.1 Three-View Layout | 3h | 布局增强 |
-| **P2-Medium** | 5.2 GameType 搜索 | 1h | 38 类型导航 |
 | **P2-Low** | 4.2 P2 建议引擎 | 2h | 智能建议 |
 | **P2-Low** | 4.3 P3 Intent Extraction | 2h | 深层交互 |
 | **P3-Decision** | 5.3 L2 卡片细分 | 2h | 设计待决：2 大类 vs 6 细分 |
 | **P3-Low** | 6.1 E2E 测试 P1/P2 扩展 | 3h | 扩展覆盖 |
 
-**合计：** 6 项实现 + 1 项设计决策 + 1 项测试扩展 = 8 项 ≈ **14 小时工时**
+**合计：** 2 项实现 + 1 项设计决策 + 1 项测试扩展 = 4 项 ≈ **9 小时工时**
 
 ---
 
-## 审计存档 — 已完成的 20 项
+## 审计存档 — 已完成的 24 项
 
 ### 2026-04-08 审计（17 项）
 
@@ -162,6 +116,19 @@ commit `fe7826b feat: streaming asset fulfillment with per-sprite hot-swap (7.1 
 | 7.3 | Per-asset 流式预览 | `asset-agent.ts` onAsset callback 逐张回调；`asset-preview-block.tsx` 骨架占位 → 实际图渐进显示；`GameObjectRenderer.applyAssetUpdate` 通过 `assets:updated` 事件实现 per-sprite 热交换；首 sprite 可见时间 145s → ~30s |
 
 **效果：** 104 个新测试通过，Playwright spec `asset-streaming.spec.ts` 验证首 sprite ≤ 45s、5+ sprite ≤ 180s。
+
+### 2026-04-09 四任务联合落地（4 项）
+
+双模型协作规划 + 三波 Agent 并行 TDD 执行，5 个 commit 分拆交付（详见 `.claude/plan/p1-p2-four-tasks.md`）：
+
+| 编号 | 原任务 | 完成 commit | 验证证据 |
+|------|--------|------------|---------|
+| 5.6 | Chat 验证反馈 | `502bf8b feat(chat): surface ValidationReport issues as a dismissible chat block` | 新增 `validation-summary` ChatBlock + `validation-summary-block.tsx` 渲染 + use-conversation-manager 注入；12 个新测试 |
+| 7.2 | AI 请求 Cancel 按钮 | `62b9825 feat(ai): add cancel button for in-progress asset generation` | AbortSignal 全链路穿透（gemini-image / claude-proxy / asset-agent）+ 独立 `asset-fulfillment-store` + 发送/停止按钮切换；18 个新测试 |
+| 5.2 | GameTypeSelector 搜索 & 分类 | `edb4787 feat(chat): wire full 38-game catalog into GameTypeSelector` | UI 层早已完整（search/tabs/show-more/cards），只需数据层补全：`buildFullGameTypeOptions` 从 38 款目录构建（8 分类 + supportedToday + thumbnailUrl）；顺手修复 5.6 `messageId` prop 透传；7 个测试变更 |
+| 4.1 | Three-View Layout + Paste/Drop | `44f080c feat(layout): three-view layout with dual dividers and asset browser drawer` | Paste/Drop 早已有 `useChatInputPaste`；本次加双分隔条 + 独立面板可见性/宽度 state + `useResizeDivider` direction 参数 + chat 面板内 AssetBrowser drawer；17 个新测试 |
+
+**效果：** 54 个新测试，3691/3694 total passing，`npm run build` 通过。原估 6h，实际发现前置基础设施已完整，5.2 降级到 ~30min，4.1 降级到 ~2.5h。
 
 ---
 
