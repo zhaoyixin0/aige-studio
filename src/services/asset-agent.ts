@@ -298,7 +298,7 @@ export class AssetAgent {
 
         onProgress?.({ current: i + 1, total, key, status: 'done' });
       } catch (err) {
-        console.error(`[AssetAgent] ❌ Generation FAILED for "${key}" (role: ${PromptBuilder.inferRole(key)}):`, err);
+        console.warn(`[AssetAgent] ❌ Generation FAILED for "${key}" (role: ${PromptBuilder.inferRole(key)}):`, err);
         onProgress?.({ current: i + 1, total, key, status: 'error' });
         onError?.(key, err, { index: i, total });
       }
