@@ -1,19 +1,8 @@
 # AIGE Studio — 未完成任务总表
 
 > 整合自 42 个计划文件，仅保留经验证尚未完成的任务。
-> 更新日期：2026-04-08（审计后大规模收敛）
-> **本次审计删除了 17 项已实现条目**，详见底部"2026-04-08 审计存档"
-
----
-
-## 一、引擎可靠性与质量 (Engine Reliability)
-
-### 1.3 Asset fulfillment 竞态保护
-**来源：** engine-reliability-hardening.md M5
-**状态：** 未完成（`studio-chat-panel.tsx` 中无 configVersion 校验）
-**文件：** `src/ui/chat/studio-chat-panel.tsx`
-**操作：** triggerAssetFulfillment 中捕获 configVersion，callback 中校验 currentVersion === capturedVersion 再应用，防止旧素材注入新游戏
-**风险：** 用户连续创建多个游戏时，旧的 Gemini 异步回调可能把过时素材写入新游戏
+> 更新日期：2026-04-08（审计 + `fe7826b` 流式资产落地后二次收敛）
+> **审计累计移除 20 项已实现条目**（17 项 2026-04-08 审计 + 3 项 `fe7826b` 流式资产完成），详见底部"审计存档"
 
 ---
 
@@ -100,20 +89,7 @@
 ## 七、AI 生成 UX 优化 (AI Generation UX)
 
 > 来源：E2E V2 investigation 2026-04-08。原 memory 误报"AI 链路崩溃 8/100"实际是后端正常但前端反馈缺失的 UX 问题。
-> 三条任务文件耦合度高（共享 asset-agent.ts / studio-chat-panel.tsx / conversation-agent.ts），建议合并为一个 PR。
-
-### 7.1 AI 生成进度反馈
-**来源：** E2E V2 investigation 2026-04-08
-**Why:** Gemini-3-pro-image-preview 单张 50-95s，5 张串行 ~150s 是已知现实。当前 UI 只有"思考中..."占位，用户在 60+ 秒无任何信号时会认为应用挂了 → 刷新页面 → 全部状态丢失。
-**文件：**
-- `src/services/asset-agent.ts` — 新增 progress 事件 emit
-- `src/agent/conversation-agent.ts` — 桥接进度到 chat 状态
-- `src/ui/chat/studio-chat-panel.tsx` — 渲染进度文本
-**操作：**
-1. asset-agent 在每张 sprite 开始/结束时 emit `{phase:'asset', current:N, total:M, label:'草莓'}` 事件
-2. ConversationAgent 把进度状态写入 active assistant message 的 metadata
-3. Chat panel 把"思考中..."替换为"Generating sprite 2/5: 草莓..."
-**测试：** 单元测试 asset-agent 的 progress emit 顺序；E2E 测试观察 chat message 文本变化
+> **7.1 + 7.3 + 1.3（加强版）已在 `fe7826b` 一次性完成**。剩下的 7.2 仍在本章。
 
 ### 7.2 AI 请求 Cancel 按钮
 **来源：** E2E V2 investigation 2026-04-08
@@ -129,30 +105,16 @@
 3. cancel 后保留之前已成功的 sprite，只丢弃未完成的
 4. UI 显示"已取消，保留 N 张素材"提示
 **测试：** mock fetch + AbortController 测试取消后 promise rejects with AbortError 且已生成的 sprite 保留
-
-### 7.3 Per-asset 流式预览
-**来源：** E2E V2 investigation 2026-04-08
-**Why:** 每张素材成功后立即可见比等到 150s 全部完成更让人安心。已经在 99-final.png 看到 chat panel 有 asset 占位区，只缺增量绑定。
-**文件：**
-- `src/services/asset-agent.ts` — emit `asset:ready {id, dataUrl}` 事件
-- `src/ui/chat/studio-chat-panel.tsx` — 接收事件 → 更新 message blocks 中的 asset 缩略图
-**操作：**
-1. asset-agent 完成单张 sprite → 立即 emit `asset:ready` 事件并把素材写入 game store（不等其他完成）
-2. Chat panel 在生成中的 message 内嵌入 N×缩略图 grid（占位 → 真实图渐进显示）
-3. PixiRenderer 已支持 hot-swap，自动反映新素材
-**测试：** 时序测试验证 sprite N 在 Promise.all 完成前已写入 store；视觉回归测试缩略图 grid 渲染
+**注：** 现在已有 `fe7826b` 的流式 fulfillment 基础设施，取消按钮可以直接接 `useStreamingAssetFulfillment` 已暴露的生命周期。
 
 ---
 
-## 优先级排序（审计后）
+## 优先级排序（`fe7826b` 完成 3 项后）
 
 | 优先级 | 任务 | 估算 | 风险/价值 |
 |--------|------|------|----------|
-| **P0-Critical** | 1.3 Asset 竞态保护 | 30min | 数据错乱 |
-| **P1-Medium** | 7.1 AI 生成进度反馈 | 1.5h | V2 8/100 假阴性根因，最大感知改善 |
 | **P1-Medium** | 5.6 Chat 验证反馈 | 1h | 闭环 ConfigValidator |
 | **P2-Medium** | 7.2 AI 请求 Cancel 按钮 | 1h | 用户控制权 |
-| **P2-Medium** | 7.3 Per-asset 流式预览 | 1.5h | 减少感知延迟 |
 | **P2-Medium** | 4.1 Three-View Layout | 3h | 布局增强 |
 | **P2-Medium** | 5.2 GameType 搜索 | 1h | 38 类型导航 |
 | **P2-Low** | 4.2 P2 建议引擎 | 2h | 智能建议 |
@@ -160,13 +122,15 @@
 | **P3-Decision** | 5.3 L2 卡片细分 | 2h | 设计待决：2 大类 vs 6 细分 |
 | **P3-Low** | 6.1 E2E 测试 P1/P2 扩展 | 3h | 扩展覆盖 |
 
-**合计：** 9 项实现 + 1 项设计决策 + 1 项测试扩展 = 11 项 ≈ **18 小时工时**
+**合计：** 6 项实现 + 1 项设计决策 + 1 项测试扩展 = 8 项 ≈ **14 小时工时**
 
 ---
 
-## 2026-04-08 审计存档 — 已验证完成的 17 项
+## 审计存档 — 已完成的 20 项
 
-通过子代理对每条任务的文件/符号做了直接验证，以下 17 项已在 2026-04-07 之前完成，本次从 MASTER-PLAN 移除：
+### 2026-04-08 审计（17 项）
+
+通过子代理对每条任务的文件/符号做了直接验证，以下 17 项已在 2026-04-07 之前完成：
 
 | 编号 | 原任务 | 验证证据 |
 |------|--------|---------|
@@ -186,6 +150,18 @@
 | 5.4 | Game Feel Dashboard 集成 | `editor-panel.tsx` 已 import + mount `GameFeelScore` |
 | 5.5 | Diagnostic Popover | `diagnostic-badge.tsx:45` 点击触发 DiagnosticPopover |
 | 6.1 | E2E 测试 P0 部分 | `qa-e2e/tests/` 已有 5 个 P0 spec |
+
+### 2026-04-08 `fe7826b` 流式资产落地（3 项）
+
+commit `fe7826b feat: streaming asset fulfillment with per-sprite hot-swap (7.1 + 7.3)` 一次性完成以下三项：
+
+| 编号 | 原任务 | 验证证据 |
+|------|--------|---------|
+| 1.3 | Asset 竞态保护 | `use-asset-stream-applier.ts` `makeStreamingApplier` monotonic race guard（v0 + applied），外部 configVersion bump 时静默 abort；比原计划方案更强 |
+| 7.1 | AI 生成进度反馈 | `asset-agent.ts:fulfillAssets` 新 `FulfillOptions {onProgress}`；`progress-log-block.tsx` active-entry 高亮 + `aria-live`；`useStreamingAssetFulfillment` 把进度写入 chat message |
+| 7.3 | Per-asset 流式预览 | `asset-agent.ts` onAsset callback 逐张回调；`asset-preview-block.tsx` 骨架占位 → 实际图渐进显示；`GameObjectRenderer.applyAssetUpdate` 通过 `assets:updated` 事件实现 per-sprite 热交换；首 sprite 可见时间 145s → ~30s |
+
+**效果：** 104 个新测试通过，Playwright spec `asset-streaming.spec.ts` 验证首 sprite ≤ 45s、5+ sprite ≤ 180s。
 
 ---
 

@@ -636,7 +636,18 @@ export type ChatBlock =
   | { kind: 'asset-preview'; items: AssetPreviewItem[]; allowApplyAll?: boolean }
   | { kind: 'param-card'; title?: string; fields: ParamCardField[] }
   | { kind: 'progress-log'; entries: ProgressEntry[] }
-  | { kind: 'upload-request'; target: string; accept: Array<'image' | 'audio'>; hint?: string };
+  | { kind: 'upload-request'; target: string; accept: Array<'image' | 'audio'>; hint?: string }
+  | {
+      kind: 'validation-summary';
+      summary: string;
+      issues: ReadonlyArray<{
+        severity: 'error' | 'warning';
+        title: string;
+        description: string;
+      }>;
+      fixable: boolean;
+      resolved?: boolean;
+    };
 
 /* ------------------------------------------------------------------ */
 

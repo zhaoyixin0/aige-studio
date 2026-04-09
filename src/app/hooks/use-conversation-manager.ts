@@ -3,13 +3,48 @@ import { useEditorStore } from '@/store/editor-store';
 import type { ChatMessage, Chip } from '@/store/editor-store';
 import { useGameStore } from '@/store/game-store';
 import type { ConversationResult } from '@/agent/conversation-agent';
-import { validateConfig, applyFixes } from '@/engine/core/config-validator';
+import { validateConfig, applyFixes, type ValidationReport } from '@/engine/core/config-validator';
 import { ContractRegistry } from '@/engine/core/contract-registry';
 import { createModuleRegistry } from '@/engine/module-setup';
 import { getConversationAgent } from '@/agent/singleton';
 import { buildGameTypeOptions } from '@/agent/game-type-options';
 import { useStreamingAssetFulfillment } from '@/app/hooks/use-streaming-asset-fulfillment';
+import { translateIssue } from '@/ui/preview/diagnostic-messages';
 import type { GameConfig } from '@/engine/core';
+import type { ChatBlock } from '@/agent/conversation-defs';
+
+/**
+ * Build a validation-summary assistant message from a ValidationReport.
+ * Returns null when the report has no errors/warnings to report.
+ */
+function buildValidationSummaryMessage(report: ValidationReport): ChatMessage | null {
+  const allIssues = [...report.errors, ...report.warnings];
+  if (allIssues.length === 0) return null;
+
+  const issues = allIssues.map((issue) => {
+    const translated = translateIssue(issue);
+    return {
+      severity: translated.severity,
+      title: translated.title,
+      description: translated.description,
+    };
+  });
+
+  const block: ChatBlock = {
+    kind: 'validation-summary',
+    summary: `${report.errors.length} 错误, ${report.warnings.length} 警告`,
+    issues,
+    fixable: report.fixes.length > 0,
+  };
+
+  return {
+    id: crypto.randomUUID(),
+    role: 'assistant',
+    content: `配置验证发现 ${report.errors.length} 个错误和 ${report.warnings.length} 个警告`,
+    timestamp: Date.now(),
+    blocks: [block],
+  };
+}
 
 /* ------------------------------------------------------------------ */
 /*  Stable Zustand selectors                                           */
@@ -100,6 +135,12 @@ export function useConversationManager(): ConversationManagerResult {
           const report = validateConfig(result.config, contracts);
           fixedConfig = report.fixes.length > 0 ? applyFixes(result.config, report.fixes) : result.config;
           setConfig(fixedConfig);
+
+          // Task 5.6: Inject validation-summary assistant message when issues exist
+          const validationMsg = buildValidationSummaryMessage(report);
+          if (validationMsg) {
+            addChatMessage(validationMsg);
+          }
         }
 
         // Update suggestion chips if provided

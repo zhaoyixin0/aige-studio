@@ -67,6 +67,16 @@ vi.mock('../game-type-selector', () => ({
   ),
 }));
 
+vi.mock('../chat-block-renderer', () => ({
+  ChatBlockRenderer: (props: any) => (
+    <div
+      data-testid="chat-block-renderer"
+      data-message-id={props.messageId ?? ''}
+      data-block-count={props.blocks?.length ?? 0}
+    />
+  ),
+}));
+
 vi.mock('@/engine/core/composite-mapper', () => ({
   applyL1Preset: vi.fn(() => []),
 }));
@@ -262,5 +272,34 @@ describe('MessageList', () => {
     expect(screen.queryByTestId('l1-experience-card')).not.toBeInTheDocument();
     expect(screen.queryByTestId('gui-param-card-mock')).not.toBeInTheDocument();
     expect(screen.queryByTestId('game-type-selector')).not.toBeInTheDocument();
+  });
+
+  /* ---------------------------------------------------------------- */
+  /*  ChatBlockRenderer messageId threading                            */
+  /* ---------------------------------------------------------------- */
+
+  it('passes message.id as messageId prop to ChatBlockRenderer', () => {
+    const messageId = 'test-message-id-123';
+    const messages: ChatMessage[] = [
+      makeMessage({
+        id: messageId,
+        role: 'assistant',
+        content: 'msg with blocks',
+        blocks: [
+          {
+            kind: 'validation-summary',
+            summary: '1 错误',
+            issues: [{ severity: 'error', title: 'x', description: 'y' }],
+            fixable: false,
+          },
+        ],
+      }),
+    ];
+
+    render(<MessageList messages={messages} isLoading={false} />);
+
+    const renderer = screen.getByTestId('chat-block-renderer');
+    expect(renderer).toHaveAttribute('data-message-id', messageId);
+    expect(renderer).toHaveAttribute('data-block-count', '1');
   });
 });

@@ -193,6 +193,7 @@ function MessageBubble({
           <ChatBlockRenderer
             blocks={message.blocks}
             isLatestAssistant={isLatestAssistant}
+            messageId={message.id}
           />
         )}
 
