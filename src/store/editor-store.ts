@@ -3,6 +3,16 @@ import type { ValidationReport } from '@/engine/core/config-validator';
 import type { ChatBlock, Attachment } from '@/agent/conversation-defs';
 
 export type PreviewMode = 'edit' | 'play' | 'fullscreen';
+
+/** Panel width constraints (px) — used by setChatWidth/setEditorWidth clamps. */
+export const CHAT_WIDTH_MIN = 280;
+export const CHAT_WIDTH_MAX = 800;
+export const EDITOR_WIDTH_MIN = 240;
+export const EDITOR_WIDTH_MAX = 640;
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
 export type PreviewPhase = 'tuning' | 'playing' | 'success' | 'fail';
 
 export interface L1State {
@@ -114,6 +124,12 @@ interface EditorStore {
   suggestionChips: Chip[];
   editorExpanded: boolean;
 
+  // Three-view layout state (independently controllable panels)
+  chatVisible: boolean;
+  editorVisible: boolean;
+  chatWidth: number;
+  editorWidth: number;
+
   l1State: L1State;
   boardModeOpen: boolean;
 
@@ -137,6 +153,10 @@ interface EditorStore {
   setLayoutPhase: (phase: 'landing' | 'studio') => void;
   setSuggestionChips: (chips: Chip[]) => void;
   toggleEditor: () => void;
+  toggleChatVisible: () => void;
+  toggleEditorVisible: () => void;
+  setChatWidth: (width: number) => void;
+  setEditorWidth: (width: number) => void;
   setValidationReport: (report: ValidationReport | null) => void;
   setL1State: (partial: Partial<L1State>) => void;
   setBoardModeOpen: (open: boolean) => void;
@@ -158,6 +178,10 @@ export const useEditorStore = create<EditorStore>((set) => ({
   layoutPhase: 'landing',
   suggestionChips: DEFAULT_CHIPS,
   editorExpanded: false,
+  chatVisible: true,
+  editorVisible: false,
+  chatWidth: 480,
+  editorWidth: 320,
   l1State: { difficulty: 'normal', pacing: 50, emotion: 'cartoon' },
   boardModeOpen: false,
   expertBrowserOpen: false,
@@ -198,7 +222,28 @@ export const useEditorStore = create<EditorStore>((set) => ({
 
   setLayoutPhase: (phase) => set({ layoutPhase: phase }),
   setSuggestionChips: (chips) => set({ suggestionChips: chips }),
-  toggleEditor: () => set((state) => ({ editorExpanded: !state.editorExpanded })),
+  toggleEditor: () =>
+    set((state) => ({
+      editorExpanded: !state.editorExpanded,
+      editorVisible: !state.editorExpanded,
+    })),
+  toggleChatVisible: () =>
+    set((state) => {
+      const next = !state.chatVisible;
+      // Auto-close board mode when chat hides — board mode lives inside chat panel
+      return next
+        ? { chatVisible: true }
+        : { chatVisible: false, boardModeOpen: false };
+    }),
+  toggleEditorVisible: () =>
+    set((state) => ({
+      editorVisible: !state.editorVisible,
+      editorExpanded: !state.editorVisible,
+    })),
+  setChatWidth: (width) =>
+    set({ chatWidth: clamp(width, CHAT_WIDTH_MIN, CHAT_WIDTH_MAX) }),
+  setEditorWidth: (width) =>
+    set({ editorWidth: clamp(width, EDITOR_WIDTH_MIN, EDITOR_WIDTH_MAX) }),
   setValidationReport: (report) => set({ validationReport: report }),
   setL1State: (partial) =>
     set((state) => ({ l1State: { ...state.l1State, ...partial } })),

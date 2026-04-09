@@ -5,7 +5,13 @@ import { PreviewCanvas } from '@/ui/preview/preview-canvas.tsx';
 import { EditorPanel } from '@/ui/editor/editor-panel.tsx';
 import { BoardModePanel } from '@/ui/parameters/board-mode-panel.tsx';
 import { useEngine, EngineContext } from '@/app/hooks/use-engine.ts';
-import { useEditorStore } from '@/store/editor-store.ts';
+import {
+  useEditorStore,
+  CHAT_WIDTH_MIN,
+  CHAT_WIDTH_MAX,
+  EDITOR_WIDTH_MIN,
+  EDITOR_WIDTH_MAX,
+} from '@/store/editor-store.ts';
 import { useGameStore } from '@/store/game-store.ts';
 import {
   extractRegistryValueMap,
@@ -14,13 +20,20 @@ import {
 import { FullscreenMode } from '@/ui/preview/fullscreen-mode.tsx';
 import { setupUIActionExecutor } from '@/ui/chat/ui-action-executor.ts';
 import type { PreviewMode } from '@/store/editor-store.ts';
-import { PanelRight, PanelRightClose } from 'lucide-react';
+import { PanelLeft, PanelLeftClose, PanelRight, PanelRightClose } from 'lucide-react';
 import { useResizeDivider } from '@/app/hooks/use-resize-divider.ts';
 
 const selectPreviewMode = (s: { previewMode: PreviewMode }) => s.previewMode;
 const selectLayoutPhase = (s: { layoutPhase: 'landing' | 'studio' }) => s.layoutPhase;
-const selectEditorExpanded = (s: { editorExpanded: boolean }) => s.editorExpanded;
-const selectToggleEditor = (s: { toggleEditor: () => void }) => s.toggleEditor;
+const selectChatVisible = (s: { chatVisible: boolean }) => s.chatVisible;
+const selectEditorVisible = (s: { editorVisible: boolean }) => s.editorVisible;
+const selectChatWidth = (s: { chatWidth: number }) => s.chatWidth;
+const selectEditorWidth = (s: { editorWidth: number }) => s.editorWidth;
+const selectToggleChatVisible = (s: { toggleChatVisible: () => void }) => s.toggleChatVisible;
+const selectToggleEditorVisible = (s: { toggleEditorVisible: () => void }) =>
+  s.toggleEditorVisible;
+const selectSetChatWidth = (s: { setChatWidth: (w: number) => void }) => s.setChatWidth;
+const selectSetEditorWidth = (s: { setEditorWidth: (w: number) => void }) => s.setEditorWidth;
 const selectBoardModeOpen = (s: { boardModeOpen: boolean }) => s.boardModeOpen;
 const selectSetBoardModeOpen = (s: { setBoardModeOpen: (open: boolean) => void }) =>
   s.setBoardModeOpen;
@@ -29,15 +42,37 @@ export function MainLayout() {
   const engine = useEngine();
   const previewMode = useEditorStore(selectPreviewMode);
   const layoutPhase = useEditorStore(selectLayoutPhase);
-  const editorExpanded = useEditorStore(selectEditorExpanded);
-  const toggleEditor = useEditorStore(selectToggleEditor);
+  const chatVisible = useEditorStore(selectChatVisible);
+  const editorVisible = useEditorStore(selectEditorVisible);
+  const chatWidth = useEditorStore(selectChatWidth);
+  const editorWidth = useEditorStore(selectEditorWidth);
+  const toggleChatVisible = useEditorStore(selectToggleChatVisible);
+  const toggleEditorVisible = useEditorStore(selectToggleEditorVisible);
+  const setChatWidth = useEditorStore(selectSetChatWidth);
+  const setEditorWidth = useEditorStore(selectSetEditorWidth);
   const boardModeOpen = useEditorStore(selectBoardModeOpen);
   const setBoardModeOpen = useEditorStore(selectSetBoardModeOpen);
-  const {
-    width: chatWidth,
-    onMouseDown: handleMouseDown,
-    onTouchStart: handleTouchStart,
-  } = useResizeDivider(480);
+
+  // Left divider — drives chatWidth
+  const chatDivider = useResizeDivider(chatWidth, {
+    minWidth: CHAT_WIDTH_MIN,
+    maxWidth: CHAT_WIDTH_MAX,
+    direction: 'left',
+  });
+  // Right divider — drives editorWidth (drag-left grows editor)
+  const editorDivider = useResizeDivider(editorWidth, {
+    minWidth: EDITOR_WIDTH_MIN,
+    maxWidth: EDITOR_WIDTH_MAX,
+    direction: 'right',
+  });
+
+  // Sync local divider widths back into store on change
+  useEffect(() => {
+    if (chatDivider.width !== chatWidth) setChatWidth(chatDivider.width);
+  }, [chatDivider.width, chatWidth, setChatWidth]);
+  useEffect(() => {
+    if (editorDivider.width !== editorWidth) setEditorWidth(editorDivider.width);
+  }, [editorDivider.width, editorWidth, setEditorWidth]);
 
   // Wire UIAction executor (global event handler)
   useEffect(() => {
@@ -53,7 +88,6 @@ export function MainLayout() {
   const values = useMemo(() => extractRegistryValueMap(config), [config]);
 
   // Debounce engine reload during high-frequency Board Mode param changes (slider drags).
-  // 150ms is below human perception threshold yet coalesces ~10 frames of slider events.
   const reloadTimeoutRef = useRef<number | null>(null);
   useEffect(() => {
     return () => {
@@ -69,11 +103,9 @@ export function MainLayout() {
       if (!config) return;
       const plan = planUpdatesForParamChange(paramId, value, config);
 
-      // Separate _enabled toggles from regular param updates
       const enableOps = plan.params.filter((p) => '_enabled' in p.changes);
       const paramOps = plan.params.filter((p) => !('_enabled' in p.changes));
 
-      // Build a single merged config update for meta + enableOps to avoid stale closure
       if (plan.meta || enableOps.length > 0) {
         let next = config;
         if (plan.meta) {
@@ -92,12 +124,10 @@ export function MainLayout() {
         setConfig(next);
       }
 
-      // Handle regular param updates
       if (paramOps.length > 0) {
         batchUpdateParams(paramOps);
       }
 
-      // Debounced engine reload — coalesces rapid slider events into a single reload
       if (reloadTimeoutRef.current !== null) {
         window.clearTimeout(reloadTimeoutRef.current);
       }
@@ -117,14 +147,18 @@ export function MainLayout() {
     [setBoardModeOpen],
   );
 
+  const showStudioPanels = previewMode === 'edit';
+  const showChat = showStudioPanels && chatVisible;
+  const showEditor = showStudioPanels && editorVisible;
+
   return (
     <EngineContext.Provider value={engine}>
       {layoutPhase === 'landing' ? (
         <LandingPage />
       ) : (
         <div className="h-screen w-screen flex bg-gray-950 text-white overflow-hidden">
-          {/* Left: Chat Panel (with Board Mode slide-over) */}
-          {previewMode === 'edit' && (
+          {/* Left: Chat Panel + Board Mode overlay */}
+          {showChat && (
             <>
               <div
                 className="shrink-0 border-r border-white/5 bg-gray-950/50 backdrop-blur-xl relative overflow-hidden"
@@ -151,12 +185,11 @@ export function MainLayout() {
                 </div>
               </div>
 
-              {/* Resizable Divider */}
               <div
-                onMouseDown={handleMouseDown}
-                onTouchStart={handleTouchStart}
+                onMouseDown={chatDivider.onMouseDown}
+                onTouchStart={chatDivider.onTouchStart}
                 className="w-1.5 shrink-0 -mx-0.75 cursor-col-resize hover:bg-blue-600/50 active:bg-blue-600 transition-colors z-20"
-                title="拖动调整大小"
+                title="拖动调整对话宽度"
               />
             </>
           )}
@@ -165,23 +198,44 @@ export function MainLayout() {
           <div className="flex-1 min-w-0 relative bg-black/20">
             <PreviewCanvas />
 
-            {/* Editor toggle button */}
-            {previewMode === 'edit' && (
-              <button
-                onClick={toggleEditor}
-                className="absolute top-3 right-3 z-10 p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition-colors"
-                title={editorExpanded ? '收起编辑器' : '展开编辑器'}
-              >
-                {editorExpanded ? <PanelRightClose size={18} /> : <PanelRight size={18} />}
-              </button>
+            {showStudioPanels && (
+              <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+                <button
+                  onClick={toggleChatVisible}
+                  className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition-colors"
+                  title={chatVisible ? '隐藏对话面板' : '显示对话面板'}
+                  aria-label={chatVisible ? '隐藏对话' : '显示对话'}
+                >
+                  {chatVisible ? <PanelLeftClose size={18} /> : <PanelLeft size={18} />}
+                </button>
+                <button
+                  onClick={toggleEditorVisible}
+                  className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition-colors"
+                  title={editorVisible ? '隐藏编辑器' : '显示编辑器'}
+                  aria-label={editorVisible ? '隐藏编辑器' : '显示编辑器'}
+                >
+                  {editorVisible ? <PanelRightClose size={18} /> : <PanelRight size={18} />}
+                </button>
+              </div>
             )}
           </div>
 
-          {/* Right: Editor Panel (collapsed by default) */}
-          {previewMode === 'edit' && editorExpanded && (
-            <div className="w-80 shrink-0 border-l border-white/5">
-              <EditorPanel />
-            </div>
+          {/* Right: Editor Panel + divider */}
+          {showEditor && (
+            <>
+              <div
+                onMouseDown={editorDivider.onMouseDown}
+                onTouchStart={editorDivider.onTouchStart}
+                className="w-1.5 shrink-0 -mx-0.75 cursor-col-resize hover:bg-blue-600/50 active:bg-blue-600 transition-colors z-20"
+                title="拖动调整编辑器宽度"
+              />
+              <div
+                className="shrink-0 border-l border-white/5"
+                style={{ width: editorWidth }}
+              >
+                <EditorPanel />
+              </div>
+            </>
           )}
         </div>
       )}

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { SendHorizontal, Square } from 'lucide-react';
+import { Image as ImageIcon, SendHorizontal, Square, X } from 'lucide-react';
 import { useEditorStore } from '@/store/editor-store';
 import { useAssetFulfillmentStore } from '@/store/asset-fulfillment-store';
 import { useChatInputPaste } from '@/app/hooks/use-chat-input-paste';
@@ -11,6 +11,7 @@ import { MessageList } from './message-list';
 import { L3PillsPanel } from './l3-pills-panel';
 import { SuggestionChips } from './suggestion-chips';
 import { ExpertBrowser } from '@/ui/experts/expert-browser';
+import { AssetBrowser } from '@/ui/assets/asset-browser';
 
 /* ------------------------------------------------------------------ */
 /*  Stable Zustand selectors                                           */
@@ -40,6 +41,15 @@ export function StudioChatPanel() {
   const { submitMessage } = useConversationManager();
 
   const [input, setInput] = useState('');
+  const [assetDrawerOpen, setAssetDrawerOpen] = useState(false);
+
+  const openAssetDrawer = useCallback(() => setAssetDrawerOpen(true), []);
+  const closeAssetDrawer = useCallback(() => setAssetDrawerOpen(false), []);
+  const handleAssetSelect = useCallback(() => {
+    // Future: thread the selected asset into the input as an attachment.
+    // For now, simply close the drawer to acknowledge the selection.
+    setAssetDrawerOpen(false);
+  }, []);
 
   /* ---------------------------------------------------------------- */
   /*  Input handlers                                                   */
@@ -164,6 +174,15 @@ export function StudioChatPanel() {
             rows={1}
             disabled={isChatLoading}
           />
+          <button
+            type="button"
+            onClick={openAssetDrawer}
+            aria-label="打开素材库"
+            title="打开素材库"
+            className="text-gray-400 hover:text-white transition-colors p-1"
+          >
+            <ImageIcon size={16} />
+          </button>
           {isFulfillmentActive ? (
             <button
               type="button"
@@ -187,6 +206,30 @@ export function StudioChatPanel() {
           )}
         </div>
       </div>
+
+      {/* Asset Library slide-over drawer */}
+      {assetDrawerOpen && (
+        <div
+          data-testid="asset-drawer"
+          className="absolute top-0 left-0 right-0 bottom-0 z-40 bg-gray-950/95 backdrop-blur-xl border-r border-white/5 flex flex-col"
+        >
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+            <span className="text-sm font-semibold text-white">素材库</span>
+            <button
+              type="button"
+              onClick={closeAssetDrawer}
+              aria-label="关闭素材库"
+              title="关闭素材库"
+              className="text-gray-400 hover:text-white transition-colors p-1"
+            >
+              <X size={16} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-3">
+            <AssetBrowser onSelect={handleAssetSelect} />
+          </div>
+        </div>
+      )}
 
       {/* Expert Browser Modal */}
       <ExpertBrowser

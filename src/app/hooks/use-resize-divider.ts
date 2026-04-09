@@ -2,7 +2,15 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 
 export interface UseResizeDividerOptions {
   minWidth?: number;
+  maxWidth?: number;
   maxWidthRatio?: number;
+  /**
+   * 'left' (default): divider sits on the right edge of a left-anchored panel.
+   *   Dragging right grows the panel — width = clientX.
+   * 'right': divider sits on the left edge of a right-anchored panel.
+   *   Dragging left grows the panel — width = window.innerWidth - clientX.
+   */
+  direction?: 'left' | 'right';
 }
 
 /**
@@ -13,7 +21,12 @@ export function useResizeDivider(
   initialWidth: number,
   options?: UseResizeDividerOptions,
 ) {
-  const { minWidth = 320, maxWidthRatio = 0.6 } = options ?? {};
+  const {
+    minWidth = 320,
+    maxWidth,
+    maxWidthRatio = 0.6,
+    direction = 'left',
+  } = options ?? {};
   const [width, setWidth] = useState(initialWidth);
   const isDraggingRef = useRef(false);
 
@@ -46,10 +59,15 @@ export function useResizeDivider(
 
   const clampWidth = useCallback(
     (clientX: number) => {
-      const maxWidth = window.innerWidth * maxWidthRatio;
-      return Math.max(minWidth, Math.min(clientX, maxWidth));
+      const desired =
+        direction === 'right' ? window.innerWidth - clientX : clientX;
+      const cap = Math.min(
+        maxWidth ?? Number.POSITIVE_INFINITY,
+        window.innerWidth * maxWidthRatio,
+      );
+      return Math.max(minWidth, Math.min(desired, cap));
     },
-    [minWidth, maxWidthRatio],
+    [direction, minWidth, maxWidth, maxWidthRatio],
   );
 
   const onMouseDown = useCallback(
