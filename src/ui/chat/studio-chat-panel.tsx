@@ -4,7 +4,9 @@ import { useEditorStore } from '@/store/editor-store';
 import { useAssetFulfillmentStore } from '@/store/asset-fulfillment-store';
 import { useChatInputPaste } from '@/app/hooks/use-chat-input-paste';
 import { type ChatMessage, type Chip, getPresetIdFromChip } from '@/store/editor-store';
+// Chip type retained for handleChipClick signature even though chips list is no longer read here.
 import { useConversationManager } from '@/app/hooks/use-conversation-manager';
+import { buildFullGameTypeOptions } from '@/agent/game-type-options';
 import { MessageList } from './message-list';
 import { L3PillsPanel } from './l3-pills-panel';
 import { SuggestionChips } from './suggestion-chips';
@@ -16,7 +18,6 @@ import { ExpertBrowser } from '@/ui/experts/expert-browser';
 
 const selectChatMessages = (s: { chatMessages: ChatMessage[] }) => s.chatMessages;
 const selectIsChatLoading = (s: { isChatLoading: boolean }) => s.isChatLoading;
-const selectSuggestionChips = (s: { suggestionChips: Chip[] }) => s.suggestionChips;
 const selectAddChatMessage = (s: { addChatMessage: (msg: ChatMessage) => void }) =>
   s.addChatMessage;
 
@@ -27,7 +28,6 @@ const selectAddChatMessage = (s: { addChatMessage: (msg: ChatMessage) => void })
 export function StudioChatPanel() {
   const chatMessages = useEditorStore(selectChatMessages);
   const isChatLoading = useEditorStore(selectIsChatLoading);
-  const chips = useEditorStore(selectSuggestionChips);
   const addChatMessage = useEditorStore(selectAddChatMessage);
   const expertBrowserOpen = useEditorStore((s) => s.expertBrowserOpen);
   const expertBrowserGameType = useEditorStore((s) => s.expertBrowserGameType);
@@ -84,25 +84,35 @@ export function StudioChatPanel() {
         void submitMessage(`使用模板 ${presetId}`);
         return;
       }
-      // For game_type chips, generate a GameTypeSelector message
+      // For game_type chips, generate a GameTypeSelector message that shows
+      // the FULL game type catalog (not just the curated chip subset).
+      // The selector UI handles search / category tabs / show-more on its own.
       if (chip.type === 'game_type') {
-        const gameTypeOptions = chips
-          .filter((c) => c.type === 'game_type')
-          .map((c) => ({ id: c.id, name: c.label, emoji: c.emoji }));
-
-        addChatMessage({
+        // Carry the full GameTypeOption shape (incl. category / supportedToday)
+        // through the message — runtime data is preserved even though
+        // ChatMessage.gameTypeOptions is typed narrowly upstream.
+        const fullOptions = buildFullGameTypeOptions();
+        const newMessage: ChatMessage = {
           id: crypto.randomUUID(),
           role: 'assistant',
           content: '请选择游戏类型：',
-          gameTypeOptions,
+          gameTypeOptions: fullOptions.map((o) => ({
+            id: o.id,
+            name: o.name,
+            emoji: o.emoji,
+            category: o.category,
+            supportedToday: o.supportedToday,
+            thumbnailUrl: o.thumbnailUrl,
+          })) as ChatMessage['gameTypeOptions'],
           timestamp: Date.now(),
-        });
+        };
+        addChatMessage(newMessage);
         return;
       }
       const text = chip.emoji ? `${chip.emoji} ${chip.label}` : chip.label;
       void submitMessage(text);
     },
-    [isChatLoading, submitMessage, chips, addChatMessage],
+    [isChatLoading, submitMessage, addChatMessage],
   );
 
   const paste = useChatInputPaste();

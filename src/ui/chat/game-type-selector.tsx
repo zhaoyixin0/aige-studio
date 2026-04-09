@@ -13,6 +13,12 @@ export interface GameTypeOption {
   readonly emoji?: string;
   readonly category?: string;
   readonly supportedToday?: boolean;
+  /**
+   * Optional thumbnail URL. When provided, the GameTypeCard renders the
+   * image instead of the emoji. Falls back to emoji when missing or when
+   * the image fails to load.
+   */
+  readonly thumbnailUrl?: string;
 }
 
 export interface GameTypeSelectorProps {
@@ -34,11 +40,15 @@ interface CardProps {
 }
 
 function GameTypeCard({ option, isHovered, expertCount, onHover, onConfirm, onBadgeClick }: CardProps) {
+  const [thumbFailed, setThumbFailed] = useState(false);
+
   const baseClasses =
     'flex flex-col items-center gap-2 rounded-xl p-4 transition-all duration-200 border cursor-pointer';
   const stateClasses = isHovered
     ? 'bg-blue-500/15 border-blue-400 shadow-lg shadow-blue-500/10'
     : 'bg-white/5 border-white/10 hover:bg-white/8';
+
+  const showThumb = !!option.thumbnailUrl && !thumbFailed;
 
   return (
     <div
@@ -48,8 +58,17 @@ function GameTypeCard({ option, isHovered, expertCount, onHover, onConfirm, onBa
       onMouseEnter={() => onHover(option.id)}
       onMouseLeave={() => onHover(null)}
     >
-      {option.emoji && (
-        <span className="text-3xl leading-none">{option.emoji}</span>
+      {showThumb ? (
+        <img
+          src={option.thumbnailUrl}
+          alt={option.name}
+          className="w-12 h-12 object-cover rounded-md"
+          onError={() => setThumbFailed(true)}
+        />
+      ) : (
+        option.emoji && (
+          <span className="text-3xl leading-none">{option.emoji}</span>
+        )
       )}
       <span className="text-sm text-gray-200 text-center font-medium">
         {option.name}

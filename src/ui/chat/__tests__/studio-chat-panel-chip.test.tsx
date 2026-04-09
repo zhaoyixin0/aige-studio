@@ -48,7 +48,7 @@ describe('StudioChatPanel — game_type chip generates GameTypeSelector message'
     mockSubmitMessage.mockReset();
   });
 
-  it('clicking a game_type chip adds an assistant message with gameTypeOptions', () => {
+  it('clicking a game_type chip adds an assistant message with the FULL game type catalog', () => {
     const chips: Chip[] = [
       { id: 'catch', label: '接住游戏', emoji: '🎯', type: 'game_type' },
       { id: 'shooting', label: '射击游戏', emoji: '🔫', type: 'game_type' },
@@ -63,16 +63,35 @@ describe('StudioChatPanel — game_type chip generates GameTypeSelector message'
     // Should NOT call submitMessage for game_type chips
     expect(mockSubmitMessage).not.toHaveBeenCalled();
 
-    // Should add an assistant message with gameTypeOptions
+    // Should add an assistant message with FULL catalog (not just chip subset)
     const messages = useEditorStore.getState().chatMessages;
     expect(messages).toHaveLength(1);
     expect(messages[0].role).toBe('assistant');
     expect(messages[0].content).toBe('请选择游戏类型：');
-    expect(messages[0].gameTypeOptions).toEqual([
-      { id: 'catch', name: '接住游戏', emoji: '🎯' },
-      { id: 'shooting', name: '射击游戏', emoji: '🔫' },
-      { id: 'dodge', name: '躲避游戏', emoji: '💨' },
-    ]);
+
+    type FullOpt = {
+      id: string;
+      name: string;
+      emoji?: string;
+      category?: string;
+      supportedToday?: boolean;
+    };
+    const options = (messages[0].gameTypeOptions ?? []) as FullOpt[];
+    // Catalog has 38 game types — far more than the 3 chips
+    expect(options.length).toBeGreaterThanOrEqual(15);
+    // Each option carries id/name/category from the catalog
+    for (const opt of options) {
+      expect(typeof opt.id).toBe('string');
+      expect(typeof opt.name).toBe('string');
+      expect(opt.category).toBeTruthy();
+    }
+    // Known supported types are present and marked supportedToday
+    const catchOpt = options.find((o) => o.id === 'catch');
+    expect(catchOpt?.supportedToday).toBe(true);
+    const shootingOpt = options.find((o) => o.id === 'shooting');
+    expect(shootingOpt?.supportedToday).toBe(true);
+    const platformerOpt = options.find((o) => o.id === 'platformer');
+    expect(platformerOpt?.supportedToday).toBe(true);
   });
 
   it('does not interfere with param chip handling', () => {
@@ -105,7 +124,7 @@ describe('StudioChatPanel — game_type chip generates GameTypeSelector message'
     expect(useEditorStore.getState().chatMessages).toHaveLength(0);
   });
 
-  it('game_type options include only game_type chips, not other types', () => {
+  it('uses the full catalog regardless of which non-game_type chips are present', () => {
     setChips([
       { id: 'catch', label: '接住游戏', emoji: '🎯', type: 'game_type' },
       { id: 'speed', label: '速度调节', emoji: '⚙️', type: 'param', paramId: 'speed' },
@@ -117,11 +136,12 @@ describe('StudioChatPanel — game_type chip generates GameTypeSelector message'
     fireEvent.click(screen.getByText('接住游戏'));
 
     const messages = useEditorStore.getState().chatMessages;
-    expect(messages[0].gameTypeOptions).toHaveLength(2);
-    expect(messages[0].gameTypeOptions).toEqual([
-      { id: 'catch', name: '接住游戏', emoji: '🎯' },
-      { id: 'shooting', name: '射击游戏', emoji: '🔫' },
-    ]);
+    const options = messages[0].gameTypeOptions ?? [];
+    // Catalog far exceeds the 2 game_type chips above
+    expect(options.length).toBeGreaterThanOrEqual(15);
+    // The catalog includes ids that were NOT in the chip subset
+    expect(options.some((o) => o.id === 'rhythm')).toBe(true);
+    expect(options.some((o) => o.id === 'puzzle')).toBe(true);
   });
 
   it('does nothing when isChatLoading is true', () => {

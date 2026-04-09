@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildGameTypeOptions } from '../game-type-options';
+import { buildGameTypeOptions, buildFullGameTypeOptions } from '../game-type-options';
 import { ALL_GAME_TYPES, GAME_TYPE_META } from '../game-presets';
 
 describe('buildGameTypeOptions', () => {
@@ -45,5 +45,38 @@ describe('buildGameTypeOptions', () => {
       const meta = GAME_TYPE_META[opt.id as keyof typeof GAME_TYPE_META];
       expect(opt.name).toBe(meta.displayName);
     }
+  });
+
+  it('returns more than 15 options (full catalog beyond DEFAULT_CHIPS)', () => {
+    expect(options.length).toBeGreaterThan(15);
+  });
+
+  it('known-working types are marked supportedToday=true', () => {
+    const knownWorking = ['catch', 'shooting', 'platformer', 'dodge', 'rhythm'];
+    for (const id of knownWorking) {
+      const opt = options.find((o) => o.id === id);
+      expect(opt, `${id} should be in catalog`).toBeDefined();
+      expect(opt?.supportedToday).toBe(true);
+    }
+  });
+
+  it('returns options in deterministic order across calls', () => {
+    const a = buildGameTypeOptions().map((o) => o.id);
+    const b = buildGameTypeOptions().map((o) => o.id);
+    expect(a).toEqual(b);
+  });
+});
+
+describe('buildFullGameTypeOptions', () => {
+  it('is a stable alias of buildGameTypeOptions', () => {
+    const a = buildFullGameTypeOptions();
+    const b = buildGameTypeOptions();
+    expect(a.map((o) => o.id)).toEqual(b.map((o) => o.id));
+    expect(a.length).toBe(b.length);
+  });
+
+  it('returns the full catalog (≥15 entries)', () => {
+    const opts = buildFullGameTypeOptions();
+    expect(opts.length).toBeGreaterThan(15);
   });
 });
