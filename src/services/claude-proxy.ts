@@ -13,20 +13,28 @@ interface MessageCreateParams {
   tool_choice?: unknown;
 }
 
+export interface MessageCreateOptions {
+  signal?: AbortSignal;
+}
+
 interface ClaudeProxyClient {
   messages: {
-    create(params: MessageCreateParams): Promise<Record<string, unknown>>;
+    create(
+      params: MessageCreateParams,
+      options?: MessageCreateOptions,
+    ): Promise<Record<string, unknown>>;
   };
 }
 
 export function createClaudeClient(): ClaudeProxyClient {
   return {
     messages: {
-      async create(params: MessageCreateParams) {
+      async create(params: MessageCreateParams, options?: MessageCreateOptions) {
         const res = await fetch('/api/claude', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(params),
+          signal: options?.signal,
         });
 
         if (!res.ok) {

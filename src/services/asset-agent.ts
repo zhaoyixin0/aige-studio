@@ -243,8 +243,9 @@ export class AssetAgent {
         });
 
         // Pass role-specific image config (aspectRatio, imageSize) to Nano Banana Pro
+        // Thread the abort signal so cancellation aborts the in-flight fetch.
         const imageConfig = PromptBuilder.getImageConfig(role);
-        let dataUrl = await gemini.generateImageRaw(prompt, imageConfig);
+        let dataUrl = await gemini.generateImageRaw(prompt, imageConfig, signal);
 
         if (signal.aborted) return result;
 

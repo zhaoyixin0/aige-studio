@@ -19,17 +19,30 @@ export interface ImageGenOptions {
 }
 
 export class GeminiImageService {
-  async generateImage(prompt: string, style: ImageStyle = 'cartoon', options?: ImageGenOptions): Promise<string> {
+  async generateImage(
+    prompt: string,
+    style: ImageStyle = 'cartoon',
+    options?: ImageGenOptions,
+    signal?: AbortSignal,
+  ): Promise<string> {
     const styleHint = STYLE_PROMPTS[style] ?? STYLE_PROMPTS.cartoon;
     const fullPrompt = `Game sprite asset: ${prompt}. Simple, clean icon for a mobile game. ${styleHint}`;
-    return this.callAPI(fullPrompt, options);
+    return this.callAPI(fullPrompt, options, signal);
   }
 
-  async generateImageRaw(prompt: string, options?: ImageGenOptions): Promise<string> {
-    return this.callAPI(prompt, options);
+  async generateImageRaw(
+    prompt: string,
+    options?: ImageGenOptions,
+    signal?: AbortSignal,
+  ): Promise<string> {
+    return this.callAPI(prompt, options, signal);
   }
 
-  private async callAPI(promptText: string, options?: ImageGenOptions): Promise<string> {
+  private async callAPI(
+    promptText: string,
+    options?: ImageGenOptions,
+    signal?: AbortSignal,
+  ): Promise<string> {
     const response = await fetch('/api/gemini', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -38,6 +51,7 @@ export class GeminiImageService {
         aspectRatio: options?.aspectRatio,
         imageSize: options?.imageSize,
       }),
+      signal,
     });
 
     if (!response.ok) {

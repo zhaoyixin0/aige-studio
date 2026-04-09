@@ -18,12 +18,22 @@
  *      as a permanent thumbnail grid).
  *   5. On foreign config change (race guard trips) or explicit error, emit a
  *      quiet fallback message — no throw.
+ *
+ * Cancellation (Task 7.2):
+ *   - The hook tracks the active agent + applier + message id in refs and
+ *     mirrors `isActive` into `useAssetFulfillmentStore` so unrelated UI
+ *     (e.g. StudioChatPanel) can subscribe and trigger `cancel()`.
+ *   - `cancel()` aborts the current AssetAgent's controller, replaces the
+ *     progress message text with `"已取消，保留 N/M 张素材"`, drops the
+ *     progress-log block, and keeps the asset-preview block intact so
+ *     already-completed thumbnails remain visible.
  */
-import { useCallback } from 'react';
+import { useCallback, useRef, useSyncExternalStore } from 'react';
 import { AssetAgent, extractAssetKeys } from '@/services/asset-agent';
 import { useEditorStore, type ChatMessage } from '@/store/editor-store';
 import { useEngineContext } from '@/app/hooks/use-engine';
-import { makeStreamingApplier } from '@/app/hooks/use-asset-stream-applier';
+import { makeStreamingApplier, type StreamApplier } from '@/app/hooks/use-asset-stream-applier';
+import { useAssetFulfillmentStore } from '@/store/asset-fulfillment-store';
 import type { GameConfig } from '@/engine/core';
 import type {
   AssetPreviewItem,
@@ -37,10 +47,58 @@ export interface StreamingAssetFulfillmentHook {
    * Returns immediately — the actual generation runs in the background.
    */
   triggerStreamingFulfillment: (config: GameConfig) => void;
+  /** Abort the in-flight fulfillment, if any, and collapse its message. */
+  cancel: () => void;
+  /** True while a fulfillment run is in flight. */
+  isActive: boolean;
+}
+
+interface ActiveRun {
+  agent: AssetAgent;
+  applier: StreamApplier;
+  messageId: string;
+  expectedTotal: number;
 }
 
 export function useStreamingAssetFulfillment(): StreamingAssetFulfillmentHook {
   const { engineRef } = useEngineContext();
+
+  // Refs for the in-flight run — survive re-renders, no React state churn.
+  const activeRunRef = useRef<ActiveRun | null>(null);
+
+  // Subscribe to the singleton store so consumers re-render on isActive flips.
+  const isActive = useSyncExternalStore(
+    useAssetFulfillmentStore.subscribe,
+    () => useAssetFulfillmentStore.getState().isActive,
+    () => useAssetFulfillmentStore.getState().isActive,
+  );
+
+  /* ---------------------------------------------------------------- */
+  /*  Cancel helper                                                    */
+  /* ---------------------------------------------------------------- */
+
+  const cancel = useCallback((): void => {
+    const run = activeRunRef.current;
+    if (!run) return;
+
+    run.agent.cancel();
+
+    const applied = run.applier.appliedCount;
+    const total = run.expectedTotal;
+
+    useEditorStore.getState().updateChatMessage(run.messageId, (msg) => ({
+      ...msg,
+      content: `\u26D4 \u5DF2\u53D6\u6D88\uFF0C\u4FDD\u7559 ${applied}/${total} \u5F20\u7D20\u6750`,
+      blocks: msg.blocks?.filter((b: ChatBlock) => b.kind !== 'progress-log'),
+    }));
+
+    activeRunRef.current = null;
+    useAssetFulfillmentStore.getState().setActive(false, null);
+  }, []);
+
+  /* ---------------------------------------------------------------- */
+  /*  Trigger                                                          */
+  /* ---------------------------------------------------------------- */
 
   const triggerStreamingFulfillment = useCallback(
     (newConfig: GameConfig): void => {
@@ -64,7 +122,7 @@ export function useStreamingAssetFulfillment(): StreamingAssetFulfillmentHook {
       const initialEntries: ProgressEntry[] = expectedKeys.map((key) => ({
         key,
         status: 'pending',
-        message: `等待中: ${key}`,
+        message: `\u7B49\u5F85\u4E2D: ${key}`,
       }));
       const initialItems: AssetPreviewItem[] = expectedKeys.map((key) => ({
         key,
@@ -76,7 +134,7 @@ export function useStreamingAssetFulfillment(): StreamingAssetFulfillmentHook {
       const progressMsg: ChatMessage = {
         id: progressMsgId,
         role: 'assistant',
-        content: `\uD83C\uDFA8 正在生成 ${expectedKeys.length} 个游戏素材...`,
+        content: `\uD83C\uDFA8 \u6B63\u5728\u751F\u6210 ${expectedKeys.length} \u4E2A\u6E38\u620F\u7D20\u6750...`,
         timestamp: Date.now(),
         blocks: [
           { kind: 'progress-log', entries: initialEntries },
@@ -92,6 +150,15 @@ export function useStreamingAssetFulfillment(): StreamingAssetFulfillmentHook {
       const assetAgent = new AssetAgent();
       const applier = makeStreamingApplier({ engineRef, progressMsgId });
 
+      const run: ActiveRun = {
+        agent: assetAgent,
+        applier,
+        messageId: progressMsgId,
+        expectedTotal: expectedKeys.length,
+      };
+      activeRunRef.current = run;
+      useAssetFulfillmentStore.getState().setActive(true, { cancel });
+
       // 3. Fire and forget.
       assetAgent
         .fulfillAssets(newConfig, {
@@ -99,8 +166,15 @@ export function useStreamingAssetFulfillment(): StreamingAssetFulfillmentHook {
           onAsset: applier.onAsset,
         })
         .then(() => {
+          // If we were cancelled, the cancel() handler already cleaned up.
+          if (activeRunRef.current !== run) return;
+
           // Foreign change detected mid-stream → stay quiet.
-          if (applier.isStopped) return;
+          if (applier.isStopped) {
+            activeRunRef.current = null;
+            useAssetFulfillmentStore.getState().setActive(false, null);
+            return;
+          }
 
           const count = applier.appliedCount;
 
@@ -109,27 +183,38 @@ export function useStreamingAssetFulfillment(): StreamingAssetFulfillmentHook {
             ...msg,
             content:
               count > 0
-                ? `\u2705 已生成 ${count} 个游戏素材！`
-                : `\u2139\uFE0F 无需额外素材`,
+                ? `\u2705 \u5DF2\u751F\u6210 ${count} \u4E2A\u6E38\u620F\u7D20\u6750\uFF01`
+                : `\u2139\uFE0F \u65E0\u9700\u989D\u5916\u7D20\u6750`,
             blocks: msg.blocks?.filter(
               (b: ChatBlock) => b.kind !== 'progress-log',
             ),
           }));
+
+          activeRunRef.current = null;
+          useAssetFulfillmentStore.getState().setActive(false, null);
         })
         .catch((err) => {
+          // If cancelled in the middle, the cancel() handler already cleaned up.
+          if (activeRunRef.current !== run) return;
           // Genuine error (not race guard) — silent if applier already stopped.
-          if (applier.isStopped) return;
+          if (applier.isStopped) {
+            activeRunRef.current = null;
+            useAssetFulfillmentStore.getState().setActive(false, null);
+            return;
+          }
           const errMsg = err instanceof Error ? err.message : String(err);
           useEditorStore.getState().addChatMessage({
             id: crypto.randomUUID(),
             role: 'assistant',
-            content: `\u274C 素材生成失败: ${errMsg}`,
+            content: `\u274C \u7D20\u6750\u751F\u6210\u5931\u8D25: ${errMsg}`,
             timestamp: Date.now(),
           });
+          activeRunRef.current = null;
+          useAssetFulfillmentStore.getState().setActive(false, null);
         });
     },
-    [engineRef],
+    [engineRef, cancel],
   );
 
-  return { triggerStreamingFulfillment };
+  return { triggerStreamingFulfillment, cancel, isActive };
 }

@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
-import { SendHorizontal } from 'lucide-react';
+import { SendHorizontal, Square } from 'lucide-react';
 import { useEditorStore } from '@/store/editor-store';
+import { useAssetFulfillmentStore } from '@/store/asset-fulfillment-store';
 import { useChatInputPaste } from '@/app/hooks/use-chat-input-paste';
 import { type ChatMessage, type Chip, getPresetIdFromChip } from '@/store/editor-store';
 import { useConversationManager } from '@/app/hooks/use-conversation-manager';
@@ -31,6 +32,10 @@ export function StudioChatPanel() {
   const expertBrowserOpen = useEditorStore((s) => s.expertBrowserOpen);
   const expertBrowserGameType = useEditorStore((s) => s.expertBrowserGameType);
   const setExpertBrowserOpen = useEditorStore((s) => s.setExpertBrowserOpen);
+
+  // Asset fulfillment state — when isActive, show stop button instead of send.
+  const isFulfillmentActive = useAssetFulfillmentStore((s) => s.isActive);
+  const cancelFulfillment = useAssetFulfillmentStore((s) => s.cancel);
 
   const { submitMessage } = useConversationManager();
 
@@ -149,13 +154,27 @@ export function StudioChatPanel() {
             rows={1}
             disabled={isChatLoading}
           />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim() || isChatLoading}
-            className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors p-1"
-          >
-            <SendHorizontal size={16} />
-          </button>
+          {isFulfillmentActive ? (
+            <button
+              type="button"
+              onClick={cancelFulfillment}
+              aria-label="停止生成"
+              title="停止生成"
+              className="bg-red-500/15 text-red-400 hover:bg-red-500/25 hover:text-red-300 transition-colors rounded p-1"
+            >
+              <Square size={16} fill="currentColor" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSend}
+              disabled={!input.trim() || isChatLoading}
+              aria-label="发送"
+              className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors p-1"
+            >
+              <SendHorizontal size={16} />
+            </button>
+          )}
         </div>
       </div>
 
