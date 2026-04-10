@@ -18,11 +18,13 @@ describe('Expert Registry', () => {
     }
   });
 
-  it('resolvePreset finds hero preset first (priority)', () => {
-    const result = resolvePreset({ presetId: 'hero-catch-fruit' });
-    expect(result).not.toBeNull();
-    expect(result!.id).toBe('hero-catch-fruit');
-    expect(result!.tags).not.toContain('expert-import');
+  it('resolvePreset returns null for hero-skeleton presetIds', () => {
+    // All hero presets are now hero-skeleton v2 and are routed through
+    // HERO_SKELETON_PRESETS inside runPresetToConfig, so resolvePreset()
+    // (which only returns legacy PresetTemplate entries) returns null
+    // for every hero id.
+    const result = resolvePreset({ presetId: 'hero-platformer-basic' });
+    expect(result).toBeNull();
   });
 
   it('resolvePreset falls back to expert preset by ID', () => {

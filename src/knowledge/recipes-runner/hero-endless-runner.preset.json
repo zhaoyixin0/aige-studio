@@ -1,26 +1,16 @@
 {
   "id": "hero-endless-runner",
-  "title": "无尽跑酷",
-  "description": "侧向滚动躲避障碍收集金币",
+  "kind": "hero-skeleton",
+  "version": 2,
   "gameType": "runner",
+  "title": "无尽跑酷",
+  "description": "无尽奔跑收集金币躲避障碍",
   "tags": ["action", "scrolling", "intermediate"],
-  "params": [
-    { "name": "initialSpeed", "type": "number", "default": 400, "min": 200, "max": 800, "description": "初始速度" },
-    { "name": "acceleration", "type": "number", "default": 15, "min": 5, "max": 30, "description": "加速度" }
-  ],
-  "sequence": {
-    "id": "hero-endless-runner",
-    "commands": [
-      { "name": "addModule", "args": { "id": "gameflow_1", "type": "GameFlow", "params": { "countdown": 3, "onFinish": "show_result" } } },
-      { "name": "addModule", "args": { "id": "runner_1", "type": "Runner", "params": { "speed": "$initialSpeed", "acceleration": "$acceleration", "lanes": 3 } } },
-      { "name": "addModule", "args": { "id": "spawner_1", "type": "Spawner", "params": { "frequency": 1.2, "maxCount": 5, "direction": "left" } } },
-      { "name": "addModule", "args": { "id": "collision_1", "type": "Collision", "params": { "rules": [{ "a": "player", "b": "items", "event": "hit", "destroy": ["b"] }, { "a": "player", "b": "obstacles", "event": "damage", "destroy": ["b"] }] } } },
-      { "name": "addModule", "args": { "id": "scorer_1", "type": "Scorer", "params": { "perHit": 10, "scorePerSecond": 1 } } },
-      { "name": "addModule", "args": { "id": "lives_1", "type": "Lives", "params": { "count": 3 } } },
-      { "name": "addModule", "args": { "id": "difficultyramp_1", "type": "DifficultyRamp", "params": { "mode": "time", "rampInterval": 10, "speedMultiplier": 1.1 } } },
-      { "name": "addModule", "args": { "id": "uioverlay_1", "type": "UIOverlay" } },
-      { "name": "addModule", "args": { "id": "resultscreen_1", "type": "ResultScreen" } }
-    ]
-  },
-  "requiredModules": ["GameFlow", "Runner", "Spawner", "Collision", "DifficultyRamp"]
+  "concept": "无尽奔跑收集金币躲避障碍",
+  "inputMethod": "TouchInput",
+  "emphasis": { "difficulty": 0.6, "pacing": 0.9, "juice": 0.7, "complexity": 0.4 },
+  "signature": {
+    "goods": ["金币", "星星"],
+    "bads": ["路障", "坑"]
+  }
 }

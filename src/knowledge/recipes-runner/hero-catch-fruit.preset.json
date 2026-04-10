@@ -1,25 +1,16 @@
 {
   "id": "hero-catch-fruit",
+  "kind": "hero-skeleton",
+  "version": 2,
+  "gameType": "catch",
   "title": "经典接水果",
   "description": "从天而降的水果接住得分，混合好坏物品",
-  "gameType": "catch",
   "tags": ["casual", "beginner", "spawner"],
-  "params": [
-    { "name": "duration", "type": "number", "default": 30, "min": 10, "max": 120, "description": "游戏时长(秒)" },
-    { "name": "spawnRate", "type": "number", "default": 1.5, "min": 0.5, "max": 3, "description": "生成频率(秒)" }
-  ],
-  "sequence": {
-    "id": "hero-catch-fruit",
-    "commands": [
-      { "name": "addModule", "args": { "id": "gameflow_1", "type": "GameFlow", "params": { "countdown": 3, "onFinish": "show_result" } } },
-      { "name": "addModule", "args": { "id": "spawner_1", "type": "Spawner", "params": { "frequency": "$spawnRate", "maxCount": 5, "speed": { "min": 200, "max": 300 }, "direction": "down" } } },
-      { "name": "addModule", "args": { "id": "collision_1", "type": "Collision", "params": { "rules": [{ "a": "player", "b": "items", "event": "hit", "destroy": ["b"] }] } } },
-      { "name": "addModule", "args": { "id": "scorer_1", "type": "Scorer", "params": { "perHit": 10 } } },
-      { "name": "addModule", "args": { "id": "timer_1", "type": "Timer", "params": { "duration": "$duration", "mode": "countdown" } } },
-      { "name": "addModule", "args": { "id": "lives_1", "type": "Lives", "params": { "count": 3 } } },
-      { "name": "addModule", "args": { "id": "uioverlay_1", "type": "UIOverlay" } },
-      { "name": "addModule", "args": { "id": "resultscreen_1", "type": "ResultScreen", "params": { "show": ["score", "combo_max"] } } }
-    ]
-  },
-  "requiredModules": ["GameFlow", "Spawner", "Collision", "Scorer", "Timer", "Lives"]
+  "concept": "从天而降的水果接住得分，混合好坏物品",
+  "inputMethod": "TouchInput",
+  "emphasis": { "difficulty": 0.4, "pacing": 0.5, "juice": 0.6, "complexity": 0.3 },
+  "signature": {
+    "goods": ["火龙果", "香蕉", "草莓"],
+    "bads": ["炸弹"]
+  }
 }

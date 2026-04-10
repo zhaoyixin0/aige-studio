@@ -23,10 +23,39 @@ const heroPresetFiles = import.meta.glob('/src/knowledge/recipes-runner/*.preset
   import: 'default',
 });
 
-export const HERO_PRESETS: readonly PresetTemplate[] = Object.values(heroPresetFiles) as PresetTemplate[];
+// Split hero preset JSON files by format:
+//   - kind==='hero-skeleton' → routed through hero-preset-loader (new path)
+//   - otherwise              → legacy PresetTemplate, stays on RecipeExecutor
+function isSkeletonRecord(v: unknown): v is { id: string; kind: 'hero-skeleton' } {
+  return (
+    typeof v === 'object' &&
+    v !== null &&
+    !Array.isArray(v) &&
+    (v as Record<string, unknown>).kind === 'hero-skeleton' &&
+    typeof (v as Record<string, unknown>).id === 'string'
+  );
+}
+
+const _heroRaw = Object.values(heroPresetFiles) as unknown[];
+
+export const HERO_PRESETS: readonly PresetTemplate[] = _heroRaw.filter(
+  (v): v is PresetTemplate => !isSkeletonRecord(v),
+);
+
+export const HERO_SKELETON_PRESETS: Readonly<Record<string, unknown>> = (() => {
+  const out: Record<string, unknown> = {};
+  for (const v of _heroRaw) {
+    if (isSkeletonRecord(v)) {
+      out[v.id] = v;
+    }
+  }
+  return out;
+})();
 
 /**
- * Create a PresetRegistry pre-loaded with all hero presets.
+ * Create a PresetRegistry pre-loaded with all legacy hero presets.
+ * Hero-skeleton presets are not registered here — they are resolved via
+ * HERO_SKELETON_PRESETS in the facade.
  */
 export function createHeroRegistry(): _PresetRegistry {
   const registry = new _PresetRegistry();

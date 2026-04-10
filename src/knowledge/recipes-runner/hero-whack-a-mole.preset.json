@@ -1,24 +1,16 @@
 {
   "id": "hero-whack-a-mole",
+  "kind": "hero-skeleton",
+  "version": 2,
+  "gameType": "tap",
   "title": "经典打地鼠",
   "description": "快速点击冒出的目标得分",
-  "gameType": "whack-a-mole",
   "tags": ["casual", "beginner", "tween"],
-  "params": [
-    { "name": "duration", "type": "number", "default": 30, "min": 15, "max": 90, "description": "游戏时长(秒)" },
-    { "name": "spawnRate", "type": "number", "default": 1.0, "min": 0.3, "max": 2.0, "description": "出现频率(秒)" }
-  ],
-  "sequence": {
-    "id": "hero-whack-a-mole",
-    "commands": [
-      { "name": "addModule", "args": { "id": "gameflow_1", "type": "GameFlow", "params": { "countdown": 3, "onFinish": "show_result" } } },
-      { "name": "addModule", "args": { "id": "spawner_1", "type": "Spawner", "params": { "frequency": "$spawnRate", "maxCount": 3 } } },
-      { "name": "addModule", "args": { "id": "collision_1", "type": "Collision", "params": { "rules": [{ "a": "player", "b": "items", "event": "hit", "destroy": ["b"] }] } } },
-      { "name": "addModule", "args": { "id": "scorer_1", "type": "Scorer", "params": { "perHit": 10 } } },
-      { "name": "addModule", "args": { "id": "timer_1", "type": "Timer", "params": { "duration": "$duration", "mode": "countdown" } } },
-      { "name": "addModule", "args": { "id": "uioverlay_1", "type": "UIOverlay" } },
-      { "name": "addModule", "args": { "id": "resultscreen_1", "type": "ResultScreen" } }
-    ]
-  },
-  "requiredModules": ["GameFlow", "Spawner", "Collision", "Scorer", "Timer"]
+  "concept": "快速点击冒出的地鼠得分，躲避会惩罚的陷阱地鼠",
+  "inputMethod": "TouchInput",
+  "emphasis": { "difficulty": 0.5, "pacing": 0.8, "juice": 0.5, "complexity": 0.2 },
+  "signature": {
+    "goods": ["地鼠", "金币地鼠"],
+    "bads": ["炸弹地鼠"]
+  }
 }

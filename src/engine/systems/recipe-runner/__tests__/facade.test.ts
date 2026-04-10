@@ -16,23 +16,28 @@ beforeEach(() => {
   _resetRegistry();
 });
 
+// Note: all hero presets (including hero-platformer-basic and
+// hero-shooter-wave) are now hero-skeleton v2 and resolve via
+// HERO_SKELETON_PRESETS inside runPresetToConfig. resolvePreset() only
+// returns legacy PresetTemplate entries, which means hero ids are null
+// and gameType/tags fall through to the expert registry.
+
 describe('resolvePreset', () => {
-  it('resolves by presetId', () => {
-    const preset = resolvePreset({ presetId: 'hero-catch-fruit' });
-    expect(preset).not.toBeNull();
-    expect(preset!.id).toBe('hero-catch-fruit');
+  it('returns null for a hero-skeleton presetId (not a legacy template)', () => {
+    const preset = resolvePreset({ presetId: 'hero-platformer-basic' });
+    expect(preset).toBeNull();
   });
 
-  it('resolves by gameType', () => {
-    const preset = resolvePreset({ gameType: 'catch' });
+  it('resolves an expert preset by gameType fallback', () => {
+    const preset = resolvePreset({ gameType: 'platformer' });
     expect(preset).not.toBeNull();
-    expect(preset!.gameType).toBe('catch');
+    expect(preset!.gameType).toBe('platformer');
   });
 
-  it('resolves by tags', () => {
-    const preset = resolvePreset({ tags: ['casual'] });
+  it('resolves an expert preset by tags fallback', () => {
+    const preset = resolvePreset({ tags: ['expert-import'] });
     expect(preset).not.toBeNull();
-    expect(preset!.tags).toContain('casual');
+    expect(preset!.tags).toContain('expert-import');
   });
 
   it('returns null for nonexistent presetId', () => {
@@ -46,8 +51,8 @@ describe('resolvePreset', () => {
   });
 });
 
-describe('runPresetToConfig', () => {
-  it('returns valid GameConfig with modules', () => {
+describe('runPresetToConfig — hero-skeleton', () => {
+  it('returns valid GameConfig with modules for hero-catch-fruit', () => {
     const base = makeEmptyConfig();
     const result = runPresetToConfig({ presetId: 'hero-catch-fruit' }, base);
 
@@ -68,24 +73,42 @@ describe('runPresetToConfig', () => {
     const base = makeEmptyConfig();
     const result = runPresetToConfig({ presetId: 'hero-catch-fruit' }, base);
 
-    // pendingAssets should be an array (may or may not have entries depending on preset)
     expect(Array.isArray(result.pendingAssets)).toBe(true);
-    // Assets with empty src should be in pendingAssets
     for (const assetId of result.pendingAssets) {
       expect(result.config.assets[assetId]).toBeDefined();
       expect(result.config.assets[assetId].src).toBeFalsy();
     }
   });
 
-  it('applies param overrides', () => {
+  it('writes asset_descriptions into config.meta.assetDescriptions', () => {
+    const base = makeEmptyConfig();
+    const result = runPresetToConfig({ presetId: 'hero-catch-fruit' }, base);
+    expect(result.config.meta.assetDescriptions).toBeDefined();
+    expect(result.config.meta.assetDescriptions!.good_1).toBe('火龙果');
+  });
+});
+
+describe('runPresetToConfig — routing', () => {
+  it('routes hero-platformer-basic through the skeleton builder', () => {
     const base = makeEmptyConfig();
     const result = runPresetToConfig(
-      { presetId: 'hero-catch-fruit', params: { timerDuration: 30 } },
+      { presetId: 'hero-platformer-basic' },
       base,
     );
-
     expect(result.config).toBeDefined();
-    expect(result.presetId).toBe('hero-catch-fruit');
+    expect(result.presetId).toBe('hero-platformer-basic');
+    expect(result.config.meta.gameType).toBe('platformer');
+  });
+
+  it('routes hero-shooter-wave through the skeleton builder', () => {
+    const base = makeEmptyConfig();
+    const result = runPresetToConfig(
+      { presetId: 'hero-shooter-wave' },
+      base,
+    );
+    expect(result.config).toBeDefined();
+    expect(result.presetId).toBe('hero-shooter-wave');
+    expect(result.config.meta.gameType).toBe('shooting');
   });
 
   it('throws on missing preset', () => {
@@ -97,8 +120,7 @@ describe('runPresetToConfig', () => {
 
   it('resolves via gameType when presetId not provided', () => {
     const base = makeEmptyConfig();
-    const result = runPresetToConfig({ gameType: 'catch' }, base);
-
+    const result = runPresetToConfig({ gameType: 'platformer' }, base);
     expect(result.config.modules.length).toBeGreaterThan(0);
   });
 });

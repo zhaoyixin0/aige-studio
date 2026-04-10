@@ -60,6 +60,31 @@ export interface GameMeta {
   assetDescriptions?: Record<string, string>;
   playerEmoji?: string;
   spriteSize?: number;
+  /**
+   * Optional hint written by preset loaders (hero-skeleton, expert facade).
+   * When present, ConversationAgent.inferGameType returns this value directly
+   * instead of guessing from module composition. Enables recognition of niche
+   * expert gameTypes (slingshot, avatar-frame, bouncing, ...) that do not map
+   * 1-to-1 onto native engine modules.
+   */
+  gameType?: string;
+  /** Hero preset id written by hero-skeleton-builder when a preset is loaded. */
+  heroPresetId?: string;
+  /** Conceptual intent text carried over from a hero-skeleton. */
+  concept?: string;
+  /** Signature good item labels (for preset-enricher context). */
+  signatureGoods?: readonly string[];
+  /** Signature bad item labels (for preset-enricher context). */
+  signatureBads?: readonly string[];
+  /**
+   * Preset enrichment lifecycle:
+   *   undefined   — not a hero preset load, or not checked yet
+   *   'pending'   — enrichment in flight
+   *   true        — enrichment complete (diff merged)
+   *   'failed'    — enrichment rejected / errored (no diff applied)
+   *   'cancelled' — user cancelled mid-flight
+   */
+  presetEnriched?: true | 'pending' | 'failed' | 'cancelled';
 }
 
 export interface GameConfig {
