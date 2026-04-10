@@ -56,6 +56,10 @@ export interface ConfigChange {
   duration?: number;
   param_key?: string;
   param_value?: unknown;
+  /** set_asset_description: target asset id in config.assets / meta.assetDescriptions */
+  asset_id?: string;
+  /** set_asset_description: new natural-language description fed to Gemini prompt builder */
+  description?: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -92,6 +96,13 @@ export const ALL_MODULES = [
 
 export const THEMES = ['fruit', 'space', 'ocean', 'halloween', 'candy'] as const;
 export const ART_STYLES = ['cartoon', 'pixel', 'flat', 'realistic', 'watercolor', 'chibi'] as const;
+
+/**
+ * Sentinel prefix written by use-preset-advice hook on the block.summary.
+ * The presence of this prefix switches the ValidationSummaryBlock component
+ * from validation mode to advice mode.
+ */
+export const ADVICE_SUMMARY_PREFIX = '[preset-advice]';
 
 export const HERO_PRESET_IDS = [
   'hero-catch-fruit', 'hero-shooter-wave', 'hero-platformer-basic',
@@ -545,6 +556,74 @@ export const TOOLS: Anthropic.Messages.Tool[] = [
     },
   },
 ];
+
+/* ------------------------------------------------------------------ */
+/*  refine_preset tool — used ONLY by preset-enricher (P2 skill pass)  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Tool definition for preset-enricher's independent Claude call. Not
+ * registered in the main TOOLS array — preset-enricher invokes Claude
+ * directly with `tool_choice: { type: 'tool', name: 'refine_preset' }`.
+ *
+ * The `changes` field is an array of ConfigChange-shaped objects. The
+ * enricher applies guardrails (whitelist, validation, size cap) after
+ * parsing the tool_use block so this schema stays permissive.
+ */
+export const REFINE_PRESET_TOOL: Anthropic.Messages.Tool = {
+  name: 'refine_preset',
+  description:
+    '基于 skill 知识对一个已可玩的基线 hero preset 做风味微调。' +
+    '只允许修改参数、时长、主题、画风、素材描述，以及增强型模块的添加/移除。' +
+    '禁止触碰核心模块（GameFlow/Timer/Scorer/Lives/Collision/Spawner/Input 等）。' +
+    '最多返回 8 条 change。',
+  input_schema: {
+    type: 'object',
+    properties: {
+      changes: {
+        type: 'array',
+        description: '要应用的修改列表（最多 8 条）',
+        items: {
+          type: 'object',
+          properties: {
+            action: {
+              type: 'string',
+              enum: [
+                'set_param',
+                'set_duration',
+                'set_theme',
+                'set_art_style',
+                'set_asset_description',
+                'add_module',
+                'remove_module',
+              ],
+              description: '修改类型',
+            },
+            module_type: {
+              type: 'string',
+              description: '模块类型（set_param/add_module/remove_module 时必填）',
+            },
+            param_key: { type: 'string', description: 'set_param 参数名' },
+            param_value: { description: 'set_param 参数值（任意类型）' },
+            theme: { type: 'string', description: 'set_theme 目标主题' },
+            art_style: { type: 'string', description: 'set_art_style 目标画风' },
+            duration: { type: 'number', description: 'set_duration 秒数' },
+            asset_id: {
+              type: 'string',
+              description: 'set_asset_description 目标 asset id',
+            },
+            description: {
+              type: 'string',
+              description: 'set_asset_description 的新描述文本',
+            },
+          },
+          required: ['action'],
+        },
+      },
+    },
+    required: ['changes'],
+  },
+};
 
 /* ------------------------------------------------------------------ */
 /*  Regex fallback keyword map (Chinese → game type)                   */

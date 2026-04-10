@@ -1,5 +1,8 @@
 import { create } from 'zustand';
 import type { AssetEntry, GameConfig, ModuleConfig } from '@/engine/core';
+import type { ConfigChange } from '@/agent/conversation-defs';
+import { applyConfigChanges } from '@/agent/conversation-helpers';
+import { applyConfigPath, pathForConfigChange } from './config-path';
 
 // Module-scope accumulators for RAF micro-batching
 const liveAccumulator = new Map<string, Record<string, unknown>>();
@@ -11,10 +14,25 @@ export function __resetLiveAccumulator(): void {
   liveScheduled = false;
 }
 
+export interface EnricherDiffResult {
+  applied: number;
+  skipped: number;
+  skippedPaths: string[];
+}
+
 interface GameStore {
   config: GameConfig | null;
   /** Monotonically increasing version — incremented on every config mutation */
   configVersion: number;
+  /**
+   * Field-level user edit tracking. Keys are canonical paths (see
+   * src/store/config-path.ts); values are timestamps (ms) of the latest
+   * user-initiated write. Used by preset enrichment to avoid clobbering
+   * concurrent user edits.
+   */
+  userEdits: Record<string, number>;
+  /** Result of the last applyEnricherDiff call. Read this after calling the action. */
+  lastEnricherResult: EnricherDiffResult | null;
 
   setConfig: (config: GameConfig) => void;
 
@@ -37,11 +55,42 @@ interface GameStore {
   ) => void;
 
   updateModuleParamLive: (moduleId: string, param: string, value: unknown) => void;
+
+  /** User-driven field edit — writes config and records timestamp. */
+  applyUserConfigChange: (path: string, value: unknown) => void;
+
+  /**
+   * Apply an enricher-produced diff with field-level user-edit protection.
+   * Any change whose target path has a userEdits timestamp greater than
+   * `enrichmentStartedAt` is skipped. Result is stored in `lastEnricherResult`.
+   *
+   * Enricher changes are intentionally NOT recorded in userEdits:
+   * - Double-enrichment is prevented by preset-enricher idempotency
+   *   (meta.presetEnriched === true) and the hook's shouldTriggerEnrichment
+   *   guard (only undefined triggers).
+   * - Recording them would pollute userEdits and block future legitimate
+   *   enricher writes after a preset reload.
+   */
+  applyEnricherDiff: (
+    changes: ConfigChange[],
+    enrichmentStartedAt: number,
+  ) => void;
+
+  /**
+   * Atomically update config.meta.presetEnriched + configVersion.
+   * Replaces the old patchMetaPresetEnriched pattern that bypassed store actions.
+   */
+  setPresetEnriched: (value: string | boolean | undefined) => void;
+
+  resetUserEdits: () => void;
+  clearUserEditsForPath: (path: string) => void;
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
   config: null,
   configVersion: 0,
+  userEdits: {},
+  lastEnricherResult: null,
 
   setConfig: (config) => set({ config, configVersion: get().configVersion + 1 }),
 
@@ -212,6 +261,75 @@ export const useGameStore = create<GameStore>((set, get) => ({
       });
     }
   },
+
+  applyUserConfigChange: (path, value) =>
+    set((state) => {
+      if (!state.config) return state;
+      const nextConfig = applyConfigPath(state.config, path, value);
+      if (nextConfig === state.config) return state;
+      return {
+        config: nextConfig,
+        configVersion: state.configVersion + 1,
+        userEdits: { ...state.userEdits, [path]: Date.now() },
+      };
+    }),
+
+  applyEnricherDiff: (changes, enrichmentStartedAt) =>
+    set((state) => {
+      if (!state.config) {
+        return { lastEnricherResult: { applied: 0, skipped: 0, skippedPaths: [] } };
+      }
+
+      const skippedPaths: string[] = [];
+      const acceptedChanges: ConfigChange[] = [];
+      for (const change of changes) {
+        const path = pathForConfigChange(change, state.config);
+        if (path && (state.userEdits[path] ?? 0) > enrichmentStartedAt) {
+          skippedPaths.push(path);
+          continue;
+        }
+        acceptedChanges.push(change);
+      }
+
+      const result: EnricherDiffResult = {
+        applied: acceptedChanges.length,
+        skipped: skippedPaths.length,
+        skippedPaths,
+      };
+
+      if (acceptedChanges.length === 0) {
+        return { lastEnricherResult: result };
+      }
+
+      const nextConfig = applyConfigChanges(state.config, acceptedChanges);
+      return {
+        config: nextConfig,
+        configVersion: state.configVersion + 1,
+        lastEnricherResult: result,
+      };
+    }),
+
+  setPresetEnriched: (value) =>
+    set((state) => {
+      if (!state.config) return state;
+      return {
+        config: {
+          ...state.config,
+          meta: { ...state.config.meta, presetEnriched: value },
+        },
+        configVersion: state.configVersion + 1,
+      };
+    }),
+
+  resetUserEdits: () => set({ userEdits: {} }),
+
+  clearUserEditsForPath: (path) =>
+    set((state) => {
+      if (!(path in state.userEdits)) return state;
+      const next = { ...state.userEdits };
+      delete next[path];
+      return { userEdits: next };
+    }),
 }));
 
 // Expose store for renderer access (background sync)
