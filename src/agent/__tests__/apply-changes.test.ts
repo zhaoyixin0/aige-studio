@@ -166,4 +166,156 @@ describe('applyConfigChanges', () => {
     expect(config.meta.theme).toBe('fruit');
     expect(config.assets['bg'].src).toBe('old.png');
   });
+
+  describe('set_asset_description action (P4)', () => {
+    it('should set a new asset description into meta.assetDescriptions', () => {
+      const config = makeTestConfig();
+      const result = applyConfigChanges(config, [
+        {
+          action: 'set_asset_description',
+          asset_id: 'good_1',
+          description: 'A shiny golden star',
+        },
+      ]);
+
+      expect(result.meta.assetDescriptions).toBeDefined();
+      expect(result.meta.assetDescriptions!['good_1']).toBe('A shiny golden star');
+      // Original untouched (no mutation)
+      expect(config.meta.assetDescriptions).toBeUndefined();
+    });
+
+    it('should merge with existing assetDescriptions without clobbering others', () => {
+      const config: GameConfig = {
+        ...makeTestConfig(),
+        meta: {
+          ...makeTestConfig().meta,
+          assetDescriptions: { player: 'A cute bunny', background: 'Forest' },
+        },
+      };
+
+      const result = applyConfigChanges(config, [
+        {
+          action: 'set_asset_description',
+          asset_id: 'good_1',
+          description: 'A shiny golden star',
+        },
+      ]);
+
+      expect(result.meta.assetDescriptions!['player']).toBe('A cute bunny');
+      expect(result.meta.assetDescriptions!['background']).toBe('Forest');
+      expect(result.meta.assetDescriptions!['good_1']).toBe('A shiny golden star');
+      // Original dictionary reference not mutated
+      expect(Object.keys(config.meta.assetDescriptions!)).toEqual(['player', 'background']);
+    });
+
+    it('should overwrite existing description for the same asset_id', () => {
+      const config: GameConfig = {
+        ...makeTestConfig(),
+        meta: {
+          ...makeTestConfig().meta,
+          assetDescriptions: { player: 'Old description' },
+        },
+      };
+
+      const result = applyConfigChanges(config, [
+        {
+          action: 'set_asset_description',
+          asset_id: 'player',
+          description: 'New description',
+        },
+      ]);
+
+      expect(result.meta.assetDescriptions!['player']).toBe('New description');
+      // Original untouched
+      expect(config.meta.assetDescriptions!['player']).toBe('Old description');
+    });
+
+    it('should ignore set_asset_description when asset_id is missing', () => {
+      const config = makeTestConfig();
+      const result = applyConfigChanges(config, [
+        {
+          action: 'set_asset_description',
+          description: 'Orphan description',
+        },
+      ]);
+
+      expect(result.meta.assetDescriptions).toBeUndefined();
+    });
+
+    it('should ignore set_asset_description when description is missing', () => {
+      const config = makeTestConfig();
+      const result = applyConfigChanges(config, [
+        {
+          action: 'set_asset_description',
+          asset_id: 'good_1',
+        },
+      ]);
+
+      expect(result.meta.assetDescriptions).toBeUndefined();
+    });
+
+    it('should not affect modules or assets when only setting descriptions', () => {
+      const config: GameConfig = {
+        ...makeTestConfig(),
+        assets: { bg: { type: 'background', src: 'existing.png' } },
+      };
+      const originalModules = config.modules;
+
+      const result = applyConfigChanges(config, [
+        {
+          action: 'set_asset_description',
+          asset_id: 'bg',
+          description: 'A dark forest',
+        },
+      ]);
+
+      // Modules untouched
+      expect(result.modules).toEqual(originalModules);
+      // Asset src preserved (no clearing)
+      expect(result.assets['bg'].src).toBe('existing.png');
+    });
+
+    it('should produce a new meta object reference (immutability)', () => {
+      const config = makeTestConfig();
+      const result = applyConfigChanges(config, [
+        {
+          action: 'set_asset_description',
+          asset_id: 'good_1',
+          description: 'A sparkly gem',
+        },
+      ]);
+
+      expect(result.meta).not.toBe(config.meta);
+    });
+
+    it('should truncate description to 300 characters', () => {
+      const config = makeTestConfig();
+      const longDesc = 'A'.repeat(500);
+      const result = applyConfigChanges(config, [
+        {
+          action: 'set_asset_description',
+          asset_id: 'good_1',
+          description: longDesc,
+        },
+      ]);
+
+      expect(result.meta.assetDescriptions).toBeDefined();
+      expect(result.meta.assetDescriptions!['good_1'].length).toBeLessThanOrEqual(300);
+      expect(result.meta.assetDescriptions!['good_1']).toBe('A'.repeat(300));
+    });
+
+    it('should not truncate description under 300 characters', () => {
+      const config = makeTestConfig();
+      const shortDesc = 'A short description';
+      const result = applyConfigChanges(config, [
+        {
+          action: 'set_asset_description',
+          asset_id: 'good_1',
+          description: shortDesc,
+        },
+      ]);
+
+      expect(result.meta.assetDescriptions!['good_1']).toBe(shortDesc);
+    });
+  });
 });

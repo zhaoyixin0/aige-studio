@@ -99,3 +99,59 @@ test.describe('Bug discovery — game creation flow', () => {
     await expect(page.locator('[data-canvas-mount="true"] canvas')).toBeVisible();
   });
 });
+
+// ── P4 Task 5 — hero preset sweep for runtime crashes ─────────────
+// Clicks through every hero preset quickly and records console errors
+// and failed network requests. Not a pixel-level check; the goal is to
+// surface uncaught exceptions and 4xx/5xx asset loads.
+test.describe('Bug discovery — hero preset sweep', () => {
+  const HERO_PRESET_IDS = [
+    'hero-catch-fruit',
+    'hero-whack-a-mole',
+    'hero-slingshot-launch',
+    'hero-match-pairs',
+    'hero-endless-runner',
+    'hero-quiz-challenge',
+    'hero-platformer-basic',
+    'hero-shooter-wave',
+  ];
+
+  for (const presetId of HERO_PRESET_IDS) {
+    test(`${presetId} — no runtime crashes during baseline load`, async ({ page }, testInfo) => {
+      const captures = attachListeners(page);
+      await createGameNoApi(page, `使用模板 ${presetId}`);
+      await page.waitForTimeout(5000);
+
+      console.log(`\n=== HERO PRESET DIAGNOSTICS (${presetId}) ===`);
+      console.log('Console errors:', JSON.stringify(captures.consoleErrors, null, 2));
+      console.log('Failed requests:', JSON.stringify(captures.failedRequests, null, 2));
+      console.log('HTTP error responses:', JSON.stringify(captures.responseErrors, null, 2));
+      console.log('=== END DIAGNOSTICS ===\n');
+
+      // Attach captures as a test artifact so CI can triage.
+      await testInfo.attach(`${presetId}-diagnostics.json`, {
+        contentType: 'application/json',
+        body: Buffer.from(
+          JSON.stringify(
+            {
+              presetId,
+              consoleErrors: captures.consoleErrors,
+              failedRequests: captures.failedRequests,
+              responseErrors: captures.responseErrors,
+            },
+            null,
+            2,
+          ),
+        ),
+      });
+
+      // Canvas must still render despite any background asset failures.
+      await expect(page.locator('[data-canvas-mount="true"] canvas')).toBeVisible();
+      // No uncaught JS errors allowed.
+      expect(
+        captures.consoleErrors.filter((e) => !/favicon/i.test(e.text)),
+        `Uncaught console errors for ${presetId}`,
+      ).toHaveLength(0);
+    });
+  }
+});

@@ -6,6 +6,9 @@ import { useChatInputPaste } from '@/app/hooks/use-chat-input-paste';
 import { type ChatMessage, type Chip, getPresetIdFromChip } from '@/store/editor-store';
 // Chip type retained for handleChipClick signature even though chips list is no longer read here.
 import { useConversationManager } from '@/app/hooks/use-conversation-manager';
+import { usePresetEnrichment } from '@/app/hooks/use-preset-enrichment';
+import { usePresetAdvice } from '@/app/hooks/use-preset-advice';
+import { PresetEnrichmentBadge } from './preset-enrichment-badge';
 import { buildFullGameTypeOptions } from '@/agent/game-type-options';
 import { MessageList } from './message-list';
 import { L3PillsPanel } from './l3-pills-panel';
@@ -39,6 +42,17 @@ export function StudioChatPanel() {
   const cancelFulfillment = useAssetFulfillmentStore((s) => s.cancel);
 
   const { submitMessage } = useConversationManager();
+
+  // P2 async skill pass — subscribes to game-store, runs preset-enricher
+  // in the background after hero preset loads, merges diff with field-level
+  // user-edit protection. Also exposes a cancel hook that UI can wire up to
+  // a progress block.
+  const enrichment = usePresetEnrichment();
+
+  // P3 signature-drift advice — once a preset is enriched, compare against
+  // the expert-card signature and push advice chat blocks if parameters
+  // drift beyond the per-key tolerance.
+  usePresetAdvice();
 
   const [input, setInput] = useState('');
   const [assetDrawerOpen, setAssetDrawerOpen] = useState(false);
@@ -145,6 +159,14 @@ export function StudioChatPanel() {
 
       {/* Messages */}
       <MessageList messages={chatMessages} isLoading={isChatLoading} />
+
+      {/* Preset enrichment status indicator */}
+      <PresetEnrichmentBadge
+        state={enrichment.state}
+        applied={enrichment.applied}
+        skipped={enrichment.skipped}
+        onCancel={enrichment.cancelEnrichment}
+      />
 
       {/* L3 parameter pills */}
       <L3PillsPanel />

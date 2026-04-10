@@ -270,6 +270,29 @@ function applySingleChange(
           }
         : config;
 
+    case 'set_asset_description': {
+      if (
+        typeof change.asset_id !== 'string' ||
+        change.asset_id.length === 0 ||
+        typeof change.description !== 'string'
+      ) {
+        return config;
+      }
+      const MAX_DESC = 300;
+      const desc = change.description.slice(0, MAX_DESC);
+      const prev = config.meta.assetDescriptions ?? {};
+      return {
+        ...config,
+        meta: {
+          ...config.meta,
+          assetDescriptions: {
+            ...prev,
+            [change.asset_id]: desc,
+          },
+        },
+      };
+    }
+
     default:
       return config;
   }
