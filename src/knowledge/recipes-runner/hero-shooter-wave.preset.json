@@ -1,28 +1,16 @@
 {
   "id": "hero-shooter-wave",
-  "title": "波次射击",
-  "description": "波次生成敌人，瞄准射击消灭",
+  "kind": "hero-skeleton",
+  "version": 2,
   "gameType": "shooting",
-  "tags": ["combat", "shooter", "intermediate"],
-  "params": [
-    { "name": "waveCount", "type": "number", "default": 5, "min": 1, "max": 20, "description": "总波次数" },
-    { "name": "enemySpeed", "type": "number", "default": 120, "min": 50, "max": 300, "description": "敌人移动速度" }
-  ],
-  "sequence": {
-    "id": "hero-shooter-wave",
-    "commands": [
-      { "name": "addModule", "args": { "id": "gameflow_1", "type": "GameFlow", "params": { "countdown": 3, "onFinish": "show_result" } } },
-      { "name": "addModule", "args": { "id": "playermovement_1", "type": "PlayerMovement", "params": { "mode": "follow", "speed": 300 } } },
-      { "name": "addModule", "args": { "id": "wavespawner_1", "type": "WaveSpawner", "params": { "totalWaves": "$waveCount", "spawnInterval": 1.5 } } },
-      { "name": "addModule", "args": { "id": "enemyai_1", "type": "EnemyAI", "params": { "behavior": "chase", "speed": "$enemySpeed" } } },
-      { "name": "addModule", "args": { "id": "projectile_1", "type": "Projectile", "params": { "speed": 600, "autoFire": true } } },
-      { "name": "addModule", "args": { "id": "aim_1", "type": "Aim" } },
-      { "name": "addModule", "args": { "id": "health_1", "type": "Health", "params": { "maxHp": 100 } } },
-      { "name": "addModule", "args": { "id": "collision_1", "type": "Collision", "params": { "rules": [] } } },
-      { "name": "addModule", "args": { "id": "scorer_1", "type": "Scorer", "params": { "perHit": 50 } } },
-      { "name": "addModule", "args": { "id": "uioverlay_1", "type": "UIOverlay" } },
-      { "name": "addModule", "args": { "id": "resultscreen_1", "type": "ResultScreen" } }
-    ]
-  },
-  "requiredModules": ["GameFlow", "WaveSpawner", "Projectile", "EnemyAI", "Health"]
+  "title": "波次射击战",
+  "description": "波次刷新敌人射击消灭",
+  "tags": ["action", "shooter"],
+  "concept": "俯视角波次射击：瞄准+自动射击+敌人波次刷新",
+  "inputMethod": "TouchInput",
+  "emphasis": { "difficulty": 0.5, "pacing": 0.7, "juice": 0.7, "complexity": 0.4 },
+  "signature": {
+    "goods": [],
+    "bads": ["普通敌人", "精英敌人", "Boss"]
+  }
 }

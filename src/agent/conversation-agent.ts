@@ -430,140 +430,10 @@ export class ConversationAgent {
   /*  Private: build GameConfig from create_game tool params           */
   /* ---------------------------------------------------------------- */
 
-  private buildGameConfig(params: {
-    game_type: string;
-    theme?: string;
-    art_style?: string;
-    duration?: number;
-    input_method?: string;
-    extra_modules?: string[];
-    want_background?: boolean;
-    asset_descriptions?: Record<string, string>;
-  }): GameConfig {
-    const gameType = ALL_GAME_TYPES.includes(params.game_type as any)
-      ? params.game_type
-      : 'catch';
-
-    const preset = getGamePreset(gameType);
-    const modules: ModuleConfig[] = [];
-    const typeCounts = new Map<string, number>();
-
-    const addModule = (type: string) => {
-      // Skip duplicates
-      if (modules.some((m) => m.type === type)) return;
-      const count = (typeCounts.get(type) ?? 0) + 1;
-      typeCounts.set(type, count);
-      modules.push({
-        id: `${type.toLowerCase()}_${count}`,
-        type,
-        enabled: true,
-        params: getModuleParams(gameType, type),
-      });
-    };
-
-    // Input modules from preset — only add ONE (default: TouchInput)
-    const INPUT_TYPES = new Set(['FaceInput', 'HandInput', 'BodyInput', 'TouchInput', 'DeviceInput', 'AudioInput']);
-
-    // Add all non-input modules from the preset, plus one input module
-    if (preset) {
-      for (const moduleType of Object.keys(preset)) {
-        if (INPUT_TYPES.has(moduleType)) continue; // skip — we'll add one below
-        addModule(moduleType);
-      }
-    } else {
-      addModule('GameFlow');
-      addModule('UIOverlay');
-      addModule('ResultScreen');
-    }
-
-    // Add exactly one input module (default TouchInput for mobile games)
-    const inputMethod = params.input_method ?? 'TouchInput';
-    addModule(inputMethod);
-
-    // Add any extra modules requested by the LLM
-    if (params.extra_modules) {
-      for (const modType of params.extra_modules) {
-        addModule(modType);
-      }
-    }
-
-    // Override timer duration if specified (immutable — no mutation)
-    const duration = params.duration ?? 30;
-    let finalModules = modules;
-    if (duration > 0) {
-      const hasTimer = modules.some((m) => m.type === 'Timer');
-      if (hasTimer) {
-        finalModules = modules.map((m) =>
-          m.type === 'Timer' ? { ...m, params: { ...m.params, duration } } : m,
-        );
-      } else {
-        const count = (typeCounts.get('Timer') ?? 0) + 1;
-        finalModules = [
-          ...modules,
-          {
-            id: `timer_${count}`,
-            type: 'Timer',
-            enabled: true,
-            params: { ...getModuleParams(gameType, 'Timer'), duration },
-          },
-        ];
-      }
-    }
-
-    // Resolve theme — allow custom themes (AI will generate matching assets)
-    const themeId = params.theme ?? DEFAULT_THEME[gameType] ?? 'fruit';
-
-    // Resolve art style
-    const artStyle = params.art_style && ART_STYLES.includes(params.art_style as any)
-      ? params.art_style
-      : 'cartoon';
-
-    // Build assets — include background flag if requested
-    const assets: Record<string, AssetEntry> = {};
-    if (params.want_background) {
-      assets['background'] = { type: 'background', src: '' };
-    }
-
-    // Resolve InputProfile: ensure PlayerMovement has correct continuousEvent
-    const inputProfile = resolveInputProfile(inputMethod, gameType);
-    finalModules = finalModules.map((m) => {
-      if (m.type !== 'PlayerMovement') return m;
-      const pmParams = { ...m.params };
-      // Only set continuousEvent if not already explicitly specified
-      if (!pmParams.continuousEvent && inputProfile.continuousEvent) {
-        pmParams.continuousEvent = inputProfile.continuousEvent;
-      }
-      if (pmParams.mode === undefined) {
-        pmParams.mode = inputProfile.mode;
-      }
-      if (pmParams.defaultY === undefined && inputProfile.defaultY !== undefined) {
-        pmParams.defaultY = inputProfile.defaultY;
-      }
-      return { ...m, params: pmParams };
-    });
-
-    const desc = GAME_TYPE_DESCRIPTIONS[gameType] ?? gameType;
-    const config: GameConfig = {
-      version: '1.0.0',
-      meta: {
-        name: desc.split(' — ')[0] + '游戏',
-        description: desc.split(' — ')[1] ?? '',
-        thumbnail: null,
-        createdAt: new Date().toISOString(),
-        theme: themeId,
-        artStyle,
-        ...(params.asset_descriptions ? { assetDescriptions: params.asset_descriptions } : {}),
-      },
-      canvas: { width: 1080, height: 1920 },
-      modules: finalModules,
-      assets,
-    };
-
-    // Run pre-load validation and apply auto-fixes (immutable)
-    const report = validateConfig(config, ConversationAgent.contracts);
+  private buildGameConfig(params: BuildGameConfigInput): GameConfig {
+    const { config, report } = buildGameConfigPure(params, ConversationAgent.contracts);
     this._lastValidationReport = report;
-
-    return report.fixes.length > 0 ? applyFixes(config, report.fixes) : config;
+    return config;
   }
 
   private buildBaseConfigForPreset(gameType?: string): GameConfig {
@@ -682,6 +552,13 @@ export class ConversationAgent {
   /* ---------------------------------------------------------------- */
 
   private inferGameType(config: GameConfig): string {
+    // Fast path: preset loaders (hero-skeleton / expert facade) write the
+    // canonical gameType into meta so niche types survive round-tripping.
+    const metaHint = config.meta?.gameType;
+    if (typeof metaHint === 'string' && metaHint.length > 0) {
+      return metaHint;
+    }
+
     const moduleTypes = new Set(config.modules.map((m) => m.type));
 
     // Specialized modules first (most specific → least specific)
@@ -713,4 +590,194 @@ export class ConversationAgent {
 
     return 'catch'; // ultimate fallback
   }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Pure module-level helpers (extracted so use_preset can reuse)     */
+/* ------------------------------------------------------------------ */
+
+export interface BuildGameConfigInput {
+  game_type: string;
+  theme?: string;
+  art_style?: string;
+  duration?: number;
+  input_method?: string;
+  extra_modules?: string[];
+  want_background?: boolean;
+  asset_descriptions?: Record<string, string>;
+}
+
+export interface BuildGameConfigResult {
+  readonly config: GameConfig;
+  readonly report: ValidationReport;
+}
+
+/* ---- Helper: build initial module list from preset + input + extras ---- */
+
+const INPUT_TYPES = new Set([
+  'FaceInput', 'HandInput', 'BodyInput', 'TouchInput', 'DeviceInput', 'AudioInput',
+]);
+
+interface ModuleListResult {
+  readonly modules: readonly ModuleConfig[];
+  readonly typeCounts: ReadonlyMap<string, number>;
+}
+
+function buildModuleList(
+  gameType: string,
+  inputMethod: string,
+  extraModules?: readonly string[],
+): ModuleListResult {
+  const preset = getGamePreset(gameType);
+  const modules: ModuleConfig[] = [];
+  const typeCounts = new Map<string, number>();
+
+  const addModule = (type: string): void => {
+    if (modules.some((m) => m.type === type)) return;
+    const count = (typeCounts.get(type) ?? 0) + 1;
+    typeCounts.set(type, count);
+    modules.push({
+      id: `${type.toLowerCase()}_${count}`,
+      type,
+      enabled: true,
+      params: getModuleParams(gameType, type),
+    });
+  };
+
+  if (preset) {
+    for (const moduleType of Object.keys(preset)) {
+      if (INPUT_TYPES.has(moduleType)) continue;
+      addModule(moduleType);
+    }
+  } else {
+    addModule('GameFlow');
+    addModule('UIOverlay');
+    addModule('ResultScreen');
+  }
+
+  addModule(inputMethod);
+  if (extraModules) {
+    for (const modType of extraModules) addModule(modType);
+  }
+
+  return { modules, typeCounts };
+}
+
+/* ---- Helper: apply InputProfile to PlayerMovement modules -------------- */
+
+function resolvePlayerMovement(
+  modules: readonly ModuleConfig[],
+  inputMethod: string,
+  gameType: string,
+): readonly ModuleConfig[] {
+  const inputProfile = resolveInputProfile(inputMethod, gameType);
+  return modules.map((m) => {
+    if (m.type !== 'PlayerMovement') return m;
+    const pmParams: Record<string, unknown> = { ...m.params };
+    if (inputProfile.continuousEvent) {
+      pmParams.continuousEvent = inputProfile.continuousEvent;
+    }
+    if (pmParams.mode === undefined) {
+      pmParams.mode = inputProfile.mode;
+    }
+    if (pmParams.defaultY === undefined && inputProfile.defaultY !== undefined) {
+      pmParams.defaultY = inputProfile.defaultY;
+    }
+    return { ...m, params: pmParams };
+  });
+}
+
+/* ---- Helper: ensure Timer exists with correct duration ----------------- */
+
+function resolveTimerDuration(
+  modules: readonly ModuleConfig[],
+  duration: number,
+  gameType: string,
+  typeCounts: ReadonlyMap<string, number>,
+): readonly ModuleConfig[] {
+  if (duration <= 0) return modules;
+
+  const hasTimer = modules.some((m) => m.type === 'Timer');
+  if (hasTimer) {
+    return modules.map((m) =>
+      m.type === 'Timer' ? { ...m, params: { ...m.params, duration } } : m,
+    );
+  }
+
+  const count = (typeCounts.get('Timer') ?? 0) + 1;
+  return [
+    ...modules,
+    {
+      id: `timer_${count}`,
+      type: 'Timer',
+      enabled: true,
+      params: { ...getModuleParams(gameType, 'Timer'), duration },
+    },
+  ];
+}
+
+/* ---- Orchestrator: buildGameConfigPure --------------------------------- */
+
+/**
+ * Build a complete GameConfig from create_game tool params. Pure function —
+ * no mutation of inputs, no shared state. Used by both ConversationAgent and
+ * the hero-skeleton preset loader path in runPresetToConfig.
+ */
+export function buildGameConfigPure(
+  params: BuildGameConfigInput,
+  contracts: ContractRegistry,
+): BuildGameConfigResult {
+  const gameType = ALL_GAME_TYPES.includes(params.game_type as never)
+    ? params.game_type
+    : 'catch';
+
+  const inputMethod = params.input_method ?? 'TouchInput';
+  const duration = params.duration ?? 30;
+
+  const { modules, typeCounts } = buildModuleList(gameType, inputMethod, params.extra_modules);
+  const withTimer = resolveTimerDuration(modules, duration, gameType, typeCounts);
+  const withPM = resolvePlayerMovement(withTimer, inputMethod, gameType);
+
+  const themeId = params.theme ?? DEFAULT_THEME[gameType] ?? 'fruit';
+  const artStyle = params.art_style && ART_STYLES.includes(params.art_style as never)
+    ? params.art_style
+    : 'cartoon';
+
+  const assets: Record<string, AssetEntry> = {};
+  if (params.want_background) {
+    assets['background'] = { type: 'background', src: '' };
+  }
+
+  const desc = GAME_TYPE_DESCRIPTIONS[gameType] ?? gameType;
+  const config: GameConfig = {
+    version: '1.0.0',
+    meta: {
+      name: desc.split(' — ')[0] + '游戏',
+      description: desc.split(' — ')[1] ?? '',
+      thumbnail: null,
+      createdAt: new Date().toISOString(),
+      theme: themeId,
+      artStyle,
+      ...(params.asset_descriptions ? { assetDescriptions: params.asset_descriptions } : {}),
+    },
+    canvas: { width: 1080, height: 1920 },
+    modules: [...withPM],
+    assets,
+  };
+
+  const report = validateConfig(config, contracts);
+  const finalConfig = report.fixes.length > 0 ? applyFixes(config, report.fixes) : config;
+  return { config: finalConfig, report };
+}
+
+/**
+ * Shared ContractRegistry used by buildGameConfigPure when called outside
+ * the class. Lazy-initialized once.
+ */
+let _sharedContracts: ContractRegistry | null = null;
+export function getSharedContracts(): ContractRegistry {
+  if (!_sharedContracts) {
+    _sharedContracts = ContractRegistry.fromRegistry(createModuleRegistry());
+  }
+  return _sharedContracts;
 }

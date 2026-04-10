@@ -104,7 +104,7 @@ describe('ResultScreen', () => {
     const schema = result.getSchema();
 
     expect(schema.showAnimation).toBeDefined();
-    expect(schema.showAnimation.type).toBe('toggle');
+    expect(schema.showAnimation.type).toBe('boolean');
     expect(schema.showAnimation.default).toBe(true);
   });
 
@@ -113,7 +113,7 @@ describe('ResultScreen', () => {
     const schema = result.getSchema();
 
     expect(schema.showText).toBeDefined();
-    expect(schema.showText.type).toBe('toggle');
+    expect(schema.showText.type).toBe('boolean');
     expect(schema.showText.default).toBe(true);
   });
 });
