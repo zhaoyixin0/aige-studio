@@ -3,11 +3,11 @@ import { loadInventory } from '../io/expert-inventory';
 import { normalizeExpert } from '../schema/guards';
 import { buildRecipes, type Recipe } from '../recipes/from-expert';
 
-import path from 'path';
+import { EXPERT_DATA_DIR, canRunOfflinePipelineTests } from './test-helpers';
 
-const EXPERT_DIR = path.resolve(__dirname, '../../../../expert-data/json');
+const EXPERT_DIR = EXPERT_DATA_DIR;
 
-describe('Recipe Builder', () => {
+describe.skipIf(!canRunOfflinePipelineTests())('Recipe Builder', () => {
   let recipes: Recipe[];
 
   beforeAll(async () => {

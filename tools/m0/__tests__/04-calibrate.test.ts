@@ -8,11 +8,11 @@ import {
   type CalibrationResult,
   type GroupStats,
 } from '../calibration/calibrate';
-import path from 'path';
+import { EXPERT_DATA_DIR, canRunOfflinePipelineTests } from './test-helpers';
 
-const EXPERT_DIR = path.resolve(__dirname, '../../../../expert-data/json');
+const EXPERT_DIR = EXPERT_DATA_DIR;
 
-describe('Calibration Math', () => {
+describe.skipIf(!canRunOfflinePipelineTests())('Calibration Math', () => {
   let knowledgeParams: CanonicalParams[];
 
   beforeAll(async () => {

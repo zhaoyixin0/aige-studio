@@ -8,9 +8,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 function makeMockReq(overrides: {
   method?: string;
   body?: unknown;
-} = {}): { method: string; body: unknown } {
+  headers?: Record<string, string>;
+} = {}): { method: string; body: unknown; headers: Record<string, string> } {
   return {
     method: overrides.method ?? 'POST',
+    headers: overrides.headers ?? {},
     body: overrides.body ?? {
       prompt: 'a red apple',
       aspectRatio: '1:1',
@@ -181,5 +183,119 @@ describe('api/gemini handler', () => {
     expect(statusFn).toHaveBeenCalledWith(200);
     const [url] = fetchMock.mock.calls[0];
     expect(url as string).toContain('key=vite-key');
+  });
+
+  /* ---------------------------------------------------------------- */
+  /*  H7: Security — internal secret header + body size limit          */
+  /* ---------------------------------------------------------------- */
+
+  describe('internal secret authentication', () => {
+    const savedSecret = process.env.INTERNAL_API_SECRET;
+
+    afterEach(() => {
+      if (savedSecret !== undefined) {
+        process.env.INTERNAL_API_SECRET = savedSecret;
+      } else {
+        delete process.env.INTERNAL_API_SECRET;
+      }
+    });
+
+    it('rejects request without x-internal-secret when INTERNAL_API_SECRET is set', async () => {
+      process.env.INTERNAL_API_SECRET = 'my-secret-456';
+      process.env.GEMINI_API_KEY = 'test-key';
+
+      vi.resetModules();
+      const mod = await import('../../api/gemini.ts');
+      handler = mod.default;
+
+      const req = makeMockReq({ headers: {} });
+      const { res, statusFn, jsonFn } = makeMockRes();
+
+      await handler(req, res);
+
+      expect(statusFn).toHaveBeenCalledWith(401);
+      expect(jsonFn).toHaveBeenCalledWith({ error: 'Unauthorized' });
+    });
+
+    it('allows request with correct x-internal-secret', async () => {
+      process.env.INTERNAL_API_SECRET = 'my-secret-456';
+      process.env.GEMINI_API_KEY = 'test-key';
+
+      vi.resetModules();
+      const mod = await import('../../api/gemini.ts');
+      handler = mod.default;
+
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ ok: true }),
+      } as Response);
+      global.fetch = fetchMock as unknown as typeof fetch;
+
+      const req = makeMockReq({
+        headers: { 'x-internal-secret': 'my-secret-456' },
+      });
+      const { res, statusFn } = makeMockRes();
+
+      await handler(req, res);
+
+      expect(statusFn).toHaveBeenCalledWith(200);
+    });
+
+    it('allows request when INTERNAL_API_SECRET is not set (backward compat)', async () => {
+      delete process.env.INTERNAL_API_SECRET;
+      process.env.GEMINI_API_KEY = 'test-key';
+
+      vi.resetModules();
+      const mod = await import('../../api/gemini.ts');
+      handler = mod.default;
+
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ ok: true }),
+      } as Response);
+      global.fetch = fetchMock as unknown as typeof fetch;
+
+      const req = makeMockReq({ headers: {} });
+      const { res, statusFn } = makeMockRes();
+
+      await handler(req, res);
+
+      expect(statusFn).toHaveBeenCalledWith(200);
+    });
+  });
+
+  describe('body size limit', () => {
+    it('rejects oversized request body (>100KB)', async () => {
+      process.env.GEMINI_API_KEY = 'test-key';
+
+      const req = makeMockReq({
+        headers: { 'content-length': '200000' },
+      });
+      const { res, statusFn, jsonFn } = makeMockRes();
+
+      await handler(req, res);
+
+      expect(statusFn).toHaveBeenCalledWith(413);
+      expect(jsonFn).toHaveBeenCalledWith({ error: 'Request too large' });
+    });
+
+    it('allows request within size limit', async () => {
+      process.env.GEMINI_API_KEY = 'test-key';
+
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ ok: true }),
+      } as Response);
+      global.fetch = fetchMock as unknown as typeof fetch;
+
+      const req = makeMockReq({
+        headers: { 'content-length': '5000' },
+      });
+      const { res, statusFn } = makeMockRes();
+
+      await handler(req, res);
+
+      expect(statusFn).toHaveBeenCalledWith(200);
+    });
   });
 });

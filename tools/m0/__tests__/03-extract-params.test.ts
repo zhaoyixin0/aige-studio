@@ -2,11 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { loadInventory } from '../io/expert-inventory';
 import { normalizeExpert } from '../schema/guards';
 import { extractParams, CANONICAL_PARAMS, type CanonicalParams } from '../calibration/extract-params';
-import path from 'path';
+import { EXPERT_DATA_DIR, canRunOfflinePipelineTests } from './test-helpers';
 
-const EXPERT_DIR = path.resolve(__dirname, '../../../../expert-data/json');
+const EXPERT_DIR = EXPERT_DATA_DIR;
 
-describe('Parameter Extractor', () => {
+describe.skipIf(!canRunOfflinePipelineTests())('Parameter Extractor', () => {
   let allNormalized: Array<{ filename: string; doc: ReturnType<typeof normalizeExpert> }>;
 
   beforeAll(async () => {

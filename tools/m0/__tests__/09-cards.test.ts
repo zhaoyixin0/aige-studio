@@ -11,11 +11,11 @@ import {
   type GameTypeCard,
   type RecipeCard,
 } from '../cards/generate-cards';
-import path from 'path';
+import { EXPERT_DATA_DIR, canRunOfflinePipelineTests } from './test-helpers';
 
-const EXPERT_DIR = path.resolve(__dirname, '../../../../expert-data/json');
+const EXPERT_DIR = EXPERT_DATA_DIR;
 
-describe('Knowledge Cards Generator', () => {
+describe.skipIf(!canRunOfflinePipelineTests())('Knowledge Cards Generator', () => {
   let gameTypeCards: GameTypeCard[];
   let recipeCards: RecipeCard[];
 

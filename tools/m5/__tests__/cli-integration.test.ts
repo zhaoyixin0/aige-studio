@@ -1,11 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { runPipeline, type PipelineResult } from '../cli.ts';
 import { validateSequence } from '@/engine/systems/recipe-runner/validators.ts';
+import {
+  EXPERT_DATA_DIR,
+  canRunOfflinePipelineTests,
+} from '../../m0/__tests__/test-helpers';
 
-// Use a small subset of real expert files for integration testing
-const EXPERT_DATA_DIR = 'G:/claude code/AIGE_DEMO/expert-data/json';
-
-describe('M5 CLI pipeline integration', () => {
+describe.skipIf(!canRunOfflinePipelineTests())('M5 CLI pipeline integration', () => {
   let result: PipelineResult;
 
   // Run pipeline once for all tests

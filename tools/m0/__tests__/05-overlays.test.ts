@@ -9,11 +9,11 @@ import {
   type PresetOverlay,
 } from '../calibration/apply-overlays';
 import { ALL_GAME_TYPES, getGamePreset } from '../../../src/agent/game-presets';
-import path from 'path';
+import { EXPERT_DATA_DIR, canRunOfflinePipelineTests } from './test-helpers';
 
-const EXPERT_DIR = path.resolve(__dirname, '../../../../expert-data/json');
+const EXPERT_DIR = EXPERT_DATA_DIR;
 
-describe('Preset Overlay Builder', () => {
+describe.skipIf(!canRunOfflinePipelineTests())('Preset Overlay Builder', () => {
   let overlays: PresetOverlay[];
 
   beforeAll(async () => {

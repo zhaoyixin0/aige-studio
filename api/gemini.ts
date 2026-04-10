@@ -13,6 +13,7 @@ const NANO_BANANA_PRO_ENDPOINT =
 
 interface ProxyRequest {
   method: string;
+  headers: Record<string, string | undefined>;
   body: {
     prompt: string;
     aspectRatio?: string;
@@ -25,12 +26,26 @@ interface ProxyResponse {
   json(data: unknown): ProxyResponse;
 }
 
+const MAX_BODY_BYTES = 100_000;
+
 export default async function handler(
   req: ProxyRequest,
   res: ProxyResponse,
 ): Promise<ProxyResponse> {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // H7: Internal secret header authentication (skip when env var not set)
+  const internalSecret = process.env.INTERNAL_API_SECRET;
+  if (internalSecret && req.headers['x-internal-secret'] !== internalSecret) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // H7: Body size limit
+  const contentLength = parseInt(req.headers['content-length'] ?? '0', 10);
+  if (contentLength > MAX_BODY_BYTES) {
+    return res.status(413).json({ error: 'Request too large' });
   }
 
   const apiKey = process.env.GEMINI_API_KEY ?? process.env.VITE_GEMINI_API_KEY;

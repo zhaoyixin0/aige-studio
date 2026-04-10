@@ -10,11 +10,11 @@ import { buildRecipes } from '../recipes/from-expert';
 import { generateGameTypeCards, generateRecipeCards } from '../cards/generate-cards';
 import { computeFeelScore } from '../benchmark/feel-score';
 import { ALL_GAME_TYPES, getGamePreset } from '../../../src/agent/game-presets';
-import path from 'path';
+import { EXPERT_DATA_DIR, canRunOfflinePipelineTests } from './test-helpers';
 
-const EXPERT_DIR = path.resolve(__dirname, '../../../../expert-data/json');
+const EXPERT_DIR = EXPERT_DATA_DIR;
 
-describe('M0 Integration Smoke Test', () => {
+describe.skipIf(!canRunOfflinePipelineTests())('M0 Integration Smoke Test', () => {
   it('full pipeline: inventory → normalize → extract → calibrate → overlay → taxonomy → recipes → cards → feel score', async () => {
     // 1. Load inventory
     const inv = await loadInventory(EXPERT_DIR);

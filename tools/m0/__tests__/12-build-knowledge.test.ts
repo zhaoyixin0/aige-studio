@@ -5,14 +5,15 @@ import fs from 'fs/promises';
 import crypto from 'crypto';
 
 import { buildKnowledgeArtifacts } from '../cli/build-knowledge';
+import { EXPERT_DATA_DIR, canRunOfflinePipelineTests } from './test-helpers';
 
-const EXPERT_DIR = path.resolve(__dirname, '../../../../expert-data/json');
+const EXPERT_DIR = EXPERT_DATA_DIR;
 
 function sha256(s: string): string {
   return crypto.createHash('sha256').update(s).digest('hex');
 }
 
-describe('build-knowledge CLI', () => {
+describe.skipIf(!canRunOfflinePipelineTests())('build-knowledge CLI', () => {
   let tmpRoot: string;
   let outDir: string;
 

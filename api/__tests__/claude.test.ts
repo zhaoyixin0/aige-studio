@@ -17,9 +17,11 @@ vi.mock('@anthropic-ai/sdk', () => {
 function makeMockReq(overrides: {
   method?: string;
   body?: unknown;
-} = {}): { method: string; body: unknown } {
+  headers?: Record<string, string>;
+} = {}): { method: string; body: unknown; headers: Record<string, string> } {
   return {
     method: overrides.method ?? 'POST',
+    headers: overrides.headers ?? {},
     body: overrides.body ?? {
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
@@ -59,10 +61,12 @@ describe('api/claude handler', () => {
     expect(jsonFn).toHaveBeenCalledWith({ error: 'Method not allowed' });
   });
 
-  it('returns 500 when ANTHROPIC_API_KEY is not set', async () => {
-    // Ensure env var is unset
-    const saved = process.env.ANTHROPIC_API_KEY;
+  it('returns 500 when neither ANTHROPIC_API_KEY nor VITE_ANTHROPIC_API_KEY is set', async () => {
+    // Handler falls back to VITE_ANTHROPIC_API_KEY, so both must be unset
+    const savedServer = process.env.ANTHROPIC_API_KEY;
+    const savedVite = process.env.VITE_ANTHROPIC_API_KEY;
     delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.VITE_ANTHROPIC_API_KEY;
 
     const req = makeMockReq();
     const { res, statusFn, jsonFn } = makeMockRes();
@@ -75,7 +79,8 @@ describe('api/claude handler', () => {
     });
 
     // Restore
-    if (saved !== undefined) process.env.ANTHROPIC_API_KEY = saved;
+    if (savedServer !== undefined) process.env.ANTHROPIC_API_KEY = savedServer;
+    if (savedVite !== undefined) process.env.VITE_ANTHROPIC_API_KEY = savedVite;
   });
 
   it('proxies request to Anthropic and returns response', async () => {
@@ -121,5 +126,118 @@ describe('api/claude handler', () => {
     expect(jsonFn).toHaveBeenCalledWith({ error: 'Rate limit exceeded' });
 
     delete process.env.ANTHROPIC_API_KEY;
+  });
+
+  /* ---------------------------------------------------------------- */
+  /*  H7: Security — internal secret header + body size limit          */
+  /* ---------------------------------------------------------------- */
+
+  describe('internal secret authentication', () => {
+    const savedSecret = process.env.INTERNAL_API_SECRET;
+
+    afterEach(() => {
+      if (savedSecret !== undefined) {
+        process.env.INTERNAL_API_SECRET = savedSecret;
+      } else {
+        delete process.env.INTERNAL_API_SECRET;
+      }
+    });
+
+    it('rejects request without x-internal-secret when INTERNAL_API_SECRET is set', async () => {
+      process.env.INTERNAL_API_SECRET = 'my-secret-123';
+      process.env.ANTHROPIC_API_KEY = 'test-key';
+
+      // Re-import to pick up new env
+      vi.resetModules();
+      mockCreate.mockReset();
+      const mod = await import('../../api/claude.ts');
+      handler = mod.default;
+
+      const req = makeMockReq({ headers: {} });
+      const { res, statusFn, jsonFn } = makeMockRes();
+
+      await handler(req, res);
+
+      expect(statusFn).toHaveBeenCalledWith(401);
+      expect(jsonFn).toHaveBeenCalledWith({ error: 'Unauthorized' });
+
+      delete process.env.ANTHROPIC_API_KEY;
+    });
+
+    it('allows request with correct x-internal-secret', async () => {
+      process.env.INTERNAL_API_SECRET = 'my-secret-123';
+      process.env.ANTHROPIC_API_KEY = 'test-key';
+
+      vi.resetModules();
+      mockCreate.mockReset();
+      mockCreate.mockResolvedValue({ id: 'msg_ok' });
+      const mod = await import('../../api/claude.ts');
+      handler = mod.default;
+
+      const req = makeMockReq({
+        headers: { 'x-internal-secret': 'my-secret-123' },
+      });
+      const { res, statusFn } = makeMockRes();
+
+      await handler(req, res);
+
+      expect(statusFn).toHaveBeenCalledWith(200);
+
+      delete process.env.ANTHROPIC_API_KEY;
+    });
+
+    it('allows request when INTERNAL_API_SECRET is not set (backward compat)', async () => {
+      delete process.env.INTERNAL_API_SECRET;
+      process.env.ANTHROPIC_API_KEY = 'test-key';
+
+      vi.resetModules();
+      mockCreate.mockReset();
+      mockCreate.mockResolvedValue({ id: 'msg_ok' });
+      const mod = await import('../../api/claude.ts');
+      handler = mod.default;
+
+      const req = makeMockReq({ headers: {} });
+      const { res, statusFn } = makeMockRes();
+
+      await handler(req, res);
+
+      expect(statusFn).toHaveBeenCalledWith(200);
+
+      delete process.env.ANTHROPIC_API_KEY;
+    });
+  });
+
+  describe('body size limit', () => {
+    it('rejects oversized request body (>100KB)', async () => {
+      process.env.ANTHROPIC_API_KEY = 'test-key';
+
+      const req = makeMockReq({
+        headers: { 'content-length': '200000' },
+      });
+      const { res, statusFn, jsonFn } = makeMockRes();
+
+      await handler(req, res);
+
+      expect(statusFn).toHaveBeenCalledWith(413);
+      expect(jsonFn).toHaveBeenCalledWith({ error: 'Request too large' });
+
+      delete process.env.ANTHROPIC_API_KEY;
+    });
+
+    it('allows request within size limit', async () => {
+      process.env.ANTHROPIC_API_KEY = 'test-key';
+      mockCreate.mockResolvedValue({ id: 'msg_ok' });
+
+      const req = makeMockReq({
+        headers: { 'content-length': '5000' },
+      });
+      const { res, statusFn } = makeMockRes();
+
+      await handler(req, res);
+
+      expect(statusFn).toHaveBeenCalledWith(200);
+
+      delete process.env.ANTHROPIC_API_KEY;
+    });
   });
 });

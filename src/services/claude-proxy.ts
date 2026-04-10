@@ -30,9 +30,15 @@ export function createClaudeClient(): ClaudeProxyClient {
   return {
     messages: {
       async create(params: MessageCreateParams, options?: MessageCreateOptions) {
+        const secret = import.meta.env.VITE_INTERNAL_API_SECRET as
+          | string
+          | undefined;
         const res = await fetch('/api/claude', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(secret ? { 'x-internal-secret': secret } : {}),
+          },
           body: JSON.stringify(params),
           signal: options?.signal,
         });

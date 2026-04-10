@@ -43,9 +43,15 @@ export class GeminiImageService {
     options?: ImageGenOptions,
     signal?: AbortSignal,
   ): Promise<string> {
+    const secret = import.meta.env.VITE_INTERNAL_API_SECRET as
+      | string
+      | undefined;
     const response = await fetch('/api/gemini', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(secret ? { 'x-internal-secret': secret } : {}),
+      },
       body: JSON.stringify({
         prompt: promptText,
         aspectRatio: options?.aspectRatio,

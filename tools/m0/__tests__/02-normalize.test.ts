@@ -8,11 +8,11 @@ import {
   isSnapshot,
   type NormalizedExpert,
 } from '../schema/guards';
-import path from 'path';
+import { EXPERT_DATA_DIR, canRunOfflinePipelineTests } from './test-helpers';
 
-const EXPERT_DIR = path.resolve(__dirname, '../../../../expert-data/json');
+const EXPERT_DIR = EXPERT_DATA_DIR;
 
-describe('Schema Guards & Normalizer', () => {
+describe.skipIf(!canRunOfflinePipelineTests())('Schema Guards & Normalizer', () => {
   let allDocs: Array<{ filename: string; raw: Record<string, unknown>; category: string }>;
 
   beforeAll(async () => {

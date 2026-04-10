@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { loadInventory, type Inventory } from '../io/expert-inventory';
-import path from 'path';
+import { EXPERT_DATA_DIR, canRunOfflinePipelineTests } from './test-helpers';
 
-const EXPERT_DIR = path.resolve(__dirname, '../../../../expert-data/json');
+const EXPERT_DIR = EXPERT_DATA_DIR;
 
-describe('Expert JSON Inventory', () => {
+describe.skipIf(!canRunOfflinePipelineTests())('Expert JSON Inventory', () => {
   let inventory: Inventory;
 
   beforeAll(async () => {
