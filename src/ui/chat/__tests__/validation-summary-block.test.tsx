@@ -151,4 +151,94 @@ describe('ValidationSummaryBlock', () => {
     expect(screen.queryByRole('button', { name: '修正这个' })).toBeNull();
     expect(screen.queryByRole('button', { name: '我了解了' })).toBeNull();
   });
+
+  /* -------------------------------------------------------------- */
+  /*  Advice mode (preset-advice extension)                          */
+  /* -------------------------------------------------------------- */
+
+  describe('advice mode', () => {
+    const adviceBlock: ValidationSummaryChatBlock = {
+      kind: 'validation-summary',
+      summary: '[preset-advice] 市场参数建议 2 条',
+      issues: [
+        {
+          severity: 'warning',
+          title: '参数偏离: Spawner.frequency',
+          description: '专家建议 frequency ≈ 1.3，当前 2.8 偏高',
+        },
+        {
+          severity: 'warning',
+          title: '市场参考: scene.object_count',
+          description: '市场平均 object_count = 10，当前 3',
+        },
+      ],
+      fixable: false,
+      resolved: false,
+    };
+
+    it('detects advice mode via summary prefix and uses advice testid', () => {
+      addMessageWithBlock('msg-a', adviceBlock);
+      render(<ValidationSummaryBlock block={adviceBlock} messageId="msg-a" />);
+
+      expect(screen.getByTestId('validation-summary-advice')).toBeDefined();
+      expect(screen.queryByTestId('validation-summary')).toBeNull();
+    });
+
+    it('renders the stripped summary text without the [preset-advice] prefix', () => {
+      addMessageWithBlock('msg-a', adviceBlock);
+      render(<ValidationSummaryBlock block={adviceBlock} messageId="msg-a" />);
+
+      expect(screen.getByText(/市场参数建议/)).toBeDefined();
+      expect(
+        screen.queryByText((_, el) =>
+          el?.textContent?.includes('[preset-advice]') ?? false,
+        ),
+      ).toBeNull();
+    });
+
+    it('renders all advice issues with titles and descriptions', () => {
+      addMessageWithBlock('msg-a', adviceBlock);
+      render(<ValidationSummaryBlock block={adviceBlock} messageId="msg-a" />);
+
+      expect(screen.getByText('参数偏离: Spawner.frequency')).toBeDefined();
+      expect(
+        screen.getByText('专家建议 frequency ≈ 1.3，当前 2.8 偏高'),
+      ).toBeDefined();
+      expect(screen.getByText('市场参考: scene.object_count')).toBeDefined();
+      expect(screen.getByText('市场平均 object_count = 10，当前 3')).toBeDefined();
+    });
+
+    it('does NOT render the 修正这个 button in advice mode', () => {
+      addMessageWithBlock('msg-a', adviceBlock);
+      render(<ValidationSummaryBlock block={adviceBlock} messageId="msg-a" />);
+
+      expect(screen.queryByRole('button', { name: '修正这个' })).toBeNull();
+    });
+
+    it('renders the 我了解了 dismiss button and marks block resolved on click', () => {
+      addMessageWithBlock('msg-a', adviceBlock);
+      render(<ValidationSummaryBlock block={adviceBlock} messageId="msg-a" />);
+
+      const btn = screen.getByRole('button', { name: '我了解了' });
+      fireEvent.click(btn);
+
+      const updated = useEditorStore.getState().chatMessages[0];
+      const updatedBlock = updated.blocks?.[0] as ValidationSummaryChatBlock;
+      expect(updatedBlock.resolved).toBe(true);
+    });
+
+    it('falls back to validation-mode rendering when summary has no advice prefix', () => {
+      const validationBlock: ValidationSummaryChatBlock = {
+        ...adviceBlock,
+        summary: '1 错误, 1 警告',
+      };
+      addMessageWithBlock('msg-v', validationBlock);
+      render(
+        <ValidationSummaryBlock block={validationBlock} messageId="msg-v" />,
+      );
+
+      expect(screen.getByTestId('validation-summary')).toBeDefined();
+      expect(screen.queryByTestId('validation-summary-advice')).toBeNull();
+    });
+  });
 });

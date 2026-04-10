@@ -1,5 +1,5 @@
-import { AlertTriangle, AlertCircle, CheckCircle2 } from 'lucide-react';
-import type { ChatBlock } from '@/agent/conversation-defs';
+import { AlertTriangle, AlertCircle, CheckCircle2, Info } from 'lucide-react';
+import { ADVICE_SUMMARY_PREFIX, type ChatBlock } from '@/agent/conversation-defs';
 import { useEditorStore } from '@/store/editor-store';
 import { useGameStore } from '@/store/game-store';
 import { validateConfig, applyFixes } from '@/engine/core/config-validator';
@@ -7,6 +7,15 @@ import { ContractRegistry } from '@/engine/core/contract-registry';
 import { createModuleRegistry } from '@/engine/module-setup';
 
 type ValidationSummaryChatBlock = Extract<ChatBlock, { kind: 'validation-summary' }>;
+
+function isAdviceBlock(block: ValidationSummaryChatBlock): boolean {
+  return typeof block.summary === 'string' &&
+    block.summary.startsWith(ADVICE_SUMMARY_PREFIX);
+}
+
+function stripAdvicePrefix(summary: string): string {
+  return summary.replace(ADVICE_SUMMARY_PREFIX, '').trim();
+}
 
 interface ValidationSummaryBlockProps {
   readonly block: ValidationSummaryChatBlock;
@@ -66,6 +75,48 @@ export function ValidationSummaryBlock({
         <span className="text-sm text-green-700">
           已修正 {block.issues.length} 项配置问题
         </span>
+      </div>
+    );
+  }
+
+  if (isAdviceBlock(block)) {
+    return (
+      <div
+        className="rounded-lg border border-slate-200 bg-slate-50 p-3 mt-2"
+        data-testid="validation-summary-advice"
+      >
+        <div className="text-sm font-medium text-slate-700 flex items-center gap-2">
+          <Info size={16} className="text-slate-500" />
+          市场参数建议 — {stripAdvicePrefix(block.summary)}
+        </div>
+
+        <ul className="mt-2 space-y-1.5">
+          {block.issues.map((issue, i) => (
+            <li
+              key={i}
+              data-testid={`advice-issue-${i}`}
+              className="text-xs rounded px-2 py-1 border bg-white border-slate-200 text-slate-700"
+            >
+              <div className="flex items-center gap-1.5 font-medium">
+                <Info size={12} className="text-slate-400" />
+                {issue.title}
+              </div>
+              <div className="mt-0.5 pl-4 text-[11px] opacity-80">
+                {issue.description}
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-3 flex gap-2">
+          <button
+            type="button"
+            onClick={handleDismiss}
+            className="text-xs px-3 py-1.5 rounded-md bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 transition-colors"
+          >
+            我了解了
+          </button>
+        </div>
       </div>
     );
   }

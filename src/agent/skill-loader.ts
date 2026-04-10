@@ -21,6 +21,20 @@ const expertCardFiles = import.meta.glob('/src/knowledge/cards/**/*.card.json', 
   eager: false,
 });
 
+/** Raw shape of an expert card JSON file (see /src/knowledge/cards/game-type). */
+export interface ExpertCardRaw {
+  readonly id?: string;
+  readonly displayName?: string;
+  readonly group?: string;
+  readonly expertDataCount?: number;
+  readonly topModules?: readonly string[];
+  readonly signatureParams?: Readonly<
+    Record<string, { suggested: number; confidence: number }>
+  >;
+  readonly missingModules?: readonly string[];
+  readonly supportedToday?: boolean;
+}
+
 export class SkillLoader {
   private cache = new Map<string, string>();
   private cardCache = new Map<string, string>();
@@ -163,6 +177,27 @@ export class SkillLoader {
       return summary;
     } catch {
       return '';
+    }
+  }
+
+  /**
+   * Load the raw expert card JSON for a game type.
+   * Returns null when the card does not exist or parsing fails.
+   *
+   * Unlike loadExpertCardSummary / loadExpertCardRich, this exposes the full
+   * structured data (including signatureParams with confidence scores) for
+   * programmatic consumers such as preset-advice.detectSignatureDrift().
+   */
+  async loadExpertCardRaw(gameType: string): Promise<ExpertCardRaw | null> {
+    const key = `/src/knowledge/cards/game-type/gametype-${gameType}.card.json`;
+    const loader = expertCardFiles[key];
+    if (!loader) return null;
+
+    try {
+      const raw = (await loader()) as string;
+      return JSON.parse(raw) as ExpertCardRaw;
+    } catch {
+      return null;
     }
   }
 
